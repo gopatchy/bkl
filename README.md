@@ -364,3 +364,58 @@ myList:
 </tr>
 
 </table>
+
+## Advanced Values
+
+### $required
+
+Use `$required` in lower layers to force upper layers to replace the value.
+
+```yaml
+myMap:
+  a: 1
+  b: $required
+```
+
+This will cause an error unless a layer on top sets `myMap.b`.
+
+### $copy
+
+Copy a subtree to another location.
+
+```yaml
+foo:
+  bar:
+    a: 1
+zig:
+  $copy: foo.bar
+```
+
+evaluates to:
+
+```yaml
+foo:
+  bar:
+    a: 1
+zig:
+  a: 1
+```
+
+### $output
+
+When used at the top level, selects a subtree for output:
+
+```yaml
+$output: foo.bar
+foo:
+  bar:
+    a: 1
+```
+
+evaluates to:
+
+```yaml
+a: 1
+```
+
+Combine `$copy` and `$output` to have hidden "template" subtrees that don't appear in the output but can be copied in as needed. 
