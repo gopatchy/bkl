@@ -379,16 +379,41 @@ myMap:
 
 This will cause an error unless a layer on top sets `myMap.b`.
 
-### $copy
+### $merge
 
-Copy a subtree to another location.
+Merges in another subtree.
 
 ```yaml
 foo:
   bar:
     a: 1
 zig:
-  $copy: foo.bar
+  b: 2
+  $merge: foo.bar
+```
+
+evaluates to:
+
+```yaml
+foo:
+  bar:
+    a: 1
+zig:
+  a: 1
+  b: 2
+```
+
+### $replace
+
+Replaces a subtree with one from another location.
+
+```yaml
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $replace: foo.bar
 ```
 
 evaluates to:
