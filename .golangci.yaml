@@ -1,0 +1,39 @@
+linters:
+  enable-all: true
+  disable:
+    # re-enable when working
+    - rowserrcheck
+    - wastedassign
+    # maybe enable these
+    - wrapcheck
+    # leave these disabled
+    - cyclop
+    - deadcode
+    - dupl
+    - exhaustivestruct
+    - exhaustruct
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gocognit
+    - goconst
+    - godox
+    - gofumpt
+    - golint
+    - gomnd
+    - ifshort
+    - interfacer
+    - lll
+    - maintidx
+    - maligned
+    - nilnil
+    - nestif
+    - nlreturn
+    - nolintlint
+    - nosnakecase
+    - scopelint
+    - structcheck
+    - thelper
+    - varcheck
+    - varnamelen
