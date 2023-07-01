@@ -60,5 +60,263 @@ $ bkl -f json-pretty service.test.toml
 
 ## Merge Behavior
 
-By default, lists and maps are merged. To change that, use [$patch](https://github.com/edgarsandi/Kubernetes/blob/master/docs/devel/api-conventions.md#strategic-merge-patch) syntax:
+By default, lists and maps are merged. To change that, use [$patch](https://github.com/edgarsandi/Kubernetes/blob/master/docs/devel/api-conventions.md#strategic-merge-patch) syntax.
 
+### Maps
+
+<table>
+  
+<tr>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  b: 2
+```
+</td>
+
+<td>
+
+**=**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+  b: 2
+```
+</td>
+
+</tr>
+
+<tr></tr>
+
+<tr>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  b: 2
+  $patch: replace
+```
+</td>
+
+<td>
+
+**=**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  b: 2
+```
+</td>
+
+</tr>
+
+<tr></tr>
+
+<tr>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+  b: 2
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  c: 3
+  b: null
+```
+</td>
+
+<td>
+
+**=**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+  c: 3
+```
+</td>
+
+</tr>
+
+</table>
+
+### Lists
+
+<table>
+  
+<tr>
+
+<td>
+
+```yaml
+myList:
+  - 1
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myList:
+  - 2
+```
+</td>
+
+<td>
+
+**=**
+</td>
+
+<td>
+
+```yaml
+myList:
+  - 1
+  - 2
+```
+</td>
+
+</tr>
+
+<tr></tr>
+
+<tr>
+
+<td>
+
+```yaml
+myList:
+  - 1
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myList:
+  - 2
+  - $patch: replace
+```
+</td>
+
+<td>
+
+**=**
+</td>
+
+<td>
+
+```yaml
+myList:
+  - 2
+```
+</td>
+
+</tr>
+
+<tr></tr>
+
+<tr>
+
+<td>
+
+```yaml
+myList:
+  - x: 1
+  - x: 2
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myList:
+  - x: 3
+  - x: 2
+    $patch: delete
+```
+</td>
+
+<td>
+
+**=**
+</td>
+
+<td>
+
+```yaml
+myList:
+  - x: 1
+  - x: 3
+```
+</td>
+
+</tr>
+
+</table>
