@@ -92,7 +92,13 @@ $ bkl c.d.yaml   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml
 ### Streams
 
 bkl understands input streams (multi-document YAML files delimited with `---`). To layer them, it has to match up sections between files. It tries the following strategies, in order:
-* Custom paths: If you pass `-m`/`--match-key` (example value: `a.b,c.d`), bkl will use its list of paths as match keys.
+* `$match`: specify match fields in the document, e.g.
+```yaml
+$match:
+  kind: Service
+  metadata:
+    name: myService
+```
 * K8s paths: If `kind` and `metadata.name` are present, they are used as default match keys.
 * Ordering: Stream position is used to match documents.
 
