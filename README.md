@@ -365,7 +365,7 @@ myList:
 
 </table>
 
-## Advanced Values
+## Advanced Keys & Values
 
 ### $required
 
@@ -460,6 +460,12 @@ myMap:
 
 Merges in another subtree.
 
+<table>
+  
+<tr>
+
+<td>
+
 ```yaml
 foo:
   bar:
@@ -468,8 +474,14 @@ zig:
   b: 2
   $merge: foo.bar
 ```
+</td>
 
-evaluates to:
+<td>
+
+**→**
+</td>
+
+<td>
 
 ```yaml
 foo:
@@ -479,10 +491,21 @@ zig:
   a: 1
   b: 2
 ```
+</td>
+
+</tr>
+
+</table>
 
 ### $replace
 
 Replaces a subtree with one from another location.
+
+<table>
+  
+<tr>
+
+<td>
 
 ```yaml
 foo:
@@ -492,8 +515,14 @@ zig:
   b: 2
   $replace: foo.bar
 ```
+</td>
 
-evaluates to:
+<td>
+
+**→**
+</td>
+
+<td>
 
 ```yaml
 foo:
@@ -502,10 +531,21 @@ foo:
 zig:
   a: 1
 ```
+</td>
+
+</tr>
+
+</table>
 
 ### $output
 
 When used at the top level, selects a subtree for output:
+
+<table>
+  
+<tr>
+
+<td>
 
 ```yaml
 $output: foo.bar
@@ -513,11 +553,22 @@ foo:
   bar:
     a: 1
 ```
+</td>
 
-evaluates to:
+<td>
+
+**→**
+</td>
+
+<td>
 
 ```yaml
 a: 1
 ```
+</td>
 
-Combine `$copy` and `$output` to have hidden "template" subtrees that don't appear in the output but can be copied in as needed. 
+</tr>
+
+</table>
+
+Combine `$output` with `$replace` or `$merge` to have hidden "template" subtrees that don't appear in the output but can be copied in as needed. 
