@@ -8,14 +8,14 @@ No template tags. No custom syntax. No schemas. No new formats to learn.
 
 ## Example
 
-### service.yaml
+### `service.yaml`
 ```yaml
 name: myService
 addr: 127.0.0.1
 port: 8080
 ```
 
-### service.test.toml
+### `service.test.toml`
 ```toml
 port = 8081
 ```
