@@ -135,7 +135,7 @@ myMap:
 
 <td>
 
-**=**
+**→**
 </td>
 
 <td>
@@ -177,7 +177,7 @@ myMap:
 
 <td>
 
-**=**
+**→**
 </td>
 
 <td>
@@ -219,7 +219,7 @@ myMap:
 
 <td>
 
-**=**
+**→**
 </td>
 
 <td>
@@ -264,7 +264,7 @@ myList:
 
 <td>
 
-**=**
+**→**
 </td>
 
 <td>
@@ -306,7 +306,7 @@ myList:
 
 <td>
 
-**=**
+**→**
 </td>
 
 <td>
@@ -349,7 +349,7 @@ myList:
 
 <td>
 
-**=**
+**→**
 </td>
 
 <td>
@@ -371,13 +371,90 @@ myList:
 
 Use `$required` in lower layers to force upper layers to replace the value.
 
+<table>
+  
+<tr>
+
+<td>
+
 ```yaml
 myMap:
   a: 1
   b: $required
 ```
+</td>
 
-This will cause an error unless a layer on top sets `myMap.b`.
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  c: 3
+```
+</td>
+
+<td>
+
+**→**
+</td>
+
+<td>
+
+**Error**
+
+</td>
+
+</tr>
+
+<tr></tr>
+
+<tr>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+  b: $required
+```
+</td>
+
+<td>
+
+**+**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  b: 2
+  c: 3
+```
+</td>
+
+<td>
+
+**→**
+</td>
+
+<td>
+
+```yaml
+myMap:
+  a: 1
+  b: 2
+  c: 3
+```
+</td>
+
+</tr>
+
+</table>
 
 ### $merge
 
