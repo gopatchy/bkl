@@ -92,7 +92,7 @@ $ bkl c.d.yaml   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml
 ### Streams
 
 bkl understands input streams (multi-document YAML files delimited with `---`). To layer them, it has to match up sections between files. It tries the following strategies, in order:
-* `$match`: specify match fields in the document, e.g.
+* `$match`: specify match fields in the document:
 ```yaml
 $match:
   kind: Service
