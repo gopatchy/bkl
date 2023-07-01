@@ -8,11 +8,11 @@ import (
 )
 
 type options struct {
-	OutputPath   *string  `short:"o" long:"output" description:"output file path"`
-	OutputFormat *string  `short:"f" long:"format" description:"output format"`
+	OutputPath   *string `short:"o" long:"output" description:"output file path"`
+	OutputFormat *string `short:"f" long:"format" description:"output format"`
 
 	Positional struct {
-		InputPaths   []string `positional-arg-name:"inputPath" required:"1" description:"input file path"`
+		InputPaths []string `positional-arg-name:"inputPath" required:"1" description:"input file path"`
 	} `positional-args:"yes"`
 }
 
