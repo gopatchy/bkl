@@ -76,7 +76,7 @@ Output format is autodetected from output filename.
 Specifying multiple input files evaluates them as normal, then merges them onto each other in order.
 
 ```console
-$ bkl a.b.yaml c.yaml   # a.yaml -> a.b.yaml -> c.yaml -> output
+$ bkl a.b.yaml c.d.yaml   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)
 ```
 
 ### Symlinks
@@ -85,7 +85,7 @@ bkl follows symbolic links and evaluates the inherited layers on the other side 
 
 ```console
 $ ln -s a.b.yaml c.yaml
-$ bkl c.d.yaml   # a.yaml -> a.b.yaml (c.yaml) -> c.d.yaml -> output
+$ bkl c.d.yaml   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml
 
 ```
 
