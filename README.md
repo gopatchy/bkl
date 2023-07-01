@@ -26,7 +26,7 @@ $ bkl service.test.toml
 { "addr": "127.0.0.1", "name": "myService", "port": 8081 }
 ```
 
-bkl knows that service.test.toml inherits from service.yaml by the filename pattern, and uses filename extensions to determine format.
+bkl knows that `service.test.toml` inherits from `service.yaml` by the filename pattern, and uses filename extensions to determine format.
 
 ## Output Formats
 
@@ -57,6 +57,44 @@ $ bkl -f json-pretty service.test.toml
   "port": 8081
 }
 ```
+
+## Output Locations
+
+Output goes to stdout by default. Errors always go to stderr.
+
+### File Output
+```console
+$ bkl -o out.yaml service.test.toml
+```
+
+Output format is autodetected from output filename.
+
+## Advanced Inputs
+
+### Multiple Files
+
+Specifying multiple input files evaluates them as normal, then merges them onto each other in order.
+
+```console
+$ bkl a.b.yaml c.yaml   # a.yaml -> a.b.yaml -> c.yaml -> output
+```
+
+### Symlinks
+
+bkl follows symbolic links and evaluates the inherited layers on the other side of the symlink.
+
+```console
+$ ln -s a.b.yaml c.yaml
+$ bkl c.d.yaml   # a.yaml -> a.b.yaml (c.yaml) -> c.d.yaml -> output
+
+```
+
+### Streams
+
+bkl understands input streams (multi-document YAML files delimited with `---`). To layer them, it has to match up sections between files. It tries the following strategies, in order:
+* Custom paths: If you pass `-m`/`--match-key` (example value: `a.b,c.d`), bkl will use its list of paths as match keys.
+* K8s paths: If `kind` and `metadata.name` are present, they are used as default match keys.
+* Ordering: Stream position is used to match documents.
 
 ## Merge Behavior
 
