@@ -15,6 +15,10 @@ var formatByExtension = map[string]format{
 		decode: decodeJSON,
 		encode: encodeJSON,
 	},
+	"toml": {
+		decode: decodeTOML,
+		encode: encodeTOML,
+	},
 	"yaml": {
 		decode: decodeYAML,
 		encode: encodeYAML,
