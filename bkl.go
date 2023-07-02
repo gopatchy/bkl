@@ -90,7 +90,7 @@ func (p *Parser) MergeMultiBytes(bs [][]byte, ext string) error {
 	for i, b := range bs {
 		err := p.MergeIndexBytes(i, b, ext)
 		if err != nil {
-			return fmt.Errorf("index %d (of [0,%d]): %w (%w)", i, len(bs)-1, err, ErrDecode)
+			return fmt.Errorf("index %d (of [0,%d]): %w", i, len(bs)-1, err)
 		}
 	}
 

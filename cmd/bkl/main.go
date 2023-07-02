@@ -56,7 +56,21 @@ func main() {
 		fatal("%s", err)
 	}
 
-	os.Stdout.Write(out)
+	fh := os.Stdout
+
+	if opts.OutputPath != nil {
+		fh, err = os.OpenFile(*opts.OutputPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			fatal("%s: %s", *opts.OutputPath, err)
+		}
+
+		defer fh.Close()
+	}
+
+	_, err = fh.Write(out)
+	if err != nil {
+		fatal("output: %s", err)
+	}
 }
 
 func fatal(format string, v ...any) {
