@@ -11,6 +11,7 @@ import (
 type options struct {
 	OutputPath   *string `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
+	Verbose      bool    `short:"v" long:"verbose" description:"enable verbose logging"`
 
 	Positional struct {
 		InputPaths []string `positional-arg-name:"inputPath" required:"1" description:"input file path"`
@@ -28,6 +29,10 @@ func main() {
 	}
 
 	p := bkl.New()
+
+	if opts.Verbose {
+		p.SetDebug(true)
+	}
 
 	for _, path := range opts.Positional.InputPaths {
 		err := p.MergeFileLayers(path)

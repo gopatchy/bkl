@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,8 @@ var (
 
 // Parser carries state for parse operations with multiple layered inputs.
 type Parser struct {
-	docs []any
+	docs  []any
+	debug bool
 }
 
 // New creates and returns a new [Parser] with an empty starting document.
@@ -39,6 +41,10 @@ func NewFromFile(path string) (*Parser, error) {
 	}
 
 	return p, nil
+}
+
+func (p *Parser) SetDebug(debug bool) {
+	p.debug = debug
 }
 
 // MergePatch applies the supplied patch to the [Parser]'s current internal
@@ -115,6 +121,8 @@ func (p *Parser) MergeReader(in io.Reader, ext string) error {
 // MergeFile opens the supplied path and determines the file format from the
 // file extension, then calls [MergeReader()].
 func (p *Parser) MergeFile(path string) error {
+	p.log("loading %s", path)
+
 	fh, err := os.Open(path)
 	if err != nil {
 		return fmt.Errorf("%s: %w", path, err)
@@ -149,6 +157,16 @@ func (p *Parser) MergeFileLayers(path string) error {
 
 		layerPath := filepath.Join(dir, strings.Join(layerParts, "."))
 
+		dest, _ := os.Readlink(layerPath)
+		if dest != "" {
+			err := p.MergeFileLayers(dest)
+			if err != nil {
+				return err
+			}
+
+			continue
+		}
+
 		err := p.MergeFile(layerPath)
 		if err != nil {
 			return err
@@ -156,4 +174,12 @@ func (p *Parser) MergeFileLayers(path string) error {
 	}
 
 	return nil
+}
+
+func (p *Parser) log(format string, v ...any) {
+	if !p.debug {
+		return
+	}
+
+	log.Printf(format, v...)
 }
