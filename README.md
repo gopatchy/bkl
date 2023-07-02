@@ -99,7 +99,7 @@ $match:
   metadata:
     name: myService
 ```
-* K8s paths: If `kind` and `metadata.name` are present, they are used as default match keys.
+* K8s paths: If `kind` and `metadata.name` are present, they are used as match keys.
 * Ordering: Stream position is used to match documents.
 
 ## Merge Behavior
