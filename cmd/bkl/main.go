@@ -37,8 +37,29 @@ func main() {
 	for _, path := range opts.Positional.InputPaths {
 		err := p.MergeFileLayers(path)
 		if err != nil {
-			fmt.Printf("%s\n", err)
-			os.Exit(1)
+			fatal("%s", err)
 		}
 	}
+
+	format := "json"
+
+	if opts.OutputPath != nil {
+		format = bkl.GetExtension(*opts.OutputPath)
+	}
+
+	if opts.OutputFormat != nil {
+		format = *opts.OutputFormat
+	}
+
+	out, err := p.GetOutput(format)
+	if err != nil {
+		fatal("%s", err)
+	}
+
+	os.Stdout.Write(out)
+}
+
+func fatal(format string, v ...any) {
+	fmt.Fprintf(os.Stderr, format+"\n", v...)
+	os.Exit(1)
 }

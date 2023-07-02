@@ -5,7 +5,7 @@ import "encoding/json"
 func decodeJSON(in []byte) (any, error) {
 	var obj any
 
-	err := json.Unmarshal(in, obj)
+	err := json.Unmarshal(in, &obj)
 	if err != nil {
 		return nil, err
 	}
@@ -14,5 +14,10 @@ func decodeJSON(in []byte) (any, error) {
 }
 
 func encodeJSON(obj any) ([]byte, error) {
-	return json.Marshal(obj)
+	out, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(out, '\n'), nil
 }

@@ -14,6 +14,8 @@ import (
 var (
 	Err              = fmt.Errorf("bkl error")
 	ErrUnknownFormat = fmt.Errorf("unknown format (%w)", Err)
+	ErrInvalidIndex  = fmt.Errorf("invalid index (%w)", Err)
+	ErrEncode        = fmt.Errorf("encoding error (%w)", Err)
 	ErrDecode        = fmt.Errorf("decoding error (%w)", Err)
 )
 
@@ -88,7 +90,7 @@ func (p *Parser) MergeMultiBytes(bs [][]byte, ext string) error {
 	for i, b := range bs {
 		err := p.MergeIndexBytes(i, b, ext)
 		if err != nil {
-			return fmt.Errorf("document index %d (of [0,%d]): %w", i, len(bs)-1, err)
+			return fmt.Errorf("index %d (of [0,%d]): %w (%w)", i, len(bs)-1, err, ErrDecode)
 		}
 	}
 
@@ -130,10 +132,7 @@ func (p *Parser) MergeFile(path string) error {
 
 	defer fh.Close()
 
-	parts := strings.Split(filepath.Base(path), ".")
-	ext := parts[len(parts)-1]
-
-	err = p.MergeReader(fh, ext)
+	err = p.MergeReader(fh, GetExtension(path))
 	if err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
@@ -148,7 +147,7 @@ func (p *Parser) MergeFileLayers(path string) error {
 	base := filepath.Base(path)
 
 	parts := strings.Split(base, ".")
-	ext := parts[len(parts)-1]
+	ext := GetExtension(path)
 
 	for i := 1; i < len(parts); i++ {
 		layerParts := []string{}
@@ -176,10 +175,77 @@ func (p *Parser) MergeFileLayers(path string) error {
 	return nil
 }
 
+// Count returns the number of documents.
+func (p *Parser) Count() int {
+	return len(p.docs)
+}
+
+// GetIndex returns the parsed tree for the document at index.
+func (p *Parser) GetIndex(index int) (any, error) {
+	if index >= p.Count() {
+		return nil, fmt.Errorf("%d: %w", index, ErrInvalidIndex)
+	}
+
+	return p.docs[index], nil
+}
+
+// GetOutputIndex returns the document at index, encoded as ext.
+func (p *Parser) GetOutputIndex(index int, ext string) ([]byte, error) {
+	obj, err := p.GetIndex(index)
+	if err != nil {
+		return nil, err
+	}
+
+	f, found := formatByExtension[ext]
+	if !found {
+		return nil, fmt.Errorf("%s: %w", ext, ErrUnknownFormat)
+	}
+
+	enc, err := f.encode(obj)
+	if err != nil {
+		return nil, fmt.Errorf("index %d (of [0,%d]): %w (%w)", index, p.Count()-1, err, ErrEncode)
+	}
+
+	return enc, nil
+}
+
+// GetOutputLayers returns all layers encoded as ext.
+func (p *Parser) GetOutputLayers(ext string) ([][]byte, error) {
+	outs := [][]byte{}
+
+	for i := 0; i < p.Count(); i++ {
+		out, err := p.GetOutputIndex(i, ext)
+		if err != nil {
+			return nil, err
+		}
+
+		outs = append(outs, out)
+	}
+
+	return outs, nil
+}
+
+// GetOutput returns all documents encoded as ext and merged with ---.
+func (p *Parser) GetOutput(ext string) ([]byte, error) {
+	outs, err := p.GetOutputLayers(ext)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.Join(outs, []byte("---\n")), nil
+}
+
 func (p *Parser) log(format string, v ...any) {
 	if !p.debug {
 		return
 	}
 
 	log.Printf(format, v...)
+}
+
+func GetExtension(path string) string {
+	base := filepath.Base(path)
+	parts := strings.Split(base, ".")
+
+	return parts[len(parts)-1]
 }
