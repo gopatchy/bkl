@@ -45,6 +45,10 @@ func NewFromFile(path string) (*Parser, error) {
 // document state (at the specified document index) using bkl's merge
 // semantics.
 func (p *Parser) MergePatch(index int, patch any) error {
+	if index >= len(p.docs) {
+		p.docs = append(p.docs, make([]any, index-len(p.docs)+1)...)
+	}
+
 	// XXX
 	p.docs[index] = patch
 
