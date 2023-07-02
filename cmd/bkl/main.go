@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -26,5 +27,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("%#v\n", *opts)
+	p := bkl.New()
+
+	for _, path := range opts.Positional.InputPaths {
+		err := p.MergeFileLayers(path)
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			os.Exit(1)
+		}
+	}
 }
