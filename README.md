@@ -552,6 +552,7 @@ foo:
   bar:
     $output: true
     a: 1
+    b: 2
 ```
 </td>
 
@@ -564,6 +565,7 @@ foo:
 
 ```yaml
 a: 1
+b: 2
 ```
 </td>
 
