@@ -539,7 +539,7 @@ zig:
 
 ### $output
 
-When used at the top level, selects a subtree for output:
+Selects a subtree for output.
 
 <table>
   
@@ -548,9 +548,9 @@ When used at the top level, selects a subtree for output:
 <td>
 
 ```yaml
-$output: foo.bar
 foo:
   bar:
+    $output: true
     a: 1
 ```
 </td>
