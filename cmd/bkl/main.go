@@ -44,7 +44,7 @@ func main() {
 	format := "json"
 
 	if opts.OutputPath != nil {
-		format = bkl.GetExtension(*opts.OutputPath)
+		format = bkl.Ext(*opts.OutputPath)
 	}
 
 	if opts.OutputFormat != nil {

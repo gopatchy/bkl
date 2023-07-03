@@ -3,6 +3,7 @@ package bkl
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -13,6 +14,7 @@ import (
 
 var (
 	Err              = fmt.Errorf("bkl error")
+	ErrMissingFile   = fmt.Errorf("missing file (%w)", Err)
 	ErrUnknownFormat = fmt.Errorf("unknown format (%w)", Err)
 	ErrInvalidIndex  = fmt.Errorf("invalid index (%w)", Err)
 	ErrEncode        = fmt.Errorf("encoding error (%w)", Err)
@@ -132,7 +134,7 @@ func (p *Parser) MergeFile(path string) error {
 
 	defer fh.Close()
 
-	err = p.MergeReader(fh, GetExtension(path))
+	err = p.MergeReader(fh, Ext(path))
 	if err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
@@ -147,16 +149,16 @@ func (p *Parser) MergeFileLayers(path string) error {
 	base := filepath.Base(path)
 
 	parts := strings.Split(base, ".")
-	ext := GetExtension(path)
 
 	for i := 1; i < len(parts); i++ {
-		layerParts := []string{}
-		layerParts = append(layerParts, parts[:i]...)
-		layerParts = append(layerParts, ext)
+		layerPath := filepath.Join(dir, strings.Join(parts[:i], "."))
 
-		layerPath := filepath.Join(dir, strings.Join(layerParts, "."))
+		extPath := FindFile(layerPath)
+		if extPath == "" {
+			return fmt.Errorf("%s: %w", layerPath, ErrMissingFile)
+		}
 
-		dest, _ := os.Readlink(layerPath)
+		dest, _ := os.Readlink(extPath)
 		if dest != "" {
 			err := p.MergeFileLayers(dest)
 			if err != nil {
@@ -166,7 +168,7 @@ func (p *Parser) MergeFileLayers(path string) error {
 			continue
 		}
 
-		err := p.MergeFile(layerPath)
+		err := p.MergeFile(extPath)
 		if err != nil {
 			return err
 		}
@@ -243,9 +245,22 @@ func (p *Parser) log(format string, v ...any) {
 	log.Printf(format, v...)
 }
 
-func GetExtension(path string) string {
-	base := filepath.Base(path)
-	parts := strings.Split(base, ".")
+// Ext returns the file extension for path, or "".
+func Ext(path string) string {
+	return strings.TrimPrefix(filepath.Ext(path), ".")
+}
 
-	return parts[len(parts)-1]
+// FindFile finds a file starting with path and ending with a known extension.
+// It returns "" on failure.
+func FindFile(path string) string {
+	for ext := range formatByExtension {
+		extPath := fmt.Sprintf("%s.%s", path, ext)
+		if _, err := os.Stat(extPath); errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+
+		return extPath
+	}
+
+	return ""
 }

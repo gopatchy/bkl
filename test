@@ -1,0 +1,22 @@
+#!/bin/bash
+
+ROOT=$(pwd)
+
+function cleanup {
+	rm $ROOT/bkl
+}
+
+trap cleanup EXIT
+
+go build ./cmd/bkl
+export PATH=$PATH:$ROOT
+
+for TEST in tests/*; do
+	printf "$TEST\t"
+	cd $TEST
+
+	diff -ud <(source cmd) out
+
+	cd ~-
+	printf "DONE\n"
+done
