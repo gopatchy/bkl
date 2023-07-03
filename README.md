@@ -23,7 +23,7 @@ port = 8081
 ### Run it!
 ```console
 $ bkl service.test.toml
-{ "addr": "127.0.0.1", "name": "myService", "port": 8081 }
+{"addr":"127.0.0.1","name":"myService","port":8081}
 ```
 
 bkl knows that `service.test.toml` inherits from `service.yaml` by the filename pattern, and uses filename extensions to determine formats.
