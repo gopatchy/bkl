@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ROOT=$(pwd)
 
@@ -9,14 +9,14 @@ function cleanup {
 trap cleanup EXIT
 
 go build ./cmd/bkl
-export PATH=$PATH:$ROOT
+export PATH=$PATH:/opt/homebrew/share/git-core/contrib/diff-highlight:$ROOT
 
 for TEST in tests/*; do
-	printf "$TEST\t"
+	echo TEST $TEST
 	cd $TEST
 
-	diff -ud <(source cmd) out
+	colordiff -ud expected <(source cmd) | diff-highlight
 
 	cd ~-
-	printf "DONE\n"
+	echo "	PASS"
 done
