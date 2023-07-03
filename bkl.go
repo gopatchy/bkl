@@ -14,11 +14,12 @@ import (
 
 var (
 	Err              = fmt.Errorf("bkl error")
-	ErrMissingFile   = fmt.Errorf("missing file (%w)", Err)
-	ErrUnknownFormat = fmt.Errorf("unknown format (%w)", Err)
-	ErrInvalidIndex  = fmt.Errorf("invalid index (%w)", Err)
 	ErrEncode        = fmt.Errorf("encoding error (%w)", Err)
 	ErrDecode        = fmt.Errorf("decoding error (%w)", Err)
+	ErrInvalidIndex  = fmt.Errorf("invalid index (%w)", Err)
+	ErrInvalidType   = fmt.Errorf("invalid type (%w)", Err)
+	ErrMissingFile   = fmt.Errorf("missing file (%w)", Err)
+	ErrUnknownFormat = fmt.Errorf("unknown format (%w)", Err)
 )
 
 // Parser carries state for parse operations with multiple layered inputs.
@@ -59,8 +60,12 @@ func (p *Parser) MergePatch(index int, patch any) error {
 		p.docs = append(p.docs, make([]any, index-len(p.docs)+1)...)
 	}
 
-	// XXX
-	p.docs[index] = patch
+	merged, err := Merge(p.docs[index], patch)
+	if err != nil {
+		return err
+	}
+
+	p.docs[index] = merged
 
 	return nil
 }
