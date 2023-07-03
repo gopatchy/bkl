@@ -15,6 +15,10 @@ var formatByExtension = map[string]format{
 		decode: decodeJSON,
 		encode: encodeJSON,
 	},
+	"json-pretty": {
+		decode: decodeJSON,
+		encode: encodeJSONPretty,
+	},
 	"toml": {
 		decode: decodeTOML,
 		encode: encodeTOML,

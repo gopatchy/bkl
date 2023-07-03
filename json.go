@@ -1,6 +1,9 @@
 package bkl
 
-import "encoding/json"
+import (
+	"bytes"
+	"encoding/json"
+)
 
 func decodeJSON(in []byte) (any, error) {
 	var obj any
@@ -20,4 +23,17 @@ func encodeJSON(obj any) ([]byte, error) {
 	}
 
 	return append(out, '\n'), nil
+}
+
+func encodeJSONPretty(obj any) ([]byte, error) {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetIndent("", "  ")
+
+	err := enc.Encode(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
