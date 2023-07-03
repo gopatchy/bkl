@@ -115,8 +115,7 @@ By default, lists and maps are merged. To change that, use [$patch](https://gith
 <td>
 
 ```yaml
-myMap:
-  a: 1
+a: 1
 ```
 </td>
 
@@ -128,8 +127,7 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  b: 2
+b: 2
 ```
 </td>
 
@@ -141,9 +139,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  a: 1
-  b: 2
+a: 1
+b: 2
 ```
 </td>
 
@@ -156,8 +153,7 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  a: 1
+a: 1
 ```
 </td>
 
@@ -169,9 +165,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  b: 2
-  $patch: replace
+b: 2
+$patch: replace
 ```
 </td>
 
@@ -183,8 +178,7 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  b: 2
+b: 2
 ```
 </td>
 
@@ -197,9 +191,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  a: 1
-  b: 2
+a: 1
+b: 2
 ```
 </td>
 
@@ -211,9 +204,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  c: 3
-  b: null
+c: 3
+b: null
 ```
 </td>
 
@@ -225,9 +217,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  a: 1
-  c: 3
+a: 1
+c: 3
 ```
 </td>
 
@@ -244,8 +235,7 @@ myMap:
 <td>
 
 ```yaml
-myList:
-  - 1
+- 1
 ```
 </td>
 
@@ -257,8 +247,7 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - 2
+- 2
 ```
 </td>
 
@@ -270,9 +259,8 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - 1
-  - 2
+- 1
+- 2
 ```
 </td>
 
@@ -285,8 +273,7 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - 1
+- 1
 ```
 </td>
 
@@ -298,9 +285,8 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - 2
-  - $patch: replace
+- 2
+ $patch: replace
 ```
 </td>
 
@@ -312,8 +298,7 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - 2
+- 2
 ```
 </td>
 
@@ -326,9 +311,8 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - x: 1
-  - x: 2
+- x: 1
+- x: 2
 ```
 </td>
 
@@ -340,10 +324,9 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - x: 3
-  - x: 2
-    $patch: delete
+- x: 3
+- x: 2
+  $patch: delete
 ```
 </td>
 
@@ -355,9 +338,8 @@ myList:
 <td>
 
 ```yaml
-myList:
-  - x: 1
-  - x: 3
+- x: 1
+- x: 3
 ```
 </td>
 
@@ -378,9 +360,8 @@ Use `$required` in lower layers to force upper layers to replace the value.
 <td>
 
 ```yaml
-myMap:
-  a: 1
-  b: $required
+a: 1
+b: $required
 ```
 </td>
 
@@ -392,8 +373,7 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  c: 3
+c: 3
 ```
 </td>
 
@@ -417,9 +397,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  a: 1
-  b: $required
+a: 1
+b: $required
 ```
 </td>
 
@@ -431,9 +410,8 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  b: 2
-  c: 3
+b: 2
+c: 3
 ```
 </td>
 
@@ -445,10 +423,9 @@ myMap:
 <td>
 
 ```yaml
-myMap:
-  a: 1
-  b: 2
-  c: 3
+a: 1
+b: 2
+c: 3
 ```
 </td>
 
