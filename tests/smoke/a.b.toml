@@ -1,6 +1,5 @@
-myList = [
-	{ p = 16 },
-]
+[[myList]]
+p = 16
 
 [myMap]
 b = 3
