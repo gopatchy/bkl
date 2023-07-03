@@ -1,4 +1,4 @@
-bkl -o out.json service.test.toml
+bkl -o out.yaml service.test.toml
 echo X
-cat out.json
-rm -f out.json
+cat out.yaml
+rm -f out.yaml
