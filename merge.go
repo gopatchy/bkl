@@ -22,6 +22,11 @@ func MergeMap(dst map[string]any, src any) (any, error) {
 	switch st := CanonicalizeType(src).(type) {
 	case map[string]any:
 		for k, v := range st {
+			if v == nil {
+				delete(dst, k)
+				continue
+			}
+
 			existing, found := dst[k]
 			if found {
 				n, err := Merge(existing, v)
