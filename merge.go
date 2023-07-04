@@ -182,6 +182,36 @@ func PostMerge(root any, obj any) (any, error) {
 	}
 }
 
+func FindOutputs(obj any) []any {
+	switch objType := obj.(type) {
+	case map[string]any:
+		ret := []any{}
+
+		if _, found := objType["$output"]; found {
+			delete(objType, "$output")
+			ret = append(ret, obj)
+		}
+
+		for _, v := range objType {
+			ret = append(ret, FindOutputs(v)...)
+		}
+
+		return ret
+
+	case []any:
+		ret := []any{}
+
+		for _, v := range objType {
+			ret = append(ret, FindOutputs(v)...)
+		}
+
+		return ret
+
+	default:
+		return []any{}
+	}
+}
+
 func CanonicalizeType(in any) any {
 	switch inType := in.(type) {
 	case []map[string]any:

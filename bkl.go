@@ -242,7 +242,7 @@ func (p *Parser) GetIndex(index int) (any, error) {
 }
 
 // GetOutputIndex returns the document at index, encoded as ext.
-func (p *Parser) GetOutputIndex(index int, ext string) ([]byte, error) {
+func (p *Parser) GetOutputIndex(index int, ext string) ([][]byte, error) {
 	obj, err := p.GetIndex(index)
 	if err != nil {
 		return nil, err
@@ -258,17 +258,28 @@ func (p *Parser) GetOutputIndex(index int, ext string) ([]byte, error) {
 		return nil, err
 	}
 
+	outs := FindOutputs(obj)
+	if len(outs) == 0 {
+		outs = append(outs, obj)
+	}
+
 	f, found := formatByExtension[ext]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", ext, ErrUnknownFormat)
 	}
 
-	enc, err := f.encode(obj)
-	if err != nil {
-		return nil, fmt.Errorf("index %d (of [0,%d]): %w (%w)", index, p.Count()-1, err, ErrEncode)
+	encs := [][]byte{}
+
+	for _, out := range outs {
+		enc, err := f.encode(out)
+		if err != nil {
+			return nil, fmt.Errorf("index %d (of [0,%d]): %w (%w)", index, p.Count()-1, err, ErrEncode)
+		}
+
+		encs = append(encs, enc)
 	}
 
-	return enc, nil
+	return encs, nil
 }
 
 // GetOutputLayers returns all layers encoded as ext.
@@ -281,7 +292,7 @@ func (p *Parser) GetOutputLayers(ext string) ([][]byte, error) {
 			return nil, err
 		}
 
-		outs = append(outs, out)
+		outs = append(outs, out...)
 	}
 
 	return outs, nil
