@@ -138,6 +138,22 @@ func PostMerge(root any, obj any) (any, error) {
 			return PostMerge(root, next)
 		}
 
+		if path, found := objType["$replace"]; found {
+			delete(objType, "$replace")
+
+			pathVal, ok := path.(string)
+			if !ok {
+				return nil, fmt.Errorf("%T: %w", path, ErrInvalidReplaceType)
+			}
+
+			next := Get(root, pathVal)
+			if next == nil {
+				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
+			}
+
+			return PostMerge(root, next)
+		}
+
 		for k, v := range objType {
 			v2, err := PostMerge(root, v)
 			if err != nil {
