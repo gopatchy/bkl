@@ -20,6 +20,7 @@ var (
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
 	ErrInvalidType      = fmt.Errorf("invalid type (%w)", Err)
 	ErrMissingFile      = fmt.Errorf("missing file (%w)", Err)
+	ErrRequiredField    = fmt.Errorf("required field not set (%w)", Err)
 	ErrUnknownFormat    = fmt.Errorf("unknown format (%w)", Err)
 
 	ErrInvalidPatchType  = fmt.Errorf("invalid $patch type (%w)", ErrInvalidDirective)
@@ -216,6 +217,11 @@ func (p *Parser) GetIndex(index int) (any, error) {
 // GetOutputIndex returns the document at index, encoded as ext.
 func (p *Parser) GetOutputIndex(index int, ext string) ([]byte, error) {
 	obj, err := p.GetIndex(index)
+	if err != nil {
+		return nil, err
+	}
+
+	err = Validate(obj)
 	if err != nil {
 		return nil, err
 	}

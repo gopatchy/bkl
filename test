@@ -17,8 +17,6 @@ for TEST in tests/*; do
 	echo TEST $TEST
 	cd $TEST
 
-	source cmd > /dev/null
-
 	colordiff -ud expected <(source cmd) | diff-highlight
 
 	cd ~-
