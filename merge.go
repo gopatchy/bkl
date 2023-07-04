@@ -21,6 +21,22 @@ func Merge(dst any, src any) (any, error) {
 func MergeMap(dst map[string]any, src any) (any, error) {
 	switch st := CanonicalizeType(src).(type) {
 	case map[string]any:
+		if patch, found := st["$patch"]; found {
+			patchVal, ok := patch.(string)
+			if !ok {
+				return nil, fmt.Errorf("%T: %w", patch, ErrInvalidPatchType)
+			}
+
+			switch patchVal {
+			case "replace":
+				delete(st, "$patch")
+				return st, nil
+
+			default:
+				return nil, fmt.Errorf("%s: %w", patch, ErrInvalidPatchValue)
+			}
+		}
+
 		for k, v := range st {
 			if v == nil {
 				delete(dst, k)

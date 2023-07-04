@@ -13,13 +13,17 @@ import (
 )
 
 var (
-	Err              = fmt.Errorf("bkl error")
-	ErrEncode        = fmt.Errorf("encoding error (%w)", Err)
-	ErrDecode        = fmt.Errorf("decoding error (%w)", Err)
-	ErrInvalidIndex  = fmt.Errorf("invalid index (%w)", Err)
-	ErrInvalidType   = fmt.Errorf("invalid type (%w)", Err)
-	ErrMissingFile   = fmt.Errorf("missing file (%w)", Err)
-	ErrUnknownFormat = fmt.Errorf("unknown format (%w)", Err)
+	Err                 = fmt.Errorf("bkl error")
+	ErrEncode           = fmt.Errorf("encoding error (%w)", Err)
+	ErrDecode           = fmt.Errorf("decoding error (%w)", Err)
+	ErrInvalidIndex     = fmt.Errorf("invalid index (%w)", Err)
+	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
+	ErrInvalidType      = fmt.Errorf("invalid type (%w)", Err)
+	ErrMissingFile      = fmt.Errorf("missing file (%w)", Err)
+	ErrUnknownFormat    = fmt.Errorf("unknown format (%w)", Err)
+
+	ErrInvalidPatchType  = fmt.Errorf("invalid $patch type (%w)", ErrInvalidDirective)
+	ErrInvalidPatchValue = fmt.Errorf("invalid $patch value (%w)", ErrInvalidDirective)
 )
 
 // Parser carries state for parse operations with multiple layered inputs.
