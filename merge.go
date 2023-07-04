@@ -3,6 +3,7 @@ package bkl
 import (
 	"fmt"
 	"slices"
+	"strings"
 )
 
 func Merge(dst any, src any) (any, error) {
@@ -113,6 +114,58 @@ func MergeList(dst []any, src any) (any, error) {
 	}
 }
 
+func PostMerge(root any, obj any) (any, error) {
+	switch objType := obj.(type) {
+	case map[string]any:
+		if path, found := objType["$merge"]; found {
+			delete(objType, "$merge")
+
+			pathVal, ok := path.(string)
+			if !ok {
+				return nil, fmt.Errorf("%T: %w", path, ErrInvalidMergeType)
+			}
+
+			in := Get(root, pathVal)
+			if in == nil {
+				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrMergeRefNotFound)
+			}
+
+			next, err := Merge(objType, in)
+			if err != nil {
+				return nil, err
+			}
+
+			return PostMerge(root, next)
+		}
+
+		for k, v := range objType {
+			v2, err := PostMerge(root, v)
+			if err != nil {
+				return nil, err
+			}
+
+			objType[k] = v2
+		}
+
+		return objType, nil
+
+	case []any:
+		for i, v := range objType {
+			v2, err := PostMerge(root, v)
+			if err != nil {
+				return nil, err
+			}
+
+			objType[i] = v2
+		}
+
+		return objType, nil
+
+	default:
+		return obj, nil
+	}
+}
+
 func CanonicalizeType(in any) any {
 	switch inType := in.(type) {
 	case []map[string]any:
@@ -169,5 +222,24 @@ func Match(obj any, pat any) bool {
 
 	default:
 		return obj == pat
+	}
+}
+
+func Get(obj any, path string) any {
+	parts := strings.Split(path, ".")
+	return get(obj, parts)
+}
+
+func get(obj any, parts []string) any {
+	if len(parts) == 0 {
+		return obj
+	}
+
+	switch objType := obj.(type) {
+	case map[string]any:
+		return get(objType[parts[0]], parts[1:])
+
+	default:
+		return nil
 	}
 }

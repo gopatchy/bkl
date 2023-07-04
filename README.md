@@ -549,6 +549,6 @@ b: 2
 
 </table>
 
-Multiple instances of `$output` in a document will generate multiple output documents (delimited with `---`). If the `$output` key has a numeric value, that value is used as the output document index.
+Multiple instances of `$output` in a document will generate multiple output documents (delimited with `---`).
 
 Combine `$output` with `$replace` or `$merge` to have hidden "template" subtrees that don't appear in the output but can be copied in as needed. 
