@@ -1,6 +1,10 @@
 package bkl
 
-import "fmt"
+import (
+	"fmt"
+
+	"golang.org/x/exp/slices"
+)
 
 func Merge(dst any, src any) (any, error) {
 	switch dt := CanonicalizeType(dst).(type) {
@@ -67,9 +71,27 @@ func MergeMap(dst map[string]any, src any) (any, error) {
 }
 
 func MergeList(dst []any, src any) (any, error) {
-	switch ds := CanonicalizeType(src).(type) {
+	switch st := CanonicalizeType(src).(type) {
 	case []any:
-		for _, v := range ds { //nolint:gosimple
+		for i, v := range st {
+			switch vt := CanonicalizeType(v).(type) { //nolint:gocritic
+			case map[string]any:
+				if patch, found := vt["$patch"]; found {
+					patchVal, ok := patch.(string)
+					if !ok {
+						return nil, fmt.Errorf("%T: %w", patch, ErrInvalidPatchType)
+					}
+
+					switch patchVal {
+					case "replace":
+						return slices.Delete(st, i, i+1), nil
+
+					default:
+						return nil, fmt.Errorf("%s: %w", patch, ErrInvalidPatchValue)
+					}
+				}
+			}
+
 			dst = append(dst, v)
 		}
 

@@ -286,7 +286,7 @@ c: 3
 
 ```yaml
 - 2
- $patch: replace
+- $patch: replace
 ```
 </td>
 
