@@ -2,7 +2,6 @@ package bkl
 
 import (
 	"fmt"
-	"maps"
 	"slices"
 )
 
@@ -87,13 +86,7 @@ func MergeList(dst []any, src any) (any, error) {
 						delete(val2, "$patch")
 
 						dst = slices.DeleteFunc(dst, func(elem any) bool {
-							switch elemType := elem.(type) {
-							case map[string]any:
-								return maps.Equal(elemType, val2)
-
-							default:
-								return false
-							}
+							return Match(elem, val2)
 						})
 
 						continue
@@ -121,16 +114,60 @@ func MergeList(dst []any, src any) (any, error) {
 }
 
 func CanonicalizeType(in any) any {
-	switch t := in.(type) {
+	switch inType := in.(type) {
 	case []map[string]any:
 		ret := []any{}
-		for _, v := range t {
-			ret = append(ret, v)
+		for _, val := range inType {
+			ret = append(ret, val)
 		}
 
 		return ret
 
 	default:
-		return in
+		return inType
+	}
+}
+
+func Match(obj any, pat any) bool {
+	switch patType := CanonicalizeType(pat).(type) {
+	case map[string]any:
+		objMap, ok := obj.(map[string]any)
+		if !ok {
+			return false
+		}
+
+		result := true
+
+		for patKey, patVal := range patType {
+			result = result && Match(objMap[patKey], patVal)
+		}
+
+		return result
+
+	case []any:
+		objList, ok := obj.([]any)
+		if !ok {
+			return false
+		}
+
+		result := true
+
+		for _, patVal := range patType {
+			found := false
+
+			for _, objVal := range objList {
+				if Match(objVal, patVal) {
+					found = true
+					break
+				}
+			}
+
+			result = result && found
+		}
+
+		return result
+
+	default:
+		return obj == pat
 	}
 }
