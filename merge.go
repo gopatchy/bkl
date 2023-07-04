@@ -2,17 +2,17 @@ package bkl
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/slices"
+	"maps"
+	"slices"
 )
 
 func Merge(dst any, src any) (any, error) {
-	switch dt := CanonicalizeType(dst).(type) {
+	switch dst2 := CanonicalizeType(dst).(type) {
 	case map[string]any:
-		return MergeMap(dt, src)
+		return MergeMap(dst2, src)
 
 	case []any:
-		return MergeList(dt, src)
+		return MergeList(dst2, src)
 
 	case nil:
 		return src, nil
@@ -23,9 +23,9 @@ func Merge(dst any, src any) (any, error) {
 }
 
 func MergeMap(dst map[string]any, src any) (any, error) {
-	switch st := CanonicalizeType(src).(type) {
+	switch src2 := CanonicalizeType(src).(type) {
 	case map[string]any:
-		if patch, found := st["$patch"]; found {
+		if patch, found := src2["$patch"]; found {
 			patchVal, ok := patch.(string)
 			if !ok {
 				return nil, fmt.Errorf("%T: %w", patch, ErrInvalidPatchType)
@@ -33,15 +33,15 @@ func MergeMap(dst map[string]any, src any) (any, error) {
 
 			switch patchVal {
 			case "replace":
-				delete(st, "$patch")
-				return st, nil
+				delete(src2, "$patch")
+				return src2, nil
 
 			default:
 				return nil, fmt.Errorf("%s: %w", patch, ErrInvalidPatchValue)
 			}
 		}
 
-		for k, v := range st {
+		for k, v := range src2 {
 			if v == nil {
 				delete(dst, k)
 				continue
@@ -71,20 +71,35 @@ func MergeMap(dst map[string]any, src any) (any, error) {
 }
 
 func MergeList(dst []any, src any) (any, error) {
-	switch st := CanonicalizeType(src).(type) {
+	switch src2 := CanonicalizeType(src).(type) {
 	case []any:
-		for i, v := range st {
-			switch vt := CanonicalizeType(v).(type) { //nolint:gocritic
+		for i, val := range src2 {
+			switch val2 := CanonicalizeType(val).(type) { //nolint:gocritic
 			case map[string]any:
-				if patch, found := vt["$patch"]; found {
+				if patch, found := val2["$patch"]; found {
 					patchVal, ok := patch.(string)
 					if !ok {
 						return nil, fmt.Errorf("%T: %w", patch, ErrInvalidPatchType)
 					}
 
 					switch patchVal {
+					case "delete":
+						delete(val2, "$patch")
+
+						dst = slices.DeleteFunc(dst, func(elem any) bool {
+							switch elemType := elem.(type) {
+							case map[string]any:
+								return maps.Equal(elemType, val2)
+
+							default:
+								return false
+							}
+						})
+
+						continue
+
 					case "replace":
-						return slices.Delete(st, i, i+1), nil
+						return slices.Delete(src2, i, i+1), nil
 
 					default:
 						return nil, fmt.Errorf("%s: %w", patch, ErrInvalidPatchValue)
@@ -92,7 +107,7 @@ func MergeList(dst []any, src any) (any, error) {
 				}
 			}
 
-			dst = append(dst, v)
+			dst = append(dst, val)
 		}
 
 		return dst, nil
