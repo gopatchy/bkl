@@ -20,6 +20,7 @@ var (
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
 	ErrInvalidType      = fmt.Errorf("invalid type (%w)", Err)
 	ErrMissingFile      = fmt.Errorf("missing file (%w)", Err)
+	ErrNoMatchFound     = fmt.Errorf("no document matched $match (%w)", Err)
 	ErrRequiredField    = fmt.Errorf("required field not set (%w)", Err)
 	ErrUnknownFormat    = fmt.Errorf("unknown format (%w)", Err)
 
@@ -90,6 +91,8 @@ func (p *Parser) MergePatch(index int, patch any) error {
 
 // MergeIndexBytes parses the supplied doc bytes as the format specified by ext
 // (file extension), then calls [MergePatch()].
+//
+// index is taken as a hint but can be overridden by $match.
 func (p *Parser) MergeIndexBytes(index int, doc []byte, ext string) error {
 	f, found := formatByExtension[ext]
 	if !found {
@@ -99,6 +102,26 @@ func (p *Parser) MergeIndexBytes(index int, doc []byte, ext string) error {
 	patch, err := f.decode(doc)
 	if err != nil {
 		return fmt.Errorf("%w / %w", err, ErrDecode)
+	}
+
+	if patchMap, ok := CanonicalizeType(patch).(map[string]any); ok {
+		m, found := patchMap["$match"]
+		if found {
+			delete(patchMap, "$match")
+
+			index = -1
+
+			for i, doc := range p.docs {
+				if Match(doc, m) {
+					index = i
+					break
+				}
+			}
+
+			if index == -1 {
+				return fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+			}
+		}
 	}
 
 	err = p.MergePatch(index, patch)
