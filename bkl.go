@@ -52,6 +52,19 @@ func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
 }
 
+// MergeOther applies other's internal document state to ours, using bkl's
+// merge semantics.
+func (p *Parser) MergeOther(other *Parser) error {
+	for i, doc := range other.docs {
+		err := p.MergePatch(i, doc)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // MergePatch applies the supplied patch to the [Parser]'s current internal
 // document state (at the specified document index) using bkl's merge
 // semantics.

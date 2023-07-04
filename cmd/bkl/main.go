@@ -35,7 +35,12 @@ func main() {
 	}
 
 	for _, path := range opts.Positional.InputPaths {
-		err := p.MergeFileLayers(path)
+		fileP, err := bkl.NewFromFile(path)
+		if err != nil {
+			fatal("%s", err)
+		}
+
+		err = p.MergeOther(fileP)
 		if err != nil {
 			fatal("%s", err)
 		}
