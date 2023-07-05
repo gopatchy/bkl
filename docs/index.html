@@ -158,6 +158,11 @@ split5 {
 	grid: auto-flow / 1fr 10px 1fr 10px 1fr;
 }
 
+split3a {
+	display: grid;
+	grid: auto-flow / 1fr 30px 1fr;
+}
+
 split5a {
 	display: grid;
 	grid: auto-flow / 1fr 30px 1fr 30px 1fr;
@@ -205,7 +210,7 @@ code {
 	word-wrap: normal;
 }
 
-split3 code, split5 code, split5a code {
+split3 code, split5 code, split3a code, split5a code {
 	height: 100%;
 }
 
@@ -262,7 +267,7 @@ inlineFocus {
 
 <p>bkl (short for Baklava, because it has layers) is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.</p>
 
-<p>Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts, or automate with the library.</p>
+<p>Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts, or automate with the <a href="https://pkg.go.dev/github.com/gopatchy/bkl">library</a>.</p>
 
 
 
@@ -286,9 +291,9 @@ inlineFocus {
 
 <code class="span3 labeled">$ <cmd>bkl</cmd> <string>service.test.toml</string>
 {
-	"<key>addr</key>": "<string>127.0.0.1</string>",
-	"<key>name</key>": "<string>myService</string>",
-	"<key>port</key>": <focus><number>8081</number></focus>
+  "<key>addr</key>": "<string>127.0.0.1</string>",
+  "<key>name</key>": "<string>myService</string>",
+  "<key>port</key>": <focus><number>8081</number></focus>
 }</code>
 
 </split3>
@@ -406,7 +411,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <code><key>c</key>: <number>3</number>
 <focus><key>$match</key>:
-	<key>b</key>: <number>2</number></focus>
+  <key>b</key>: <number>2</number></focus>
 </code>
 
 <op>=</op>
@@ -570,6 +575,90 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <vSpace></vSpace>
 <vSpace></vSpace>
+
+
+
+<h2><a name="merge">Merging Subtrees</a></h2>
+
+<p>Use <inlineFocus>$merge</inlineFocus> to merge the contents one subtree into another.</p>
+
+<split3a>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>b</key>: <number>2</number>
+  <focus><key>$merge</key>: <string>foo.bar</string></focus></code>
+
+<op>=</op>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>a</key>: <number>1</number>
+  <key>b</key>: <number>2</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
+<h2><a name="replace">Replacing Subtrees</a></h2>
+
+<p>Use <inlineFocus>$replace</inlineFocus> to merge the contents of one subtree with another.</p>
+
+<split3a>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>b</key>: <number>2</number>
+  <focus><key>$replace</key>: <string>foo.bar</string></focus></code>
+
+<op>=</op>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>a</key>: <number>1</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
+<h2><a name="output">Subtree Output</a></h2>
+
+<p>Use <inlineFocus>$output</inlineFocus> to select a subtree for output instead of the document root.</p>
+
+<split3a>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+  	<focus><key>$output</key>: <bool>true</bool></focus>
+    <key>a</key>: <number>1</number>
+	<key>b</key>: <number>2</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>1</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+
+<p>Multiple instances of <inlineFocus>$output</inlineFocus> in a document will generate multiple output documents (delimited with <inlineFocus>---</inlineFocus>).
+
+<p>Combine <inlineFocus>$output</inlineFocus> with <inlineFocus>$replace</inlineFocus> or <inlineFocus>$merge</inlineFocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
 
 </main></body>
 
