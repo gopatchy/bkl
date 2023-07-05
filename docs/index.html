@@ -103,16 +103,49 @@ body {
 main {
 	flex-direction: column;
 	display: flex;
-	max-width: 800px;
+	max-width: 650px;
 }
 
-header {
+h1 {
 	color: var(--vivid4);
 	display: block;
 	font-family: source-code-pro;
 	font-size: 48px;
 	left: -4px;
+	margin: 0;
 	position: relative;
+}
+
+h2 {
+	color: var(--vivid2);
+	margin: 0;
+	padding: 5px 0 15px 0;
+}
+
+h3 {
+	color: var(--vivid1);
+	margin: 0;
+	padding: 5px 0 10px 0;
+}
+
+p {
+	max-width: 35em;
+	margin: 0;
+	padding: 0 0 15px 0;
+	text-align: justify;
+}
+
+a[href] {
+	color: var(--neutral4);
+	text-decoration: none;
+}
+
+a[href]:hover {
+	text-decoration: underline dotted;
+}
+
+a[name] {
+	text-decoration: none;
 }
 
 split3 {
@@ -120,12 +153,17 @@ split3 {
 	grid: auto-flow / 1fr 10px 1fr;
 }
 
+split5 {
+	display: grid;
+	grid: auto-flow / 1fr 10px 1fr 10px 1fr;
+}
+
 .span3 {
 	grid-column-end: span 3;
 }
 
 vSpace {
-	height: 10px;
+	padding: 5px;
 }
 
 label {
@@ -144,7 +182,7 @@ code {
 	display: inline-block;
 	font-family: source-code-pro;
 	font-size: 16px;
-	height: 100%;
+	height: fit-content;
 	hyphens: none;
 	line-height: 1.5;
 	overflow: auto;
@@ -158,6 +196,10 @@ code {
 	word-wrap: normal;
 }
 
+ref {
+	color: var(--green2);
+}
+
 code.labeled {
 	border-radius: 0 5px 5px 5px;
 }
@@ -166,11 +208,7 @@ key {
 	color: var(--yellow4);
 }
 
-punc {
-	color: var(--neutral7);
-}
-
-func {
+cmd {
 	color: var(--blue5);
 }
 
@@ -179,43 +217,101 @@ string {
 }
 
 number {
+	color: var(--green6);
+}
+
+flag {
+	color: var(--blue5);
+}
+
+focus {
 	color: var(--red6);
+}
+
+inlineFocus {
+	background: var(--neutral8);
+	color: var(--red6);
+	white-space: nowrap;
 }
 </style>
 </head>
 
 <body><main>
 
-<header>BKL</header>
+<h1>BKL</h1>
+
+<p>bkl (short for Baklava, because it has layers) is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.</p>
+
+<p>Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts, or automate with the library.</p>
+
+<h2><a name="example">Example</a></h2>
 
 <split3>
 
 <label>service.yaml</label>
-
 <noop></noop>
-
 <label>service.test.toml</label>
 
-<code class="labeled"><key>name</key><punc>:</punc> <string>myService</string>
-<key>addr</key><punc>:</punc> <string>127.0.0.1</string>
-<key>port</key><punc>:</punc> <number>8080</number></code>
-
+<code class="labeled"><key>name</key>: <string>myService</string>
+<key>addr</key>: <string>127.0.0.1</string>
+<key>port</key>: <number>8080</number></code>
 <noop></noop>
-
-<code class="labeled"><key>port</key> <punc>=</punc> <number>8081</number></code>
+<code class="labeled"><key>port</key> = <number><focus>8081</focus></number></code>
 
 <vSpace class="span3"></vSpace>
 
 <label class="span3">Run it!</label>
 
-<code class="span3 labeled">$ <func>bkl</func> <string>service.test.toml</string>
-<punc>{
-	"</punc><key>addr</key><punc>": "</punc><string>127.0.0.1</string><punc>",
-	"</punc><key>name</key><punc>": "</punc><string>myService</string><punc>",
-	"</punc><key>port</key><punc>": </punc><number>8081</number>
-<punc>}</punc></code>
+<code class="span3 labeled">$ <cmd>bkl</cmd> <string>service.test.toml</string>
+{
+	"<key>addr</key>": "<string>127.0.0.1</string>",
+	"<key>name</key>": "<string>myService</string>",
+	"<key>port</key>": <number><focus>8081</focus></number>
+}</code>
 
 </split3>
+
+<vSpace></vSpace>
+
+<p>bkl knows that <ref>service.test.toml</ref> inherits from <ref>service.yaml</ref> by the filename pattern, and uses filename extensions to determine formats.</p>
+
+<h2><a name="output-format">Output Format</a></h2>
+
+<p>Output defaults to human-friendly JSON (you can make that explicit with <inlineFocus>-f json-pretty</inlineFocus>).</p>
+
+<label>YAML</label>
+<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-f yaml</focus></flagValue> <string>service.test.toml</string>
+<key>addr</key>: <string>127.0.0.1</string>
+<key>name</key>: <string>myService</string>
+<key>port</key>: <number>8081</number></code>
+
+<vSpace></vSpace>
+
+<label>TOML</label>
+<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-f toml</focus></flag> <string>service.test.toml</string>
+<key>addr</key> = "<string>127.0.0.1</string>"
+<key>name</key> = "<string>myService</string>"
+<key>port</key> = <number>8081</number></code>
+
+<vSpace></vSpace>
+
+<label>JSON</label>
+<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-f json</focus></flag> <string>service.test.toml</string>
+{"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+<h2><a name="output-location">Output Location</a></h2>
+
+<p>Output goes to stdout by default. Errors always go to stderr.</p>
+
+<label>File Output</label>
+<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-o out.yaml</focus></flag> <string>service.test.toml</string></code>
+
+<vSpace></vSpace>
+
+<p>Output format is autodetected from output filename (unless specified with <inlineFocus>-f</inlineFocus>).</p>
 
 </main></body>
 
