@@ -104,7 +104,7 @@ body {
 main {
 	flex-direction: column;
 	display: flex;
-	max-width: 750px;
+	max-width: min(750px, 100vw - 10px);
 }
 
 h1 {
@@ -514,6 +514,47 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <code>- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>3</number></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
+<h2><a name="required-values">Required Values</a></h2>
+
+<p>Use <inlineFocus>$required</inlineFocus> in lower layers to force upper layers to replace the value.</p>
+
+<split5a>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>b</key>: <string>$required</string></focus></code>
+
+<op>+</op>
+
+<code><key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<op>Error</op>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>b</key>: <string>$required</string></focus></code>
+
+<op>+</op>
+
+<code><focus><key>b</key>: <number>2</number></focus>
+<key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<key>c</key>: <number>3</number></code>
 
 </split5a>
 
