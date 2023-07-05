@@ -412,6 +412,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <vSpace></vSpace>
 
 
+
 <h2><a name="maps">Maps</a></h2>
 
 <p>Maps are merged by default. To change that, use <inlineFocus>$patch</inlineFocus>, or remove individual entries with <inlineFocus>null</inlineFocus>.</p>
@@ -458,6 +459,61 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <code><key>a</key>: <number>1</number>
 <key>c</key>: <number>3</number></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
+<h2><a name="lists">Lists</a></h2>
+
+<p>Lists are merged by default. To change that, use <inlineFocus>$patch</inlineFocus>.</p>
+
+<split5a>
+
+<code>- <number>1</number></code>
+
+<op>+</op>
+
+<code>- <number>2</number></code>
+
+<op>=</op>
+
+<code>- <number>1</number>
+- <number>2</number></code>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
+
+<code>- <number>1</number></code>
+
+<op>+</op>
+
+<code>- <number>2</number>
+<focus>- <key>$patch</key>: <string>replace</string></focus></code>
+
+<op>=</op>
+
+<code>- <number>2</number></code>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
+
+<code>- <key>x</key>: <number>1</number>
+- <key>x</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code>- <key>x</key>: <number>3</number>
+<focus>- <key>x</key>: <number>2</number>
+  <key>$patch</key>: <string>delete</string></focus></code>
+
+<op>=</op>
+
+<code>- <key>x</key>: <number>1</number>
+- <key>x</key>: <number>3</number></code>
 
 </split5a>
 
