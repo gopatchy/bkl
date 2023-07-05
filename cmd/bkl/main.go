@@ -46,7 +46,7 @@ func main() {
 		}
 	}
 
-	format := "json"
+	format := "json-pretty"
 
 	if opts.OutputPath != nil {
 		format = bkl.Ext(*opts.OutputPath)

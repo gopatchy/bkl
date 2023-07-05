@@ -30,7 +30,7 @@ bkl knows that `service.test.toml` inherits from `service.yaml` by the filename 
 
 ## Output Formats
 
-Output defaults to machine-friendly JSON (you can make that explicit with `-f json`).
+Output defaults to human-friendly JSON (you can make that explicit with `-f json-pretty`).
 
 ### YAML
 ```console
@@ -48,14 +48,10 @@ name = "myService"
 port = 8081
 ```
 
-### Pretty JSON
+### JSON (machine-friendly)
 ```console
-$ bkl -f json-pretty service.test.toml
-{
-  "addr": "127.0.0.1",
-  "name": "myService",
-  "port": 8081
-}
+$ bkl -f json service.test.toml
+{"addr":"127.0.0.1","name":"myService","port":8081}
 ```
 
 ## Output Locations
