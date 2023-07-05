@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
 @font-face {
     font-family: "komet";
@@ -103,7 +104,7 @@ body {
 main {
 	flex-direction: column;
 	display: flex;
-	max-width: 650px;
+	max-width: 750px;
 }
 
 h1 {
@@ -119,17 +120,16 @@ h1 {
 h2 {
 	color: var(--vivid2);
 	margin: 0;
-	padding: 5px 0 15px 0;
+	padding: 15px 0 15px 0;
 }
 
 h3 {
 	color: var(--vivid1);
 	margin: 0;
-	padding: 5px 0 10px 0;
+	padding: 10px 0 10px 0;
 }
 
 p {
-	max-width: 35em;
 	margin: 0;
 	padding: 0 0 15px 0;
 	text-align: justify;
@@ -158,8 +158,17 @@ split5 {
 	grid: auto-flow / 1fr 10px 1fr 10px 1fr;
 }
 
+split5a {
+	display: grid;
+	grid: auto-flow / 1fr 30px 1fr 30px 1fr;
+}
+
 .span3 {
 	grid-column-end: span 3;
+}
+
+.span5 {
+	grid-column-end: span 5;
 }
 
 vSpace {
@@ -196,6 +205,17 @@ code {
 	word-wrap: normal;
 }
 
+split3 code, split5 code, split5a code {
+	height: 100%;
+}
+
+op {
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	font-size: 30px;
+}
+
 ref {
 	color: var(--green2);
 }
@@ -224,7 +244,7 @@ flag {
 	color: var(--blue5);
 }
 
-focus {
+focus, focus > * {
 	color: var(--red6);
 }
 
@@ -244,6 +264,8 @@ inlineFocus {
 
 <p>Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts, or automate with the library.</p>
 
+
+
 <h2><a name="example">Example</a></h2>
 
 <split3>
@@ -256,7 +278,7 @@ inlineFocus {
 <key>addr</key>: <string>127.0.0.1</string>
 <key>port</key>: <number>8080</number></code>
 <noop></noop>
-<code class="labeled"><key>port</key> = <number><focus>8081</focus></number></code>
+<code class="labeled"><key>port</key> = <focus><number>8081</number></focus></code>
 
 <vSpace class="span3"></vSpace>
 
@@ -266,7 +288,7 @@ inlineFocus {
 {
 	"<key>addr</key>": "<string>127.0.0.1</string>",
 	"<key>name</key>": "<string>myService</string>",
-	"<key>port</key>": <number><focus>8081</focus></number>
+	"<key>port</key>": <focus><number>8081</number></focus>
 }</code>
 
 </split3>
@@ -275,12 +297,14 @@ inlineFocus {
 
 <p>bkl knows that <ref>service.test.toml</ref> inherits from <ref>service.yaml</ref> by the filename pattern, and uses filename extensions to determine formats.</p>
 
+
+
 <h2><a name="output-format">Output Format</a></h2>
 
 <p>Output defaults to human-friendly JSON (you can make that explicit with <inlineFocus>-f json-pretty</inlineFocus>).</p>
 
 <label>YAML</label>
-<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-f yaml</focus></flagValue> <string>service.test.toml</string>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flagValue></focus> <string>service.test.toml</string>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></code>
@@ -288,7 +312,7 @@ inlineFocus {
 <vSpace></vSpace>
 
 <label>TOML</label>
-<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-f toml</focus></flag> <string>service.test.toml</string>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f toml</flag></focus> <string>service.test.toml</string>
 <key>addr</key> = "<string>127.0.0.1</string>"
 <key>name</key> = "<string>myService</string>"
 <key>port</key> = <number>8081</number></code>
@@ -296,22 +320,149 @@ inlineFocus {
 <vSpace></vSpace>
 
 <label>JSON</label>
-<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-f json</focus></flag> <string>service.test.toml</string>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
 {"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
 
+
+
 <h2><a name="output-location">Output Location</a></h2>
 
 <p>Output goes to stdout by default. Errors always go to stderr.</p>
 
+<vSpace></vSpace>
+
 <label>File Output</label>
-<code class="labeled">$ <cmd>bkl</cmd> <flag><focus>-o out.yaml</focus></flag> <string>service.test.toml</string></code>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-o out.yaml</flag></focus> <string>service.test.toml</string></code>
 
 <vSpace></vSpace>
 
 <p>Output format is autodetected from output filename (unless specified with <inlineFocus>-f</inlineFocus>).</p>
+
+
+
+<h2><a name="advanced-input">Advanced Input</a></h2>
+
+<label>Multiple Files</label>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
+
+<vSpace></vSpace>
+
+<p>Specifying multiple input files evaluates them as normal, then merges them onto each other in order.</p>
+
+<vSpace></vSpace>
+
+<label>Symlinks</label>
+<code class="labeled">$ <cmd>ln</cmd> <string>-s</string> <focus><string>a.b.yaml</string> <string>c.yaml</string></focus>
+$ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml</code>
+
+<vSpace></vSpace>
+
+<p>bkl follows symbolic links and evaluates the inherited layers on the other side of the symlink.</p>
+
+
+
+<h2><a name="streams">Streams</a></h2>
+
+<p>bkl understands input streams (multi-document YAML files delimited with <inlineFocus>---</inlineFocus>). To layer them, it has to match documents between layers. It does this using document ordering within layer files by default, but can be overridden with <inlineFocus>$match</inlineFocus>.</p>
+
+<split5a>
+
+<code><key>a</key>: <number>1</number>
+---
+<key>b</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code><key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>c</key>: <number>3</number></focus>
+---
+<key>b</key>: <number>2</number></code>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+---
+<key>b</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code><key>c</key>: <number>3</number>
+<focus><key>$match</key>:
+	<key>b</key>: <number>2</number></focus>
+</code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+---
+<key>b</key>: <number>2</number>
+<focus><key>c</key>: <number>3</number></focus></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+<h2><a name="maps">Maps</a></h2>
+
+<p>Maps are merged by default. To change that, use <inlineFocus>$patch</inlineFocus>, or remove individual entries with <inlineFocus>null</inlineFocus>.</p>
+
+<split5a>
+
+<code><key>a</key>: <number>1</number></code>
+
+<op>+</op>
+
+<code><key>b</key>: <number>2</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number></code>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
+
+<code><key>a</key>: <number>1</number></code>
+
+<op>+</op>
+
+<code><key>b</key>: <number>2</number>
+<focus><key>$patch</key>: <string>replace</string></focus></code>
+
+<op>=</op>
+
+<code><key>b</key>: <number>2</number></code>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code><key>c</key>: <number>3</number>
+<focus><key>b</key>: null</focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>c</key>: <number>3</number></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 </main></body>
 
