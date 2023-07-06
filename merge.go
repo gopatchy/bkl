@@ -3,7 +3,6 @@ package bkl
 import (
 	"fmt"
 	"slices"
-	"strings"
 )
 
 func merge(dst any, src any) (any, error) {
@@ -111,83 +110,5 @@ func mergeList(dst []any, src any) (any, error) {
 
 	default:
 		return nil, fmt.Errorf("merge []any with %T: %w", src, ErrInvalidType)
-	}
-}
-
-func canonicalizeType(in any) any {
-	switch inType := in.(type) {
-	case []map[string]any:
-		ret := []any{}
-		for _, val := range inType {
-			ret = append(ret, val)
-		}
-
-		return ret
-
-	default:
-		return inType
-	}
-}
-
-func match(obj any, pat any) bool {
-	switch patType := canonicalizeType(pat).(type) {
-	case map[string]any:
-		objMap, ok := obj.(map[string]any)
-		if !ok {
-			return false
-		}
-
-		result := true
-
-		for patKey, patVal := range patType {
-			result = result && match(objMap[patKey], patVal)
-		}
-
-		return result
-
-	case []any:
-		objList, ok := obj.([]any)
-		if !ok {
-			return false
-		}
-
-		result := true
-
-		for _, patVal := range patType {
-			found := false
-
-			for _, objVal := range objList {
-				if match(objVal, patVal) {
-					found = true
-					break
-				}
-			}
-
-			result = result && found
-		}
-
-		return result
-
-	default:
-		return obj == pat
-	}
-}
-
-func get(obj any, path string) any {
-	parts := strings.Split(path, ".")
-	return getRecursive(obj, parts)
-}
-
-func getRecursive(obj any, parts []string) any {
-	if len(parts) == 0 {
-		return obj
-	}
-
-	switch objType := obj.(type) {
-	case map[string]any:
-		return getRecursive(objType[parts[0]], parts[1:])
-
-	default:
-		return nil
 	}
 }
