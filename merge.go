@@ -2,6 +2,7 @@ package bkl
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 )
@@ -201,9 +202,11 @@ func FindOutputs(obj any) []any {
 			ret = append(ret, obj)
 		}
 
-		// TODO: Sort by key so output order is stable
-		for _, v := range objType {
-			ret = append(ret, FindOutputs(v)...)
+		keys := maps.Keys(objType)
+		slices.Sort(keys)
+
+		for _, k := range keys {
+			ret = append(ret, FindOutputs(objType[k])...)
 		}
 
 		return ret
