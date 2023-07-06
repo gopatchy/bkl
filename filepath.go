@@ -10,7 +10,7 @@ import (
 
 // Ext returns the file extension for path, or "".
 //
-// It differs from [filepath.Ext] by not including the leading `.`.
+// It differs from [filepath.Ext] by omitting the leading dot.
 func Ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }

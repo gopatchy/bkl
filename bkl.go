@@ -1,8 +1,8 @@
 // Package bkl implements a layered configuration language parser.
 //
-// Language & tool documentation: https://bkl.gopatchy.io/
-// Go library source: https://github.com/gopatchy/bkl
-// Go library documentation: https://pkg.go.dev/github.com/gopatchy/bkl
+//  - Language & tool documentation: https://bkl.gopatchy.io/
+//  - Go library source: https://github.com/gopatchy/bkl
+//  - Go library documentation: https://pkg.go.dev/github.com/gopatchy/bkl
 package bkl
 
 import (
@@ -15,6 +15,12 @@ import (
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
+//
+// Terminology:
+//  - Each Parser can read multiple files
+//  - Each file represents a single layer
+//  - Each file contains one or more documents
+//  - Each document generates one or more outputs
 type Parser struct {
 	docs  []any
 	debug bool
@@ -27,8 +33,8 @@ func New() *Parser {
 	return &Parser{}
 }
 
-// NewFromFile creates a new [Parser] then calls [MergeFileLayers] with
-// the supplied path.
+// NewFromFile creates a new [Parser] then calls [Parser.MergeFileLayers] with
+// the supplied path to merge in the file and its parent layers.
 func NewFromFile(path string) (*Parser, error) {
 	p := New()
 
@@ -40,13 +46,14 @@ func NewFromFile(path string) (*Parser, error) {
 	return p, nil
 }
 
+// SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
 }
 
-// MergeOther applies other's internal document state to ours, using bkl's
+// MergeParser applies other's internal document state to ours using bkl's
 // merge semantics.
-func (p *Parser) MergeOther(other *Parser) error {
+func (p *Parser) MergeParser(other *Parser) error {
 	for i, doc := range other.docs {
 		err := p.MergePatch(i, doc)
 		if err != nil {
@@ -58,38 +65,12 @@ func (p *Parser) MergeOther(other *Parser) error {
 }
 
 // MergePatch applies the supplied patch to the [Parser]'s current internal
-// document state (at the specified document index) using bkl's merge
+// document state at the specified document index using bkl's merge
 // semantics.
-func (p *Parser) MergePatch(index int, patch any) error {
-	if index >= len(p.docs) {
-		p.docs = append(p.docs, make([]any, index-len(p.docs)+1)...)
-	}
-
-	merged, err := merge(p.docs[index], patch)
-	if err != nil {
-		return err
-	}
-
-	p.docs[index] = merged
-
-	return nil
-}
-
-// MergeIndexBytes parses the supplied doc bytes as the format specified by ext
-// (file extension), then calls [MergePatch()].
 //
-// index is taken as a hint but can be overridden by $match.
-func (p *Parser) MergeIndexBytes(index int, doc []byte, ext string) error {
-	f, found := formatByExtension[ext]
-	if !found {
-		return fmt.Errorf("%s: %w", ext, ErrUnknownFormat)
-	}
-
-	patch, err := f.decode(doc)
-	if err != nil {
-		return fmt.Errorf("%w / %w", err, ErrDecode)
-	}
-
+// index is only a hint; if the patch contains a $match entry, that is used
+// instead.
+func (p *Parser) MergePatch(index int, patch any) error {
 	if patchMap, ok := canonicalizeType(patch).(map[string]any); ok {
 		m, found := patchMap["$match"]
 		if found {
@@ -110,54 +91,29 @@ func (p *Parser) MergeIndexBytes(index int, doc []byte, ext string) error {
 		}
 	}
 
-	err = p.MergePatch(index, patch)
+	if index >= len(p.docs) {
+		p.docs = append(p.docs, make([]any, index-len(p.docs)+1)...)
+	}
+
+	merged, err := merge(p.docs[index], patch)
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// MergeMultiBytes calls [MergeIndexBytes()] once for each item in the outer
-// slice.
-func (p *Parser) MergeMultiBytes(bs [][]byte, ext string) error {
-	for i, b := range bs {
-		err := p.MergeIndexBytes(i, b, ext)
-		if err != nil {
-			return fmt.Errorf("index %d (of [0,%d]): %w", i, len(bs)-1, err)
-		}
-	}
+	p.docs[index] = merged
 
 	return nil
 }
 
-// MergeBytes splits its input into multiple documents (using the ---
-// delimiter) then calls [MergeMultiBytes()].
-func (p *Parser) MergeBytes(b []byte, ext string) error {
-	docs := bytes.SplitAfter(b, []byte("\n---\n"))
-
-	for i, doc := range docs {
-		// Leave the initial \n attached
-		docs[i] = bytes.TrimSuffix(doc, []byte("---\n"))
-	}
-
-	return p.MergeMultiBytes(docs, ext)
-}
-
-// MergeReader reads all input then calls [MergeBytes()].
-func (p *Parser) MergeReader(in io.Reader, ext string) error {
-	b, err := io.ReadAll(in)
-	if err != nil {
-		return err
-	}
-
-	return p.MergeBytes(b, ext)
-}
-
-// MergeFile opens the supplied path and determines the file format from the
-// file extension, then calls [MergeReader()].
+// MergeFile parses the file at path and merges its contents into the
+// [Parser]'s document state using bkl's merge semantics.
 func (p *Parser) MergeFile(path string) error {
 	p.log("loading %s", path)
+
+	format, found := formatByExtension[Ext(path)]
+	if !found {
+		return fmt.Errorf("%s: %w", Ext(path), ErrUnknownFormat)
+	}
 
 	fh, err := os.Open(path)
 	if err != nil {
@@ -166,9 +122,26 @@ func (p *Parser) MergeFile(path string) error {
 
 	defer fh.Close()
 
-	err = p.MergeReader(fh, Ext(path))
+	b, err := io.ReadAll(fh)
 	if err != nil {
-		return fmt.Errorf("%s: %w", path, err)
+		return err
+	}
+
+	docs := bytes.SplitAfter(b, []byte("\n---\n"))
+
+	for i, doc := range docs {
+		// Leave the initial \n attached
+		doc = bytes.TrimSuffix(doc, []byte("---\n"))
+
+		patch, err := format.decode(doc)
+		if err != nil {
+			return fmt.Errorf("%w / %w", err, ErrDecode)
+		}
+
+		err = p.MergePatch(i, patch)
+		if err != nil {
+			return fmt.Errorf("index %d (of [0,%d]): %w", i, len(docs)-1, err)
+		}
 	}
 
 	return nil
@@ -207,23 +180,25 @@ func (p *Parser) MergeFileLayers(path string) error {
 	return nil
 }
 
-// Count returns the number of documents.
-func (p *Parser) Count() int {
+// NumDocuments returns the number of documents in the [Parser]'s internal
+// state.
+func (p *Parser) NumDocuments() int {
 	return len(p.docs)
 }
 
-// GetIndex returns the parsed tree for the document at index.
-func (p *Parser) GetIndex(index int) (any, error) {
-	if index >= p.Count() {
+// Document returns the parsed, merged tree for the document at index.
+func (p *Parser) Document(index int) (any, error) {
+	if index >= p.NumDocuments() {
 		return nil, fmt.Errorf("%d: %w", index, ErrInvalidIndex)
 	}
 
 	return p.docs[index], nil
 }
 
-// GetOutputIndex returns the document at index, encoded as ext.
-func (p *Parser) GetOutputIndex(index int, ext string) ([][]byte, error) {
-	obj, err := p.GetIndex(index)
+// OutputIndex returns the outputs generated by the document at the
+// specified index, encoded in the specified format.
+func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
+	obj, err := p.Document(index)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +228,7 @@ func (p *Parser) GetOutputIndex(index int, ext string) ([][]byte, error) {
 	for _, out := range outs {
 		enc, err := f.encode(out)
 		if err != nil {
-			return nil, fmt.Errorf("index %d (of [0,%d]): %w (%w)", index, p.Count()-1, err, ErrEncode)
+			return nil, fmt.Errorf("index %d (of [0,%d]): %w (%w)", index, p.NumDocuments()-1, err, ErrEncode)
 		}
 
 		encs = append(encs, enc)
@@ -262,12 +237,13 @@ func (p *Parser) GetOutputIndex(index int, ext string) ([][]byte, error) {
 	return encs, nil
 }
 
-// GetOutputLayers returns all layers encoded as ext.
-func (p *Parser) GetOutputLayers(ext string) ([][]byte, error) {
+// Outputs returns all outputs from all documents encoded in the specified
+// format.
+func (p *Parser) Outputs(ext string) ([][]byte, error) {
 	outs := [][]byte{}
 
-	for i := 0; i < p.Count(); i++ {
-		out, err := p.GetOutputIndex(i, ext)
+	for i := 0; i < p.NumDocuments(); i++ {
+		out, err := p.OutputIndex(i, ext)
 		if err != nil {
 			return nil, err
 		}
@@ -278,9 +254,10 @@ func (p *Parser) GetOutputLayers(ext string) ([][]byte, error) {
 	return outs, nil
 }
 
-// GetOutput returns all documents encoded as ext and merged with ---.
-func (p *Parser) GetOutput(ext string) ([]byte, error) {
-	outs, err := p.GetOutputLayers(ext)
+// Output returns all documents encoded in the specified format and merged into
+// a stream with ---.
+func (p *Parser) Output(ext string) ([]byte, error) {
+	outs, err := p.Outputs(ext)
 	if err != nil {
 		return nil, err
 	}

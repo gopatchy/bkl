@@ -40,7 +40,7 @@ func main() {
 			fatal("%s", err)
 		}
 
-		err = p.MergeOther(fileP)
+		err = p.MergeParser(fileP)
 		if err != nil {
 			fatal("%s", err)
 		}
@@ -56,7 +56,7 @@ func main() {
 		format = *opts.OutputFormat
 	}
 
-	out, err := p.GetOutput(format)
+	out, err := p.Output(format)
 	if err != nil {
 		fatal("%s", err)
 	}
