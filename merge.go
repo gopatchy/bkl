@@ -114,7 +114,16 @@ func MergeList(dst []any, src any) (any, error) {
 	}
 }
 
-func PostMerge(root any, obj any) (any, error) {
+func PostMerge(root any) (any, error) {
+	switch rootType := root.(type) {
+	case map[string]any:
+		delete(rootType, "$parent")
+	}
+
+	return PostMergeInt(root, root)
+}
+
+func PostMergeInt(root any, obj any) (any, error) {
 	switch objType := obj.(type) {
 	case map[string]any:
 		if path, found := objType["$merge"]; found {
@@ -135,7 +144,7 @@ func PostMerge(root any, obj any) (any, error) {
 				return nil, err
 			}
 
-			return PostMerge(root, next)
+			return PostMergeInt(root, next)
 		}
 
 		if path, found := objType["$replace"]; found {
@@ -151,11 +160,11 @@ func PostMerge(root any, obj any) (any, error) {
 				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
 			}
 
-			return PostMerge(root, next)
+			return PostMergeInt(root, next)
 		}
 
 		for k, v := range objType {
-			v2, err := PostMerge(root, v)
+			v2, err := PostMergeInt(root, v)
 			if err != nil {
 				return nil, err
 			}
@@ -167,7 +176,7 @@ func PostMerge(root any, obj any) (any, error) {
 
 	case []any:
 		for i, v := range objType {
-			v2, err := PostMerge(root, v)
+			v2, err := PostMergeInt(root, v)
 			if err != nil {
 				return nil, err
 			}
@@ -192,6 +201,7 @@ func FindOutputs(obj any) []any {
 			ret = append(ret, obj)
 		}
 
+		// TODO: Sort by key so output order is stable
 		for _, v := range objType {
 			ret = append(ret, FindOutputs(v)...)
 		}

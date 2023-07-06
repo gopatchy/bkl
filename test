@@ -11,7 +11,7 @@ function cleanup {
 trap cleanup EXIT
 
 go build ./cmd/bkl
-export PATH=$PATH:/opt/homebrew/share/git-core/contrib/diff-highlight:$ROOT
+export PATH=$ROOT:/opt/homebrew/share/git-core/contrib/diff-highlight:$PATH
 
 for TEST in tests/*; do
 	echo TEST $TEST

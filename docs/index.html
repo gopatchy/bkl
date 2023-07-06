@@ -220,10 +220,6 @@ op {
 	font-size: 30px;
 }
 
-ref {
-	color: var(--green2);
-}
-
 code.labeled {
 	border-radius: 0 5px 5px 5px;
 }
@@ -255,6 +251,8 @@ focus, focus > * {
 inlineFocus {
 	background: var(--neutral8);
 	color: var(--red6);
+	display: inline-block;
+	padding: 0 3px 0 3px;
 	white-space: nowrap;
 }
 </style>
@@ -299,7 +297,7 @@ inlineFocus {
 
 <vSpace></vSpace>
 
-<p>bkl knows that <ref>service.test.toml</ref> inherits from <ref>service.yaml</ref> by the filename pattern, and uses filename extensions to determine formats.</p>
+<p>bkl knows that <inlineFocus>service.test.toml</inlineFocus> inherits from <inlineFocus>service.yaml</inlineFocus> by the filename pattern (<a href="#inheritance">override with <inlineFocus>$parent</inlineFocus></a>), and uses filename extensions to determine formats.</p>
 
 
 
@@ -357,24 +355,37 @@ inlineFocus {
 
 
 
-<h2><a name="advanced-input">Advanced Input</a></h2>
+<h2><a name="multiple-input-files">Multiple Input Files</a></h2>
 
-<label>Multiple Files</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
+<code>$ <cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
 
 <vSpace></vSpace>
 
 <p>Specifying multiple input files evaluates them as normal, then merges them onto each other in order.</p>
 
-<vSpace></vSpace>
 
-<label>Symlinks</label>
-<code class="labeled">$ <cmd>ln</cmd> <string>-s</string> <focus><string>a.b.yaml</string> <string>c.yaml</string></focus>
+
+<h2><a name="symlinks">Symlinks</a></h2>
+
+<code>$ <cmd>ln</cmd> <string>-s</string> <focus><string>a.b.yaml</string> <string>c.yaml</string></focus>
 $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml</code>
 
 <vSpace></vSpace>
 
 <p>bkl follows symbolic links and evaluates the inherited layers on the other side of the symlink.</p>
+
+
+
+<h2><a name="inheritance">Inheritance</a></h2>
+
+<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <inlineFocus>.</inlineFocus> and treated as an inheritance hierarchy (e.g. <inlineFocus>a.b.c.yaml</inlineFocus> inherits from <inlineFocus>a.b.&lt;ext&gt;</inlineFocus> inherits from <inlineFocus>a.&lt;ext&gt;</inlineFocus>). Parent templates may have any supported file extension.</p>
+
+<label>Override Inheritance</label>
+<code class="labeled"><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
+
+<vSpace></vSpace>
+
+<p>bkl will still check for all supported endings of a manually-specified parent file, and will still evaluate template layers of the parent in the normal order.</p>
 
 
 
