@@ -7,13 +7,13 @@ import (
 	"strings"
 )
 
-func Merge(dst any, src any) (any, error) {
-	switch dst2 := CanonicalizeType(dst).(type) {
+func merge(dst any, src any) (any, error) {
+	switch dst2 := canonicalizeType(dst).(type) {
 	case map[string]any:
-		return MergeMap(dst2, src)
+		return mergeMap(dst2, src)
 
 	case []any:
-		return MergeList(dst2, src)
+		return mergeList(dst2, src)
 
 	case nil:
 		return src, nil
@@ -23,8 +23,8 @@ func Merge(dst any, src any) (any, error) {
 	}
 }
 
-func MergeMap(dst map[string]any, src any) (any, error) {
-	switch src2 := CanonicalizeType(src).(type) {
+func mergeMap(dst map[string]any, src any) (any, error) {
+	switch src2 := canonicalizeType(src).(type) {
 	case map[string]any:
 		if patch, found := src2["$patch"]; found {
 			patchVal, ok := patch.(string)
@@ -50,7 +50,7 @@ func MergeMap(dst map[string]any, src any) (any, error) {
 
 			existing, found := dst[k]
 			if found {
-				n, err := Merge(existing, v)
+				n, err := merge(existing, v)
 				if err != nil {
 					return nil, fmt.Errorf("%s %w", k, err)
 				}
@@ -71,11 +71,11 @@ func MergeMap(dst map[string]any, src any) (any, error) {
 	}
 }
 
-func MergeList(dst []any, src any) (any, error) {
-	switch src2 := CanonicalizeType(src).(type) {
+func mergeList(dst []any, src any) (any, error) {
+	switch src2 := canonicalizeType(src).(type) {
 	case []any:
 		for i, val := range src2 {
-			switch val2 := CanonicalizeType(val).(type) { //nolint:gocritic
+			switch val2 := canonicalizeType(val).(type) { //nolint:gocritic
 			case map[string]any:
 				if patch, found := val2["$patch"]; found {
 					patchVal, ok := patch.(string)
@@ -88,7 +88,7 @@ func MergeList(dst []any, src any) (any, error) {
 						delete(val2, "$patch")
 
 						dst = slices.DeleteFunc(dst, func(elem any) bool {
-							return Match(elem, val2)
+							return match(elem, val2)
 						})
 
 						continue
@@ -115,16 +115,16 @@ func MergeList(dst []any, src any) (any, error) {
 	}
 }
 
-func PostMerge(root any) (any, error) {
+func postMerge(root any) (any, error) {
 	switch rootType := root.(type) {
 	case map[string]any:
 		delete(rootType, "$parent")
 	}
 
-	return PostMergeInt(root, root)
+	return postMergeRecursive(root, root)
 }
 
-func PostMergeInt(root any, obj any) (any, error) {
+func postMergeRecursive(root any, obj any) (any, error) {
 	switch objType := obj.(type) {
 	case map[string]any:
 		if path, found := objType["$merge"]; found {
@@ -135,17 +135,17 @@ func PostMergeInt(root any, obj any) (any, error) {
 				return nil, fmt.Errorf("%T: %w", path, ErrInvalidMergeType)
 			}
 
-			in := Get(root, pathVal)
+			in := get(root, pathVal)
 			if in == nil {
 				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrMergeRefNotFound)
 			}
 
-			next, err := Merge(objType, in)
+			next, err := merge(objType, in)
 			if err != nil {
 				return nil, err
 			}
 
-			return PostMergeInt(root, next)
+			return postMergeRecursive(root, next)
 		}
 
 		if path, found := objType["$replace"]; found {
@@ -156,16 +156,16 @@ func PostMergeInt(root any, obj any) (any, error) {
 				return nil, fmt.Errorf("%T: %w", path, ErrInvalidReplaceType)
 			}
 
-			next := Get(root, pathVal)
+			next := get(root, pathVal)
 			if next == nil {
 				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
 			}
 
-			return PostMergeInt(root, next)
+			return postMergeRecursive(root, next)
 		}
 
 		for k, v := range objType {
-			v2, err := PostMergeInt(root, v)
+			v2, err := postMergeRecursive(root, v)
 			if err != nil {
 				return nil, err
 			}
@@ -177,7 +177,7 @@ func PostMergeInt(root any, obj any) (any, error) {
 
 	case []any:
 		for i, v := range objType {
-			v2, err := PostMergeInt(root, v)
+			v2, err := postMergeRecursive(root, v)
 			if err != nil {
 				return nil, err
 			}
@@ -192,7 +192,7 @@ func PostMergeInt(root any, obj any) (any, error) {
 	}
 }
 
-func FindOutputs(obj any) []any {
+func findOutputs(obj any) []any {
 	switch objType := obj.(type) {
 	case map[string]any:
 		ret := []any{}
@@ -206,7 +206,7 @@ func FindOutputs(obj any) []any {
 		slices.Sort(keys)
 
 		for _, k := range keys {
-			ret = append(ret, FindOutputs(objType[k])...)
+			ret = append(ret, findOutputs(objType[k])...)
 		}
 
 		return ret
@@ -215,7 +215,7 @@ func FindOutputs(obj any) []any {
 		ret := []any{}
 
 		for _, v := range objType {
-			ret = append(ret, FindOutputs(v)...)
+			ret = append(ret, findOutputs(v)...)
 		}
 
 		return ret
@@ -225,7 +225,7 @@ func FindOutputs(obj any) []any {
 	}
 }
 
-func CanonicalizeType(in any) any {
+func canonicalizeType(in any) any {
 	switch inType := in.(type) {
 	case []map[string]any:
 		ret := []any{}
@@ -240,8 +240,8 @@ func CanonicalizeType(in any) any {
 	}
 }
 
-func Match(obj any, pat any) bool {
-	switch patType := CanonicalizeType(pat).(type) {
+func match(obj any, pat any) bool {
+	switch patType := canonicalizeType(pat).(type) {
 	case map[string]any:
 		objMap, ok := obj.(map[string]any)
 		if !ok {
@@ -251,7 +251,7 @@ func Match(obj any, pat any) bool {
 		result := true
 
 		for patKey, patVal := range patType {
-			result = result && Match(objMap[patKey], patVal)
+			result = result && match(objMap[patKey], patVal)
 		}
 
 		return result
@@ -268,7 +268,7 @@ func Match(obj any, pat any) bool {
 			found := false
 
 			for _, objVal := range objList {
-				if Match(objVal, patVal) {
+				if match(objVal, patVal) {
 					found = true
 					break
 				}
@@ -284,19 +284,19 @@ func Match(obj any, pat any) bool {
 	}
 }
 
-func Get(obj any, path string) any {
+func get(obj any, path string) any {
 	parts := strings.Split(path, ".")
-	return get(obj, parts)
+	return getRecursive(obj, parts)
 }
 
-func get(obj any, parts []string) any {
+func getRecursive(obj any, parts []string) any {
 	if len(parts) == 0 {
 		return obj
 	}
 
 	switch objType := obj.(type) {
 	case map[string]any:
-		return get(objType[parts[0]], parts[1:])
+		return getRecursive(objType[parts[0]], parts[1:])
 
 	default:
 		return nil

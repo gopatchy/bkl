@@ -14,19 +14,24 @@ import (
 )
 
 var (
+	// Base error; every error in bkl inherits from this
 	Err = fmt.Errorf("bkl error")
 
-	ErrEncode           = fmt.Errorf("encoding error (%w)", Err)
-	ErrDecode           = fmt.Errorf("decoding error (%w)", Err)
-	ErrInvalidIndex     = fmt.Errorf("invalid index (%w)", Err)
-	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
-	ErrInvalidFilename  = fmt.Errorf("invalid filename (%w)", Err)
-	ErrInvalidType      = fmt.Errorf("invalid type (%w)", Err)
-	ErrMissingFile      = fmt.Errorf("missing file (%w)", Err)
-	ErrNoMatchFound     = fmt.Errorf("no document matched $match (%w)", Err)
-	ErrRequiredField    = fmt.Errorf("required field not set (%w)", Err)
-	ErrUnknownFormat    = fmt.Errorf("unknown format (%w)", Err)
+	// Format and system errors
+	ErrEncode          = fmt.Errorf("encoding error (%w)", Err)
+	ErrDecode          = fmt.Errorf("decoding error (%w)", Err)
+	ErrInvalidIndex    = fmt.Errorf("invalid index (%w)", Err)
+	ErrInvalidFilename = fmt.Errorf("invalid filename (%w)", Err)
+	ErrInvalidType     = fmt.Errorf("invalid type (%w)", Err)
+	ErrMissingFile     = fmt.Errorf("missing file (%w)", Err)
+	ErrNoMatchFound    = fmt.Errorf("no document matched $match (%w)", Err)
+	ErrRequiredField   = fmt.Errorf("required field not set (%w)", Err)
+	ErrUnknownFormat   = fmt.Errorf("unknown format (%w)", Err)
 
+	// Base language directive error
+	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
+
+	// Specific language directive errors
 	ErrInvalidMergeType   = fmt.Errorf("invalid $merge type (%w)", ErrInvalidDirective)
 	ErrInvalidParentType  = fmt.Errorf("invalid $parent type (%w)", ErrInvalidDirective)
 	ErrInvalidPatchType   = fmt.Errorf("invalid $patch type (%w)", ErrInvalidDirective)
@@ -89,7 +94,7 @@ func (p *Parser) MergePatch(index int, patch any) error {
 		p.docs = append(p.docs, make([]any, index-len(p.docs)+1)...)
 	}
 
-	merged, err := Merge(p.docs[index], patch)
+	merged, err := merge(p.docs[index], patch)
 	if err != nil {
 		return err
 	}
@@ -114,7 +119,7 @@ func (p *Parser) MergeIndexBytes(index int, doc []byte, ext string) error {
 		return fmt.Errorf("%w / %w", err, ErrDecode)
 	}
 
-	if patchMap, ok := CanonicalizeType(patch).(map[string]any); ok {
+	if patchMap, ok := canonicalizeType(patch).(map[string]any); ok {
 		m, found := patchMap["$match"]
 		if found {
 			delete(patchMap, "$match")
@@ -122,7 +127,7 @@ func (p *Parser) MergeIndexBytes(index int, doc []byte, ext string) error {
 			index = -1
 
 			for i, doc := range p.docs {
-				if Match(doc, m) {
+				if match(doc, m) {
 					index = i
 					break
 				}
@@ -206,7 +211,7 @@ func (p *Parser) MergeFileLayers(path string) error {
 	}
 
 	for {
-		parent, err := GetParent(path)
+		parent, err := getParent(path)
 		if err != nil {
 			return err
 		}
@@ -252,17 +257,17 @@ func (p *Parser) GetOutputIndex(index int, ext string) ([][]byte, error) {
 		return nil, err
 	}
 
-	obj, err = PostMerge(obj)
+	obj, err = postMerge(obj)
 	if err != nil {
 		return nil, err
 	}
 
-	err = Validate(obj)
+	err = validate(obj)
 	if err != nil {
 		return nil, err
 	}
 
-	outs := FindOutputs(obj)
+	outs := findOutputs(obj)
 	if len(outs) == 0 {
 		outs = append(outs, obj)
 	}
@@ -320,8 +325,8 @@ func (p *Parser) log(format string, v ...any) {
 	log.Printf(format, v...)
 }
 
-func GetParent(path string) (*string, error) {
-	parent, err := GetParentFromDirective(path)
+func getParent(path string) (*string, error) {
+	parent, err := getParentFromDirective(path)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +335,7 @@ func GetParent(path string) (*string, error) {
 		return parent, nil
 	}
 
-	parent, err = GetParentFromSymlink(path)
+	parent, err = getParentFromSymlink(path)
 	if err != nil {
 		return nil, err
 	}
@@ -339,10 +344,10 @@ func GetParent(path string) (*string, error) {
 		return parent, nil
 	}
 
-	return GetParentFromFilename(path)
+	return getParentFromFilename(path)
 }
 
-func GetParentFromDirective(path string) (*string, error) {
+func getParentFromDirective(path string) (*string, error) {
 	fh, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
@@ -382,7 +387,7 @@ func GetParentFromDirective(path string) (*string, error) {
 			return nil, fmt.Errorf("%T: %w", parent, ErrInvalidParentType)
 		}
 
-		parentPath := FindFile(parentStr)
+		parentPath := findFile(parentStr)
 		if parentPath == "" {
 			return nil, fmt.Errorf("%s: %w", parentStr, ErrMissingFile)
 		}
@@ -393,7 +398,7 @@ func GetParentFromDirective(path string) (*string, error) {
 	return nil, nil
 }
 
-func GetParentFromSymlink(path string) (*string, error) {
+func getParentFromSymlink(path string) (*string, error) {
 	dest, _ := os.Readlink(path)
 
 	if dest == "" {
@@ -401,10 +406,10 @@ func GetParentFromSymlink(path string) (*string, error) {
 		return nil, nil
 	}
 
-	return GetParentFromFilename(dest)
+	return getParentFromFilename(dest)
 }
 
-func GetParentFromFilename(path string) (*string, error) {
+func getParentFromFilename(path string) (*string, error) {
 	dir := filepath.Dir(path)
 	base := filepath.Base(path)
 
@@ -421,7 +426,7 @@ func GetParentFromFilename(path string) (*string, error) {
 	default:
 		layerPath := filepath.Join(dir, strings.Join(parts[:len(parts)-2], "."))
 
-		extPath := FindFile(layerPath)
+		extPath := findFile(layerPath)
 		if extPath == "" {
 			return nil, fmt.Errorf("%s: %w", layerPath, ErrMissingFile)
 		}
@@ -435,9 +440,7 @@ func Ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
 
-// FindFile finds a file starting with path and ending with a known extension.
-// It returns "" on failure.
-func FindFile(path string) string {
+func findFile(path string) string {
 	for ext := range formatByExtension {
 		extPath := fmt.Sprintf("%s.%s", path, ext)
 		if _, err := os.Stat(extPath); errors.Is(err, os.ErrNotExist) {

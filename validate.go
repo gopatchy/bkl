@@ -2,11 +2,11 @@ package bkl
 
 import "fmt"
 
-func Validate(obj any) error {
-	switch obj2 := CanonicalizeType(obj).(type) {
+func validate(obj any) error {
+	switch obj2 := canonicalizeType(obj).(type) {
 	case map[string]any:
 		for k, v := range obj2 {
-			err := Validate(v)
+			err := validate(v)
 			if err != nil {
 				return fmt.Errorf("%s: %w", k, err)
 			}
@@ -14,7 +14,7 @@ func Validate(obj any) error {
 
 	case []any:
 		for _, v := range obj2 {
-			err := Validate(v)
+			err := validate(v)
 			if err != nil {
 				return err
 			}
