@@ -1,4 +1,8 @@
 // Package bkl implements a layered configuration language parser.
+//
+// Language & tool documentation: https://bkl.gopatchy.io/
+// Go library source: https://github.com/gopatchy/bkl
+// Go library documentation: https://pkg.go.dev/github.com/gopatchy/bkl
 package bkl
 
 import (
@@ -10,20 +14,20 @@ import (
 	"slices"
 )
 
-// Parser carries state for parse operations with multiple layered inputs.
+// A Parser reads input documents, merges layers, and generates outputs.
 type Parser struct {
 	docs  []any
 	debug bool
 }
 
-// New creates and returns a new [Parser] with an empty starting document.
+// New creates and returns a new [Parser] with an empty starting document set.
 //
 // New always succeeds and returns a Parser instance.
 func New() *Parser {
 	return &Parser{}
 }
 
-// NewFromFile creates a new [Parser] then calls [MergeFileLayers()] with
+// NewFromFile creates a new [Parser] then calls [MergeFileLayers] with
 // the supplied path.
 func NewFromFile(path string) (*Parser, error) {
 	p := New()
