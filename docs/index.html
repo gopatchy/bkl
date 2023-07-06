@@ -380,12 +380,22 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <inlineFocus>.</inlineFocus> and treated as an inheritance hierarchy (e.g. <inlineFocus>a.b.c.yaml</inlineFocus> inherits from <inlineFocus>a.b.&lt;ext&gt;</inlineFocus> inherits from <inlineFocus>a.&lt;ext&gt;</inlineFocus>). Parent templates may have any supported file extension.</p>
 
-<label>Override Inheritance</label>
+<label>Set Parent</label>
 <code class="labeled"><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
 
 <vSpace></vSpace>
 
-<p>bkl will still check for all supported endings of a manually-specified parent file, and will still evaluate template layers of the parent in the normal order.</p>
+<p><inlineFocus>$parent</inlineFocus> can only be used in the document root. bkl will still check for all supported endings of a manually-specified parent file, and will still evaluate template layers of the parent in the normal order.</p>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+<label>No Parent</label>
+<code class="labeled"><focus><key>$parent</key>: null</focus>   # no further inheritance</code>
+
+<vSpace></vSpace>
+
+<p>Setting <inlineFocus>$parent</inlineFocus> to <inlineFocus>null</inlineFocus> stops any further inheritance regardless of filename structure.</p>
 
 
 

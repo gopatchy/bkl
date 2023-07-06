@@ -34,6 +34,8 @@ var (
 	ErrInvalidReplaceType = fmt.Errorf("invalid $replace type (%w)", ErrInvalidDirective)
 	ErrMergeRefNotFound   = fmt.Errorf("$merge reference not found (%w)", ErrInvalidDirective)
 	ErrReplaceRefNotFound = fmt.Errorf("$replace reference not found (%w)", ErrInvalidDirective)
+
+	baseTemplate = ""
 )
 
 // Parser carries state for parse operations with multiple layered inputs.
@@ -209,11 +211,11 @@ func (p *Parser) MergeFileLayers(path string) error {
 			return err
 		}
 
-		if parent == "" {
+		if *parent == baseTemplate {
 			break
 		}
 
-		path = parent
+		path = *parent
 		paths = append(paths, path)
 	}
 
@@ -318,88 +320,91 @@ func (p *Parser) log(format string, v ...any) {
 	log.Printf(format, v...)
 }
 
-func GetParent(path string) (string, error) {
-	// TODO: Needs a different API so it can specify no parent
-	parent, err := GetParentFromOverride(path)
+func GetParent(path string) (*string, error) {
+	parent, err := GetParentFromDirective(path)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	if parent != "" {
+	if parent != nil {
 		return parent, nil
 	}
 
 	parent, err = GetParentFromSymlink(path)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	if parent != "" {
+	if parent != nil {
 		return parent, nil
 	}
 
 	return GetParentFromFilename(path)
 }
 
-func GetParentFromOverride(path string) (string, error) {
+func GetParentFromDirective(path string) (*string, error) {
 	fh, err := os.Open(path)
 	if err != nil {
-		return "", fmt.Errorf("%s: %w", path, err)
+		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
 	defer fh.Close()
 
 	b, err := io.ReadAll(fh)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	ext := Ext(path)
 
 	f, found := formatByExtension[ext]
 	if !found {
-		return "", fmt.Errorf("%s: %w", ext, ErrUnknownFormat)
+		return nil, fmt.Errorf("%s: %w", ext, ErrUnknownFormat)
 	}
 
 	patch, err := f.decode(b)
 	if err != nil {
-		return "", fmt.Errorf("%w / %w", err, ErrDecode)
+		return nil, fmt.Errorf("%w / %w", err, ErrDecode)
 	}
 
 	patchMap, ok := patch.(map[string]any)
 	if !ok {
-		return "", nil
+		return nil, nil
 	}
 
 	if parent, found := patchMap["$parent"]; found {
+		if parent == nil {
+			return &baseTemplate, nil
+		}
+
 		parentStr, ok := parent.(string)
 		if !ok {
-			return "", fmt.Errorf("%T: %w", parent, ErrInvalidParentType)
+			return nil, fmt.Errorf("%T: %w", parent, ErrInvalidParentType)
 		}
 
 		parentPath := FindFile(parentStr)
 		if parentPath == "" {
-			return "", fmt.Errorf("%s: %w", parentStr, ErrMissingFile)
+			return nil, fmt.Errorf("%s: %w", parentStr, ErrMissingFile)
 		}
 
-		return parentPath, nil
+		return &parentPath, nil
 	}
 
-	return "", nil
+	return nil, nil
 }
 
-func GetParentFromSymlink(path string) (string, error) {
+func GetParentFromSymlink(path string) (*string, error) {
 	dest, _ := os.Readlink(path)
 
 	if dest == "" {
 		// Not a link
-		return "", nil
+		return nil, nil
 	}
 
 	return GetParentFromFilename(dest)
 }
 
-func GetParentFromFilename(path string) (string, error) {
+func GetParentFromFilename(path string) (*string, error) {
 	dir := filepath.Dir(path)
 	base := filepath.Base(path)
 
@@ -408,21 +413,20 @@ func GetParentFromFilename(path string) (string, error) {
 
 	switch {
 	case len(parts) < 2:
-		return "", fmt.Errorf("%s: %w", path, ErrInvalidFilename)
+		return nil, fmt.Errorf("%s: %w", path, ErrInvalidFilename)
 
 	case len(parts) == 2:
-		// Base template
-		return "", nil
+		return &baseTemplate, nil
 
 	default:
 		layerPath := filepath.Join(dir, strings.Join(parts[:len(parts)-2], "."))
 
 		extPath := FindFile(layerPath)
 		if extPath == "" {
-			return "", fmt.Errorf("%s: %w", layerPath, ErrMissingFile)
+			return nil, fmt.Errorf("%s: %w", layerPath, ErrMissingFile)
 		}
 
-		return extPath, nil
+		return &extPath, nil
 	}
 }
 
