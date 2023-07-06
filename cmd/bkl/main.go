@@ -11,6 +11,7 @@ import (
 type options struct {
 	OutputPath   *string `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
+	SkipParent   bool    `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool    `short:"v" long:"verbose" description:"enable verbose logging"`
 
 	Positional struct {
@@ -35,14 +36,20 @@ func main() {
 	}
 
 	for _, path := range opts.Positional.InputPaths {
-		fileP, err := bkl.NewFromFile(path)
+		fileP := bkl.New()
+
+		if opts.SkipParent {
+			err = fileP.MergeFile(path)
+		} else {
+			err = fileP.MergeFileLayers(path)
+		}
 		if err != nil {
-			fatal("%s", err)
+			fatal(err)
 		}
 
 		err = p.MergeParser(fileP)
 		if err != nil {
-			fatal("%s", err)
+			fatal(err)
 		}
 	}
 
@@ -58,11 +65,11 @@ func main() {
 	}
 
 	if err != nil {
-		fatal("%s", err)
+		fatal(err)
 	}
 }
 
-func fatal(format string, v ...any) {
-	fmt.Fprintf(os.Stderr, format+"\n", v...)
+func fatal(err error) {
+	fmt.Fprintf(os.Stderr, "%s\n", err)
 	os.Exit(1)
 }

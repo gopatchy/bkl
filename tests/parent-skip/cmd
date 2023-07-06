@@ -1,0 +1,1 @@
+bkl -P -f yaml a.b.yaml c.yaml

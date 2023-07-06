@@ -33,19 +33,6 @@ func New() *Parser {
 	return &Parser{}
 }
 
-// NewFromFile creates a new [Parser] then calls [Parser.MergeFileLayers] with
-// the supplied path to merge in the file and its parent layers.
-func NewFromFile(path string) (*Parser, error) {
-	p := New()
-
-	err := p.MergeFileLayers(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
-}
-
 // SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
