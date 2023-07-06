@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var baseTemplate = ""
+
 func getParent(path string) (*string, error) {
 	parent, err := getParentFromDirective(path)
 	if err != nil {
