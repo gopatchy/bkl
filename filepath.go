@@ -8,10 +8,7 @@ import (
 	"strings"
 )
 
-// Ext returns the file extension for path, or "".
-//
-// It differs from [filepath.Ext] by omitting the leading dot.
-func Ext(path string) string {
+func ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
 

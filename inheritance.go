@@ -45,7 +45,7 @@ func getParentFromDirective(path string) (*string, error) {
 		return nil, err
 	}
 
-	ext := Ext(path)
+	ext := ext(path)
 
 	f, found := formatByExtension[ext]
 	if !found {

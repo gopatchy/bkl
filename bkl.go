@@ -110,9 +110,9 @@ func (p *Parser) MergePatch(index int, patch any) error {
 func (p *Parser) MergeFile(path string) error {
 	p.log("loading %s", path)
 
-	format, found := formatByExtension[Ext(path)]
+	format, found := formatByExtension[ext(path)]
 	if !found {
-		return fmt.Errorf("%s: %w", Ext(path), ErrUnknownFormat)
+		return fmt.Errorf("%s: %w", ext(path), ErrUnknownFormat)
 	}
 
 	fh, err := os.Open(path)
@@ -271,7 +271,7 @@ func (p *Parser) Output(ext string) ([]byte, error) {
 // If format is "", it is inferred from path's file extension.
 func (p *Parser) OutputToFile(path, format string) error {
 	if format == "" {
-		format = Ext(path)
+		format = ext(path)
 	}
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
