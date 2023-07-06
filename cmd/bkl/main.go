@@ -46,35 +46,19 @@ func main() {
 		}
 	}
 
-	format := "json-pretty"
-
-	if opts.OutputPath != nil {
-		format = bkl.Ext(*opts.OutputPath)
-	}
-
+	format := ""
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
 	}
 
-	out, err := p.Output(format)
+	if opts.OutputPath == nil {
+		err = p.OutputToWriter(os.Stdout, format)
+	} else {
+		err = p.OutputToFile(*opts.OutputPath, format)
+	}
+
 	if err != nil {
 		fatal("%s", err)
-	}
-
-	fh := os.Stdout
-
-	if opts.OutputPath != nil {
-		fh, err = os.OpenFile(*opts.OutputPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-		if err != nil {
-			fatal("%s: %s", *opts.OutputPath, err)
-		}
-
-		defer fh.Close()
-	}
-
-	_, err = fh.Write(out)
-	if err != nil {
-		fatal("output: %s", err)
 	}
 }
 

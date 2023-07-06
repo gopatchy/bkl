@@ -7,8 +7,9 @@ var (
 	Err = fmt.Errorf("bkl error")
 
 	// Format and system errors
-	ErrEncode          = fmt.Errorf("encoding error (%w)", Err)
 	ErrDecode          = fmt.Errorf("decoding error (%w)", Err)
+	ErrEncode          = fmt.Errorf("encoding error (%w)", Err)
+	ErrOutputFile      = fmt.Errorf("error opening output file (%w)", Err)
 	ErrInvalidIndex    = fmt.Errorf("invalid index (%w)", Err)
 	ErrInvalidFilename = fmt.Errorf("invalid filename (%w)", Err)
 	ErrInvalidType     = fmt.Errorf("invalid type (%w)", Err)

@@ -1,8 +1,8 @@
 // Package bkl implements a layered configuration language parser.
 //
-//  - Language & tool documentation: https://bkl.gopatchy.io/
-//  - Go library source: https://github.com/gopatchy/bkl
-//  - Go library documentation: https://pkg.go.dev/github.com/gopatchy/bkl
+//   - Language & tool documentation: https://bkl.gopatchy.io/
+//   - Go library source: https://github.com/gopatchy/bkl
+//   - Go library documentation: https://pkg.go.dev/github.com/gopatchy/bkl
 package bkl
 
 import (
@@ -17,10 +17,10 @@ import (
 // A Parser reads input documents, merges layers, and generates outputs.
 //
 // Terminology:
-//  - Each Parser can read multiple files
-//  - Each file represents a single layer
-//  - Each file contains one or more documents
-//  - Each document generates one or more outputs
+//   - Each Parser can read multiple files
+//   - Each file represents a single layer
+//   - Each file contains one or more documents
+//   - Each document generates one or more outputs
 type Parser struct {
 	docs  []any
 	debug bool
@@ -263,6 +263,52 @@ func (p *Parser) Output(ext string) ([]byte, error) {
 	}
 
 	return bytes.Join(outs, []byte("---\n")), nil
+}
+
+// OutputToFile encodes all documents in the specified format and writes them
+// to the specified output path.
+//
+// If format is "", it is inferred from path's file extension.
+func (p *Parser) OutputToFile(path, format string) error {
+	if format == "" {
+		format = Ext(path)
+	}
+
+	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("%s: %w (%w)", path, err, ErrOutputFile)
+	}
+
+	defer fh.Close()
+
+	err = p.OutputToWriter(fh, format)
+	if err != nil {
+		return fmt.Errorf("%s: %s", path, err)
+	}
+
+	return nil
+}
+
+// OutputToWriter encodes all documents in the specified format and writes them
+// to the specified [io.Writer].
+//
+// If format is "", it defaults to "json-pretty".
+func (p *Parser) OutputToWriter(fh io.Writer, format string) error {
+	if format == "" {
+		format = "json-pretty"
+	}
+
+	out, err := p.Output(format)
+	if err != nil {
+		return err
+	}
+
+	_, err = fh.Write(out)
+	if err != nil {
+		return fmt.Errorf("%w (%w)", err, ErrOutputFile)
+	}
+
+	return nil
 }
 
 func (p *Parser) log(format string, v ...any) {
