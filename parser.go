@@ -30,7 +30,10 @@ import (
 // Merge phase 1 (load)
 //   - $parent
 //
-// Merge phase 2 (merge)
+// Merge phase 2 (evaluate)
+//   - $env
+//
+// Merge phase 3 (merge)
 //   - $patch
 //
 // Output phase 1 (process)

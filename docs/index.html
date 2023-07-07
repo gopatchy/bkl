@@ -248,7 +248,7 @@ focus, focus > * {
 	color: var(--red6);
 }
 
-inlineFocus {
+ifocus {
 	background: var(--neutral8);
 	color: var(--red6);
 	display: inline-block;
@@ -297,7 +297,7 @@ inlineFocus {
 
 <vSpace></vSpace>
 
-<p>bkl knows that <inlineFocus>service.test.toml</inlineFocus> inherits from <inlineFocus>service.yaml</inlineFocus> by the filename pattern (<a href="#inheritance">override with <inlineFocus>$parent</inlineFocus></a>), and uses filename extensions to determine formats.</p>
+<p>bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>), and uses filename extensions to determine formats.</p>
 
 
 
@@ -307,13 +307,13 @@ inlineFocus {
 
 <vSpace></vSpace>
 
-<p>Verify that <inlineFocus>~/go/bin</inlineFocus> is in your <inlineFocus>$PATH</inlineFocus>.</p>
+<p>Verify that <ifocus>~/go/bin</ifocus> is in your <ifocus>$PATH</ifocus>.</p>
 
 
 
 <h2><a name="output-format">Output Format</a></h2>
 
-<p>Output defaults to human-friendly JSON (you can make that explicit with <inlineFocus>-f json-pretty</inlineFocus>).</p>
+<p>Output defaults to human-friendly JSON (you can make that explicit with <ifocus>-f json-pretty</ifocus>).</p>
 
 <label>YAML</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flagValue></focus> <string>service.test.toml</string>
@@ -351,7 +351,7 @@ inlineFocus {
 
 <vSpace></vSpace>
 
-<p>Output format is autodetected from output filename (unless specified with <inlineFocus>-f</inlineFocus>).</p>
+<p>Output format is autodetected from output filename (unless specified with <ifocus>-f</ifocus>).</p>
 
 
 
@@ -378,21 +378,21 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="inheritance">Inheritance</a></h2>
 
-<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <inlineFocus>.</inlineFocus> and treated as an inheritance hierarchy (e.g. <inlineFocus>a.b.c.yaml</inlineFocus> inherits from <inlineFocus>a.b.&lt;ext&gt;</inlineFocus> inherits from <inlineFocus>a.&lt;ext&gt;</inlineFocus>). Parent templates may have any supported file extension.</p>
+<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent templates may have any supported file extension.</p>
 
 <label>Set Parent In File</label>
 <code class="labeled"><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
 
 <vSpace></vSpace>
 
-<p><inlineFocus>$parent</inlineFocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file, and will still evaluate template layers of the parent in the normal order.</p>
+<p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file, and will still evaluate template layers of the parent in the normal order.</p>
 
 <label>Set Parent In CLI</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
 
 <vSpace></vSpace>
 
-<p>The <inlineFocus>-P</inlineFocus> flag (or <inlineFocus>--skip-parent</inlineFocus>) tells bkl to not load parent templates using filenames or <inlineFocus>$parent</inlineFocus>. Layer order can then be specified with just commandline argument order.</p>
+<p>The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent templates using filenames or <ifocus>$parent</ifocus>. Layer order can then be specified with just commandline argument order.</p>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
@@ -402,13 +402,13 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <vSpace></vSpace>
 
-<p>Setting <inlineFocus>$parent</inlineFocus> to <inlineFocus>null</inlineFocus> stops any further inheritance regardless of filename structure.</p>
+<p>Setting <ifocus>$parent</ifocus> to <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.</p>
 
 
 
 <h2><a name="streams">Streams</a></h2>
 
-<p>bkl understands input streams (multi-document YAML files delimited with <inlineFocus>---</inlineFocus>). To layer them, it has to match documents between layers. It does this using document ordering within layer files by default, but can be overridden with <inlineFocus>$match</inlineFocus>.</p>
+<p>bkl understands input streams (multi-document YAML files delimited with <ifocus>---</ifocus>). To layer them, it has to match documents between layers. It does this using document ordering within layer files by default, but can be overridden with <ifocus>$match</ifocus>.</p>
 
 <split5a>
 
@@ -457,7 +457,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="maps">Maps</a></h2>
 
-<p>Maps are merged by default. To change that, use <inlineFocus>$patch</inlineFocus>, or remove individual entries with <inlineFocus>null</inlineFocus>.</p>
+<p>Maps are merged by default. To change that, use <ifocus>$patch</ifocus>, or remove individual entries with <ifocus>null</ifocus>.</p>
 
 <split5a>
 
@@ -511,7 +511,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="lists">Lists</a></h2>
 
-<p>Lists are merged by default. To change that, use <inlineFocus>$patch</inlineFocus>.</p>
+<p>Lists are merged by default. To change that, use <ifocus>$patch</ifocus>.</p>
 
 <split5a>
 
@@ -564,9 +564,52 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
+<h2><a name="environment-substitution">Environment Substitution</a></h2>
+
+<p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys, values, and directives.</p>
+
+<split3a>
+
+<code># export FOO=test
+<focus><key>"$env:FOO"</key></focus>: <number>1</number></code>
+
+<op>=</op>
+
+<code><focus><key>test</key></focus>: <number>1</number></code>
+
+<vSpace class="span3"></vSpace>
+
+<code># export FOO=test
+<key>a</key>: <focus><string>$env:FOO</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>test</string></focus></code>
+
+<vSpace class="span3"></vSpace>
+
+<code># export FOO=a
+<key>a</key>:
+  <key>b</key>: <number>1</number>
+<key>c</key>:
+  <key>$output</key>: <bool>true</bool>
+  <key>$merge</key>: <focus><string>$env:FOO</string></focus></code>
+
+<op>=</op>
+
+<code><focus><key>b</key>: <number>1</number></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+
+<p>Note that all <ifocus>$env:</ifocus> substitutions result in string values, even if the substituted value is digits or <ifocus>null</ifocus>.</p>
+
+
+
 <h2><a name="required-values">Required Values</a></h2>
 
-<p>Use <inlineFocus>$required</inlineFocus> in lower layers to force upper layers to replace the value.</p>
+<p>Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.</p>
 
 <split5a>
 
@@ -607,7 +650,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="merge">Merging Subtrees</a></h2>
 
-<p>Use <inlineFocus>$merge</inlineFocus> to merge the contents one subtree into another.</p>
+<p>Use <ifocus>$merge</ifocus> to merge the contents one subtree into another.</p>
 
 <split3a>
 
@@ -636,7 +679,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="replace">Replacing Subtrees</a></h2>
 
-<p>Use <inlineFocus>$replace</inlineFocus> to merge the contents of one subtree with another.</p>
+<p>Use <ifocus>$replace</ifocus> to merge the contents of one subtree with another.</p>
 
 <split3a>
 
@@ -664,7 +707,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="output">Subtree Output</a></h2>
 
-<p>Use <inlineFocus>$output</inlineFocus> to select a subtree for output instead of the document root.</p>
+<p>Use <ifocus>$output</ifocus> to select a subtree for output instead of the document root.</p>
 
 <split3a>
 
@@ -683,9 +726,9 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <vSpace></vSpace>
 
-<p>Multiple instances of <inlineFocus>$output</inlineFocus> in a document will generate multiple output documents (delimited with <inlineFocus>---</inlineFocus>).
+<p>Multiple instances of <ifocus>$output</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
 
-<p>Combine <inlineFocus>$output</inlineFocus> with <inlineFocus>$replace</inlineFocus> or <inlineFocus>$merge</inlineFocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
+<p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
 
 </main></body>
 

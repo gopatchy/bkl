@@ -50,6 +50,7 @@ func loadFile(path string) (*file, error) {
 		}
 
 		doc = normalize(doc)
+		doc = env(doc)
 
 		f.docs = append(f.docs, doc)
 	}

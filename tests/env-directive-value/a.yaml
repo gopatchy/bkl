@@ -1,0 +1,5 @@
+a:
+  b: 1
+c:
+  $output: true
+  $merge: $env:FOO
