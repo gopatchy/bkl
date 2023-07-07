@@ -7,28 +7,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestMerge(t *testing.T) {
+func TestSymlink(t *testing.T) {
 	t.Parallel()
 
 	b := bkl.New()
 
-	require.NoError(t, b.MergeFileLayers("tests/merge1/a.yaml"))
+	require.NoError(t, b.MergeFileLayers("tests/symlink/c.d.yaml"))
 
 	blob, err := b.Output("json")
 	require.NoError(t, err)
-	require.Equal(t, `{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
+	require.Equal(t, `{"a":1,"b":2,"c":3}
 `, string(blob))
 }
 
-func TestReplace(t *testing.T) {
+func TestParentDirective(t *testing.T) {
 	t.Parallel()
 
 	b := bkl.New()
 
-	require.NoError(t, b.MergeFileLayers("tests/replace1/a.yaml"))
+	require.NoError(t, b.MergeFileLayers("tests/parent-set/a.b.yaml"))
 
 	blob, err := b.Output("json")
 	require.NoError(t, err)
-	require.Equal(t, `{"foo":{"bar":{"a":1}},"zig":{"a":1}}
+	require.Equal(t, `{"a":1,"b":2}
 `, string(blob))
 }

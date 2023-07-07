@@ -38,6 +38,10 @@ func main() {
 	for _, path := range opts.Positional.InputPaths {
 		fileP := bkl.New()
 
+		if opts.Verbose {
+			fileP.SetDebug(true)
+		}
+
 		if opts.SkipParent {
 			err = fileP.MergeFile(path)
 		} else {

@@ -102,6 +102,8 @@ func (f *file) parentFromDirective() (*string, error) {
 		return nil, fmt.Errorf("%T: %w", parent, ErrInvalidParentType)
 	}
 
+	parentStr = filepath.Join(filepath.Dir(f.path), parentStr)
+
 	parentPath := findFile(parentStr)
 	if parentPath == "" {
 		return nil, fmt.Errorf("%s: %w", parentStr, ErrMissingFile)
@@ -111,9 +113,12 @@ func (f *file) parentFromDirective() (*string, error) {
 }
 
 func (f *file) parentFromSymlink() (*string, error) {
-	dest, _ := os.Readlink(f.path)
+	dest, err := filepath.EvalSymlinks(f.path)
+	if err != nil {
+		return nil, err
+	}
 
-	if dest == "" {
+	if dest == f.path {
 		// Not a link
 		return nil, nil
 	}
