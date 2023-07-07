@@ -22,8 +22,6 @@ func match(obj any, pat any) bool {
 			return false
 		}
 
-		result := true
-
 		for _, patVal := range patType {
 			found := false
 
@@ -34,10 +32,12 @@ func match(obj any, pat any) bool {
 				}
 			}
 
-			result = result && found
+			if !found {
+				return false
+			}
 		}
 
-		return result
+		return true
 
 	default:
 		return obj == pat
