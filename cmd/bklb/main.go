@@ -38,7 +38,7 @@ func main() {
 			continue
 		}
 
-		withoutExt := strings.Trim(arg, ext)
+		withoutExt := strings.TrimSuffix(arg, ext)
 		foundPath := ""
 
 		for tryExt := range exts {
