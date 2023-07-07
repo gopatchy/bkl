@@ -64,7 +64,13 @@ func main() {
 			fatal(err)
 		}
 
-		tmp, err := os.CreateTemp("", filepath.Base(os.Args[0]))
+		pat := fmt.Sprintf(
+			"%s.*.%s",
+			filepath.Base(os.Args[0]),
+			filepath.Base(arg),
+		)
+
+		tmp, err := os.CreateTemp("", pat)
 		if err != nil {
 			fatal(err)
 		}
