@@ -113,39 +113,19 @@ func (p *Parser) MergePatch(index int, patch any) error {
 // MergeFile parses the file at path and merges its contents into the
 // [Parser]'s document state using bkl's merge semantics.
 func (p *Parser) MergeFile(path string) error {
-	p.log("loading %s", path)
+	p.log("[%s] loading", path)
 
-	format, found := formatByExtension[ext(path)]
-	if !found {
-		return fmt.Errorf("%s: %w", ext(path), ErrUnknownFormat)
-	}
-
-	fh, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("%s: %w", path, err)
-	}
-
-	defer fh.Close()
-
-	b, err := io.ReadAll(fh)
+	f, err := loadFile(path)
 	if err != nil {
 		return err
 	}
 
-	docs := bytes.SplitAfter(b, []byte("\n---\n"))
+	for i, doc := range f.docs {
+		p.log("[%s] merging", f.path)
 
-	for i, doc := range docs {
-		// Leave the initial \n attached
-		doc = bytes.TrimSuffix(doc, []byte("---\n"))
-
-		patch, err := format.decode(doc)
+		err = p.MergePatch(i, doc)
 		if err != nil {
-			return fmt.Errorf("%w / %w", err, ErrDecode)
-		}
-
-		err = p.MergePatch(i, patch)
-		if err != nil {
-			return fmt.Errorf("index %d (of [0,%d]): %w", i, len(docs)-1, err)
+			return fmt.Errorf("[%s:doc%d]: %w", f.path, i, err)
 		}
 	}
 
@@ -155,12 +135,19 @@ func (p *Parser) MergeFile(path string) error {
 // MergeFileLayers determines relevant layers from the supplied path and merges
 // them in order.
 func (p *Parser) MergeFileLayers(path string) error {
-	paths := []string{
-		path,
-	}
+	files := []*file{}
 
 	for {
-		parent, err := getParent(path)
+		p.log("[%s] merging", path)
+
+		file, err := loadFile(path)
+		if err != nil {
+			return err
+		}
+
+		files = append(files, file)
+
+		parent, err := file.parent()
 		if err != nil {
 			return err
 		}
@@ -170,15 +157,18 @@ func (p *Parser) MergeFileLayers(path string) error {
 		}
 
 		path = *parent
-		paths = append(paths, path)
 	}
 
-	slices.Reverse(paths)
+	slices.Reverse(files)
 
-	for _, path := range paths {
-		err := p.MergeFile(path)
-		if err != nil {
-			return err
+	for _, f := range files {
+		for i, doc := range f.docs {
+			p.log("[%s] merging", f.path)
+
+			err := p.MergePatch(i, doc)
+			if err != nil {
+				return fmt.Errorf("[%s:doc%d]: %w", f.path, i, err)
+			}
 		}
 	}
 
@@ -230,10 +220,10 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 
 	encs := [][]byte{}
 
-	for _, out := range outs {
+	for j, out := range outs {
 		enc, err := f.encode(out)
 		if err != nil {
-			return nil, fmt.Errorf("index %d (of [0,%d]): %w (%w)", index, p.NumDocuments()-1, err, ErrEncode)
+			return nil, fmt.Errorf("[doc%d:out%d]: %w (%w)", index, j, err, ErrEncode)
 		}
 
 		encs = append(encs, enc)

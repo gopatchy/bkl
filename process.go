@@ -3,11 +3,6 @@ package bkl
 import "fmt"
 
 func process(root any) (any, error) {
-	switch rootType := root.(type) {
-	case map[string]any:
-		delete(rootType, "$parent")
-	}
-
 	return processRecursive(root, root)
 }
 
