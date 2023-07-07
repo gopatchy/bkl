@@ -141,7 +141,7 @@ func (p *Parser) MergeFileLayers(path string) error {
 	files := []*file{}
 
 	for {
-		p.log("[%s] merging", path)
+		p.log("[%s] loading", path)
 
 		file, err := loadFile(path)
 		if err != nil {
