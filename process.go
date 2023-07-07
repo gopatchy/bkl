@@ -2,16 +2,16 @@ package bkl
 
 import "fmt"
 
-func postMerge(root any) (any, error) {
+func process(root any) (any, error) {
 	switch rootType := root.(type) {
 	case map[string]any:
 		delete(rootType, "$parent")
 	}
 
-	return postMergeRecursive(root, root)
+	return processRecursive(root, root)
 }
 
-func postMergeRecursive(root any, obj any) (any, error) {
+func processRecursive(root any, obj any) (any, error) {
 	switch objType := obj.(type) {
 	case map[string]any:
 		if path, found := objType["$merge"]; found {
@@ -32,7 +32,7 @@ func postMergeRecursive(root any, obj any) (any, error) {
 				return nil, err
 			}
 
-			return postMergeRecursive(root, next)
+			return processRecursive(root, next)
 		}
 
 		if path, found := objType["$replace"]; found {
@@ -48,11 +48,11 @@ func postMergeRecursive(root any, obj any) (any, error) {
 				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
 			}
 
-			return postMergeRecursive(root, next)
+			return processRecursive(root, next)
 		}
 
 		for k, v := range objType {
-			v2, err := postMergeRecursive(root, v)
+			v2, err := processRecursive(root, v)
 			if err != nil {
 				return nil, err
 			}
@@ -64,7 +64,7 @@ func postMergeRecursive(root any, obj any) (any, error) {
 
 	case []any:
 		for i, v := range objType {
-			v2, err := postMergeRecursive(root, v)
+			v2, err := processRecursive(root, v)
 			if err != nil {
 				return nil, err
 			}

@@ -16,11 +16,29 @@ import (
 
 // A Parser reads input documents, merges layers, and generates outputs.
 //
-// Terminology:
+// # Terminology
 //   - Each Parser can read multiple files
 //   - Each file represents a single layer
 //   - Each file contains one or more documents
 //   - Each document generates one or more outputs
+//
+// # Directive Evaluation Order
+//
+// Directive evaluation order can matter, e.g. if you $merge a subtree that
+// contains an $output directive.
+//
+// Merge phase 1 (load)
+//   - $parent
+//
+// Merge phase 2 (merge)
+//   - $patch
+//
+// Output phase 1 (process)
+//   - $merge
+//   - $replace
+//
+// Output phase 2 (output)
+//   - $output
 type Parser struct {
 	docs  []any
 	debug bool
@@ -190,7 +208,7 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		return nil, err
 	}
 
-	obj, err = postMerge(obj)
+	obj, err = process(obj)
 	if err != nil {
 		return nil, err
 	}
