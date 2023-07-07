@@ -33,18 +33,33 @@ func main() {
 	}
 
 	for i, arg := range args {
-		_, err := os.Stat(arg)
-		if err != nil {
+		ext := filepath.Ext(arg)
+		if !exts[ext] {
 			continue
 		}
 
-		if !exts[filepath.Ext(arg)] {
+		withoutExt := strings.Trim(arg, ext)
+		foundPath := ""
+
+		for tryExt := range exts {
+			tryPath := withoutExt + tryExt
+
+			_, err := os.Stat(tryPath)
+			if err != nil {
+				continue
+			}
+
+			foundPath = tryPath
+			break
+		}
+
+		if foundPath == "" {
 			continue
 		}
 
 		b := bkl.New()
 
-		err = b.MergeFileLayers(arg)
+		err = b.MergeFileLayers(foundPath)
 		if err != nil {
 			fatal(err)
 		}
