@@ -203,14 +203,14 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		return nil, err
 	}
 
-	err = validate(obj)
-	if err != nil {
-		return nil, err
-	}
-
 	outs := findOutputs(obj)
 	if len(outs) == 0 {
 		outs = append(outs, obj)
+	}
+
+	err = validate(obj)
+	if err != nil {
+		return nil, err
 	}
 
 	f, found := formatByExtension[ext]
