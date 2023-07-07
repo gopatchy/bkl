@@ -276,8 +276,8 @@ ifocus {
 <noop></noop>
 <label>service.test.toml</label>
 
-<code class="labeled"><key>name</key>: <string>myService</string>
-<key>addr</key>: <string>127.0.0.1</string>
+<code class="labeled"><key>addr</key>: <string>127.0.0.1</string>
+<key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number></code>
 <noop></noop>
 <code class="labeled"><key>port</key> = <focus><number>8081</number></focus></code>
@@ -729,6 +729,48 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <p>Multiple instances of <ifocus>$output</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
 
 <p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
+
+
+
+<h2><a name="bklb">bklb Wrapper</a></h2>
+
+<p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.</p>
+
+<code>$ <cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/cmd/bklb@latest</string>
+
+$ <focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
+
+$ <cmd>cat</cmd> <string>service.yaml</string>
+<key>addr</key>: <string>127.0.0.1</string>
+<key>name</key>: <string>myService</string>
+<key>port</key>: <number>8080</number>
+
+$ <cmd>cat</cmd> <string>service.test.toml</string>
+<key>port</key> = <number>8081</number>
+
+$ <focus><cmd>catb</cmd> <string>service.test.toml</string></focus>
+<key>addr</key> = "<string>127.0.0.1</string>"
+<key>name</key> = "<string>myService</string>"
+<key>port</key> = <number>8081</number>
+
+$ <cmd>cat</cmd> <string>service.test.yaml</string> <string>service.test.json</string>
+cat: service.test.yaml: No such file or directory
+cat: service.test.json: No such file or directory
+
+$ <focus><cmd>catb</cmd> <string>service.test.yaml</string></focus>
+<key>addr</key>: <string>127.0.0.1</string>
+<key>name</key>: <string>myService</string>
+<key>port</key>: <number>8081</number>
+
+$ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
+{"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+
+<vSpace></vSpace>
+
+<p>Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.</p>
+
+<p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program, so they can coexist in your PATH.<p>
+
 
 </main></body>
 
