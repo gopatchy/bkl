@@ -6,7 +6,7 @@ import (
 )
 
 func validate(obj any) error {
-	switch obj2 := canonicalizeType(obj).(type) {
+	switch obj2 := obj.(type) {
 	case map[string]any:
 		for k, v := range obj2 {
 			err := validate(k)

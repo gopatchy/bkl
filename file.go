@@ -49,6 +49,8 @@ func loadFile(path string) (*file, error) {
 			return nil, fmt.Errorf("%s[doc%d]: %w / %w", path, i, err, ErrDecode)
 		}
 
+		doc = normalize(doc)
+
 		f.docs = append(f.docs, doc)
 	}
 

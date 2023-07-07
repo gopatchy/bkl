@@ -6,7 +6,7 @@ import (
 )
 
 func merge(dst any, src any) (any, error) {
-	switch dst2 := canonicalizeType(dst).(type) {
+	switch dst2 := dst.(type) {
 	case map[string]any:
 		return mergeMap(dst2, src)
 
@@ -22,7 +22,7 @@ func merge(dst any, src any) (any, error) {
 }
 
 func mergeMap(dst map[string]any, src any) (any, error) {
-	switch src2 := canonicalizeType(src).(type) {
+	switch src2 := src.(type) {
 	case map[string]any:
 		if patch, found := src2["$patch"]; found {
 			patchVal, ok := patch.(string)
@@ -70,10 +70,10 @@ func mergeMap(dst map[string]any, src any) (any, error) {
 }
 
 func mergeList(dst []any, src any) (any, error) {
-	switch src2 := canonicalizeType(src).(type) {
+	switch src2 := src.(type) {
 	case []any:
 		for i, val := range src2 {
-			switch val2 := canonicalizeType(val).(type) { //nolint:gocritic
+			switch val2 := val.(type) { //nolint:gocritic
 			case map[string]any:
 				if patch, found := val2["$patch"]; found {
 					patchVal, ok := patch.(string)

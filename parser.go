@@ -76,7 +76,7 @@ func (p *Parser) MergeParser(other *Parser) error {
 // index is only a hint; if the patch contains a $match entry, that is used
 // instead.
 func (p *Parser) MergePatch(index int, patch any) error {
-	if patchMap, ok := canonicalizeType(patch).(map[string]any); ok {
+	if patchMap, ok := patch.(map[string]any); ok {
 		m, found := patchMap["$match"]
 		if found {
 			delete(patchMap, "$match")
