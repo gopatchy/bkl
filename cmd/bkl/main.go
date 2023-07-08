@@ -14,7 +14,6 @@ type options struct {
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
 	SkipParent   bool    `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool    `short:"v" long:"verbose" description:"enable verbose logging"`
-	ShowVersion  bool    `long:"version" description:"show version info and exit"`
 
 	Positional struct {
 		InputPaths []string `positional-arg-name:"inputPath" required:"1" description:"input file path"`
