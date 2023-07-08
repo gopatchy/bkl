@@ -146,6 +146,15 @@ a[name] {
 	text-decoration: none;
 }
 
+ul {
+	margin: 0;
+	padding-left: 20px;
+}
+
+li {
+	padding-bottom: 10px;
+}
+
 split3 {
 	display: grid;
 	grid: auto-flow / 1fr 10px 1fr;
@@ -771,6 +780,22 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 
 <p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program, so they can coexist in your PATH.<p>
 
+
+
+<h2><a name="comparison">Comparison</a></h2>
+
+<p>bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:</p>
+
+<ul>
+	<li>Configuration and templating/layering should be generic, not service-specific.</li>
+	<li>Configuration and templating/layering should be separate from deployment tooling.</li>
+	<li>Configuration files should be written in standard formats (JSON, YAML, TOML) and parseable by their standard parsers.</li>
+	<li>Basic functionality should be available without learning custom syntax.</li>
+	<li>Non-templatized configuration (e.g. StackOverflow answers) should be usable without modification.</li>
+	<li>File composition should be accomplished without meta configuration (e.g. manifest files).</li>
+	<li>Templating/layering behavior should be intuitive and produce expected results.</li>
+	<li>Documentation and examples should be excellent.</li>
+</ul>
 
 </main></body>
 
