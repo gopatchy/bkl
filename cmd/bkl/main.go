@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
@@ -13,6 +14,7 @@ type options struct {
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
 	SkipParent   bool    `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool    `short:"v" long:"verbose" description:"enable verbose logging"`
+	ShowVersion  bool    `long:"version" description:"show version info and exit"`
 
 	Positional struct {
 		InputPaths []string `positional-arg-name:"inputPath" required:"1" description:"input file path"`
@@ -20,12 +22,25 @@ type options struct {
 }
 
 func main() {
+	var err error
+
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)
 
-	_, err := fp.Parse()
-	if flags.WroteHelp(err) {
+	_, flagErr := fp.Parse()
+
+	if opts.ShowVersion {
+		bi, ok := debug.ReadBuildInfo()
+		if !ok {
+			fatal(fmt.Errorf("ReadBuildInfo() failed"))
+		}
+
+		fmt.Printf("%s", bi)
+		os.Exit(0)
+	}
+
+	if flagErr != nil {
 		os.Exit(1)
 	}
 
