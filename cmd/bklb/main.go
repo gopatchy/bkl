@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"syscall"
@@ -19,6 +20,16 @@ var exts = map[string]bool{
 }
 
 func main() {
+	if os.Getenv("BKL_VERSION") != "" {
+		bi, ok := debug.ReadBuildInfo()
+		if !ok {
+			fatal(fmt.Errorf("ReadBuildInfo() failed"))
+		}
+
+		fmt.Printf("%s", bi)
+		os.Exit(0)
+	}
+
 	cmd := strings.TrimSuffix(filepath.Base(os.Args[0]), "b")
 	args := slices.Clone(os.Args[1:])
 

@@ -22,15 +22,7 @@ type options struct {
 }
 
 func main() {
-	var err error
-
-	opts := &options{}
-
-	fp := flags.NewParser(opts, flags.Default)
-
-	_, flagErr := fp.Parse()
-
-	if opts.ShowVersion {
+	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
 		if !ok {
 			fatal(fmt.Errorf("ReadBuildInfo() failed"))
@@ -40,7 +32,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	if flagErr != nil {
+	opts := &options{}
+
+	fp := flags.NewParser(opts, flags.Default)
+
+	_, err := fp.Parse()
+	if err != nil {
 		os.Exit(1)
 	}
 
