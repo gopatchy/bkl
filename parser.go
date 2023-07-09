@@ -280,7 +280,7 @@ func (p *Parser) OutputToFile(path, format string) error {
 
 	err = p.OutputToWriter(fh, format)
 	if err != nil {
-		return fmt.Errorf("%s: %s", path, err)
+		return fmt.Errorf("%s: %w", path, err)
 	}
 
 	return nil

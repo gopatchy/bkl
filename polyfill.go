@@ -1,10 +1,11 @@
 package bkl
 
 // Copied from go1.21 slices
-func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S {
+func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 	for i, v := range s {
 		if del(v) {
 			j := i
+
 			for i++; i < len(s); i++ {
 				v = s[i]
 				if !del(v) {
@@ -12,9 +13,11 @@ func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S {
 					j++
 				}
 			}
+
 			return s[:j]
 		}
 	}
+
 	return s
 }
 

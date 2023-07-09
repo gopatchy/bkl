@@ -12,6 +12,7 @@ func findOutputs(obj any) []any {
 
 		if _, found := objType["$output"]; found {
 			delete(objType, "$output")
+
 			ret = append(ret, obj)
 		}
 

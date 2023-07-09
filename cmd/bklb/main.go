@@ -23,7 +23,7 @@ func main() {
 	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
 		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed"))
+			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
 		}
 
 		fmt.Printf("%s", bi)
@@ -35,7 +35,7 @@ func main() {
 
 	if cmd == "bkl" {
 		// Run as bklb, not via symlink
-		fatal(fmt.Errorf("usage: ln -s `which bklb` toolb  # bklb will run 'tool'"))
+		fatal(fmt.Errorf("usage: ln -s `which bklb` toolb  # bklb will run 'tool'")) //nolint:goerr113
 	}
 
 	cmdPath, err := exec.LookPath(cmd)
@@ -61,6 +61,7 @@ func main() {
 			}
 
 			foundPath = tryPath
+
 			break
 		}
 

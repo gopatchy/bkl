@@ -2,7 +2,7 @@ package bkl_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -190,6 +190,7 @@ func ExampleParser_OutputToFile() {
 	if err != nil {
 		panic(err)
 	}
+
 	defer os.Remove(f.Name())
 
 	err = b.OutputToFile(f.Name(), "toml")
@@ -197,7 +198,7 @@ func ExampleParser_OutputToFile() {
 		panic(err)
 	}
 
-	blob, err := ioutil.ReadAll(f)
+	blob, err := io.ReadAll(f)
 	if err != nil {
 		panic(err)
 	}

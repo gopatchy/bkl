@@ -18,6 +18,7 @@ linters:
     - gochecknoglobals
     - gocognit
     - goconst
+    - godot
     - godox
     - gofumpt
     - golint
@@ -37,3 +38,6 @@ linters:
     - thelper
     - varcheck
     - varnamelen
+linters-settings:
+  wsl:
+    allow-separated-leading-comment: true

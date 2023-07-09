@@ -1,17 +1,14 @@
 package bkl_test
 
 import (
-	"os"
 	"testing"
 
 	"github.com/gopatchy/bkl"
 	"github.com/stretchr/testify/require"
 )
 
-func TestEnv(t *testing.T) {
-	t.Parallel()
-
-	os.Setenv("FOO", "xyz")
+func TestEnv(t *testing.T) { //nolint:paralleltest
+	t.Setenv("FOO", "xyz")
 
 	b := bkl.New()
 

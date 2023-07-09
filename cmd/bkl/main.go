@@ -24,7 +24,7 @@ func main() {
 	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
 		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed"))
+			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
 		}
 
 		fmt.Printf("%s", bi)
@@ -58,6 +58,7 @@ func main() {
 		} else {
 			err = fileP.MergeFileLayers(path)
 		}
+
 		if err != nil {
 			fatal(err)
 		}
