@@ -268,27 +268,42 @@ func ExampleParser_SetDebug() {
 }
 
 func FuzzParser(f *testing.F) {
-	f.Add("a.yaml", []byte{})
-	f.Add("a.json", []byte{})
-	f.Add("a.toml", []byte{})
+	f.Add("a.yaml", []byte{}, "a.json", []byte{})
+	f.Add("a.json", []byte{}, "a.toml", []byte{})
+	f.Add("a.toml", []byte{}, "a.yaml", []byte{})
 
-	f.Fuzz(func(t *testing.T, filename string, content []byte) {
-		filename = filepath.Base(filename)
-
-		if filename == "" || strings.HasPrefix(filename, ".") {
-			t.Log("invalid filename")
+	f.Fuzz(func(t *testing.T, filename1 string, content1 []byte, filename2 string, content2 []byte) {
+		path1, err := writeFile(t, filename1, content1)
+		if err != nil {
+			t.Log(err)
 			return
 		}
 
-		path := filepath.Join(t.TempDir(), filename)
-
-		err := os.WriteFile(path, content, 0600)
+		path2, err := writeFile(t, filename2, content2)
 		if err != nil {
 			t.Log(err)
 			return
 		}
 
 		b := bkl.New()
-		_ = b.MergeFile(path)
+		_ = b.MergeFile(path1)
+		_ = b.MergeFile(path2)
 	})
+}
+
+func writeFile(t *testing.T, filename string, content []byte) (string, error) {
+	filename = filepath.Base(filename)
+
+	if strings.HasPrefix(filename, ".") {
+		return "", fmt.Errorf("invalid filename") //nolint:errorlint
+	}
+
+	path := filepath.Join(t.TempDir(), filename)
+
+	err := os.WriteFile(path, content, 0600)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }
