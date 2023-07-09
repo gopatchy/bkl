@@ -5,6 +5,9 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
+	"testing"
 
 	"github.com/gopatchy/bkl"
 )
@@ -262,4 +265,30 @@ func ExampleParser_SetDebug() {
 	// [tests/example1/service.yaml] loading
 	// [tests/example1/service.yaml] merging
 	// [tests/example1/service.test.toml] merging
+}
+
+func FuzzParser(f *testing.F) {
+	f.Add("a.yaml", []byte{})
+	f.Add("a.json", []byte{})
+	f.Add("a.toml", []byte{})
+
+	f.Fuzz(func(t *testing.T, filename string, content []byte) {
+		filename = filepath.Base(filename)
+
+		if filename == "" || strings.HasPrefix(filename, ".") {
+			t.Log("invalid filename")
+			return
+		}
+
+		path := filepath.Join(t.TempDir(), filename)
+
+		err := os.WriteFile(path, content, 0600)
+		if err != nil {
+			t.Log(err)
+			return
+		}
+
+		b := bkl.New()
+		_ = b.MergeFile(path)
+	})
 }
