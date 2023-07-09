@@ -1,3 +1,5 @@
+//go:build !go1.21
+
 package bkl
 
 // Copied from go1.21 slices
