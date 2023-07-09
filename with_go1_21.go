@@ -6,10 +6,10 @@ import (
 	"slices"
 )
 
-func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
+func slicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 	return slices.DeleteFunc(s, del)
 }
 
-func Reverse[S ~[]E, E any](s S) {
+func slicesReverse[S ~[]E, E any](s S) {
 	slices.Reverse(s)
 }

@@ -161,7 +161,7 @@ func (p *Parser) MergeFileLayers(path string) error {
 		path = *parent
 	}
 
-	Reverse(files)
+	slicesReverse(files)
 
 	for _, f := range files {
 		for i, doc := range f.docs {
@@ -225,7 +225,7 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 	for j, out := range outs {
 		enc, err := f.encode(out)
 		if err != nil {
-			return nil, ErrorsJoin(fmt.Errorf("[doc%d:out%d]: %w", index, j, ErrEncode), err)
+			return nil, errorsJoin(fmt.Errorf("[doc%d:out%d]: %w", index, j, ErrEncode), err)
 		}
 
 		encs = append(encs, enc)
@@ -273,7 +273,7 @@ func (p *Parser) OutputToFile(path, format string) error {
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return ErrorsJoin(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
+		return errorsJoin(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
 	}
 
 	defer fh.Close()
@@ -302,7 +302,7 @@ func (p *Parser) OutputToWriter(fh io.Writer, format string) error {
 
 	_, err = fh.Write(out)
 	if err != nil {
-		return ErrorsJoin(ErrOutputFile, err)
+		return errorsJoin(ErrOutputFile, err)
 	}
 
 	return nil

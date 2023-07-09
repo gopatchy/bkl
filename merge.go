@@ -86,7 +86,7 @@ func mergeList(dst []any, src any) (any, error) {
 					case "delete":
 						delete(val2, "$patch")
 
-						dst = DeleteFunc(dst, func(elem any) bool {
+						dst = slicesDeleteFunc(dst, func(elem any) bool {
 							return match(elem, val2)
 						})
 

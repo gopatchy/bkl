@@ -3,7 +3,7 @@
 package bkl
 
 // Copied from go1.21 slices
-func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
+func slicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 	for i, v := range s {
 		if del(v) {
 			j := i
@@ -24,7 +24,7 @@ func DeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 }
 
 // Copied from go1.21 slices
-func Reverse[S ~[]E, E any](s S) {
+func slicesReverse[S ~[]E, E any](s S) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]
 	}

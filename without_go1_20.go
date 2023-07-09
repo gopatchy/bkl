@@ -2,6 +2,6 @@
 
 package bkl
 
-func ErrorsJoin(errs ...error) error {
+func errorsJoin(errs ...error) error {
 	return errs[0]
 }

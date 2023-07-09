@@ -46,7 +46,7 @@ func loadFile(path string) (*file, error) {
 
 		doc, err := format.decode(rawDoc)
 		if err != nil {
-			return nil, ErrorsJoin(fmt.Errorf("%s[doc%d]: %w", path, i, ErrDecode), err)
+			return nil, errorsJoin(fmt.Errorf("%s[doc%d]: %w", path, i, ErrDecode), err)
 		}
 
 		doc = normalize(doc)

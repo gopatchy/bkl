@@ -4,6 +4,6 @@ package bkl
 
 import "errors"
 
-func ErrorsJoin(errs ...error) error {
+func errorsJoin(errs ...error) error {
 	return errors.Join(errs...)
 }
