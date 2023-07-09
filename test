@@ -3,6 +3,7 @@
 set -euo pipefail
 
 ROOT=$(pwd)
+GOCMD=${GOCMD:=go}
 
 function cleanup {
 	rm $ROOT/bkl
@@ -10,7 +11,7 @@ function cleanup {
 
 trap cleanup EXIT
 
-go build ./cmd/bkl
+$GOCMD build ./cmd/bkl
 export PATH=$ROOT:$PATH
 
 for TEST in tests/*; do

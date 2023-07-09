@@ -13,5 +13,11 @@ test:
 	{{go}} tool cover -html=cover.out -o=cover.html
 	./test
 
+polytest:
+	@just go=go1.21rc2
+	@just go=go1.20.5
+	@just go=go1.19.10
+	@just go=go1.18.10
+
 todo:
 	-git grep -e TODO --and --not -e ignoretodo
