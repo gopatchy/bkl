@@ -6,11 +6,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime/debug"
-	"slices"
 	"strings"
 	"syscall"
 
 	"github.com/gopatchy/bkl"
+	"golang.org/x/exp/slices"
 )
 
 var exts = map[string]bool{

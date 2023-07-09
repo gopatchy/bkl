@@ -1,8 +1,8 @@
 package bkl
 
 import (
-	"maps"
-	"slices"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 func findOutputs(obj any) []any {

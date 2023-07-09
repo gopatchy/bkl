@@ -11,13 +11,13 @@ function cleanup {
 trap cleanup EXIT
 
 go build ./cmd/bkl
-export PATH=$ROOT:/opt/homebrew/share/git-core/contrib/diff-highlight:$PATH
+export PATH=$ROOT:$PATH
 
 for TEST in tests/*; do
 	echo TEST $TEST
 	cd $TEST
 
-	colordiff -ud expected <(source cmd) | diff-highlight
+	diff -ud expected <(source cmd)
 
 	cd ~-
 	echo "	PASS"

@@ -2,7 +2,8 @@ package bkl
 
 import (
 	"fmt"
-	"slices"
+
+	"golang.org/x/exp/slices"
 )
 
 func merge(dst any, src any) (any, error) {
@@ -85,7 +86,7 @@ func mergeList(dst []any, src any) (any, error) {
 					case "delete":
 						delete(val2, "$patch")
 
-						dst = slices.DeleteFunc(dst, func(elem any) bool {
+						dst = DeleteFunc(dst, func(elem any) bool {
 							return match(elem, val2)
 						})
 

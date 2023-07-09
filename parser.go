@@ -11,7 +11,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"slices"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -162,7 +161,7 @@ func (p *Parser) MergeFileLayers(path string) error {
 		path = *parent
 	}
 
-	slices.Reverse(files)
+	Reverse(files)
 
 	for _, f := range files {
 		for i, doc := range f.docs {
