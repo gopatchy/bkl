@@ -225,7 +225,7 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 	for j, out := range outs {
 		enc, err := f.encode(out)
 		if err != nil {
-			return nil, fmt.Errorf("[doc%d:out%d]: %w (%w)", index, j, err, ErrEncode)
+			return nil, ErrorsJoin(fmt.Errorf("[doc%d:out%d]: %w", index, j, ErrEncode), err)
 		}
 
 		encs = append(encs, enc)
@@ -273,7 +273,7 @@ func (p *Parser) OutputToFile(path, format string) error {
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("%s: %w (%w)", path, err, ErrOutputFile)
+		return ErrorsJoin(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
 	}
 
 	defer fh.Close()
@@ -302,7 +302,7 @@ func (p *Parser) OutputToWriter(fh io.Writer, format string) error {
 
 	_, err = fh.Write(out)
 	if err != nil {
-		return fmt.Errorf("%w (%w)", err, ErrOutputFile)
+		return ErrorsJoin(ErrOutputFile, err)
 	}
 
 	return nil
