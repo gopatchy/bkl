@@ -1,1 +1,1 @@
-bkl -f yaml service.test.toml
+bkl service.test.yaml

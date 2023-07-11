@@ -13,12 +13,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var exts = map[string]bool{
-	".json": true,
-	".toml": true,
-	".yaml": true,
-}
-
 func main() {
 	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
@@ -44,34 +38,14 @@ func main() {
 	}
 
 	for i, arg := range args {
-		ext := filepath.Ext(arg)
-		if !exts[ext] {
-			continue
-		}
-
-		withoutExt := strings.TrimSuffix(arg, ext)
-		foundPath := ""
-
-		for tryExt := range exts {
-			tryPath := withoutExt + tryExt
-
-			_, err := os.Stat(tryPath)
-			if err != nil {
-				continue
-			}
-
-			foundPath = tryPath
-
-			break
-		}
-
-		if foundPath == "" {
+		realPath, f, err := bkl.FileMatch(arg)
+		if err != nil {
 			continue
 		}
 
 		b := bkl.New()
 
-		err = b.MergeFileLayers(foundPath)
+		err = b.MergeFileLayers(realPath)
 		if err != nil {
 			fatal(err)
 		}
@@ -87,7 +61,7 @@ func main() {
 			fatal(err)
 		}
 
-		err = b.OutputToFile(tmp.Name(), strings.TrimPrefix(filepath.Ext(arg), "."))
+		err = b.OutputToFile(tmp.Name(), f)
 		if err != nil {
 			fatal(err)
 		}

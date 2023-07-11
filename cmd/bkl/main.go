@@ -46,6 +46,11 @@ func main() {
 		p.SetDebug(true)
 	}
 
+	format := ""
+	if opts.OutputFormat != nil {
+		format = *opts.OutputFormat
+	}
+
 	for _, path := range opts.Positional.InputPaths {
 		fileP := bkl.New()
 
@@ -53,10 +58,19 @@ func main() {
 			fileP.SetDebug(true)
 		}
 
+		realPath, f, err := bkl.FileMatch(path)
+		if err != nil {
+			fatal(err)
+		}
+
+		if format == "" {
+			format = f
+		}
+
 		if opts.SkipParent {
-			err = fileP.MergeFile(path)
+			err = fileP.MergeFile(realPath)
 		} else {
-			err = fileP.MergeFileLayers(path)
+			err = fileP.MergeFileLayers(realPath)
 		}
 
 		if err != nil {
@@ -67,11 +81,6 @@ func main() {
 		if err != nil {
 			fatal(err)
 		}
-	}
-
-	format := ""
-	if opts.OutputFormat != nil {
-		format = *opts.OutputFormat
 	}
 
 	if opts.OutputPath == nil {

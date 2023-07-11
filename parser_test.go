@@ -299,7 +299,7 @@ func writeFile(t *testing.T, filename string, content []byte) (string, error) {
 	filename = filepath.Base(filename)
 
 	if strings.HasPrefix(filename, ".") {
-		return "", fmt.Errorf("invalid filename") //nolint:errorlint
+		return "", fmt.Errorf("invalid filename") //nolint:goerr113
 	}
 
 	path := filepath.Join(t.TempDir(), filename)

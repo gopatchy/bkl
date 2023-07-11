@@ -296,11 +296,9 @@ ifocus {
 <label class="span3">Run it!</label>
 
 <code class="span3 labeled">$ <cmd>bkl</cmd> <string>service.test.toml</string>
-{
-  "<key>addr</key>": "<string>127.0.0.1</string>",
-  "<key>name</key>": "<string>myService</string>",
-  "<key>port</key>": <focus><number>8081</number></focus>
-}</code>
+<key>addr</key> = "<string>127.0.0.1</string>"
+<key>name</key> = "<string>myService</string>"
+<key>port</key> = <focus><number>8081</number></focus></code>
 
 </split3>
 
@@ -322,7 +320,7 @@ ifocus {
 
 <h2><a name="output-format">Output Format</a></h2>
 
-<p>Output defaults to human-friendly JSON (you can make that explicit with <ifocus>-f json-pretty</ifocus>).</p>
+<p>Output defaults to the same format as the specified input file.</p>
 
 <label>YAML</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flagValue></focus> <string>service.test.toml</string>
@@ -343,6 +341,25 @@ ifocus {
 <label>JSON</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
 {"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+
+<vSpace></vSpace>
+
+<label>Pretty JSON</label>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
+{
+  "<key>addr</key>": "<string>127.0.0.1</string>",
+  "<key>name</key>": "<string>myService</string>",
+  "<key>port</key>":<number>8081</number>
+}</code>
+
+<vSpace></vSpace>
+
+<p>You can also set the output format implicitly by using a different file extension.</p>
+
+<code>$ <cmd>bkl</cmd> <string>service.test.<focus>yaml</focus></string>   # real file is service.test.<focus>toml</focus>
+<key>addr</key>: <string>127.0.0.1</string>
+<key>name</key>: <string>myService</string>
+<key>port</key>: <number>8081</number></code>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
