@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.yaml")
+[]byte("\U00094323\U00094323\uf8ac\uf8ac")
+string("0.yaml")
+[]byte("\U00094323\U00094323\uf8ac\uf8ac")

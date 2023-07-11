@@ -1,0 +1,5 @@
+go test fuzz v1
+string("2.yaml")
+[]byte("0\n#\n0\n##\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n00\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n-#\n0\n---\n0--\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n\n0\n#\n0\n---#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0")
+string("!")
+[]byte("0")

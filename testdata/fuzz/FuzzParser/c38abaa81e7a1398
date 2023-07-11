@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.toml")
+[]byte("[[0]\u05ec\u05f9\u05ec\u05f9\u05ec\u05f9\u05ec\u05f9\u05ec\u05f9\u05ec\u05f9\u05ec\u05f9\u05ec\u05f9]")
+string("0")
+[]byte("0")

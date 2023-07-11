@@ -1,0 +1,5 @@
+go test fuzz v1
+string("c.yaml")
+[]byte("$maZ9h: -")
+string("a.yaml")
+[]byte("CreqZ're: 1")
