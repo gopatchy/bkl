@@ -1,7 +1,7 @@
 package bkl
 
 import (
-	"github.com/pelletier/go-toml"
+	"github.com/pelletier/go-toml/v2"
 )
 
 func decodeTOML(in []byte) (any, error) {
