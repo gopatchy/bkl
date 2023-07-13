@@ -249,6 +249,10 @@ number {
 	color: var(--green6);
 }
 
+bool {
+	color: var(--green6);
+}
+
 flag {
 	color: var(--blue5);
 }
@@ -424,11 +428,11 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <vSpace></vSpace>
 
 <label>No Parent</label>
-<code class="labeled"><focus><key>$parent</key>: null</focus>   # no further inheritance</code>
+<code class="labeled"><focus><key>$parent</key>: false</focus>   # no further inheritance</code>
 
 <vSpace></vSpace>
 
-<p>Setting <ifocus>$parent</ifocus> to <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.</p>
+<p>Setting <ifocus>$parent</ifocus> to <ifocus>false</ifocus> or <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.</p>
 
 
 
@@ -755,6 +759,16 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <p>Multiple instances of <ifocus>$output</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
 
 <p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
+
+
+
+<h2><a name="toml">TOML Notes</a></h2>
+
+<p>TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:</p>
+
+<code><focus>"<key>$parent</key>"</focus> = <bool>false</bool></code>
+
+<vSpace></vSpace>
 
 
 
