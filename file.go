@@ -112,6 +112,10 @@ func (f *file) parentFromDirective() (*string, error) {
 		return &baseTemplate, nil
 	}
 
+	if v, ok := parent.(bool); ok && !v {
+		return &baseTemplate, nil
+	}
+
 	parentStr, ok := parent.(string)
 	if !ok {
 		return nil, fmt.Errorf("%T: %w", parent, ErrInvalidParentType)
