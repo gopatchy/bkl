@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gopatchy/bkl"
+	"github.com/samber/lo"
 )
 
 func ExampleNew() {
@@ -268,13 +269,33 @@ func ExampleParser_SetDebug() {
 }
 
 func FuzzParser(f *testing.F) {
-	f.Add("a.yaml", []byte("a: 1\n---\n- 1"), "a.json", []byte("[1,2]\n---\n\"foo\""))
-	f.Add("a.json", []byte("{\"a\":1}\n---\n5"), "a.toml", []byte("a = 1\n---\n[a.b]"))
-	f.Add("a.toml", []byte("a = [1,2]\n---\nb = \"foo\""), "a.yaml", []byte("a: [1,2]\n---\n5"))
-	f.Add("a.yaml", []byte("$merge: 1"), "a.yaml", []byte("$replace: 1"))
-	f.Add("a.yaml", []byte("$patch: 1"), "a.yaml", []byte("$parent: 1"))
-	f.Add("a.yaml", []byte("$output: 1"), "a.yaml", []byte("\"$env:\": 1"))
-	f.Add("a.yaml", []byte("$match: 1"), "a.yaml", []byte("$require: 1"))
+	for _, dir := range lo.Must(os.ReadDir("tests")) {
+		aPattern := filepath.Join("tests", dir.Name(), "a.????")
+		aMatches := lo.Must(filepath.Glob(aPattern))
+
+		if len(aMatches) != 1 {
+			continue
+		}
+
+		aPath := aMatches[0]
+
+		abPattern := filepath.Join("tests", dir.Name(), "a.b.????")
+		abMatches := lo.Must(filepath.Glob(abPattern))
+
+		if len(abMatches) == 1 {
+			abPath := abMatches[0]
+
+			f.Add(
+				filepath.Base(aPath), lo.Must(os.ReadFile(aPath)),
+				filepath.Base(abPath), lo.Must(os.ReadFile(abPath)),
+			)
+		} else {
+			f.Add(
+				filepath.Base(aPath), lo.Must(os.ReadFile(aPath)),
+				"", []byte{},
+			)
+		}
+	}
 
 	f.Fuzz(func(t *testing.T, filename1 string, content1 []byte, filename2 string, content2 []byte) {
 		path1, err := writeFile(t, filename1, content1)
