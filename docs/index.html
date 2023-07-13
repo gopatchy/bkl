@@ -813,6 +813,28 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 
 
 
+<h2><a name="diff">diff</a></h2>
+
+<p>It's easy to see differences between processed bkl files using shell syntax.</p>
+
+<code>$ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+--- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
++++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
+@@ -1,3 +1,2 @@
+ a: 1
+<focus>-b: 2</focus>
+ c: 3
+
+$ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+a: 1                              a: 1
+b: 2                            <focus>&lt;</focus>
+c: 3                              c: 3
+</code>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
 <h2><a name="comparison">Comparison</a></h2>
 
 <p>bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:</p>
