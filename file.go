@@ -38,12 +38,27 @@ func loadFile(path string) (*file, error) {
 		return nil, err
 	}
 
-	rawDocs := bytes.SplitAfter(raw, []byte("\n---\n"))
+	rawDocs := [][]byte{}
+
+	for {
+		if bytes.HasPrefix(raw, []byte("---\n")) {
+			rawDocs = append(rawDocs, []byte(""))
+			raw = bytes.TrimPrefix(raw, []byte("---\n"))
+
+			continue
+		}
+
+		parts := bytes.SplitN(raw, []byte("\n---\n"), 2)
+		if len(parts) == 1 {
+			rawDocs = append(rawDocs, raw)
+			break
+		}
+
+		rawDocs = append(rawDocs, append(parts[0], '\n'))
+		raw = parts[1]
+	}
 
 	for i, rawDoc := range rawDocs {
-		// Leave the initial \n attached
-		rawDoc = bytes.TrimSuffix(rawDoc, []byte("---\n"))
-
 		doc, err := format.decode(rawDoc)
 		if err != nil {
 			return nil, errorsJoin(fmt.Errorf("%s[doc%d]: %w", path, i, ErrDecode), err)
