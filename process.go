@@ -101,6 +101,8 @@ func processRecursive(root any, obj any) (any, bool, error) {
 	case []any:
 		ret := []any{}
 
+		// TODO: Support $merge, $replace, $encode, $output
+
 		for _, v := range objType {
 			v2, use, err := processRecursive(root, v)
 			if err != nil {
