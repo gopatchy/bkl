@@ -22,5 +22,9 @@ polytest:
 fuzz:
 	{{go}} test -fuzz FuzzParser
 
+fuzz-save:
+	cp ~/.cache/go-build/fuzz/github.com/gopatchy/bkl/FuzzParser/* testdata/fuzz/FuzzParser/
+	rm ~/.cache/go-build/fuzz/github.com/gopatchy/bkl/FuzzParser/*
+
 todo:
 	-git grep -e TODO --and --not -e ignoretodo
