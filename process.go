@@ -116,7 +116,7 @@ func processMap(root any, obj map[string]any) (any, bool, error) {
 func processList(root any, obj []any) (any, bool, error) {
 	ret := []any{}
 
-	// TODO: Support $merge, $replace, $output
+	// TODO: Support $merge, $replace, $output: true
 
 	encode := ""
 
@@ -131,6 +131,12 @@ func processList(root any, obj []any) (any, bool, error) {
 				encode = v3
 
 				continue
+			}
+
+			if v2, found := vMap["$output"]; found {
+				if v3, ok := v2.(bool); ok && !v3 {
+					return nil, false, nil
+				}
 			}
 		}
 
