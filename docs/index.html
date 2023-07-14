@@ -680,7 +680,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="merge">Merging Subtrees</a></h2>
 
-<p>Use <ifocus>$merge</ifocus> to merge the contents one subtree into another.</p>
+<p>Use <ifocus>$merge</ifocus> to merge the contents one subtree or scalar value into another.</p>
 
 <split3a>
 
@@ -697,8 +697,26 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
-  <key>a</key>: <number>1</number>
+  <focus><key>a</key>: <number>1</number></focus>
   <key>b</key>: <number>2</number></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>b</key>: <number>2</number>
+  <key>c</key>: <focus><string>$merge:foo.bar.a</string></focus></code>
+
+<op>=</op>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>b</key>: <number>2</number>
+  <key>c</key>: <focus><number>1</number></focus></code>
 
 </split3a>
 

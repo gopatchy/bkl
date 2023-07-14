@@ -1,6 +1,9 @@
 package bkl
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func process(root any) (any, error) {
 	return processRecursive(root, root)
@@ -68,6 +71,20 @@ func processRecursive(root any, obj any) (any, error) {
 		}
 
 		return objType, nil
+
+	case string:
+		if strings.HasPrefix(objType, "$merge:") {
+			path := strings.TrimPrefix(objType, "$merge:")
+
+			in := get(root, path)
+			if in == nil {
+				return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
+			}
+
+			return in, nil
+		}
+
+		return obj, nil
 
 	default:
 		return obj, nil

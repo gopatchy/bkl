@@ -1,0 +1,4 @@
+foo: bar
+zig:
+  b: 2
+  zag: $merge:foo
