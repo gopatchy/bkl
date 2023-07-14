@@ -637,32 +637,23 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="encode">Embedding Encoded Files</a></h2>
+<h2><a name="encode">Encoding Subtrees</a></h2>
 
-<p>Use <ifocus>$encode:</ifocus> to evaluate a file and include its output as a string.</p>
+<p>Use <ifocus>$encode</ifocus> to output the subtree encoded as a string in the specified format.</p>
 
-<split5a>
+<split3a>
 
-<label>a.yaml</label>
-<noop></noop>
-<label>b.yaml</label>
-<noop></noop>
-<noop></noop>
-
-<code class="labeled"><key>a</key>: <focus><string>$encode:b.yaml</string></focus></code>
-
-<op></op>
-
-<code class="labeled"><key>b</key>: <number>2</number>
-<key>c</key>: <number>3</number></code>
+<code><key>a</key>:
+  b: 2
+  c: 3
+  <focus><key>$encode</key>: <string>json</string></focus></code>
 
 <op>=</op>
 
 <code><key>a</key>: <focus>|<string>
-	b: 2
-	c: 3</string></focus></code>
+	{"b":2,"c":3}</string></focus></code>
 
-</split5a>
+</split3a>
 
 <vSpace></vSpace>
 <vSpace></vSpace>

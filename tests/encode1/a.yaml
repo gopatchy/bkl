@@ -1,1 +1,4 @@
-a: $encode:b.yaml
+a:
+  b: 2
+  c: 3
+  $encode: json

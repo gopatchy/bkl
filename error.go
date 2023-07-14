@@ -22,6 +22,7 @@ var (
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
 
 	// Specific language directive errors
+	ErrInvalidEncodeType  = fmt.Errorf("include $encode type (%w)", ErrInvalidDirective)
 	ErrInvalidMergeType   = fmt.Errorf("invalid $merge type (%w)", ErrInvalidDirective)
 	ErrInvalidParentType  = fmt.Errorf("invalid $parent type (%w)", ErrInvalidDirective)
 	ErrInvalidPatchType   = fmt.Errorf("invalid $patch type (%w)", ErrInvalidDirective)

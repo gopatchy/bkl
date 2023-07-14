@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -55,6 +56,19 @@ func processRecursive(root any, obj any) (any, bool, error) {
 			}
 		}
 
+		encode := ""
+
+		if v, found := objType["$encode"]; found {
+			v2, ok := v.(string)
+			if !ok {
+				return nil, false, fmt.Errorf("%T: %w", v, ErrInvalidEncodeType)
+			}
+
+			encode = v2
+
+			delete(objType, "$encode")
+		}
+
 		ret := map[string]any{}
 
 		for k, v := range objType {
@@ -66,6 +80,20 @@ func processRecursive(root any, obj any) (any, bool, error) {
 			if use {
 				ret[k] = v2
 			}
+		}
+
+		if encode != "" {
+			f, found := formatByExtension[encode]
+			if !found {
+				return nil, false, fmt.Errorf("%s: %w", encode, ErrUnknownFormat)
+			}
+
+			enc, err := f.encode(ret)
+			if err != nil {
+				return nil, false, errors.Join(ErrEncode, err)
+			}
+
+			return string(enc), true, nil
 		}
 
 		return ret, true, nil
@@ -107,29 +135,6 @@ func processRecursive(root any, obj any) (any, bool, error) {
 			}
 
 			return in, true, nil
-		}
-
-		if strings.HasPrefix(objType, "$encode:") {
-			path := strings.TrimPrefix(objType, "$encode:")
-
-			realPath, f, err := FileMatch(path)
-			if err != nil {
-				return nil, false, err
-			}
-
-			p := New()
-
-			err = p.MergeFileLayers(realPath)
-			if err != nil {
-				return nil, false, err
-			}
-
-			b, err := p.Output(f)
-			if err != nil {
-				return nil, false, err
-			}
-
-			return string(b), true, nil
 		}
 
 		return obj, true, nil
