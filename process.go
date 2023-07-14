@@ -84,6 +84,17 @@ func processRecursive(root any, obj any) (any, error) {
 			return in, nil
 		}
 
+		if strings.HasPrefix(objType, "$replace:") {
+			path := strings.TrimPrefix(objType, "$replace:")
+
+			in := get(root, path)
+			if in == nil {
+				return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
+			}
+
+			return in, nil
+		}
+
 		return obj, nil
 
 	default:
