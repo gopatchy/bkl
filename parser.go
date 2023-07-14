@@ -209,7 +209,7 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		return [][]byte{}, nil
 	}
 
-	outs := findOutputs(obj)
+	obj, outs := findOutputs(obj)
 	if len(outs) == 0 {
 		outs = append(outs, obj)
 	}

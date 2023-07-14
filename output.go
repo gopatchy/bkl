@@ -5,38 +5,67 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-func findOutputs(obj any) []any {
+func findOutputs(obj any) (any, []any) {
 	switch objType := obj.(type) {
 	case map[string]any:
-		ret := []any{}
+		return findOutputsMap(objType)
 
-		if v, found := objType["$output"]; found {
+	case []any:
+		return findOutputsList(objType)
+
+	default:
+		return obj, []any{}
+	}
+}
+
+func findOutputsMap(obj map[string]any) (any, []any) {
+	ret := map[string]any{}
+	outs := []any{}
+
+	keys := maps.Keys(obj)
+	slices.Sort(keys)
+
+	for _, k := range keys {
+		v := obj[k]
+
+		if k == "$output" {
 			if v2, ok := v.(bool); ok && v2 {
-				delete(objType, "$output")
-
-				ret = append(ret, obj)
+				outs = append(outs, ret)
+				continue
 			}
 		}
 
-		keys := maps.Keys(objType)
-		slices.Sort(keys)
-
-		for _, k := range keys {
-			ret = append(ret, findOutputs(objType[k])...)
-		}
-
-		return ret
-
-	case []any:
-		ret := []any{}
-
-		for _, v := range objType {
-			ret = append(ret, findOutputs(v)...)
-		}
-
-		return ret
-
-	default:
-		return []any{}
+		vNew, subOuts := findOutputs(v)
+		outs = append(outs, subOuts...)
+		ret[k] = vNew
 	}
+
+	return ret, outs
+}
+
+func findOutputsList(obj []any) (any, []any) {
+	ret := []any{}
+	outs := []any{}
+	output := false
+
+	for _, v := range obj {
+		if vMap, ok := v.(map[string]any); ok {
+			if v2, found := vMap["$output"]; found {
+				if v3, ok := v2.(bool); ok && v3 {
+					output = true
+					continue
+				}
+			}
+		}
+
+		vNew, subOuts := findOutputs(v)
+		outs = append(outs, subOuts...)
+		ret = append(ret, vNew)
+	}
+
+	if output {
+		outs = append(outs, any(ret))
+	}
+
+	return ret, outs
 }
