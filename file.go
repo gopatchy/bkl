@@ -64,7 +64,11 @@ func loadFile(path string) (*file, error) {
 			return nil, errorsJoin(fmt.Errorf("%s[doc%d]: %w", path, i, ErrDecode), err)
 		}
 
-		doc = normalize(doc)
+		doc, err = normalize(doc)
+		if err != nil {
+			return nil, err
+		}
+
 		doc = env(doc)
 
 		f.docs = append(f.docs, doc)

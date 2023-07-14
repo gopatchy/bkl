@@ -1,32 +1,55 @@
 package bkl
 
-func normalize(obj any) any {
+import "fmt"
+
+func normalize(obj any) (any, error) {
 	switch objType := obj.(type) {
+	case map[any]any:
+		return nil, fmt.Errorf("numeric keys not supported (%w)", ErrInvalidType)
+
 	case []map[string]any:
 		ret := []any{}
+
 		for _, v := range objType {
-			ret = append(ret, normalize(v))
+			v2, err := normalize(v)
+			if err != nil {
+				return nil, err
+			}
+
+			ret = append(ret, v2)
 		}
 
-		return ret
+		return ret, nil
 
 	case map[string]any:
 		ret := map[string]any{}
+
 		for k, v := range objType {
-			ret[k] = normalize(v)
+			v2, err := normalize(v)
+			if err != nil {
+				return nil, err
+			}
+
+			ret[k] = v2
 		}
 
-		return ret
+		return ret, nil
 
 	case []any:
 		ret := []any{}
+
 		for _, v := range objType {
-			ret = append(ret, normalize(v))
+			v2, err := normalize(v)
+			if err != nil {
+				return nil, err
+			}
+
+			ret = append(ret, v2)
 		}
 
-		return ret
+		return ret, nil
 
 	default:
-		return objType
+		return objType, nil
 	}
 }
