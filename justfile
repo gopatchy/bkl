@@ -19,5 +19,8 @@ polytest:
 	@just go=go1.19.10
 	@just go=go1.18.10
 
+fuzz:
+	{{go}} test -fuzz FuzzParser
+
 todo:
 	-git grep -e TODO --and --not -e ignoretodo
