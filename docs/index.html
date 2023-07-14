@@ -644,14 +644,26 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <split3a>
 
 <code><key>a</key>:
-  b: 2
-  c: 3
+  <key>b</key>: <number>2</number>
+  <key>c</key>: <number>3</number>
   <focus><key>$encode</key>: <string>json</string></focus></code>
 
 <op>=</op>
 
 <code><key>a</key>: <focus>|<string>
 	{"b":2,"c":3}</string></focus></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>:
+  - <key>b</key>: <number>2</number>
+  - <key>c</key>: <number>3</number>
+  - <focus><key>$encode</key>: <string>json</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus>|<string>
+	[{"b":2},{"c":3}]</string></focus></code>
 
 </split3a>
 

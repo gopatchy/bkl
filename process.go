@@ -116,9 +116,24 @@ func processMap(root any, obj map[string]any) (any, bool, error) {
 func processList(root any, obj []any) (any, bool, error) {
 	ret := []any{}
 
-	// TODO: Support $merge, $replace, $encode, $output
+	// TODO: Support $merge, $replace, $output
+
+	encode := ""
 
 	for _, v := range obj {
+		if vMap, ok := v.(map[string]any); ok {
+			if v2, found := vMap["$encode"]; found {
+				v3, ok := v2.(string)
+				if !ok {
+					return nil, false, fmt.Errorf("%T: %w", v2, ErrInvalidEncodeType)
+				}
+
+				encode = v3
+
+				continue
+			}
+		}
+
 		v2, use, err := processRecursive(root, v)
 		if err != nil {
 			return nil, false, err
@@ -127,6 +142,20 @@ func processList(root any, obj []any) (any, bool, error) {
 		if use {
 			ret = append(ret, v2)
 		}
+	}
+
+	if encode != "" {
+		f, found := formatByExtension[encode]
+		if !found {
+			return nil, false, fmt.Errorf("%s: %w", encode, ErrUnknownFormat)
+		}
+
+		enc, err := f.encode(ret)
+		if err != nil {
+			return nil, false, errors.Join(ErrEncode, err)
+		}
+
+		return string(enc), true, nil
 	}
 
 	return ret, true, nil
