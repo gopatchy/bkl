@@ -73,6 +73,16 @@ func mergeMap(dst map[string]any, src any) (any, error) {
 func mergeList(dst []any, src any) (any, error) {
 	switch src2 := src.(type) {
 	case []any:
+		dst = slicesDeleteFunc(
+			dst,
+			func(v any) bool {
+				if v2, ok := v.(string); ok {
+					return v2 == "$required"
+				}
+				return false
+			},
+		)
+
 		for i, val := range src2 {
 			switch val2 := val.(type) { //nolint:gocritic
 			case map[string]any:
