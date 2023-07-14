@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-func process(root any) (any, error) {
+func process(root any) (any, bool, error) {
 	return processRecursive(root, root)
 }
 
-func processRecursive(root any, obj any) (any, error) {
+func processRecursive(root any, obj any) (any, bool, error) {
 	switch objType := obj.(type) {
 	case map[string]any:
 		if path, found := objType["$merge"]; found {
@@ -17,17 +17,17 @@ func processRecursive(root any, obj any) (any, error) {
 
 			pathVal, ok := path.(string)
 			if !ok {
-				return nil, fmt.Errorf("%T: %w", path, ErrInvalidMergeType)
+				return nil, false, fmt.Errorf("%T: %w", path, ErrInvalidMergeType)
 			}
 
 			in := get(root, pathVal)
 			if in == nil {
-				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrMergeRefNotFound)
+				return nil, false, fmt.Errorf("%s: (%w)", pathVal, ErrMergeRefNotFound)
 			}
 
 			next, err := merge(objType, in)
 			if err != nil {
-				return nil, err
+				return nil, false, err
 			}
 
 			return processRecursive(root, next)
@@ -38,39 +38,53 @@ func processRecursive(root any, obj any) (any, error) {
 
 			pathVal, ok := path.(string)
 			if !ok {
-				return nil, fmt.Errorf("%T: %w", path, ErrInvalidReplaceType)
+				return nil, false, fmt.Errorf("%T: %w", path, ErrInvalidReplaceType)
 			}
 
 			next := get(root, pathVal)
 			if next == nil {
-				return nil, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
+				return nil, false, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
 			}
 
 			return processRecursive(root, next)
 		}
 
-		for k, v := range objType {
-			v2, err := processRecursive(root, v)
-			if err != nil {
-				return nil, err
+		if v, found := objType["$output"]; found {
+			if v2, ok := v.(bool); ok && !v2 {
+				return nil, false, nil
 			}
-
-			objType[k] = v2
 		}
 
-		return objType, nil
+		ret := map[string]any{}
+
+		for k, v := range objType {
+			v2, use, err := processRecursive(root, v)
+			if err != nil {
+				return nil, false, err
+			}
+
+			if use {
+				ret[k] = v2
+			}
+		}
+
+		return ret, true, nil
 
 	case []any:
-		for i, v := range objType {
-			v2, err := processRecursive(root, v)
+		ret := []any{}
+
+		for _, v := range objType {
+			v2, use, err := processRecursive(root, v)
 			if err != nil {
-				return nil, err
+				return nil, false, err
 			}
 
-			objType[i] = v2
+			if use {
+				ret = append(ret, v2)
+			}
 		}
 
-		return objType, nil
+		return ret, true, nil
 
 	case string:
 		if strings.HasPrefix(objType, "$merge:") {
@@ -78,10 +92,10 @@ func processRecursive(root any, obj any) (any, error) {
 
 			in := get(root, path)
 			if in == nil {
-				return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
+				return nil, false, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 			}
 
-			return in, nil
+			return in, true, nil
 		}
 
 		if strings.HasPrefix(objType, "$replace:") {
@@ -89,15 +103,15 @@ func processRecursive(root any, obj any) (any, error) {
 
 			in := get(root, path)
 			if in == nil {
-				return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
+				return nil, false, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 			}
 
-			return in, nil
+			return in, true, nil
 		}
 
-		return obj, nil
+		return obj, true, nil
 
 	default:
-		return obj, nil
+		return obj, true, nil
 	}
 }

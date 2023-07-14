@@ -655,7 +655,6 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <op>Error</op>
 
 <vSpace class="span5"></vSpace>
-<vSpace class="span5"></vSpace>
 
 <code><key>a</key>: <number>1</number>
 <focus><key>b</key>: <string>$required</string></focus></code>
@@ -669,6 +668,39 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
+<key>c</key>: <number>3</number></code>
+
+<vSpace class="span5"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>b</key>:
+  - <string>$required</string></focus></code>
+
+<op>+</op>
+
+<code><key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<op>Error</op>
+
+<vSpace class="span5"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>b</key>:
+  - <string>$required</string></focus></code>
+
+<op>+</op>
+
+<code><focus><key>b</key>:
+  - <number>2</number></focus>
+<key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>b</key>:
+  - <number>2</number></focus>
 <key>c</key>: <number>3</number></code>
 
 </split5a>
@@ -727,7 +759,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="replace">Replacing Subtrees</a></h2>
 
-<p>Use <ifocus>$replace</ifocus> to merge the contents of one subtree with another.</p>
+<p>Use <ifocus>$replace</ifocus> to merge the contents of one subtree or scalar value with another.</p>
 
 <split3a>
 
@@ -746,7 +778,29 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <key>zig</key>:
   <key>a</key>: <number>1</number></code>
 
+<vSpace class="span3"></vSpace>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>b</key>: <number>2</number>
+  <key>c</key>: <focus><string>$replace:foo.bar.a</string></focus></code>
+
+<op>=</op>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    <key>a</key>: <number>1</number>
+<key>zig</key>:
+  <key>b</key>: <number>2</number>
+  <key>c</key>: <focus><number>1</number></focus></code>
+
 </split3a>
+
+<vSpace></vSpace>
+
+<p>Note that <ifocus>$merge</ifocus> and <ifocus>$replace</ifocus> are equivalent for scalar values.</p>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
@@ -755,7 +809,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="output">Subtree Output</a></h2>
 
-<p>Use <ifocus>$output</ifocus> to select a subtree for output instead of the document root.</p>
+<p>Use <ifocus>$output: true</ifocus> to select a subtree for output instead of the document root.</p>
 
 <split3a>
 
@@ -774,7 +828,37 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <vSpace></vSpace>
 
-<p>Multiple instances of <ifocus>$output</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
+<p>Multiple instances of <ifocus>$output: true</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
+
+<p>Use <ifocus>$output: false</ifocus> to omit a subtree or entire document from the output.</p>
+
+<split3a>
+
+<code><key>a</key>:
+  <key>b</key>: <number>1</number>
+  <focus><key>$output</key>: <bool>false</bool></focus>
+<key>c</key>:
+  <key>d</key>: <number>2</number></code>
+
+<op>=</op>
+
+<code><key>c</key>:
+  <key>d</key>: <number>2</number></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>$output</key>: <bool>false</bool></focus>
+---
+<key>b</key>: <number>2</number></code>
+
+<op>=</op>
+
+<code><key>b</key>: <number>2</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
 
 <p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
 

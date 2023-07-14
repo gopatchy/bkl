@@ -200,9 +200,13 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		return nil, err
 	}
 
-	obj, err = process(obj)
+	obj, use, err := process(obj)
 	if err != nil {
 		return nil, err
+	}
+
+	if !use {
+		return [][]byte{}, nil
 	}
 
 	outs := findOutputs(obj)

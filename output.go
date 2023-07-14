@@ -10,10 +10,12 @@ func findOutputs(obj any) []any {
 	case map[string]any:
 		ret := []any{}
 
-		if _, found := objType["$output"]; found {
-			delete(objType, "$output")
+		if v, found := objType["$output"]; found {
+			if v2, ok := v.(bool); ok && v2 {
+				delete(objType, "$output")
 
-			ret = append(ret, obj)
+				ret = append(ret, obj)
+			}
 		}
 
 		keys := maps.Keys(objType)

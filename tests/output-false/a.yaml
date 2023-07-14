@@ -1,0 +1,5 @@
+a:
+  $output: false
+  b: 1
+c:
+  d: 1
