@@ -109,6 +109,29 @@ func processRecursive(root any, obj any) (any, bool, error) {
 			return in, true, nil
 		}
 
+		if strings.HasPrefix(objType, "$encode:") {
+			path := strings.TrimPrefix(objType, "$encode:")
+
+			realPath, f, err := FileMatch(path)
+			if err != nil {
+				return nil, false, err
+			}
+
+			p := New()
+
+			err = p.MergeFileLayers(realPath)
+			if err != nil {
+				return nil, false, err
+			}
+
+			b, err := p.Output(f)
+			if err != nil {
+				return nil, false, err
+			}
+
+			return string(b), true, nil
+		}
+
 		return obj, true, nil
 
 	default:

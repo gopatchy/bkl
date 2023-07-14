@@ -637,6 +637,38 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
+<h2><a name="encode">Embedding Encoded Files</a></h2>
+
+<p>Use <ifocus>$encode:</ifocus> to evaluate a file and include its output as a string.</p>
+
+<split5a>
+
+<label>a.yaml</label>
+<noop></noop>
+<label>b.yaml</label>
+<noop></noop>
+<noop></noop>
+
+<code class="labeled"><key>a</key>: <focus><string>$encode:b.yaml</string></focus></code>
+
+<op></op>
+
+<code class="labeled"><key>b</key>: <number>2</number>
+<key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus>|<string>
+	b: 2
+	c: 3</string></focus></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
 <h2><a name="required-values">Required Values</a></h2>
 
 <p>Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.</p>
