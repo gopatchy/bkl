@@ -22,7 +22,7 @@ func merge(dst any, src any) (any, error) {
 	}
 }
 
-func mergeMap(dst map[string]any, src any) (any, error) {
+func mergeMap(dst map[string]any, src any) (map[string]any, error) {
 	switch src2 := src.(type) {
 	case map[string]any:
 		patch := getStringValue(src2, "$patch")

@@ -38,8 +38,8 @@ import (
 // Output phase 1 (process)
 //   - $merge
 //   - $replace
-//   - $encode
 //   - $output: false
+//   - $encode
 //
 // Output phase 2 (output)
 //   - $output: true

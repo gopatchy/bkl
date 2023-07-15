@@ -27,27 +27,23 @@ func processRecursive(root any, obj any) (any, error) {
 }
 
 func processMap(root any, obj map[string]any) (any, error) {
-	path := getStringValue(obj, "$merge")
-	if path != "" {
-		delete(obj, "$merge")
+	var err error
 
+	path, obj := popStringValue(obj, "$merge")
+	if path != "" {
 		in := get(root, path)
 		if in == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
-		next, err := merge(obj, in)
+		obj, err = mergeMap(obj, in)
 		if err != nil {
 			return nil, err
 		}
-
-		return processRecursive(root, next)
 	}
 
-	path = getStringValue(obj, "$replace")
+	path, obj = popStringValue(obj, "$replace")
 	if path != "" {
-		delete(obj, "$replace")
-
 		next := get(root, path)
 		if next == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrReplaceRefNotFound)
@@ -56,35 +52,35 @@ func processMap(root any, obj map[string]any) (any, error) {
 		return processRecursive(root, next)
 	}
 
-	if hasBoolValue(obj, "$output", false) {
+	output, obj := popBoolValue(obj, "$output", false)
+	if output {
 		return nil, nil
 	}
 
-	encode := getStringValue(obj, "$encode")
-	if encode != "" {
-		delete(obj, "$encode")
-	}
-
-	ret := map[string]any{}
-
-	for k, v := range obj {
+	obj, err = filterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := processRecursive(root, v)
 		if err != nil {
 			return nil, err
 		}
 
-		if v2 != nil {
-			ret[k] = v2
+		if v2 == nil {
+			return nil, nil
 		}
+
+		return map[string]any{k: v2}, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
+	encode, obj := popStringValue(obj, "$encode")
 	if encode != "" {
 		f, err := getFormat(encode)
 		if err != nil {
 			return nil, err
 		}
 
-		enc, err := f.encode(ret)
+		enc, err := f.encode(obj)
 		if err != nil {
 			return nil, errors.Join(ErrEncode, err)
 		}
@@ -92,7 +88,7 @@ func processMap(root any, obj map[string]any) (any, error) {
 		return string(enc), nil
 	}
 
-	return ret, nil
+	return obj, nil
 }
 
 func processList(root any, obj []any) (any, error) {
