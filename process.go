@@ -27,8 +27,6 @@ func processRecursive(root any, obj any) (any, error) {
 }
 
 func processMap(root any, obj map[string]any) (any, error) {
-	var err error
-
 	path, obj := popStringValue(obj, "$merge")
 	if path != "" {
 		in := get(root, path)
@@ -36,10 +34,12 @@ func processMap(root any, obj map[string]any) (any, error) {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
-		obj, err = mergeMap(obj, in)
+		next, err := mergeMap(obj, in)
 		if err != nil {
 			return nil, err
 		}
+
+		return processRecursive(root, next)
 	}
 
 	path, obj = popStringValue(obj, "$replace")
@@ -57,7 +57,7 @@ func processMap(root any, obj map[string]any) (any, error) {
 		return nil, nil
 	}
 
-	obj, err = filterMap(obj, func(k string, v any) (map[string]any, error) {
+	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := processRecursive(root, v)
 		if err != nil {
 			return nil, err

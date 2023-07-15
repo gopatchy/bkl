@@ -1,0 +1,9 @@
+foo:
+  a: 1
+bar:
+  b: 2
+  $merge: foo
+zig:
+  c: 3
+  $merge: bar
+  $output: true
