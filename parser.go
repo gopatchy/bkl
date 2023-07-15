@@ -38,9 +38,11 @@ import (
 // Output phase 1 (process)
 //   - $merge
 //   - $replace
+//   - $encode
+//   - $output: false
 //
 // Output phase 2 (output)
-//   - $output
+//   - $output: true
 type Parser struct {
 	docs  []any
 	debug bool
@@ -200,12 +202,12 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		return nil, err
 	}
 
-	obj, use, err := process(obj)
+	obj, err = process(obj)
 	if err != nil {
 		return nil, err
 	}
 
-	if !use {
+	if obj == nil {
 		return [][]byte{}, nil
 	}
 

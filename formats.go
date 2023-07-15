@@ -1,5 +1,7 @@
 package bkl
 
+import "fmt"
+
 type (
 	decodeFunc func([]byte) (any, error)
 	encodeFunc func(any) ([]byte, error)
@@ -27,4 +29,13 @@ var formatByExtension = map[string]format{
 		decode: decodeYAML,
 		encode: encodeYAML,
 	},
+}
+
+func getFormat(name string) (*format, error) {
+	f, found := formatByExtension[name]
+	if !found {
+		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)
+	}
+
+	return &f, nil
 }
