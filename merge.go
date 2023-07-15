@@ -25,13 +25,9 @@ func merge(dst any, src any) (any, error) {
 func mergeMap(dst map[string]any, src any) (any, error) {
 	switch src2 := src.(type) {
 	case map[string]any:
-		if patch, found := src2["$patch"]; found {
-			patchVal, ok := patch.(string)
-			if !ok {
-				return nil, fmt.Errorf("%T: %w", patch, ErrInvalidPatchType)
-			}
-
-			switch patchVal {
+		patch := getStringValue(src2, "$patch")
+		if patch != "" {
+			switch patch {
 			case "replace":
 				delete(src2, "$patch")
 				return src2, nil
@@ -76,23 +72,16 @@ func mergeList(dst []any, src any) (any, error) {
 		dst = slicesDeleteFunc(
 			dst,
 			func(v any) bool {
-				if v2, ok := v.(string); ok {
-					return v2 == "$required"
-				}
-				return false
+				return toString(v) == "$required"
 			},
 		)
 
 		for i, val := range src2 {
 			switch val2 := val.(type) { //nolint:gocritic
 			case map[string]any:
-				if patch, found := val2["$patch"]; found {
-					patchVal, ok := patch.(string)
-					if !ok {
-						return nil, fmt.Errorf("%T: %w", patch, ErrInvalidPatchType)
-					}
-
-					switch patchVal {
+				patch := getStringValue(val2, "$patch")
+				if patch != "" {
+					switch patch {
 					case "delete":
 						delete(val2, "$patch")
 

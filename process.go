@@ -27,17 +27,13 @@ func processRecursive(root any, obj any) (any, bool, error) {
 }
 
 func processMap(root any, obj map[string]any) (any, bool, error) {
-	if path, found := obj["$merge"]; found {
+	path := getStringValue(obj, "$merge")
+	if path != "" {
 		delete(obj, "$merge")
 
-		pathVal, ok := path.(string)
-		if !ok {
-			return nil, false, fmt.Errorf("%T: %w", path, ErrInvalidMergeType)
-		}
-
-		in := get(root, pathVal)
+		in := get(root, path)
 		if in == nil {
-			return nil, false, fmt.Errorf("%s: (%w)", pathVal, ErrMergeRefNotFound)
+			return nil, false, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
 		next, err := merge(obj, in)
@@ -48,38 +44,24 @@ func processMap(root any, obj map[string]any) (any, bool, error) {
 		return processRecursive(root, next)
 	}
 
-	if path, found := obj["$replace"]; found {
+	path = getStringValue(obj, "$replace")
+	if path != "" {
 		delete(obj, "$replace")
 
-		pathVal, ok := path.(string)
-		if !ok {
-			return nil, false, fmt.Errorf("%T: %w", path, ErrInvalidReplaceType)
-		}
-
-		next := get(root, pathVal)
+		next := get(root, path)
 		if next == nil {
-			return nil, false, fmt.Errorf("%s: (%w)", pathVal, ErrReplaceRefNotFound)
+			return nil, false, fmt.Errorf("%s: (%w)", path, ErrReplaceRefNotFound)
 		}
 
 		return processRecursive(root, next)
 	}
 
-	if v, found := obj["$output"]; found {
-		if v2, ok := v.(bool); ok && !v2 {
-			return nil, false, nil
-		}
+	if hasBoolValue(obj, "$output", false) {
+		return nil, false, nil
 	}
 
-	encode := ""
-
-	if v, found := obj["$encode"]; found {
-		v2, ok := v.(string)
-		if !ok {
-			return nil, false, fmt.Errorf("%T: %w", v, ErrInvalidEncodeType)
-		}
-
-		encode = v2
-
+	encode := getStringValue(obj, "$encode")
+	if encode != "" {
 		delete(obj, "$encode")
 	}
 
@@ -122,21 +104,13 @@ func processList(root any, obj []any) (any, bool, error) {
 
 	for _, v := range obj {
 		if vMap, ok := v.(map[string]any); ok {
-			if v2, found := vMap["$encode"]; found {
-				v3, ok := v2.(string)
-				if !ok {
-					return nil, false, fmt.Errorf("%T: %w", v2, ErrInvalidEncodeType)
-				}
-
-				encode = v3
-
+			if encode2 := getStringValue(vMap, "$encode"); encode2 != "" {
+				encode = encode2
 				continue
 			}
 
-			if v2, found := vMap["$output"]; found {
-				if v3, ok := v2.(bool); ok && !v3 {
-					return nil, false, nil
-				}
+			if hasBoolValue(vMap, "$output", false) {
+				return nil, false, nil
 			}
 		}
 

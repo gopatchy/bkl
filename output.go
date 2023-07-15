@@ -22,18 +22,19 @@ func findOutputsMap(obj map[string]any) (any, []any) {
 	ret := map[string]any{}
 	outs := []any{}
 
+	if hasBoolValue(obj, "$output", true) {
+		outs = append(outs, ret)
+	}
+
 	keys := maps.Keys(obj)
 	slices.Sort(keys)
 
 	for _, k := range keys {
-		v := obj[k]
-
 		if k == "$output" {
-			if v2, ok := v.(bool); ok && v2 {
-				outs = append(outs, ret)
-				continue
-			}
+			continue
 		}
+
+		v := obj[k]
 
 		vNew, subOuts := findOutputs(v)
 		outs = append(outs, subOuts...)
@@ -50,11 +51,9 @@ func findOutputsList(obj []any) (any, []any) {
 
 	for _, v := range obj {
 		if vMap, ok := v.(map[string]any); ok {
-			if v2, found := vMap["$output"]; found {
-				if v3, ok := v2.(bool); ok && v3 {
-					output = true
-					continue
-				}
+			if hasBoolValue(vMap, "$output", true) {
+				output = true
+				continue
 			}
 		}
 

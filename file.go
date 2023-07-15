@@ -105,31 +105,23 @@ func (f *file) parentFromDirective() (*string, error) {
 		return nil, nil
 	}
 
-	parent, found := docMap["$parent"]
-	if !found {
+	if hasNilValue(docMap, "$parent") || hasBoolValue(docMap, "$parent", false) {
+		delete(docMap, "$parent")
+		return &baseTemplate, nil
+	}
+
+	parent := getStringValue(docMap, "$parent")
+	if parent == "" {
 		return nil, nil
 	}
 
 	delete(docMap, "$parent")
 
-	if parent == nil {
-		return &baseTemplate, nil
-	}
+	parent = filepath.Join(filepath.Dir(f.path), parent)
 
-	if v, ok := parent.(bool); ok && !v {
-		return &baseTemplate, nil
-	}
-
-	parentStr, ok := parent.(string)
-	if !ok {
-		return nil, fmt.Errorf("%T: %w", parent, ErrInvalidParentType)
-	}
-
-	parentStr = filepath.Join(filepath.Dir(f.path), parentStr)
-
-	parentPath := findFile(parentStr)
+	parentPath := findFile(parent)
 	if parentPath == "" {
-		return nil, fmt.Errorf("%s: %w", parentStr, ErrMissingFile)
+		return nil, fmt.Errorf("%s: %w", parent, ErrMissingFile)
 	}
 
 	return &parentPath, nil
