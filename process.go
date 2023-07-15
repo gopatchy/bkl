@@ -146,7 +146,7 @@ func processString(root any, obj string) (any, error) {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
-		return in, nil
+		return processRecursive(root, in)
 	}
 
 	if strings.HasPrefix(obj, "$replace:") {
@@ -157,7 +157,7 @@ func processString(root any, obj string) (any, error) {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
-		return in, nil
+		return processRecursive(root, in)
 	}
 
 	return obj, nil
