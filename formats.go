@@ -1,33 +1,34 @@
 package bkl
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
 
-type (
-	decodeFunc func([]byte) (any, error)
-	encodeFunc func(any) ([]byte, error)
+	"github.com/pelletier/go-toml/v2"
+	"gopkg.in/yaml.v3"
 )
 
 type format struct {
-	decode decodeFunc
-	encode encodeFunc
+	marshal   func(any) ([]byte, error)
+	unmarshal func([]byte, any) error
 }
 
 var formatByExtension = map[string]format{
 	"json": {
-		decode: decodeJSON,
-		encode: encodeJSON,
+		marshal:   jsonMarshal,
+		unmarshal: json.Unmarshal,
 	},
 	"json-pretty": {
-		decode: decodeJSON,
-		encode: encodeJSONPretty,
+		marshal:   jsonMarshalPretty,
+		unmarshal: json.Unmarshal,
 	},
 	"toml": {
-		decode: decodeTOML,
-		encode: encodeTOML,
+		marshal:   toml.Marshal,
+		unmarshal: toml.Unmarshal,
 	},
 	"yaml": {
-		decode: decodeYAML,
-		encode: encodeYAML,
+		marshal:   yaml.Marshal,
+		unmarshal: yaml.Unmarshal,
 	},
 }
 
@@ -38,4 +39,19 @@ func getFormat(name string) (*format, error) {
 	}
 
 	return &f, nil
+}
+
+func (f *format) encode(v any) ([]byte, error) {
+	return f.marshal(v)
+}
+
+func (f *format) decode(in []byte) (any, error) {
+	var obj any
+
+	err := f.unmarshal(in, &obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return obj, nil
 }

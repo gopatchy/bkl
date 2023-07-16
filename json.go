@@ -5,19 +5,8 @@ import (
 	"encoding/json"
 )
 
-func decodeJSON(in []byte) (any, error) {
-	var obj any
-
-	err := json.Unmarshal(in, &obj)
-	if err != nil {
-		return nil, err
-	}
-
-	return obj, nil
-}
-
-func encodeJSON(obj any) ([]byte, error) {
-	out, err := json.Marshal(obj)
+func jsonMarshal(v any) ([]byte, error) {
+	out, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -25,12 +14,12 @@ func encodeJSON(obj any) ([]byte, error) {
 	return append(out, '\n'), nil
 }
 
-func encodeJSONPretty(obj any) ([]byte, error) {
+func jsonMarshalPretty(v any) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	enc := json.NewEncoder(buf)
 	enc.SetIndent("", "  ")
 
-	err := enc.Encode(obj)
+	err := enc.Encode(v)
 	if err != nil {
 		return nil, err
 	}
