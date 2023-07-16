@@ -89,14 +89,13 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 		return src, nil
 	}
 
-	dst = slicesClone(dst)
+	dst, _ = filterList(dst, func(v any) ([]any, error) {
+		if toString(v) == "$required" {
+			return nil, nil
+		}
 
-	dst = slicesDeleteFunc(
-		dst,
-		func(v any) bool {
-			return toString(v) == "$required"
-		},
-	)
+		return []any{v}, nil
+	})
 
 	for _, v := range src {
 		vMap, ok := v.(map[string]any)
@@ -106,8 +105,12 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			case "":
 
 			case "delete":
-				dst = slicesDeleteFunc(dst, func(elem any) bool {
-					return match(elem, vMap)
+				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
+					if match(v2, vMap) {
+						return nil, nil
+					}
+
+					return []any{v2}, nil
 				})
 
 				continue
