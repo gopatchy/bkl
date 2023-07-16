@@ -298,6 +298,11 @@ func FuzzParser(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, filename1 string, content1 []byte, filename2 string, content2 []byte) {
+		if strings.HasSuffix(filename1, ".yaml") || strings.HasSuffix(filename2, ".yaml") {
+			// TODO: Remove once fixed upstream: https://github.com/go-yaml/yaml/issues/932
+			return
+		}
+
 		path1, err := writeFile(t, filename1, content1)
 		if err != nil {
 			t.Log(err)
