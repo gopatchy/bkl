@@ -72,6 +72,58 @@ func popStringValue(m map[string]any, k string) (string, map[string]any) {
 	return v, m
 }
 
+func listHasBoolValue(l []any, k string, v bool) bool {
+	for _, x := range l {
+		xMap, ok := x.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if hasBoolValue(xMap, k, v) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func listGetStringValue(l []any, k string) string {
+	for _, x := range l {
+		xMap, ok := x.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		v2 := getStringValue(xMap, k)
+		if v2 != "" {
+			return v2
+		}
+	}
+
+	return ""
+}
+
+func listPopStringValue(l []any, k string) (string, []any) {
+	v2 := listGetStringValue(l, k)
+
+	if v2 != "" {
+		l, _ = filterList(l, func(x any) ([]any, error) {
+			xMap, ok := x.(map[string]any)
+			if !ok {
+				return []any{x}, nil
+			}
+
+			if getStringValue(xMap, k) == "" {
+				return []any{x}, nil
+			}
+
+			return nil, nil
+		})
+	}
+
+	return v2, l
+}
+
 func filterMap(m map[string]any, filter func(string, any) (map[string]any, error)) (map[string]any, error) {
 	ret := map[string]any{}
 
@@ -84,6 +136,21 @@ func filterMap(m map[string]any, filter func(string, any) (map[string]any, error
 		for k2, v2 := range m2 {
 			ret[k2] = v2
 		}
+	}
+
+	return ret, nil
+}
+
+func filterList(l []any, filter func(any) ([]any, error)) ([]any, error) {
+	ret := []any{}
+
+	for _, v := range l {
+		l2, err := filter(v)
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, l2...)
 	}
 
 	return ret, nil

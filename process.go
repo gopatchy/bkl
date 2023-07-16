@@ -57,6 +57,8 @@ func processMap(root any, obj map[string]any) (any, error) {
 		return nil, nil
 	}
 
+	encode, obj := popStringValue(obj, "$encode")
+
 	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := processRecursive(root, v)
 		if err != nil {
@@ -73,7 +75,6 @@ func processMap(root any, obj map[string]any) (any, error) {
 		return nil, err
 	}
 
-	encode, obj := popStringValue(obj, "$encode")
 	if encode != "" {
 		f, err := getFormat(encode)
 		if err != nil {
@@ -92,32 +93,28 @@ func processMap(root any, obj map[string]any) (any, error) {
 }
 
 func processList(root any, obj []any) (any, error) {
-	ret := []any{}
+	if listHasBoolValue(obj, "$output", false) {
+		return nil, nil
+	}
 
 	// TODO: Support $merge, $replace
 
-	encode := ""
+	encode, obj := listPopStringValue(obj, "$encode")
 
-	for _, v := range obj {
-		if vMap, ok := v.(map[string]any); ok {
-			if encode2 := getStringValue(vMap, "$encode"); encode2 != "" {
-				encode = encode2
-				continue
-			}
-
-			if hasBoolValue(vMap, "$output", false) {
-				return nil, nil
-			}
-		}
-
+	obj, err := filterList(obj, func(v any) ([]any, error) {
 		v2, err := processRecursive(root, v)
 		if err != nil {
 			return nil, err
 		}
 
-		if v2 != nil {
-			ret = append(ret, v2)
+		if v2 == nil {
+			return nil, nil
 		}
+
+		return []any{v2}, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	if encode != "" {
@@ -126,7 +123,7 @@ func processList(root any, obj []any) (any, error) {
 			return nil, fmt.Errorf("%s: %w", encode, ErrUnknownFormat)
 		}
 
-		enc, err := f.encode(ret)
+		enc, err := f.encode(obj)
 		if err != nil {
 			return nil, errors.Join(ErrEncode, err)
 		}
@@ -134,7 +131,7 @@ func processList(root any, obj []any) (any, error) {
 		return string(enc), nil
 	}
 
-	return ret, nil
+	return obj, nil
 }
 
 func processString(root any, obj string) (any, error) {
