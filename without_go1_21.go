@@ -18,6 +18,15 @@ func mapsClone[M ~map[K]V, K comparable, V any](m M) M { //nolint:ireturn
 }
 
 // Copied from go1.21 slices
+func slicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
+	if s == nil {
+		return nil
+	}
+
+	return append(S([]E{}), s...)
+}
+
+// Copied from go1.21 slices
 func slicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 	for i, v := range s {
 		if del(v) {
