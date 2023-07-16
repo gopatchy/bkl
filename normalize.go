@@ -10,46 +10,33 @@ func normalize(obj any) (any, error) {
 		return nil, fmt.Errorf("numeric keys not supported (%w)", ErrInvalidType)
 
 	case []map[string]any:
-		ret := []any{}
+		obj2 := []any{}
 
 		for _, v := range objType {
-			v2, err := normalize(v)
-			if err != nil {
-				return nil, err
-			}
-
-			ret = append(ret, v2)
+			obj2 = append(obj2, v)
 		}
 
-		return ret, nil
+		return normalize(obj2)
 
 	case map[string]any:
-		ret := map[string]any{}
-
-		for k, v := range objType {
+		return filterMap(objType, func(k string, v any) (map[string]any, error) {
 			v2, err := normalize(v)
 			if err != nil {
 				return nil, err
 			}
 
-			ret[k] = v2
-		}
-
-		return ret, nil
+			return map[string]any{k: v2}, nil
+		})
 
 	case []any:
-		ret := []any{}
-
-		for _, v := range objType {
+		return filterList(objType, func(v any) ([]any, error) {
 			v2, err := normalize(v)
 			if err != nil {
 				return nil, err
 			}
 
-			ret = append(ret, v2)
-		}
-
-		return ret, nil
+			return []any{v2}, nil
+		})
 
 	default:
 		return objType, nil
