@@ -108,7 +108,15 @@ func processList(root any, obj []any) (any, error) {
 		return processRecursive(root, next)
 	}
 
-	// TODO: Support $replace
+	path, obj = listPopStringValue(obj, "$replace")
+	if path != "" {
+		next := get(root, path)
+		if next == nil {
+			return nil, fmt.Errorf("%s: (%w)", path, ErrReplaceRefNotFound)
+		}
+
+		return processRecursive(root, next)
+	}
 
 	if listHasBoolValue(obj, "$output", false) {
 		return nil, nil

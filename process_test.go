@@ -25,7 +25,7 @@ func TestReplace(t *testing.T) {
 
 	b := bkl.New()
 
-	require.NoError(t, b.MergeFileLayers("tests/replace1/a.yaml"))
+	require.NoError(t, b.MergeFileLayers("tests/replace-map/a.yaml"))
 
 	blob, err := b.Output("json")
 	require.NoError(t, err)

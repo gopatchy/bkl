@@ -1,0 +1,6 @@
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - $replace: foo.bar
