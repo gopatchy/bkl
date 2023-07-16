@@ -93,11 +93,26 @@ func processMap(root any, obj map[string]any) (any, error) {
 }
 
 func processList(root any, obj []any) (any, error) {
+	path, obj := listPopStringValue(obj, "$merge")
+	if path != "" {
+		in := get(root, path)
+		if in == nil {
+			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
+		}
+
+		next, err := mergeList(obj, in)
+		if err != nil {
+			return nil, err
+		}
+
+		return processRecursive(root, next)
+	}
+
+	// TODO: Support $replace
+
 	if listHasBoolValue(obj, "$output", false) {
 		return nil, nil
 	}
-
-	// TODO: Support $merge, $replace
 
 	encode, obj := listPopStringValue(obj, "$encode")
 

@@ -771,6 +771,24 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <code><key>foo</key>:
   <key>bar</key>:
+    - <key>a</key>: <number>1</number>
+<key>zig</key>:
+  - <key>b</key>: <number>2</number>
+  - <focus><key>$merge</key>: <string>foo.bar</string></focus></code>
+
+<op>=</op>
+
+<code><key>foo</key>:
+  <key>bar</key>:
+    - <key>a</key>: <number>1</number>
+<key>zig</key>:
+  - <key>b</key>: <number>2</number>
+  - <focus><key>a</key>: <number>1</number></focus></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>foo</key>:
+  <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
   <key>b</key>: <number>2</number>
