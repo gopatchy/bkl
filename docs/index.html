@@ -103,6 +103,20 @@ body {
 	width: 100%;
 }
 
+nav {
+	display: block;
+	left: 0;
+	padding: 10px;
+	position: fixed;
+	top: 0;
+}
+
+@media (max-width: 975px) {
+	nav {
+		display: none;
+	}
+}
+
 main {
 	flex-direction: column;
 	display: flex;
@@ -149,6 +163,13 @@ a[name] {
 ul {
 	margin: 0;
 	padding-left: 20px;
+}
+
+nav ol {
+	list-style: none;
+	margin: 0;
+	margin: 0;
+	padding: 0;
 }
 
 li {
@@ -271,7 +292,34 @@ ifocus {
 </style>
 </head>
 
-<body><main>
+<body>
+
+<nav>
+<ol>
+	<li><a href="#example">Example</a></li>
+	<li><a href="#install">Install</a></li>
+	<li><a href="#formats">Formats</a></li>
+	<li><a href="#write">Write</a></li>
+	<li><a href="#inputs">Inputs</a></li>
+	<li><a href="#symlinks">Symlinks</a></li>
+	<li><a href="#inheritance">Inheritance</a></li>
+	<li><a href="#streams">Streams</a></li>
+	<li><a href="#maps">Maps</a></li>
+	<li><a href="#lists">Lists</a></li>
+	<li><a href="#env">$env</a></li>
+	<li><a href="#encode">$encode</a></li>
+	<li><a href="#required">$required</a></li>
+	<li><a href="#merge">$merge</a></li>
+	<li><a href="#replace">$replace</a></li>
+	<li><a href="#output">$output</a></li>
+	<li><a href="#toml">TOML</a></li>
+	<li><a href="#bklb">bklb</a></li>
+	<li><a href="#diff">diff</a></li>
+	<li><a href="#comparison">Comparison</a></li>
+</ol>
+</nav>
+
+<main>
 
 <h1>BKL</h1>
 
@@ -312,7 +360,7 @@ ifocus {
 
 
 
-<h2><a name="install">Installation</a></h2>
+<h2><a name="install">Install</a></h2>
 
 <code>$ <cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/cmd/bkl@latest</string></code>
 
@@ -322,7 +370,7 @@ ifocus {
 
 
 
-<h2><a name="output-format">Output Format</a></h2>
+<h2><a name="formats">Formats</a></h2>
 
 <p>Output defaults to the same format as the specified input file.</p>
 
@@ -370,7 +418,7 @@ ifocus {
 
 
 
-<h2><a name="output-location">Output Location</a></h2>
+<h2><a name="write">Write</a></h2>
 
 <p>Output goes to stdout by default. Errors always go to stderr.</p>
 
@@ -385,7 +433,7 @@ ifocus {
 
 
 
-<h2><a name="multiple-input-files">Multiple Input Files</a></h2>
+<h2><a name="inputs">Inputs</a></h2>
 
 <code>$ <cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
 
@@ -594,7 +642,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="environment-substitution">Environment Substitution</a></h2>
+<h2><a name="env">$env</a></h2>
 
 <p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys, values, and directives.</p>
 
@@ -637,7 +685,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="encode">Encoding Subtrees</a></h2>
+<h2><a name="encode">$encode</a></h2>
 
 <p>Use <ifocus>$encode</ifocus> to output the subtree encoded as a string in the specified format.</p>
 
@@ -672,7 +720,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="required-values">Required Values</a></h2>
+<h2><a name="required">$required</a></h2>
 
 <p>Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.</p>
 
@@ -745,7 +793,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="merge">Merging Subtrees</a></h2>
+<h2><a name="merge">$merge</a></h2>
 
 <p>Use <ifocus>$merge</ifocus> to merge the contents one subtree or scalar value into another.</p>
 
@@ -810,7 +858,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="replace">Replacing Subtrees</a></h2>
+<h2><a name="replace">$replace</a></h2>
 
 <p>Use <ifocus>$replace</ifocus> to merge the contents of one subtree or scalar value with another.</p>
 
@@ -877,7 +925,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="output">Subtree Output</a></h2>
+<h2><a name="output">$output</a></h2>
 
 <p>Use <ifocus>$output: true</ifocus> to select a subtree for output instead of the document root.</p>
 
@@ -960,7 +1008,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="toml">TOML Notes</a></h2>
+<h2><a name="toml">TOML</a></h2>
 
 <p>TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:</p>
 
@@ -970,7 +1018,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 
 
-<h2><a name="bklb">bklb Wrapper</a></h2>
+<h2><a name="bklb">bklb</a></h2>
 
 <p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.</p>
 
