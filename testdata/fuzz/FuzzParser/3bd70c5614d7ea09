@@ -1,0 +1,5 @@
+go test fuzz v1
+string("7.yaml/")
+[]byte("?\n .0:\n 08:\n 080:\n 19.2:\n 0018:\n 1.:\n 09:")
+string("d")
+[]byte("0")

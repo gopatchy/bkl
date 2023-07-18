@@ -1,0 +1,5 @@
+go test fuzz v1
+string("\x85\x85\x85\x852.yaml/")
+[]byte(" \n#\n0\n#\n#\n0\n#\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n\n#\n0\n0\n#\n0\n#\n00#\n\n0\n#\n0\n---#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n0\n#\n0\n#\n\n\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0\n#\n0\n---\n0\n#\n0\n#\n0")
+string("!Yw\xb1\xd0\xe0")
+[]byte(" ")
