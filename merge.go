@@ -48,12 +48,18 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 	dst = mapsClone(dst)
 
 	for k, v := range src {
+		existing, found := dst[k]
+
 		if v == nil {
+			if !found {
+				return nil, fmt.Errorf("%s=null: %w", k, ErrUselessOverride)
+			}
+
 			delete(dst, k)
+
 			continue
 		}
 
-		existing, found := dst[k]
 		if found {
 			v2, err := merge(existing, v)
 			if err != nil {

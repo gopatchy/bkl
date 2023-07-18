@@ -17,6 +17,7 @@ var (
 	ErrNoMatchFound    = fmt.Errorf("no document matched $match (%w)", Err)
 	ErrRequiredField   = fmt.Errorf("required field not set (%w)", Err)
 	ErrUnknownFormat   = fmt.Errorf("unknown format (%w)", Err)
+	ErrUselessOverride = fmt.Errorf("useless override (%w)", Err)
 
 	// Base language directive error
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
