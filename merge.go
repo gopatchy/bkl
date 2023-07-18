@@ -16,6 +16,10 @@ func merge(dst any, src any) (any, error) {
 		return src, nil
 
 	default:
+		if src == dst {
+			return nil, fmt.Errorf("%v: %w", src, ErrUselessOverride)
+		}
+
 		return src, nil
 	}
 }
