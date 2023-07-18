@@ -369,7 +369,7 @@ ifocus {
 
 <h2><a name="install">Install</a></h2>
 
-<code>$ <cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/cmd/bkl@latest</string></code>
+<code>$ <cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/...@latest</string></code>
 
 <vSpace></vSpace>
 
@@ -1027,9 +1027,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.</p>
 
-<code>$ <cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/cmd/bklb@latest</string>
-
-$ <focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
+<code>$ <focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
 
 $ <cmd>cat</cmd> <string>service.yaml</string>
 <key>addr</key>: <string>127.0.0.1</string>
