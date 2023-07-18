@@ -111,13 +111,20 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			case "":
 
 			case "delete":
+				deleted := false
+
 				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
 					if match(v2, vMap) {
+						deleted = true
 						return nil, nil
 					}
 
 					return []any{v2}, nil
 				})
+
+				if !deleted {
+					return nil, fmt.Errorf("%#v: %w", vMap, ErrUselessOverride)
+				}
 
 				continue
 
