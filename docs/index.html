@@ -381,7 +381,7 @@ ifocus {
 
 <h2><a name="formats">Formats</a></h2>
 
-<p>Output defaults to the same format as the specified input file.</p>
+<p>Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.</p>
 
 <label>YAML</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flagValue></focus> <string>service.test.toml</string>
@@ -405,7 +405,7 @@ ifocus {
 
 <vSpace></vSpace>
 
-<label>Pretty JSON</label>
+<label>JSON (pretty)</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
 {
   "<key>addr</key>": "<string>127.0.0.1</string>",
@@ -791,8 +791,8 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <op>=</op>
 
 <code><key>a</key>: <number>1</number>
-<focus><key>b</key>:
-  - <number>2</number></focus>
+<key>b</key>:
+  - <number>2</number>
 <key>c</key>: <number>3</number></code>
 
 </split5a>
