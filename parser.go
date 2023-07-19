@@ -44,20 +44,28 @@ import (
 // Output phase 2 (output)
 //   - $output: true
 type Parser struct {
-	docs  []any
-	debug bool
+	docs     []any
+	debug    bool
+	required bool
 }
 
 // New creates and returns a new [Parser] with an empty starting document set.
 //
 // New always succeeds and returns a Parser instance.
 func New() *Parser {
-	return &Parser{}
+	return &Parser{
+		required: true,
+	}
 }
 
 // SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
+}
+
+// SetRequired enables or disables enforcing $required fields.
+func (p *Parser) SetRequired(required bool) {
+	p.required = required
 }
 
 // MergeParser applies other's internal document state to ours using bkl's
@@ -216,7 +224,7 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		outs = append(outs, obj)
 	}
 
-	err = validate(obj)
+	err = validate(obj, p.required)
 	if err != nil {
 		return nil, err
 	}

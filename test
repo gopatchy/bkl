@@ -6,12 +6,13 @@ ROOT=$(pwd)
 GOCMD=${GOCMD:=go}
 
 function cleanup {
-	rm $ROOT/bkl
+	rm $ROOT/bkl{,i}
 }
 
 trap cleanup EXIT
 
 $GOCMD build ./cmd/bkl
+$GOCMD build ./cmd/bkli
 export PATH=$ROOT:$PATH
 
 for TEST in tests/*; do

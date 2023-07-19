@@ -5,16 +5,16 @@ import (
 	"strings"
 )
 
-func validate(obj any) error {
+func validate(obj any, required bool) error {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		for k, v := range obj2 {
-			err := validate(k)
+			err := validate(k, required)
 			if err != nil {
 				return fmt.Errorf("%s: %w", k, err)
 			}
 
-			err = validate(v)
+			err = validate(v, required)
 			if err != nil {
 				return fmt.Errorf("%s: %w", k, err)
 			}
@@ -22,7 +22,7 @@ func validate(obj any) error {
 
 	case []any:
 		for _, v := range obj2 {
-			err := validate(v)
+			err := validate(v, required)
 			if err != nil {
 				return err
 			}
@@ -30,10 +30,10 @@ func validate(obj any) error {
 
 	case string:
 		if obj2 == "$required" {
-			return ErrRequiredField
-		}
-
-		if strings.HasPrefix(obj2, "$") {
+			if required {
+				return ErrRequiredField
+			}
+		} else if strings.HasPrefix(obj2, "$") {
 			return fmt.Errorf("%s: %w", obj2, ErrInvalidDirective)
 		}
 	}
