@@ -82,8 +82,6 @@ func main() {
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "%#v\n", docs)
-
 	b := bkl.New()
 	b.SetRequired(false)
 
