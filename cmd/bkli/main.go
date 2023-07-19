@@ -10,6 +10,9 @@ import (
 )
 
 type options struct {
+	OutputPath   *string `short:"o" long:"output" description:"output file path"`
+	OutputFormat *string `short:"f" long:"format" description:"output format"`
+
 	Positional struct {
 		InputPaths []string `positional-arg-name:"inputPath" required:"2" description:"input file path"`
 	} `positional-args:"yes"`
@@ -36,6 +39,9 @@ func main() {
 	}
 
 	format := ""
+	if opts.OutputFormat != nil {
+		format = *opts.OutputFormat
+	}
 
 	var docs []any
 
@@ -88,7 +94,12 @@ func main() {
 		}
 	}
 
-	err = b.OutputToWriter(os.Stdout, format)
+	if opts.OutputPath == nil {
+		err = b.OutputToWriter(os.Stdout, format)
+	} else {
+		err = b.OutputToFile(*opts.OutputPath, format)
+	}
+
 	if err != nil {
 		fatal(err)
 	}
