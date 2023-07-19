@@ -332,9 +332,9 @@ ifocus {
 
 <h1>BKL</h1>
 
-<p>bkl (short for Baklava, because it has layers) is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.</p>
+<p>bkl (short for Baklava because it has layers) is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.</p>
 
-<p>Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts, or automate with the <a href="https://pkg.go.dev/github.com/gopatchy/bkl">library</a>.</p>
+<p>Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts or automate with the <a href="https://pkg.go.dev/github.com/gopatchy/bkl">library</a>.</p>
 
 
 
@@ -365,7 +365,7 @@ ifocus {
 
 <vSpace></vSpace>
 
-<p>bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>), and uses filename extensions to determine formats.</p>
+<p>bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>) and uses filename extensions to determine formats.</p>
 
 
 
@@ -448,7 +448,7 @@ ifocus {
 
 <vSpace></vSpace>
 
-<p>Specifying multiple input files evaluates them as normal, then merges them onto each other in order.</p>
+<p>Specifying multiple input files evaluates them as normal then merges them onto each other in order.</p>
 
 
 
@@ -472,7 +472,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <vSpace></vSpace>
 
-<p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file, and will still evaluate template layers of the parent in the normal order.</p>
+<p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file and will still evaluate template layers of the parent in the normal order.</p>
 
 <label>Set Parent In CLI</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
@@ -495,7 +495,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="streams">Streams</a></h2>
 
-<p>bkl understands input streams (multi-document YAML files delimited with <ifocus>---</ifocus>). To layer them, it has to match documents between layers. It does this using document ordering within layer files by default, but can be overridden with <ifocus>$match</ifocus>.</p>
+<p>bkl understands input streams (multi-document YAML files delimited with <ifocus>---</ifocus>). To layer them, it has to match documents between layers. It does this using document ordering within layer files by default but can be overridden with <ifocus>$match</ifocus>.</p>
 
 <split5a>
 
@@ -544,7 +544,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="maps">Maps</a></h2>
 
-<p>Maps are merged by default. To change that, use <ifocus>$patch</ifocus>, or remove individual entries with <ifocus>null</ifocus>.</p>
+<p>Maps are merged by default. To change that, use <ifocus>$patch</ifocus> or remove individual entries with <ifocus>null</ifocus>.</p>
 
 <split5a>
 
@@ -592,7 +592,8 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 </split5a>
 
 <vSpace></vSpace>
-<vSpace></vSpace>
+
+<p>bkl returns an error if you use <ifocus>null</ifocus>, <ifocus>$patch: replace</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
 
 
@@ -647,7 +648,8 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 </split5a>
 
 <vSpace></vSpace>
-<vSpace></vSpace>
+
+<p>bkl returns an error if you use <ifocus>$patch: replace</ifocus> or <ifocus>$patch: delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
 
 
@@ -690,7 +692,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <vSpace></vSpace>
 
-<p>Note that all <ifocus>$env:</ifocus> substitutions result in string values, even if the substituted value is digits or <ifocus>null</ifocus>.</p>
+<p>Note that all <ifocus>$env:</ifocus> substitutions result in string values even if the substituted value is <ifocus>true</ifocus>, <ifocus>false</ifocus>, <ifocus>null</ifocus>, or all digits.</p>
 
 
 
@@ -1060,7 +1062,7 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 
 <p>Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.</p>
 
-<p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program, so they can coexist in your PATH.<p>
+<p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program so they can coexist in your PATH.<p>
 
 
 
