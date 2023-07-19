@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -8,12 +9,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type format struct {
+type Format struct {
 	marshal   func(any) ([]byte, error)
 	unmarshal func([]byte, any) error
 }
 
-var formatByExtension = map[string]format{
+var formatByExtension = map[string]Format{
 	"json": {
 		marshal:   jsonMarshal,
 		unmarshal: json.Unmarshal,
@@ -32,7 +33,7 @@ var formatByExtension = map[string]format{
 	},
 }
 
-func getFormat(name string) (*format, error) {
+func GetFormat(name string) (*Format, error) {
 	f, found := formatByExtension[name]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)
@@ -41,16 +42,36 @@ func getFormat(name string) (*format, error) {
 	return &f, nil
 }
 
-func (f *format) encode(v any) ([]byte, error) {
-	return f.marshal(v)
+func (f *Format) Marshal(v any) ([]byte, error) {
+	ret, err := f.marshal(v)
+	if err != nil {
+		return nil, errorsJoin(err, ErrMarshal)
+	}
+
+	return ret, nil
 }
 
-func (f *format) decode(in []byte) (any, error) {
+func (f *Format) MarshalStream(vs []any) ([]byte, error) {
+	bs := [][]byte{}
+
+	for _, v := range vs {
+		b, err := f.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+
+		bs = append(bs, b)
+	}
+
+	return bytes.Join(bs, []byte("---\n")), nil
+}
+
+func (f *Format) Unmarshal(in []byte) (any, error) {
 	var obj any
 
 	err := f.unmarshal(in, &obj)
 	if err != nil {
-		return nil, err
+		return nil, errorsJoin(err, ErrUnmarshal)
 	}
 
 	return obj, nil

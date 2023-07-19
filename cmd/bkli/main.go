@@ -82,22 +82,26 @@ func main() {
 		}
 	}
 
-	b := bkl.New()
-	b.SetRequired(false)
+	f, err := bkl.GetFormat(format)
+	if err != nil {
+		fatal(err)
+	}
 
-	for i, doc := range docs {
-		err = b.MergePatch(i, doc)
+	enc, err := f.MarshalStream(docs)
+	if err != nil {
+		fatal(err)
+	}
+
+	fh := os.Stdout
+
+	if opts.OutputPath != nil {
+		fh, err = os.OpenFile(*opts.OutputPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			fatal(err)
 		}
 	}
 
-	if opts.OutputPath == nil {
-		err = b.OutputToWriter(os.Stdout, format)
-	} else {
-		err = b.OutputToFile(*opts.OutputPath, format)
-	}
-
+	_, err = fh.Write(enc)
 	if err != nil {
 		fatal(err)
 	}

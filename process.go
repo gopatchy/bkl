@@ -1,7 +1,6 @@
 package bkl
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -76,14 +75,14 @@ func processMap(root any, obj map[string]any) (any, error) {
 	}
 
 	if encode != "" {
-		f, err := getFormat(encode)
+		f, err := GetFormat(encode)
 		if err != nil {
 			return nil, err
 		}
 
-		enc, err := f.encode(obj)
+		enc, err := f.Marshal(obj)
 		if err != nil {
-			return nil, errors.Join(ErrEncode, err)
+			return nil, err
 		}
 
 		return string(enc), nil
@@ -146,9 +145,9 @@ func processList(root any, obj []any) (any, error) {
 			return nil, fmt.Errorf("%s: %w", encode, ErrUnknownFormat)
 		}
 
-		enc, err := f.encode(obj)
+		enc, err := f.Marshal(obj)
 		if err != nil {
-			return nil, errors.Join(ErrEncode, err)
+			return nil, err
 		}
 
 		return string(enc), nil

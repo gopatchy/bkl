@@ -4,15 +4,20 @@ set -euo pipefail
 
 ROOT=$(pwd)
 GOCMD=${GOCMD:=go}
+BINS="bkl bkli bkld"
 
 function cleanup {
-	rm $ROOT/bkl{,i}
+	for BIN in $BINS; do
+		rm $ROOT/$BIN
+	done
 }
 
 trap cleanup EXIT
 
-$GOCMD build ./cmd/bkl
-$GOCMD build ./cmd/bkli
+for BIN in $BINS; do
+	$GOCMD build ./cmd/$BIN
+done
+
 export PATH=$ROOT:$PATH
 
 for TEST in tests/*; do

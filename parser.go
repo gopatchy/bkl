@@ -44,28 +44,20 @@ import (
 // Output phase 2 (output)
 //   - $output: true
 type Parser struct {
-	docs     []any
-	debug    bool
-	required bool
+	docs  []any
+	debug bool
 }
 
 // New creates and returns a new [Parser] with an empty starting document set.
 //
 // New always succeeds and returns a Parser instance.
 func New() *Parser {
-	return &Parser{
-		required: true,
-	}
+	return &Parser{}
 }
 
 // SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
-}
-
-// SetRequired enables or disables enforcing $required fields.
-func (p *Parser) SetRequired(required bool) {
-	p.required = required
 }
 
 // MergeParser applies other's internal document state to ours using bkl's
@@ -224,22 +216,22 @@ func (p *Parser) OutputIndex(index int, ext string) ([][]byte, error) {
 		outs = append(outs, obj)
 	}
 
-	err = validate(obj, p.required)
+	err = validate(obj)
 	if err != nil {
 		return nil, err
 	}
 
-	f, found := formatByExtension[ext]
-	if !found {
-		return nil, fmt.Errorf("%s: %w", ext, ErrUnknownFormat)
+	f, err := GetFormat(ext)
+	if err != nil {
+		return nil, err
 	}
 
 	encs := [][]byte{}
 
 	for j, out := range outs {
-		enc, err := f.encode(out)
+		enc, err := f.Marshal(out)
 		if err != nil {
-			return nil, errorsJoin(fmt.Errorf("[doc%d:out%d]: %w", index, j, ErrEncode), err)
+			return nil, fmt.Errorf("[doc%d:out%d]: %w", index, j, err)
 		}
 
 		encs = append(encs, enc)

@@ -21,9 +21,9 @@ func loadFile(path string) (*file, error) {
 		path: path,
 	}
 
-	format, found := formatByExtension[ext(path)]
-	if !found {
-		return nil, fmt.Errorf("%s: %w", path, ErrUnknownFormat)
+	format, err := GetFormat(ext(path))
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
 	fh, err := os.Open(path)
@@ -59,9 +59,9 @@ func loadFile(path string) (*file, error) {
 	}
 
 	for i, rawDoc := range rawDocs {
-		doc, err := format.decode(rawDoc)
+		doc, err := format.Unmarshal(rawDoc)
 		if err != nil {
-			return nil, errorsJoin(fmt.Errorf("%s[doc%d]: %w", path, i, ErrDecode), err)
+			return nil, fmt.Errorf("%s[doc%d]: %w", path, i, err)
 		}
 
 		doc, err = normalize(doc)
