@@ -1,0 +1,3 @@
+- c: 3
+- $patch: delete
+  b: 2
