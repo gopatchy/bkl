@@ -1,0 +1,10 @@
+a:
+    c: x
+    i: null
+    m: m
+d:
+    - o: o
+    - $patch: delete
+      j: j
+g:
+    h: 8

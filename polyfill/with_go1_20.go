@@ -1,9 +1,9 @@
 //go:build go1.20
 
-package bkl
+package polyfill
 
 import "errors"
 
-func errorsJoin(errs ...error) error {
+func ErrorsJoin(errs ...error) error {
 	return errors.Join(errs...)
 }

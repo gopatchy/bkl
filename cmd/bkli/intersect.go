@@ -3,6 +3,8 @@ package main
 import "reflect"
 
 func intersect(a, b any) (any, error) {
+	// TODO: Short-circuit b == nil ?
+
 	switch a2 := a.(type) {
 	case map[string]any:
 		return intersectMap(a2, b)

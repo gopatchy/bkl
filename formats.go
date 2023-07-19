@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gopatchy/bkl/polyfill"
 	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
@@ -45,7 +46,7 @@ func GetFormat(name string) (*Format, error) {
 func (f *Format) Marshal(v any) ([]byte, error) {
 	ret, err := f.marshal(v)
 	if err != nil {
-		return nil, errorsJoin(err, ErrMarshal)
+		return nil, polyfill.ErrorsJoin(err, ErrMarshal)
 	}
 
 	return ret, nil
@@ -71,7 +72,7 @@ func (f *Format) Unmarshal(in []byte) (any, error) {
 
 	err := f.unmarshal(in, &obj)
 	if err != nil {
-		return nil, errorsJoin(err, ErrUnmarshal)
+		return nil, polyfill.ErrorsJoin(err, ErrUnmarshal)
 	}
 
 	return obj, nil

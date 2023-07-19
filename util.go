@@ -1,5 +1,9 @@
 package bkl
 
+import (
+	"github.com/gopatchy/bkl/polyfill"
+)
+
 func hasNilValue(m map[string]any, k string) bool {
 	v, found := m[k]
 	if !found {
@@ -36,7 +40,7 @@ func popBoolValue(m map[string]any, k string, v bool) (bool, map[string]any) {
 	found := hasBoolValue(m, k, v)
 
 	if found {
-		m = mapsClone(m)
+		m = polyfill.MapsClone(m)
 		delete(m, k)
 	}
 
@@ -65,7 +69,7 @@ func popStringValue(m map[string]any, k string) (string, map[string]any) {
 	v := getStringValue(m, k)
 
 	if v != "" {
-		m = mapsClone(m)
+		m = polyfill.MapsClone(m)
 		delete(m, k)
 	}
 

@@ -1,5 +1,9 @@
 package bkl
 
+import (
+	"github.com/gopatchy/bkl/polyfill"
+)
+
 func findOutputs(obj any) (any, []any) {
 	switch objType := obj.(type) {
 	case map[string]any:
@@ -21,8 +25,8 @@ func findOutputsMap(obj map[string]any) (any, []any) {
 		outs = append(outs, ret)
 	}
 
-	keys := mapsKeys(obj)
-	slicesSort(keys)
+	keys := polyfill.MapsKeys(obj)
+	polyfill.SlicesSort(keys)
 
 	for _, k := range keys {
 		if k == "$output" {
