@@ -50,10 +50,12 @@ func main() {
 	for _, path := range []string{opts.Positional.BasePath, opts.Positional.TargetPath} {
 		realPath, f, err := bkl.FileMatch(path)
 		if err != nil {
-			continue
+			fatal(err)
 		}
 
-		format = f
+		if format == "" {
+			format = f
+		}
 
 		b := bkl.New()
 		bs = append(bs, b)

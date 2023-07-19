@@ -14,7 +14,7 @@ type options struct {
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
 
 	Positional struct {
-		InputPaths []string `positional-arg-name:"inputPath" required:"2" description:"input file path"`
+		InputPath string `positional-arg-name:"inputPath" required:"true" description:"input file path"`
 	} `positional-args:"yes"`
 }
 
@@ -38,50 +38,36 @@ func main() {
 		os.Exit(1)
 	}
 
-	format := ""
+	realPath, format, err := bkl.FileMatch(opts.Positional.InputPath)
+	if err != nil {
+		fatal(err)
+	}
+
+	b := bkl.New()
+
+	err = b.MergeFileLayers(realPath)
+	if err != nil {
+		fatal(err)
+	}
+
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
 	}
 
-	var docs []any
+	docs := []any{}
 
-	for p, path := range opts.Positional.InputPaths {
-		realPath, f, err := bkl.FileMatch(path)
+	for i := 0; i < b.NumDocuments(); i++ {
+		doc, err := b.Document(i)
 		if err != nil {
 			fatal(err)
 		}
 
-		if format == "" {
-			format = f
-		}
-
-		b := bkl.New()
-
-		err = b.MergeFileLayers(realPath)
+		doc, err = required(doc)
 		if err != nil {
 			fatal(err)
 		}
 
-		for i := 0; i < b.NumDocuments(); i++ {
-			if i == len(docs) {
-				docs = append(docs, nil)
-			}
-
-			doc, err := b.Document(i)
-			if err != nil {
-				fatal(err)
-			}
-
-			if p == 0 {
-				docs[i] = doc
-				continue
-			}
-
-			docs[i], err = intersect(docs[i], doc)
-			if err != nil {
-				fatal(err)
-			}
-		}
+		docs = append(docs, doc)
 	}
 
 	f, err := bkl.GetFormat(format)
