@@ -1186,6 +1186,40 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 
 
 
+<h2><a name="bklr">bklr</a></h2>
+
+<p><ifocus>bklr</ifocus> (r for "required") takes one argument (path to lower layer) and outputs all required fields and their ancestors. The output can be edited into a minimal upper layer.</p>
+
+<split3a>
+
+<code><key>a</key>:
+  <key>b</key>: <string>$required</string>
+  <key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>:
+  <key>b</key>: <string>$required</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>:
+  - <string>$required</string>
+<key>b</key>:
+  - <number>2</number></code>
+
+<op>=</op>
+
+<code><key>a</key>:
+  - <string>$required</string></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
 <h2><a name="diff">diff</a></h2>
 
 <p>It's easy to see differences between processed bkl files using shell syntax.</p>
