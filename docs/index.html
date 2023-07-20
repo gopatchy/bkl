@@ -253,8 +253,11 @@ split3 code, split5 code, split3a code, split5a code {
 op {
 	align-items: center;
 	display: flex;
-	justify-content: center;
 	font-size: 30px;
+	justify-content: center;
+	line-height: 0.5;
+	text-align: center;
+	white-space: pre;
 }
 
 code.labeled {
@@ -298,6 +301,10 @@ ifocus {
 	padding: 0 3px 0 3px;
 	white-space: nowrap;
 }
+
+ifocus * {
+	color: var(--red6) !important;
+}
 </style>
 </head>
 
@@ -323,6 +330,9 @@ ifocus {
 	<li><a href="#output">$output</a></li>
 	<li><a href="#toml">TOML</a></li>
 	<li><a href="#bklb">bklb</a></li>
+	<li><a href="#bkld">bkld</a></li>
+	<li><a href="#bkli">bkli</a></li>
+	<li><a href="#bklr">bklr</a></li>
 	<li><a href="#diff">diff</a></li>
 	<li><a href="#comparison">Comparison</a></li>
 </ol>
@@ -1063,6 +1073,70 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 <p>Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.</p>
 
 <p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program so they can coexist in your PATH.<p>
+
+
+
+<h2><a name="bkld">bkld</a></h2>
+
+<p><ifocus>bkld</ifocus> (d for "diff") takes two arguments (paths to a base layer and a target output) and outputs the minimal intermediate layer needed to create the target output. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.</p>
+
+<split5a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <string>$required</string>
+<key>c</key>: <number>3</number></code>
+
+<op>?
+→</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<key>d</key>: <number>4</number></code>
+
+<op>=</op>
+
+<code><key>b</key>: <number>2</number>
+<key>c</key>: null
+<key>d</key>: <number>4</number></code>
+
+<vSpace class="span5"></vSpace>
+
+<code>- <key>a</key>: <number>1</number>
+- <key>b</key>: <number>2</number></code>
+
+<op>?
+→</op>
+
+<code>- <key>a</key>: <number>1</number>
+- <key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code>- <key>c</key>: <number>3</number>
+- <key>$patch</key>: <string>delete</string>
+  <key>b</key>: <number>2</number></code>
+
+<vSpace class="span5"></vSpace>
+
+<code>- <number>1</number>
+- <number>2</number></code>
+
+<op>?
+→</op>
+
+<code>- <number>1</number>
+- <number>3</number></code>
+
+<op>=</op>
+
+<code>- <number>1</number>
+- <number>3</number>
+- <key>$patch</key>: <string>replace</string></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 
 

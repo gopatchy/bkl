@@ -15,7 +15,7 @@ type options struct {
 
 	Positional struct {
 		BasePath   string `positional-arg-name:"basePath" required:"true" description:"base layer file path"`
-		TargetPath string `positional-arg-name:"targetPath" required:"true" description:"target layer file path"`
+		TargetPath string `positional-arg-name:"targetPath" required:"true" description:"target output file path"`
 	} `positional-args:"yes"`
 }
 
