@@ -1083,7 +1083,11 @@ cat: service.test.json: No such file or directory
 
 <h2><a name="bkld">bkld</a></h2>
 
-<p><ifocus>bkld</ifocus> (d for "diff") takes two arguments (paths to a base layer and a target output) and outputs the minimal intermediate layer needed to create the target output. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.</p>
+<code><prompt>$ </key><cmd>bkld</cmd> <string>&lt;base_layer_path&gt; &lt;target_output_path&gt;</string></code>
+
+<vSpace></vSpace>
+
+<p><ifocus>bkld</ifocus> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.</p>
 
 <split5a>
 
@@ -1147,7 +1151,11 @@ cat: service.test.json: No such file or directory
 
 <h2><a name="bkli">bkli</a></h2>
 
-<p><ifocus>bkli</ifocus> (i for "intersect") takes two or more arguments (paths to target outputs) and outputs the maximum base layer they have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.</p>
+<code><prompt>$ </key><cmd>bkli</cmd> <string>&lt;target_output_path&gt; &lt;target_output_path&gt; ...</string></code>
+
+<vSpace></vSpace>
+
+<p><ifocus>bkli</ifocus> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.</p>
 
 <p>Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.</p>
 
@@ -1193,7 +1201,11 @@ cat: service.test.json: No such file or directory
 
 <h2><a name="bklr">bklr</a></h2>
 
-<p><ifocus>bklr</ifocus> (r for "required") takes one argument (path to lower layer) and outputs all required fields and their ancestors. The output can be edited into a minimal upper layer.</p>
+<code><prompt>$ </key><cmd>bklr</cmd> <string>&lt;lower_layer_path&gt;</string></code>
+
+<vSpace></vSpace>
+
+<p><ifocus>bklr</ifocus> (r for "required") generates a document containing just the required fields and their ancestors. The output can be edited into a minimal upper layer.</p>
 
 <split3a>
 
