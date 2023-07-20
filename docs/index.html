@@ -268,6 +268,10 @@ key {
 	color: var(--yellow4);
 }
 
+prompt {
+	user-select: none;
+}
+
 cmd {
 	color: var(--blue5);
 }
@@ -367,7 +371,7 @@ ifocus * {
 
 <label class="span3">Run it!</label>
 
-<code class="span3 labeled">$ <cmd>bkl</cmd> <string>service.test.toml</string>
+<code class="span3 labeled"><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.toml</string>
 <key>addr</key> = '<string>127.0.0.1</string>'
 <key>name</key> = '<string>myService</string>'
 <key>port</key> = <focus><number>8081</number></focus></code>
@@ -382,7 +386,7 @@ ifocus * {
 
 <h2><a name="install">Install</a></h2>
 
-<code>$ <cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/...@latest</string></code>
+<code><prompt>$ </prompt><cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/...@latest</string></code>
 
 <vSpace></vSpace>
 
@@ -395,7 +399,7 @@ ifocus * {
 <p>Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.</p>
 
 <label>YAML</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flag></focus> <string>service.test.toml</string>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f yaml</flag></focus> <string>service.test.toml</string>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></code>
@@ -403,7 +407,7 @@ ifocus * {
 <vSpace></vSpace>
 
 <label>TOML</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f toml</flag></focus> <string>service.test.toml</string>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f toml</flag></focus> <string>service.test.toml</string>
 <key>addr</key> = '<string>127.0.0.1</string>'
 <key>name</key> = '<string>myService</string>'
 <key>port</key> = <number>8081</number></code>
@@ -411,13 +415,13 @@ ifocus * {
 <vSpace></vSpace>
 
 <label>JSON</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
 {"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
 
 <vSpace></vSpace>
 
 <label>JSON (pretty)</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
 {
   "<key>addr</key>": "<string>127.0.0.1</string>",
   "<key>name</key>": "<string>myService</string>",
@@ -428,7 +432,7 @@ ifocus * {
 
 <p>You can also set the output format implicitly by using a different file extension.</p>
 
-<code>$ <cmd>bkl</cmd> <string>service.test.<focus>yaml</focus></string>   # real file is service.test.<focus>toml</focus>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.<focus>yaml</focus></string>   # real file is service.test.<focus>toml</focus>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></code>
@@ -445,7 +449,7 @@ ifocus * {
 <vSpace></vSpace>
 
 <label>File Output</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-o out.yaml</flag></focus> <string>service.test.toml</string></code>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-o out.yaml</flag></focus> <string>service.test.toml</string></code>
 
 <vSpace></vSpace>
 
@@ -455,7 +459,7 @@ ifocus * {
 
 <h2><a name="inputs">Inputs</a></h2>
 
-<code>$ <cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
 
 <vSpace></vSpace>
 
@@ -465,8 +469,8 @@ ifocus * {
 
 <h2><a name="symlinks">Symlinks</a></h2>
 
-<code>$ <cmd>ln</cmd> <string>-s</string> <focus><string>a.b.yaml</string> <string>c.yaml</string></focus>
-$ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml</code>
+<code><prompt>$ </prompt><cmd>ln</cmd> <string>-s</string> <focus><string>a.b.yaml</string> <string>c.yaml</string></focus>
+<prompt>$ </prompt><cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml</code>
 
 <vSpace></vSpace>
 
@@ -486,7 +490,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.</p>
 
 <label>Set Parent In CLI</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
 
 <vSpace></vSpace>
 
@@ -1042,31 +1046,31 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.</p>
 
-<code>$ <focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
+<code><prompt>$ </prompt><focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
 
-$ <cmd>cat</cmd> <string>service.yaml</string>
+<prompt>$ </prompt><cmd>cat</cmd> <string>service.yaml</string>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number>
 
-$ <cmd>cat</cmd> <string>service.test.toml</string>
+<prompt>$ </prompt><cmd>cat</cmd> <string>service.test.toml</string>
 <key>port</key> = <number>8081</number>
 
-$ <focus><cmd>catb</cmd> <string>service.test.toml</string></focus>
+<prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.toml</string></focus>
 <key>addr</key> = "<string>127.0.0.1</string>"
 <key>name</key> = "<string>myService</string>"
 <key>port</key> = <number>8081</number>
 
-$ <cmd>cat</cmd> <string>service.test.yaml</string> <string>service.test.json</string>
+<prompt>$ </prompt><cmd>cat</cmd> <string>service.test.yaml</string> <string>service.test.json</string>
 cat: service.test.yaml: No such file or directory
 cat: service.test.json: No such file or directory
 
-$ <focus><cmd>catb</cmd> <string>service.test.yaml</string></focus>
+<prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.yaml</string></focus>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number>
 
-$ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
+<prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 {"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
 
 <vSpace></vSpace>
@@ -1225,7 +1229,7 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 
 <p>It's easy to see differences between processed bkl files using shell syntax.</p>
 
-<code>$ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+<code><prompt>$ </prompt><focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
 @@ -1,3 +1,2 @@
@@ -1233,7 +1237,7 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 <focus>-b: 2</focus>
  c: 3
 
-$ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+<prompt>$ </prompt><focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
 a: 1                              a: 1
 b: 2                            <focus>&lt;</focus>
 c: 3                              c: 3
@@ -1263,33 +1267,33 @@ c: 3                              c: 3
 
 <label>Export Existing Config</label>
 <code class="labeled"># "kubectl neat" removes status and default value fields
-$ <cmd>kubectl</cmd> <string>get</string> <flag>-o yaml</flag> <string>deploy deploy-dev</string> | <cmd>kubectl</cmd> <string>neat</string> &gt; <string>deploy-dev-orig.yaml</string>
-$ <cmd>kubectl</cmd> <string>get</string> <flag>-o yaml</flag> <string>deploy deploy-prod</string> | <cmd>kubectl</cmd> <string>neat</string> &gt; <string>deploy-prod-orig.yaml</string></code>
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>get</string> <flag>-o yaml</flag> <string>deploy deploy-dev</string> | <cmd>kubectl</cmd> <string>neat</string> &gt; <string>deploy-dev-orig.yaml</string>
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>get</string> <flag>-o yaml</flag> <string>deploy deploy-prod</string> | <cmd>kubectl</cmd> <string>neat</string> &gt; <string>deploy-prod-orig.yaml</string></code>
 
 <vSpace></vSpace>
 
 <label>Generate Base Layer</label>
 <code class="labeled"># See bkli details <a href="#bkli">here</a>
-$ <cmd>bkli</cmd> <flag>-o deploy.yaml</flag> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+<prompt>$ </prompt><cmd>bkli</cmd> <flag>-o deploy.yaml</flag> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
 
 <vSpace></vSpace>
 
 <label>Generate Service Layers</label>
 <code class="labeled"># See bkld details <a href="#bkld">here</a>
-$ <cmd>bkld</cmd> <flag>-o deploy.dev.yaml</flag> <string>deploy.yaml deploy-dev-orig.yaml</string>
-$ <cmd>bkld</cmd> <flag>-o deploy.prod.yaml</flag> <string>deploy.yaml deploy-prod-orig.yaml</string></code>
+<prompt>$ </prompt><cmd>bkld</cmd> <flag>-o deploy.dev.yaml</flag> <string>deploy.yaml deploy-dev-orig.yaml</string>
+<prompt>$ </prompt><cmd>bkld</cmd> <flag>-o deploy.prod.yaml</flag> <string>deploy.yaml deploy-prod-orig.yaml</string></code>
 
 <vSpace></vSpace>
 
 <label>Check Results</label>
 <code class="labeled"># Should show no diff
-$ <cmd>kubectl</cmd> <string>diff</string> <flag>-f</flag> <string>&lt;(<cmd>bkl</cmd> deploy.dev.yaml)</string>
-$ <cmd>kubectl</cmd> <string>diff</string> <flag>-f</flag> <string>&lt;(<cmd>bkl</cmd> deploy.prod.yaml)</string></code>
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>diff</string> <flag>-f</flag> <string>&lt;(<cmd>bkl</cmd> deploy.dev.yaml)</string>
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>diff</string> <flag>-f</flag> <string>&lt;(<cmd>bkl</cmd> deploy.prod.yaml)</string></code>
 
 <vSpace></vSpace>
 
 <label>Clean Up</label>
-<code class="labeled">$ <cmd>rm</cmd> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+<code class="labeled"><prompt>$ </prompt><cmd>rm</cmd> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
 
 <vSpace></vSpace>
 
