@@ -334,6 +334,7 @@ ifocus * {
 	<li><a href="#bkli">bkli</a></li>
 	<li><a href="#bklr">bklr</a></li>
 	<li><a href="#diff">diff</a></li>
+	<li><a href="#migrate">Migrate</a></li>
 	<li><a href="#comparison">Comparison</a></li>
 </ol>
 </nav>
@@ -394,7 +395,7 @@ ifocus * {
 <p>Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.</p>
 
 <label>YAML</label>
-<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flagValue></focus> <string>service.test.toml</string>
+<code class="labeled">$ <cmd>bkl</cmd> <focus><flag>-f yaml</flag></focus> <string>service.test.toml</string>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></code>
@@ -475,21 +476,21 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 
 <h2><a name="inheritance">Inheritance</a></h2>
 
-<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent templates may have any supported file extension.</p>
+<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent layers may have any supported file extension.</p>
 
 <label>Set Parent In File</label>
 <code class="labeled"><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
 
 <vSpace></vSpace>
 
-<p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file and will still evaluate template layers of the parent in the normal order.</p>
+<p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.</p>
 
 <label>Set Parent In CLI</label>
 <code class="labeled">$ <cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
 
 <vSpace></vSpace>
 
-<p>The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent templates using filenames or <ifocus>$parent</ifocus>. Layer order can then be specified with just commandline argument order.</p>
+<p>The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>. Layer order can then be specified with just commandline argument order.</p>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
@@ -1240,6 +1241,68 @@ c: 3                              c: 3
 
 <vSpace></vSpace>
 <vSpace></vSpace>
+
+
+
+<h2><a name="migrate">Migrate</a></h2>
+
+<p>Below is an example process for migrating an existing set of configurations to <ifocus>bkl</ifocus>. It contains some Kubernetes-specific items but the use of the <ifocus>bkl*</ifocus> tools applies to any configuration source.</p>
+
+<p>We assume you start with two K8s deployments called <ifocus>deploy-dev</ifocus> and <ifocus>deploy-prod</ifocus> which are similar but not identical.</p>
+
+<p>First, install tools:</p>
+
+<ul>
+	<li><a href="#install">bkl</a></li>
+	<li><a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a></li>
+	<li><a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/">krew</a></li>
+	<li><a href="https://github.com/itaysk/kubectl-neat#installation">neat</a></li>
+</ul>
+
+<p>It's possible to export configuration directly from existing templating systems (e.g. <ifocus>kustomize build</ifocus>, <ifocus>helm install --dry-run --debug</ifocus>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.</p>
+
+<label>Export Existing Config</label>
+<code class="labeled"># "kubectl neat" removes status and default value fields
+$ <cmd>kubectl</cmd> <string>get</string> <flag>-o yaml</flag> <string>deploy deploy-dev</string> | <cmd>kubectl</cmd> <string>neat</string> &gt; <string>deploy-dev-orig.yaml</string>
+$ <cmd>kubectl</cmd> <string>get</string> <flag>-o yaml</flag> <string>deploy deploy-prod</string> | <cmd>kubectl</cmd> <string>neat</string> &gt; <string>deploy-prod-orig.yaml</string></code>
+
+<vSpace></vSpace>
+
+<label>Generate Base Layer</label>
+<code class="labeled"># See bkli details <a href="#bkli">here</a>
+$ <cmd>bkli</cmd> <flag>-o deploy.yaml</flag> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+
+<vSpace></vSpace>
+
+<label>Generate Service Layers</label>
+<code class="labeled"># See bkld details <a href="#bkld">here</a>
+$ <cmd>bkld</cmd> <flag>-o deploy.dev.yaml</flag> <string>deploy.yaml deploy-dev-orig.yaml</string>
+$ <cmd>bkld</cmd> <flag>-o deploy.prod.yaml</flag> <string>deploy.yaml deploy-prod-orig.yaml</string></code>
+
+<vSpace></vSpace>
+
+<label>Check Results</label>
+<code class="labeled"># Should show no diff
+$ <cmd>kubectl</cmd> <string>diff</string> <flag>-f</flag> <string>&lt;(<cmd>bkl</cmd> deploy.dev.yaml)</string>
+$ <cmd>kubectl</cmd> <string>diff</string> <flag>-f</flag> <string>&lt;(<cmd>bkl</cmd> deploy.prod.yaml)</string></code>
+
+<vSpace></vSpace>
+
+<label>Clean Up</label>
+<code class="labeled">$ <cmd>rm</cmd> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+
+<vSpace></vSpace>
+
+<p>You now have 3 bkl files:</p>
+
+<ul>
+	<li><ifocus>deploy.yaml</ifocus> is the base layer containing values common to both deployments</li>
+	<li><ifocus>deploy.dev.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-dev</ifocus></li>
+	<li><ifocus>deploy.prod.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-prod</ifocus></li>
+</ul>
+
+<vSpace></vSpace>
+
 
 
 <h2><a name="comparison">Comparison</a></h2>
