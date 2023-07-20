@@ -63,7 +63,7 @@ func main() {
 			fatal(err)
 		}
 
-		if format == "" {
+		if format == "" && opts.OutputPath == nil {
 			format = f
 		}
 
