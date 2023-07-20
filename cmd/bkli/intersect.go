@@ -3,7 +3,9 @@ package main
 import "reflect"
 
 func intersect(a, b any) (any, error) {
-	// TODO: Short-circuit b == nil ?
+	if b == nil {
+		return nil, nil
+	}
 
 	switch a2 := a.(type) {
 	case map[string]any:
@@ -20,10 +22,6 @@ func intersect(a, b any) (any, error) {
 			return a, nil
 		}
 
-		if b == nil {
-			return nil, nil
-		}
-
 		return "$required", nil
 	}
 }
@@ -32,9 +30,6 @@ func intersectMap(a map[string]any, b any) (any, error) {
 	switch b2 := b.(type) {
 	case map[string]any:
 		return intersectMapMap(a, b2)
-
-	case nil:
-		return nil, nil
 
 	default:
 		// Different types but both defined
@@ -46,7 +41,18 @@ func intersectMapMap(a, b map[string]any) (map[string]any, error) {
 	ret := map[string]any{}
 
 	for k, v := range a {
-		v2, err := intersect(v, b[k])
+		v2, found := b[k]
+
+		if !found {
+			continue
+		}
+
+		if v == nil && v2 == nil {
+			ret[k] = nil
+			continue
+		}
+
+		v2, err := intersect(v, v2)
 		if err != nil {
 			return nil, err
 		}
@@ -65,9 +71,6 @@ func intersectList(a []any, b any) (any, error) {
 	switch b2 := b.(type) {
 	case []any:
 		return intersectListList(a, b2)
-
-	case nil:
-		return nil, nil
 
 	default:
 		// Different types but both defined
