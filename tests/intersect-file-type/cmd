@@ -1,0 +1,4 @@
+bkli -o out.json a.yaml b.yaml
+echo X
+cat out.json
+rm -f out.json
