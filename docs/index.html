@@ -1140,6 +1140,52 @@ $ <focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 
 
 
+<h2><a name="bkli">bkli</a></h2>
+
+<p><ifocus>bkli</ifocus> (i for "intersect") takes two or more arguments (paths to target outputs) and outputs the maximum base layer they have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.</p>
+
+<p>Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.</p>
+
+<split5a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <string>2</string>
+<key>c</key>: <number>3</number></code>
+
+<op>∩</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>10</number>
+<key>d</key>: <number>4</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <string>$required</string></code>
+
+<vSpace class="span5"></vSpace>
+
+<code>- <key>a</key>: <number>1</number>
+- <key>b</key>: <string>2</string>
+- <key>c</key>: <number>3</number></code>
+
+<op>∩</op>
+
+<code>- <key>a</key>: <number>1</number>
+- <key>b</key>: <number>10</number>
+- <key>d</key>: <number>4</number></code>
+
+<op>=</op>
+
+<code>- <key>a</key>: <number>1</number></code>
+
+</split5a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
 <h2><a name="diff">diff</a></h2>
 
 <p>It's easy to see differences between processed bkl files using shell syntax.</p>
