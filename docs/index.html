@@ -420,7 +420,7 @@ ifocus * {
 {
   "<key>addr</key>": "<string>127.0.0.1</string>",
   "<key>name</key>": "<string>myService</string>",
-  "<key>port</key>":<number>8081</number>
+  "<key>port</key>": <number>8081</number>
 }</code>
 
 <vSpace></vSpace>
@@ -632,7 +632,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <op>+</op>
 
 <code>- <number>2</number>
-<focus>- <key>$patch</key>: <string>replace</string></focus></code>
+- <focus><key>$patch</key>: <string>replace</string></focus></code>
 
 <op>=</op>
 
@@ -647,7 +647,7 @@ $ <cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml 
 <op>+</op>
 
 <code>- <key>x</key>: <number>3</number>
-<focus>- <key>x</key>: <number>2</number>
+- <focus><key>x</key>: <number>2</number>
   <key>$patch</key>: <string>delete</string></focus></code>
 
 <op>=</op>
