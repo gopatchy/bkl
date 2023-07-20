@@ -1,6 +1,6 @@
 foo:
-    bar:
-        - a: 1
-zig:
-    - b: 2
+  bar:
     - a: 1
+zig:
+  - b: 2
+  - a: 1

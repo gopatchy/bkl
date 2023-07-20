@@ -1,2 +1,2 @@
 a:
-    b: $required
+  b: $required

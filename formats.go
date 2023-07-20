@@ -29,7 +29,7 @@ var formatByExtension = map[string]Format{
 		unmarshal: toml.Unmarshal,
 	},
 	"yaml": {
-		marshal:   yaml.Marshal,
+		marshal:   yamlMarshal,
 		unmarshal: yaml.Unmarshal,
 	},
 }

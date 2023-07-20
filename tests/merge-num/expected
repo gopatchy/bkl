@@ -1,4 +1,4 @@
 foo: 1
 zig:
-    b: 2
-    zag: 1
+  b: 2
+  zag: 1
