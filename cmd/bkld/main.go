@@ -35,6 +35,10 @@ func main() {
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)
+	fp.LongDescription = `
+bkld generates the minimal intermediate layer needed to create the target output from the base layer.
+
+See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 
 	_, err := fp.Parse()
 	if err != nil {

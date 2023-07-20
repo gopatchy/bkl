@@ -16,7 +16,7 @@ type options struct {
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
 
 	Positional struct {
-		InputPath string `positional-arg-name:"inputPath" required:"true" description:"input file path"`
+		InputPath string `positional-arg-name:"layerPath" required:"true" description:"lower layer file path"`
 	} `positional-args:"yes"`
 }
 
@@ -34,6 +34,10 @@ func main() {
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)
+	fp.LongDescription = `
+bklr generates a document containing just the required fields and their ancestors from the lower layer.
+
+See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 
 	_, err := fp.Parse()
 	if err != nil {

@@ -34,6 +34,16 @@ func main() {
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)
+	fp.LongDescription = `
+bkl interprets layered configuration files from YAML, JSON, and TOML with additional bkl syntax.
+
+See https://bkl.gopatchy.io/ for detailed documentation.
+
+Related tools:
+* bklb
+* bkld
+* bkli
+* bklr`
 
 	_, err := fp.Parse()
 	if err != nil {

@@ -16,7 +16,7 @@ type options struct {
 	OutputFormat *string `short:"f" long:"format" description:"output format"`
 
 	Positional struct {
-		InputPaths []string `positional-arg-name:"inputPath" required:"2" description:"input file path"`
+		InputPaths []string `positional-arg-name:"targetPath" required:"2" description:"target output file path"`
 	} `positional-args:"yes"`
 }
 
@@ -34,6 +34,10 @@ func main() {
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)
+	fp.LongDescription = `
+bkli generates the maximal base layer that the specified targets have in common.
+
+See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 
 	_, err := fp.Parse()
 	if err != nil {
