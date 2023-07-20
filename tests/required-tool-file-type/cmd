@@ -1,0 +1,4 @@
+bklr -o out.json a.yaml
+echo X
+cat out.json
+rm -f out.json

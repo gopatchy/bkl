@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime/debug"
+	"strings"
 
 	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
@@ -48,6 +50,10 @@ func main() {
 	err = b.MergeFileLayers(realPath)
 	if err != nil {
 		fatal(err)
+	}
+
+	if opts.OutputPath != nil {
+		format = strings.TrimPrefix(filepath.Ext(*opts.OutputPath), ".")
 	}
 
 	if opts.OutputFormat != nil {

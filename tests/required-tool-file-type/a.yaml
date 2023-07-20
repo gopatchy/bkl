@@ -1,0 +1,5 @@
+a:
+  b: $required
+  c: 3
+  d:
+    e: 5
