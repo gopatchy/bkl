@@ -34,7 +34,7 @@ func diffMap(dst map[string]any, src any) (any, error) {
 	}
 }
 
-func diffMapMap(dst, src map[string]any) (map[string]any, error) {
+func diffMapMap(dst, src map[string]any) (any, error) {
 	ret := map[string]any{}
 
 	for k, v := range dst {
@@ -63,6 +63,10 @@ func diffMapMap(dst, src map[string]any) (map[string]any, error) {
 		ret[k] = nil
 	}
 
+	if len(ret) == 0 {
+		return nil, nil
+	}
+
 	return ret, nil
 }
 
@@ -76,7 +80,7 @@ func diffList(dst []any, src any) (any, error) {
 	}
 }
 
-func diffListList(dst, src []any) ([]any, error) { //nolint:unparam
+func diffListList(dst, src []any) (any, error) { //nolint:unparam
 	ret := []any{}
 
 outer1:
@@ -109,6 +113,10 @@ outer2:
 			dst = append(dst, map[string]any{"$patch": "replace"})
 			return dst, nil
 		}
+	}
+
+	if len(ret) == 0 {
+		return nil, nil
 	}
 
 	return ret, nil

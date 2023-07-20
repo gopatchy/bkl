@@ -44,6 +44,10 @@ func GetFormat(name string) (*Format, error) {
 }
 
 func (f *Format) Marshal(v any) ([]byte, error) {
+	if v == nil {
+		return []byte{}, nil
+	}
+
 	ret, err := f.marshal(v)
 	if err != nil {
 		return nil, polyfill.ErrorsJoin(err, ErrMarshal)
