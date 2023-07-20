@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.toml")
+[]byte("\n\n\n\n---\n\n\n\n\n---\n\n\n\n\n---\n\n\n\n\n---\n\n\n\n\n---\n\n\n\n\n---\n\n\n\n\n---\n\n00\n\n000000000000000000000000000000000000000000000000000\n---\n0000")
+string("0")
+[]byte("0")
