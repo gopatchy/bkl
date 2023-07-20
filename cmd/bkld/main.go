@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime/debug"
+	"strings"
 
 	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
@@ -40,8 +42,13 @@ func main() {
 	}
 
 	format := ""
+
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
+	}
+
+	if format == "" && opts.OutputPath != nil {
+		format = strings.TrimPrefix(filepath.Ext(*opts.OutputPath), ".")
 	}
 
 	bs := []*bkl.Parser{}
