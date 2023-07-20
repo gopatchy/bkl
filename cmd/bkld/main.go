@@ -12,12 +12,12 @@ import (
 )
 
 type options struct {
-	OutputPath   *string `short:"o" long:"output" description:"output file path"`
-	OutputFormat *string `short:"f" long:"format" description:"output format"`
+	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
+	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
 
 	Positional struct {
-		BasePath   string `positional-arg-name:"basePath" required:"true" description:"base layer file path"`
-		TargetPath string `positional-arg-name:"targetPath" required:"true" description:"target output file path"`
+		BasePath   flags.Filename `positional-arg-name:"basePath" required:"true" description:"base layer file path"`
+		TargetPath flags.Filename `positional-arg-name:"targetPath" required:"true" description:"target output file path"`
 	} `positional-args:"yes"`
 }
 
@@ -52,13 +52,13 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	}
 
 	if format == "" && opts.OutputPath != nil {
-		format = strings.TrimPrefix(filepath.Ext(*opts.OutputPath), ".")
+		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
 
 	bs := []*bkl.Parser{}
 	numDocs := 0
 
-	for _, path := range []string{opts.Positional.BasePath, opts.Positional.TargetPath} {
+	for _, path := range []string{string(opts.Positional.BasePath), string(opts.Positional.TargetPath)} {
 		realPath, f, err := bkl.FileMatch(path)
 		if err != nil {
 			fatal(err)
@@ -131,7 +131,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	fh := os.Stdout
 
 	if opts.OutputPath != nil {
-		fh, err = os.OpenFile(*opts.OutputPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		fh, err = os.OpenFile(string(*opts.OutputPath), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			fatal(err)
 		}

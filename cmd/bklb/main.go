@@ -29,10 +29,11 @@ func main() {
 
 	if cmd == "bkl" {
 		// Run as bklb, not via symlink
+		//nolint:goerr113,revive,stylecheck
 		fatal(fmt.Errorf(`Usage:
   ln -s $(which bklb) toolb  # bklb will run 'tool'
 
-See https://bkl.gopatchy.io/#bklb for detailed documentation.`)) //nolint:goerr113
+See https://bkl.gopatchy.io/#bklb for detailed documentation.`))
 	}
 
 	cmdPath, err := exec.LookPath(cmd)

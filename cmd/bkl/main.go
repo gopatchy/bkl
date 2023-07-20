@@ -10,13 +10,13 @@ import (
 )
 
 type options struct {
-	OutputPath   *string `short:"o" long:"output" description:"output file path"`
-	OutputFormat *string `short:"f" long:"format" description:"output format"`
-	SkipParent   bool    `short:"P" long:"skip-parent" description:"skip loading parent templates"`
-	Verbose      bool    `short:"v" long:"verbose" description:"enable verbose logging"`
+	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
+	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
+	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
+	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
 
 	Positional struct {
-		InputPaths []string `positional-arg-name:"inputPath" required:"1" description:"input file path"`
+		InputPaths []flags.Filename `positional-arg-name:"inputPath" required:"1" description:"input file path"`
 	} `positional-args:"yes"`
 }
 
@@ -68,7 +68,7 @@ Related tools:
 			fileP.SetDebug(true)
 		}
 
-		realPath, f, err := bkl.FileMatch(path)
+		realPath, f, err := bkl.FileMatch(string(path))
 		if err != nil {
 			fatal(err)
 		}
@@ -96,7 +96,7 @@ Related tools:
 	if opts.OutputPath == nil {
 		err = p.OutputToWriter(os.Stdout, format)
 	} else {
-		err = p.OutputToFile(*opts.OutputPath, format)
+		err = p.OutputToFile(string(*opts.OutputPath), format)
 	}
 
 	if err != nil {

@@ -12,11 +12,11 @@ import (
 )
 
 type options struct {
-	OutputPath   *string `short:"o" long:"output" description:"output file path"`
-	OutputFormat *string `short:"f" long:"format" description:"output format"`
+	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
+	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
 
 	Positional struct {
-		InputPath string `positional-arg-name:"layerPath" required:"true" description:"lower layer file path"`
+		InputPath flags.Filename `positional-arg-name:"layerPath" required:"true" description:"lower layer file path"`
 	} `positional-args:"yes"`
 }
 
@@ -44,7 +44,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	realPath, format, err := bkl.FileMatch(opts.Positional.InputPath)
+	realPath, format, err := bkl.FileMatch(string(opts.Positional.InputPath))
 	if err != nil {
 		fatal(err)
 	}
@@ -57,7 +57,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 	}
 
 	if opts.OutputPath != nil {
-		format = strings.TrimPrefix(filepath.Ext(*opts.OutputPath), ".")
+		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
 
 	if opts.OutputFormat != nil {
@@ -93,7 +93,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 	fh := os.Stdout
 
 	if opts.OutputPath != nil {
-		fh, err = os.OpenFile(*opts.OutputPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		fh, err = os.OpenFile(string(*opts.OutputPath), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			fatal(err)
 		}
