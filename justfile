@@ -41,6 +41,7 @@ pkg:
 		export GOOS=$(echo $PLATFORM | cut -d / -f 1)
 		export GOARCH=$(echo $PLATFORM | cut -d / -f 2)
 		DIR=$(mktemp --directory)
+		cp LICENSE $DIR
 		go build -trimpath -ldflags=-extldflags=-static -o $DIR ./...
 		cd $DIR
 		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH.tar.gz *
