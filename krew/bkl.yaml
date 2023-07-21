@@ -4,11 +4,13 @@ metadata:
   name: bkl
 spec:
   version: "v1.0.11"
-  homepage: https://bkl.gopatchy.io/
+  homepage: https://github.com/gopatchy/bkl/
   shortDescription: "Evaluates bkl configuration layer files"
   description: |
     Evaluates bkl configuration layer files passed as kubectl arguments.
     Proxies all remaining arguments back to kubectl.
+
+    Full documentation: https://bkl.gopatchy.io/
   platforms:
   - selector:
       matchLabels:
