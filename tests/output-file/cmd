@@ -1,4 +1,4 @@
-bkl -o out.yaml service.test.yaml
+bkl -o out.yaml a.b.yaml
 echo X
 cat out.yaml
 rm -f out.yaml

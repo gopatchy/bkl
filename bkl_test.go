@@ -11,7 +11,7 @@ func Example() {
 
 	b := bkl.New()
 
-	err := b.MergeFileLayers("tests/example1/service.test.toml")
+	err := b.MergeFileLayers("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}

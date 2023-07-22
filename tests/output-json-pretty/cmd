@@ -1,1 +1,1 @@
-bkl -f json-pretty service.test.toml
+bkl -f json-pretty a.b.toml

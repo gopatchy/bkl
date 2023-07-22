@@ -24,8 +24,8 @@ func ExampleNew() {
 func ExampleParser() {
 	b := bkl.New()
 
-	// Also parses tests/example1/service.yaml
-	err := b.MergeFileLayers("tests/example1/service.test.toml")
+	// Also parses tests/example1/a.yaml
+	err := b.MergeFileLayers("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +40,7 @@ func ExampleParser() {
 func ExampleParser_Document() {
 	b := bkl.New()
 
-	if err := b.MergeFileLayers("tests/example1/service.test.toml"); err != nil {
+	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
 		panic(err)
 	}
 
@@ -59,8 +59,8 @@ func ExampleParser_MergeFile() {
 
 	b := bkl.New()
 
-	// Does *not* parse tests/example1/service.yaml
-	err := b.MergeFile("tests/example1/service.test.toml")
+	// Does *not* parse tests/example1/a.yaml
+	err := b.MergeFile("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -77,8 +77,8 @@ func ExampleParser_MergeFileLayers() {
 
 	b := bkl.New()
 
-	// Also parses tests/example1/service.yaml
-	err := b.MergeFileLayers("tests/example1/service.test.toml")
+	// Also parses tests/example1/a.yaml
+	err := b.MergeFileLayers("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -137,7 +137,7 @@ func ExampleParser_MergePatch() {
 func ExampleParser_NumDocuments() {
 	b := bkl.New()
 
-	if err := b.MergeFileLayers("tests/example1/service.test.toml"); err != nil {
+	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
 		panic(err)
 	}
 
@@ -258,14 +258,14 @@ func ExampleParser_SetDebug() {
 
 	b.SetDebug(true)
 
-	if err := b.MergeFileLayers("tests/example1/service.test.toml"); err != nil {
+	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
 		panic(err)
 	}
 	// Output:
-	// [tests/example1/service.test.toml] loading
-	// [tests/example1/service.yaml] loading
-	// [tests/example1/service.yaml] merging
-	// [tests/example1/service.test.toml] merging
+	// [tests/example1/a.b.toml] loading
+	// [tests/example1/a.yaml] loading
+	// [tests/example1/a.yaml] merging
+	// [tests/example1/a.b.toml] merging
 }
 
 func FuzzParser(f *testing.F) {
