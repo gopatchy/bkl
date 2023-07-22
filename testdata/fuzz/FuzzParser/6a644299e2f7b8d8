@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.toml")
+[]byte("0={0={0={0={0={0={0={0={}}}}}}}}")
+string("u\xf7o\xd0")
+[]byte("0")

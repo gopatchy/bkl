@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.tomol")
+[]byte("0=00e")
+string("\"")
+[]byte("0")
