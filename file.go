@@ -1,7 +1,6 @@
 package bkl
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -38,35 +37,15 @@ func loadFile(path string) (*file, error) {
 		return nil, err
 	}
 
-	rawDocs := [][]byte{}
-
-	for {
-		if bytes.HasPrefix(raw, []byte("---\n")) {
-			rawDocs = append(rawDocs, []byte(""))
-			raw = bytes.TrimPrefix(raw, []byte("---\n"))
-
-			continue
-		}
-
-		parts := bytes.SplitN(raw, []byte("\n---\n"), 2)
-		if len(parts) == 1 {
-			rawDocs = append(rawDocs, raw)
-			break
-		}
-
-		rawDocs = append(rawDocs, append(parts[0], '\n'))
-		raw = parts[1]
+	docs, err := format.UnmarshalStream(raw)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
-	for i, rawDoc := range rawDocs {
-		doc, err := format.Unmarshal(rawDoc)
-		if err != nil {
-			return nil, fmt.Errorf("%s[doc%d]: %w", path, i, err)
-		}
-
+	for i, doc := range docs {
 		doc, err = normalize(doc)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
 		doc = env(doc)

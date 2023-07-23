@@ -81,3 +81,42 @@ func (f *Format) Unmarshal(in []byte) (any, error) {
 
 	return obj, nil
 }
+
+func (f *Format) UnmarshalStream(in []byte) ([]any, error) {
+	ret := []any{}
+
+	for i, raw := range splitStream(in) {
+		doc, err := f.Unmarshal(raw)
+		if err != nil {
+			return nil, fmt.Errorf("[doc%d]: %w", i, err)
+		}
+
+		ret = append(ret, doc)
+	}
+
+	return ret, nil
+}
+
+func splitStream(in []byte) [][]byte {
+	ret := [][]byte{}
+
+	for {
+		if bytes.HasPrefix(in, []byte("---\n")) {
+			ret = append(ret, []byte(""))
+			in = bytes.TrimPrefix(in, []byte("---\n"))
+
+			continue
+		}
+
+		parts := bytes.SplitN(in, []byte("\n---\n"), 2)
+		if len(parts) == 1 {
+			ret = append(ret, in)
+			break
+		}
+
+		ret = append(ret, append(parts[0], '\n'))
+		in = parts[1]
+	}
+
+	return ret
+}
