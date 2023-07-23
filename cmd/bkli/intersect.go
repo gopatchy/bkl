@@ -89,5 +89,9 @@ func intersectListList(a, b []any) ([]any, error) { //nolint:unparam
 		}
 	}
 
+	if len(ret) == 0 {
+		ret = append(ret, "$required")
+	}
+
 	return ret, nil
 }
