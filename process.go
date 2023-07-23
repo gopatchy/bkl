@@ -5,30 +5,26 @@ import (
 	"strings"
 )
 
-func process(root any) (any, error) {
-	return processRecursive(root, root)
-}
-
-func processRecursive(root any, obj any) (any, error) {
+func Process(obj, mergeFrom any) (any, error) {
 	switch objType := obj.(type) {
 	case map[string]any:
-		return processMap(root, objType)
+		return processMap(objType, mergeFrom)
 
 	case []any:
-		return processList(root, objType)
+		return processList(objType, mergeFrom)
 
 	case string:
-		return processString(root, objType)
+		return processString(objType, mergeFrom)
 
 	default:
 		return obj, nil
 	}
 }
 
-func processMap(root any, obj map[string]any) (any, error) {
+func processMap(obj map[string]any, mergeFrom any) (any, error) {
 	path, obj := popStringValue(obj, "$merge")
 	if path != "" {
-		in := get(root, path)
+		in := get(mergeFrom, path)
 		if in == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
@@ -38,17 +34,17 @@ func processMap(root any, obj map[string]any) (any, error) {
 			return nil, err
 		}
 
-		return processRecursive(root, next)
+		return Process(next, mergeFrom)
 	}
 
 	path, obj = popStringValue(obj, "$replace")
 	if path != "" {
-		next := get(root, path)
+		next := get(mergeFrom, path)
 		if next == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrReplaceRefNotFound)
 		}
 
-		return processRecursive(root, next)
+		return Process(next, mergeFrom)
 	}
 
 	output, obj := popBoolValue(obj, "$output", false)
@@ -59,7 +55,7 @@ func processMap(root any, obj map[string]any) (any, error) {
 	encode, obj := popStringValue(obj, "$encode")
 
 	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
-		v2, err := processRecursive(root, v)
+		v2, err := Process(v, mergeFrom)
 		if err != nil {
 			return nil, err
 		}
@@ -91,10 +87,10 @@ func processMap(root any, obj map[string]any) (any, error) {
 	return obj, nil
 }
 
-func processList(root any, obj []any) (any, error) {
+func processList(obj []any, mergeFrom any) (any, error) {
 	path, obj := listPopStringValue(obj, "$merge")
 	if path != "" {
-		in := get(root, path)
+		in := get(mergeFrom, path)
 		if in == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
@@ -104,17 +100,17 @@ func processList(root any, obj []any) (any, error) {
 			return nil, err
 		}
 
-		return processRecursive(root, next)
+		return Process(next, mergeFrom)
 	}
 
 	path, obj = listPopStringValue(obj, "$replace")
 	if path != "" {
-		next := get(root, path)
+		next := get(mergeFrom, path)
 		if next == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrReplaceRefNotFound)
 		}
 
-		return processRecursive(root, next)
+		return Process(next, mergeFrom)
 	}
 
 	if listHasBoolValue(obj, "$output", false) {
@@ -124,7 +120,7 @@ func processList(root any, obj []any) (any, error) {
 	encode, obj := listPopStringValue(obj, "$encode")
 
 	obj, err := filterList(obj, func(v any) ([]any, error) {
-		v2, err := processRecursive(root, v)
+		v2, err := Process(v, mergeFrom)
 		if err != nil {
 			return nil, err
 		}
@@ -156,27 +152,27 @@ func processList(root any, obj []any) (any, error) {
 	return obj, nil
 }
 
-func processString(root any, obj string) (any, error) {
+func processString(obj string, mergeFrom any) (any, error) {
 	if strings.HasPrefix(obj, "$merge:") {
 		path := strings.TrimPrefix(obj, "$merge:")
 
-		in := get(root, path)
+		in := get(mergeFrom, path)
 		if in == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
-		return processRecursive(root, in)
+		return Process(in, mergeFrom)
 	}
 
 	if strings.HasPrefix(obj, "$replace:") {
 		path := strings.TrimPrefix(obj, "$replace:")
 
-		in := get(root, path)
+		in := get(mergeFrom, path)
 		if in == nil {
 			return nil, fmt.Errorf("%s: (%w)", path, ErrMergeRefNotFound)
 		}
 
-		return processRecursive(root, in)
+		return Process(in, mergeFrom)
 	}
 
 	return obj, nil

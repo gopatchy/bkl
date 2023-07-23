@@ -203,7 +203,7 @@ func (p *Parser) OutputDocumentsIndex(index int) ([]any, error) {
 		return nil, err
 	}
 
-	obj, err = process(obj)
+	obj, err = Process(obj, obj)
 	if err != nil {
 		return nil, err
 	}
