@@ -1385,6 +1385,17 @@ c: 3                              c: 3
 	<li><ifocus>deploy.prod.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-prod</ifocus></li>
 </ul>
 
+<p>The migration process isn't deterministic; there are design and aesthetic considerations. Here are some general tips:</p>
+
+<ul>
+	<li>Iterate by diffing your evaluated layers against production (e.g. <ifocus>kubectl bkl diff -f</ifocus>), making small changes, then diffing again.</li>
+	<li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
+	<li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
+	<li>Remove duplication with <ifocus>$merge:</ifocus> but avoid chained merge paths.</li>
+	<li>Avoid using hidden <ifocus>$output: false</ifocus> trees as template variables; prefer overriding values in-place.</li>
+	<li><ifocus>bkld</ifocus> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <ifocus>containers</ifocus>) that could be trivially patched. Use <ifocus>$match:</ifocus> to select the container and override values within it.</li>
+</ul>
+
 <vSpace></vSpace>
 
 
