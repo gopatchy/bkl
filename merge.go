@@ -126,13 +126,20 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 
 			m, vMap := popMapValue(vMap, "$match")
 			if m != nil {
+				var val any = vMap
+
+				v2, vMap := popMapValue(vMap, "$value")
+				if v2 != nil {
+					val = v2
+				}
+
 				found := false
 
 				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
 					if match(v2, m) {
 						found = true
 
-						v2, err := merge(v2, vMap)
+						v2, err := merge(v2, val)
 						if err != nil {
 							return nil, err
 						}

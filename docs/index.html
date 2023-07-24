@@ -531,7 +531,6 @@ ifocus * {
 <key>b</key>: <number>2</number></code>
 
 <vSpace class="span5"></vSpace>
-<vSpace class="span5"></vSpace>
 
 <code><key>a</key>: <number>1</number>
 ---
@@ -576,7 +575,6 @@ ifocus * {
 <key>b</key>: <number>2</number></code>
 
 <vSpace class="span5"></vSpace>
-<vSpace class="span5"></vSpace>
 
 <code><key>a</key>: <number>1</number></code>
 
@@ -589,7 +587,6 @@ ifocus * {
 
 <code><key>b</key>: <number>2</number></code>
 
-<vSpace class="span5"></vSpace>
 <vSpace class="span5"></vSpace>
 
 <code><key>a</key>: <number>1</number>
@@ -631,7 +628,6 @@ ifocus * {
 - <number>2</number></code>
 
 <vSpace class="span5"></vSpace>
-<vSpace class="span5"></vSpace>
 
 <code>- <number>1</number></code>
 
@@ -644,7 +640,6 @@ ifocus * {
 
 <code>- <number>2</number></code>
 
-<vSpace class="span5"></vSpace>
 <vSpace class="span5"></vSpace>
 
 <code>- <key>x</key>: <number>1</number>
@@ -667,7 +662,7 @@ ifocus * {
 
 <p>bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
-<p>To update a specific list item from a parent layer, use <ifocus>$match</ifocus>:</p>
+<p>To update a specific list item from a parent layer, use <ifocus>$match</ifocus>. Combine it with <ifocus>$value</ifocus> for scalars.</p>
 
 <split5a>
 
@@ -685,9 +680,23 @@ ifocus * {
 <code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>10</number></code>
 
+<vSpace class="span5"></vSpace>
+
+<code>- <number>1</number>
+- <number>2</number></code>
+
+<op>+</op>
+
+<code>- <focus><key>$match</key>: <number>2</number>
+  <key>$value</key>: <number>10</number></focus></code>
+
+<op>=</op>
+
+<code>- <number>1</number>
+- <number>10</number></code>
+
 </split5a>
 
-<vSpace class="span5"></vSpace>
 <vSpace class="span5"></vSpace>
 
 
