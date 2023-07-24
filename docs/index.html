@@ -560,7 +560,7 @@ ifocus * {
 
 <h2><a name="maps">Maps</a></h2>
 
-<p>Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>null</ifocus>.</p>
+<p>Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.</p>
 
 <split5a>
 
@@ -598,7 +598,7 @@ ifocus * {
 <op>+</op>
 
 <code><key>c</key>: <number>3</number>
-<focus><key>b</key>: null</focus></code>
+<focus><key>b</key>: <string>$delete</string></focus></code>
 
 <op>=</op>
 
@@ -609,7 +609,7 @@ ifocus * {
 
 <vSpace></vSpace>
 
-<p>bkl returns an error if you use <ifocus>null</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
+<p>bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
 
 

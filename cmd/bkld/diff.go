@@ -60,7 +60,7 @@ func diffMapMap(dst, src map[string]any) (any, error) {
 			continue
 		}
 
-		ret[k] = nil
+		ret[k] = "$delete"
 	}
 
 	if len(ret) == 0 {

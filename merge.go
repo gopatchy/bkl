@@ -50,7 +50,7 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 	for k, v := range src {
 		existing, found := dst[k]
 
-		if v == nil {
+		if toString(v) == "$delete" {
 			if !found {
 				return nil, fmt.Errorf("%s=null: %w", k, ErrUselessOverride)
 			}
