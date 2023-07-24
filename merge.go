@@ -116,7 +116,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 
 				deleted := false
 
-				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
+				dst, err = filterList(dst, func(v2 any) ([]any, error) {
 					if match(v2, del) {
 						deleted = true
 						return nil, nil
@@ -124,6 +124,10 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 
 					return []any{v2}, nil
 				})
+
+				if err != nil {
+					return nil, err
+				}
 
 				if !deleted {
 					return nil, fmt.Errorf("%#v: %w", vMap, ErrUselessOverride)
@@ -143,7 +147,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 
 				found := false
 
-				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
+				dst, err = filterList(dst, func(v2 any) ([]any, error) {
 					if match(v2, m) {
 						found = true
 
@@ -157,6 +161,10 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 
 					return []any{v2}, nil
 				})
+
+				if err != nil {
+					return nil, err
+				}
 
 				if !found {
 					return nil, fmt.Errorf("%#v: %w", vMap, ErrNoMatchFound)
