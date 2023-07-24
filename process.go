@@ -22,7 +22,7 @@ func Process(obj, mergeFrom any) (any, error) {
 }
 
 func processMap(obj map[string]any, mergeFrom any) (any, error) {
-	path, obj := popStringValue(obj, "$merge")
+	path, obj := popMapStringValue(obj, "$merge")
 	if path != "" {
 		in := get(mergeFrom, path)
 		if in == nil {
@@ -37,7 +37,7 @@ func processMap(obj map[string]any, mergeFrom any) (any, error) {
 		return Process(next, mergeFrom)
 	}
 
-	path, obj = popStringValue(obj, "$replace")
+	path, obj = popMapStringValue(obj, "$replace")
 	if path != "" {
 		next := get(mergeFrom, path)
 		if next == nil {
@@ -47,12 +47,12 @@ func processMap(obj map[string]any, mergeFrom any) (any, error) {
 		return Process(next, mergeFrom)
 	}
 
-	output, obj := popBoolValue(obj, "$output", false)
+	output, obj := popMapBoolValue(obj, "$output", false)
 	if output {
 		return nil, nil
 	}
 
-	encode, obj := popStringValue(obj, "$encode")
+	encode, obj := popMapStringValue(obj, "$encode")
 
 	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := Process(v, mergeFrom)
@@ -88,7 +88,7 @@ func processMap(obj map[string]any, mergeFrom any) (any, error) {
 }
 
 func processList(obj []any, mergeFrom any) (any, error) {
-	path, obj := listPopStringValue(obj, "$merge")
+	path, obj := popListMapStringValue(obj, "$merge")
 	if path != "" {
 		in := get(mergeFrom, path)
 		if in == nil {
@@ -103,7 +103,7 @@ func processList(obj []any, mergeFrom any) (any, error) {
 		return Process(next, mergeFrom)
 	}
 
-	path, obj = listPopStringValue(obj, "$replace")
+	path, obj = popListMapStringValue(obj, "$replace")
 	if path != "" {
 		next := get(mergeFrom, path)
 		if next == nil {
@@ -113,11 +113,11 @@ func processList(obj []any, mergeFrom any) (any, error) {
 		return Process(next, mergeFrom)
 	}
 
-	if listHasBoolValue(obj, "$output", false) {
+	if hasListMapBoolValue(obj, "$output", false) {
 		return nil, nil
 	}
 
-	encode, obj := listPopStringValue(obj, "$encode")
+	encode, obj := popListMapStringValue(obj, "$encode")
 
 	obj, err := filterList(obj, func(v any) ([]any, error) {
 		v2, err := Process(v, mergeFrom)

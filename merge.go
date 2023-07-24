@@ -40,7 +40,7 @@ func mergeMap(dst map[string]any, src any) (map[string]any, error) {
 }
 
 func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error) {
-	patch, src := popStringValue(src, "$patch")
+	patch, src := popMapStringValue(src, "$patch")
 	switch patch {
 	case "":
 
@@ -95,24 +95,18 @@ func mergeList(dst []any, src any) (any, error) {
 }
 
 func mergeListList(dst []any, src []any) ([]any, error) {
-	patch := listGetStringValue(src, "$patch")
+	patch := getListMapStringValue(src, "$patch")
 	if patch == "replace" {
-		_, src = listPopStringValue(src, "$patch")
+		_, src = popListMapStringValue(src, "$patch")
 		return src, nil
 	}
 
-	dst, _ = filterList(dst, func(v any) ([]any, error) {
-		if toString(v) == "$required" {
-			return nil, nil
-		}
-
-		return []any{v}, nil
-	})
+	_, dst = popListString(dst, "$required")
 
 	for _, v := range src {
 		vMap, ok := v.(map[string]any)
 		if ok {
-			patch, vMap := popStringValue(vMap, "$patch")
+			patch, vMap := popMapStringValue(vMap, "$patch")
 			switch patch {
 			case "":
 

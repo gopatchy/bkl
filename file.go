@@ -84,12 +84,12 @@ func (f *file) parentFromDirective() (*string, error) {
 		return nil, nil
 	}
 
-	if hasNilValue(docMap, "$parent") || hasBoolValue(docMap, "$parent", false) {
+	if hasMapNilValue(docMap, "$parent") || hasMapBoolValue(docMap, "$parent", false) {
 		delete(docMap, "$parent")
 		return &baseTemplate, nil
 	}
 
-	parent := getStringValue(docMap, "$parent")
+	parent := getMapStringValue(docMap, "$parent")
 	if parent == "" {
 		return nil, nil
 	}

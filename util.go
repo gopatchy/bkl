@@ -4,7 +4,7 @@ import (
 	"github.com/gopatchy/bkl/polyfill"
 )
 
-func hasNilValue(m map[string]any, k string) bool {
+func hasMapNilValue(m map[string]any, k string) bool {
 	v, found := m[k]
 	if !found {
 		return false
@@ -18,7 +18,7 @@ func toBool(a any) (bool, bool) {
 	return v, ok
 }
 
-func getBoolValue(m map[string]any, k string) (bool, bool) {
+func getMapBoolValue(m map[string]any, k string) (bool, bool) {
 	v, found := m[k]
 	if !found {
 		return false, false
@@ -27,8 +27,8 @@ func getBoolValue(m map[string]any, k string) (bool, bool) {
 	return toBool(v)
 }
 
-func hasBoolValue(m map[string]any, k string, v bool) bool {
-	v2, ok := getBoolValue(m, k)
+func hasMapBoolValue(m map[string]any, k string, v bool) bool {
+	v2, ok := getMapBoolValue(m, k)
 	if !ok {
 		return false
 	}
@@ -36,8 +36,8 @@ func hasBoolValue(m map[string]any, k string, v bool) bool {
 	return v2 == v
 }
 
-func popBoolValue(m map[string]any, k string, v bool) (bool, map[string]any) {
-	found := hasBoolValue(m, k, v)
+func popMapBoolValue(m map[string]any, k string, v bool) (bool, map[string]any) {
+	found := hasMapBoolValue(m, k, v)
 
 	if found {
 		m = polyfill.MapsClone(m)
@@ -56,7 +56,7 @@ func toString(a any) string {
 	return v
 }
 
-func getStringValue(m map[string]any, k string) string {
+func getMapStringValue(m map[string]any, k string) string {
 	v, found := m[k]
 	if !found {
 		return ""
@@ -65,8 +65,8 @@ func getStringValue(m map[string]any, k string) string {
 	return toString(v)
 }
 
-func popStringValue(m map[string]any, k string) (string, map[string]any) {
-	v := getStringValue(m, k)
+func popMapStringValue(m map[string]any, k string) (string, map[string]any) {
+	v := getMapStringValue(m, k)
 
 	if v != "" {
 		m = polyfill.MapsClone(m)
@@ -76,14 +76,34 @@ func popStringValue(m map[string]any, k string) (string, map[string]any) {
 	return v, m
 }
 
-func listHasBoolValue(l []any, k string, v bool) bool {
+func popListString(l []any, v string) (bool, []any) {
+	found := false
+
+	l, _ = filterList(l, func(x any) ([]any, error) {
+		s, ok := x.(string)
+		if !ok {
+			return []any{x}, nil
+		}
+
+		if s == v {
+			found = true
+			return nil, nil
+		}
+
+		return []any{x}, nil
+	})
+
+	return found, l
+}
+
+func hasListMapBoolValue(l []any, k string, v bool) bool {
 	for _, x := range l {
 		xMap, ok := x.(map[string]any)
 		if !ok {
 			continue
 		}
 
-		if hasBoolValue(xMap, k, v) {
+		if hasMapBoolValue(xMap, k, v) {
 			return true
 		}
 	}
@@ -91,14 +111,14 @@ func listHasBoolValue(l []any, k string, v bool) bool {
 	return false
 }
 
-func listGetStringValue(l []any, k string) string {
+func getListMapStringValue(l []any, k string) string {
 	for _, x := range l {
 		xMap, ok := x.(map[string]any)
 		if !ok {
 			continue
 		}
 
-		v2 := getStringValue(xMap, k)
+		v2 := getMapStringValue(xMap, k)
 		if v2 != "" {
 			return v2
 		}
@@ -107,23 +127,25 @@ func listGetStringValue(l []any, k string) string {
 	return ""
 }
 
-func listPopStringValue(l []any, k string) (string, []any) {
-	v2 := listGetStringValue(l, k)
+func popListMapStringValue(l []any, k string) (string, []any) {
+	v2 := getListMapStringValue(l, k)
 
-	if v2 != "" {
-		l, _ = filterList(l, func(x any) ([]any, error) {
-			xMap, ok := x.(map[string]any)
-			if !ok {
-				return []any{x}, nil
-			}
-
-			if getStringValue(xMap, k) == "" {
-				return []any{x}, nil
-			}
-
-			return nil, nil
-		})
+	if v2 == "" {
+		return "", l
 	}
+
+	l, _ = filterList(l, func(x any) ([]any, error) {
+		xMap, ok := x.(map[string]any)
+		if !ok {
+			return []any{x}, nil
+		}
+
+		if getMapStringValue(xMap, k) == "" {
+			return []any{x}, nil
+		}
+
+		return nil, nil
+	})
 
 	return v2, l
 }
