@@ -560,7 +560,7 @@ ifocus * {
 
 <h2><a name="maps">Maps</a></h2>
 
-<p>Maps are merged by default. To change that, use <ifocus>$patch</ifocus> or remove individual entries with <ifocus>null</ifocus>.</p>
+<p>Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>null</ifocus>.</p>
 
 <split5a>
 
@@ -583,7 +583,7 @@ ifocus * {
 <op>+</op>
 
 <code><key>b</key>: <number>2</number>
-<focus><key>$patch</key>: <string>replace</string></focus></code>
+<focus><key>$replace</key>: <bool>true</bool></focus></code>
 
 <op>=</op>
 
@@ -609,13 +609,13 @@ ifocus * {
 
 <vSpace></vSpace>
 
-<p>bkl returns an error if you use <ifocus>null</ifocus>, <ifocus>$patch: replace</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
+<p>bkl returns an error if you use <ifocus>null</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
 
 
 <h2><a name="lists">Lists</a></h2>
 
-<p>Lists are merged by default. To change that, use <ifocus>$patch</ifocus>.</p>
+<p>Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus>.</p>
 
 <split5a>
 
@@ -638,7 +638,7 @@ ifocus * {
 <op>+</op>
 
 <code>- <number>2</number>
-- <focus><key>$patch</key>: <string>replace</string></focus></code>
+- <focus><key>$replace</key>: <bool>true</bool></focus></code>
 
 <op>=</op>
 
@@ -653,8 +653,8 @@ ifocus * {
 <op>+</op>
 
 <code>- <key>x</key>: <number>3</number>
-- <focus><key>x</key>: <number>2</number>
-  <key>$patch</key>: <string>delete</string></focus></code>
+- <focus><key>$delete</key>:
+<key>x</key>: <number>2</number></focus></code>
 
 <op>=</op>
 
@@ -665,7 +665,7 @@ ifocus * {
 
 <vSpace></vSpace>
 
-<p>bkl returns an error if you use <ifocus>$patch: replace</ifocus> or <ifocus>$patch: delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
+<p>bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
 
 
@@ -1123,8 +1123,8 @@ cat: service.test.json: No such file or directory
 <op>=</op>
 
 <code>- <key>c</key>: <number>3</number>
-- <key>$patch</key>: <string>delete</string>
-  <key>b</key>: <number>2</number></code>
+- <key>$delete</key>:
+    <key>b</key>: <number>2</number></code>
 
 <vSpace class="span5"></vSpace>
 
@@ -1141,7 +1141,7 @@ cat: service.test.json: No such file or directory
 
 <code>- <number>1</number>
 - <number>3</number>
-- <key>$patch</key>: <string>replace</string></code>
+- <key>$replace</key>: <bool>true</bool></code>
 
 </split5a>
 
