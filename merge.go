@@ -94,7 +94,11 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 		return src, nil
 	}
 
-	replace, src = popListMapBoolValue(src, "$replace", true)
+	replace, src, err := popListMapBoolValue(src, "$replace", true)
+	if err != nil {
+		return nil, err
+	}
+
 	if replace {
 		return src, nil
 	}

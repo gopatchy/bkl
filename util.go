@@ -1,6 +1,8 @@
 package bkl
 
 import (
+	"fmt"
+
 	"github.com/gopatchy/bkl/polyfill"
 )
 
@@ -123,25 +125,33 @@ func hasListMapBoolValue(l []any, k string, v bool) bool {
 	return false
 }
 
-func popListMapBoolValue(l []any, k string, v bool) (bool, []any) {
+func popListMapBoolValue(l []any, k string, v bool) (bool, []any, error) {
 	if !hasListMapBoolValue(l, k, v) {
-		return false, l
+		return false, l, nil
 	}
 
-	l, _ = filterList(l, func(x any) ([]any, error) {
+	l, err := filterList(l, func(x any) ([]any, error) {
 		xMap, ok := x.(map[string]any)
 		if !ok {
 			return []any{x}, nil
 		}
 
-		if hasMapBoolValue(xMap, k, v) {
+		found, xMap := popMapBoolValue(xMap, k, v)
+		if found {
+			if len(xMap) > 0 {
+				return nil, fmt.Errorf("%#v: %w", xMap, ErrExtraKeys)
+			}
+
 			return nil, nil
 		}
 
 		return []any{x}, nil
 	})
+	if err != nil {
+		return false, nil, err
+	}
 
-	return true, l
+	return true, l, nil
 }
 
 func getListMapStringValue(l []any, k string) string {
@@ -160,27 +170,35 @@ func getListMapStringValue(l []any, k string) string {
 	return ""
 }
 
-func popListMapStringValue(l []any, k string) (string, []any) {
+func popListMapStringValue(l []any, k string) (string, []any, error) {
 	v2 := getListMapStringValue(l, k)
 
 	if v2 == "" {
-		return "", l
+		return "", l, nil
 	}
 
-	l, _ = filterList(l, func(x any) ([]any, error) {
+	l, err := filterList(l, func(x any) ([]any, error) {
 		xMap, ok := x.(map[string]any)
 		if !ok {
 			return []any{x}, nil
 		}
 
-		if getMapStringValue(xMap, k) == "" {
-			return []any{x}, nil
+		v3, xMap := popMapStringValue(xMap, k)
+		if v3 != "" {
+			if len(xMap) > 0 {
+				return nil, fmt.Errorf("%#v: %w", xMap, ErrExtraKeys)
+			}
+
+			return nil, nil
 		}
 
-		return nil, nil
+		return []any{x}, nil
 	})
+	if err != nil {
+		return "", nil, err
+	}
 
-	return v2, l
+	return v2, l, nil
 }
 
 func filterMap(m map[string]any, filter func(string, any) (map[string]any, error)) (map[string]any, error) {

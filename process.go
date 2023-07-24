@@ -88,7 +88,11 @@ func processMap(obj map[string]any, mergeFrom any) (any, error) {
 }
 
 func processList(obj []any, mergeFrom any) (any, error) {
-	path, obj := popListMapStringValue(obj, "$merge")
+	path, obj, err := popListMapStringValue(obj, "$merge")
+	if err != nil {
+		return nil, err
+	}
+
 	if path != "" {
 		in := get(mergeFrom, path)
 		if in == nil {
@@ -103,7 +107,11 @@ func processList(obj []any, mergeFrom any) (any, error) {
 		return Process(next, mergeFrom)
 	}
 
-	path, obj = popListMapStringValue(obj, "$replace")
+	path, obj, err = popListMapStringValue(obj, "$replace")
+	if err != nil {
+		return nil, err
+	}
+
 	if path != "" {
 		next := get(mergeFrom, path)
 		if next == nil {
@@ -117,9 +125,12 @@ func processList(obj []any, mergeFrom any) (any, error) {
 		return nil, nil
 	}
 
-	encode, obj := popListMapStringValue(obj, "$encode")
+	encode, obj, err := popListMapStringValue(obj, "$encode")
+	if err != nil {
+		return nil, err
+	}
 
-	obj, err := filterList(obj, func(v any) ([]any, error) {
+	obj, err = filterList(obj, func(v any) ([]any, error) {
 		v2, err := Process(v, mergeFrom)
 		if err != nil {
 			return nil, err
