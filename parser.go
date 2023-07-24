@@ -34,11 +34,12 @@ import (
 //   - $env
 //
 // Merge phase 3 (merge)
-//   - $patch
+//   - $delete
+//   - $replace: true
 //
 // Output phase 1 (process)
 //   - $merge
-//   - $replace
+//   - $replace: string
 //   - $output: false
 //   - $encode
 //

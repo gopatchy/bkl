@@ -123,6 +123,27 @@ func hasListMapBoolValue(l []any, k string, v bool) bool {
 	return false
 }
 
+func popListMapBoolValue(l []any, k string, v bool) (bool, []any) {
+	if !hasListMapBoolValue(l, k, v) {
+		return false, l
+	}
+
+	l, _ = filterList(l, func(x any) ([]any, error) {
+		xMap, ok := x.(map[string]any)
+		if !ok {
+			return []any{x}, nil
+		}
+
+		if hasMapBoolValue(xMap, k, v) {
+			return nil, nil
+		}
+
+		return []any{x}, nil
+	})
+
+	return true, l
+}
+
 func getListMapStringValue(l []any, k string) string {
 	for _, x := range l {
 		xMap, ok := x.(map[string]any)

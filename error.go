@@ -23,7 +23,6 @@ var (
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
 
 	// Specific language directive errors
-	ErrInvalidPatchValue  = fmt.Errorf("invalid $patch value (%w)", ErrInvalidDirective)
 	ErrMergeRefNotFound   = fmt.Errorf("$merge reference not found (%w)", ErrInvalidDirective)
 	ErrReplaceRefNotFound = fmt.Errorf("$replace reference not found (%w)", ErrInvalidDirective)
 )

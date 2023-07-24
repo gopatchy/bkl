@@ -40,15 +40,9 @@ func mergeMap(dst map[string]any, src any) (map[string]any, error) {
 }
 
 func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error) {
-	patch, src := popMapStringValue(src, "$patch")
-	switch patch {
-	case "":
-
-	case "replace":
+	replace, src := popMapBoolValue(src, "$replace", true)
+	if replace {
 		return src, nil
-
-	default:
-		return nil, fmt.Errorf("%s: %w", patch, ErrInvalidPatchValue)
 	}
 
 	dst = polyfill.MapsClone(dst)
@@ -95,9 +89,13 @@ func mergeList(dst []any, src any) (any, error) {
 }
 
 func mergeListList(dst []any, src []any) ([]any, error) {
-	patch := getListMapStringValue(src, "$patch")
-	if patch == "replace" {
-		_, src = popListMapStringValue(src, "$patch")
+	replace, src := popListString(src, "$replace")
+	if replace {
+		return src, nil
+	}
+
+	replace, src = popListMapBoolValue(src, "$replace", true)
+	if replace {
 		return src, nil
 	}
 
