@@ -2,7 +2,9 @@ package bkl
 
 import (
 	"fmt"
-	"strings"
+	"unicode"
+
+	"golang.org/x/exp/utf8string"
 )
 
 func validate(obj any) error {
@@ -33,7 +35,8 @@ func validate(obj any) error {
 			return ErrRequiredField
 		}
 
-		if strings.HasPrefix(obj2, "$") {
+		us := utf8string.NewString(obj2)
+		if us.RuneCount() >= 2 && us.At(0) == '$' && unicode.IsLower(us.At(1)) {
 			return fmt.Errorf("%s: %w", obj2, ErrInvalidDirective)
 		}
 	}
