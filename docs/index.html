@@ -615,7 +615,7 @@ ifocus * {
 
 <h2><a name="lists">Lists</a></h2>
 
-<p>Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus>.</p>
+<p>Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.</p>
 
 <split5a>
 
@@ -654,7 +654,7 @@ ifocus * {
 
 <code>- <key>x</key>: <number>3</number>
 - <focus><key>$delete</key>:
-<key>x</key>: <number>2</number></focus></code>
+    <key>x</key>: <number>2</number></focus></code>
 
 <op>=</op>
 
@@ -666,6 +666,29 @@ ifocus * {
 <vSpace></vSpace>
 
 <p>bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
+
+<p>To update a specific list item from a parent layer, use <ifocus>$match</ifocus>:</p>
+
+<split5a>
+
+<code>- <key>a</key>: <number>1</number>
+- <key>b</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code>- <focus><key>$match</key>:
+    <key>b</key>: <number>2</number></focus>
+  <key>b</key>: <number>10</number></code>
+
+<op>=</op>
+
+<code>- <key>a</key>: <number>1</number>
+- <key>b</key>: <number>10</number></code>
+
+</split5a>
+
+<vSpace class="span5"></vSpace>
+<vSpace class="span5"></vSpace>
 
 
 
