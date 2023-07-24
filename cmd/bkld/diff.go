@@ -104,13 +104,14 @@ outer2:
 
 		v1Map, ok := v1.(map[string]any)
 		if ok {
-			v1Map = polyfill.MapsClone(v1Map)
-			v1Map["$patch"] = "delete"
-			ret = append(ret, v1Map)
+			del := map[string]any{
+				"$delete": polyfill.MapsClone(v1Map),
+			}
+			ret = append(ret, del)
 		} else {
 			// Give up patching individual entries, replace the whole list
 			dst = polyfill.SlicesClone(dst)
-			dst = append(dst, map[string]any{"$patch": "replace"})
+			dst = append(dst, map[string]any{"$replace": true})
 			return dst, nil
 		}
 	}
