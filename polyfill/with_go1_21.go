@@ -25,5 +25,5 @@ func SlicesReverse[S ~[]E, E any](s S) {
 }
 
 func SlicesSort[S ~[]E, E cmp.Ordered](x S) {
-	slices.Sort(s)
+	slices.Sort(x)
 }
