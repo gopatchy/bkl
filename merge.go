@@ -106,6 +106,10 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 		if ok {
 			del, vMap := popMapValue(vMap, "$delete")
 			if del != nil {
+				if len(vMap) > 0 {
+					return nil, fmt.Errorf("%#v: %w", vMap, ErrExtraKeys)
+				}
+
 				deleted := false
 
 				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
