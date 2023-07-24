@@ -13,7 +13,7 @@ var (
 	ErrInvalidType     = fmt.Errorf("invalid type (%w)", Err)
 	ErrMarshal         = fmt.Errorf("encoding error (%w)", Err)
 	ErrMissingFile     = fmt.Errorf("missing file (%w)", Err)
-	ErrNoMatchFound    = fmt.Errorf("no document matched $match (%w)", Err)
+	ErrNoMatchFound    = fmt.Errorf("no document/entry matched $match (%w)", Err)
 	ErrRequiredField   = fmt.Errorf("required field not set (%w)", Err)
 	ErrUnknownFormat   = fmt.Errorf("unknown format (%w)", Err)
 	ErrUnmarshal       = fmt.Errorf("decoding error (%w)", Err)

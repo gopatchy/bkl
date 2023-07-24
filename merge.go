@@ -104,9 +104,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 	for _, v := range src {
 		vMap, ok := v.(map[string]any)
 		if ok {
-			var del any
-
-			del, vMap = popMapValue(vMap, "$delete")
+			del, vMap := popMapValue(vMap, "$delete")
 			if del != nil {
 				deleted := false
 
@@ -121,6 +119,32 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 
 				if !deleted {
 					return nil, fmt.Errorf("%#v: %w", vMap, ErrUselessOverride)
+				}
+
+				continue
+			}
+
+			m, vMap := popMapValue(vMap, "$match")
+			if m != nil {
+				found := false
+
+				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
+					if match(v2, m) {
+						found = true
+
+						v2, err := merge(v2, vMap)
+						if err != nil {
+							return nil, err
+						}
+
+						return []any{v2}, nil
+					}
+
+					return []any{v2}, nil
+				})
+
+				if !found {
+					return nil, fmt.Errorf("%#v: %w", vMap, ErrNoMatchFound)
 				}
 
 				continue
