@@ -4,6 +4,18 @@ import (
 	"github.com/gopatchy/bkl/polyfill"
 )
 
+func popMapValue(m map[string]any, k string) (any, map[string]any) {
+	v, found := m[k]
+	if !found {
+		return nil, m
+	}
+
+	m = polyfill.MapsClone(m)
+	delete(m, k)
+
+	return v, m
+}
+
 func hasMapNilValue(m map[string]any, k string) bool {
 	v, found := m[k]
 	if !found {

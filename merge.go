@@ -106,15 +106,14 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 	for _, v := range src {
 		vMap, ok := v.(map[string]any)
 		if ok {
-			patch, vMap := popMapStringValue(vMap, "$patch")
-			switch patch {
-			case "":
+			var del any
 
-			case "delete":
+			del, vMap = popMapValue(vMap, "$delete")
+			if del != nil {
 				deleted := false
 
 				dst, _ = filterList(dst, func(v2 any) ([]any, error) {
-					if match(v2, vMap) {
+					if match(v2, del) {
 						deleted = true
 						return nil, nil
 					}
@@ -127,9 +126,6 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 				}
 
 				continue
-
-			default:
-				return nil, fmt.Errorf("%s: %w", patch, ErrInvalidPatchValue)
 			}
 		}
 
