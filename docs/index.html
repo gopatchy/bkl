@@ -340,6 +340,7 @@ ifocus * {
 	<li><a href="#bkli">bkli</a></li>
 	<li><a href="#bklr">bklr</a></li>
 	<li><a href="#kubectl-bkl">kubectl bkl</a></li>
+	<li><a href="#docker">Docker</a></li>
 	<li><a href="#diff">diff</a></li>
 	<li><a href="#migrate">Migrate</a></li>
 	<li><a href="#comparison">Comparison</a></li>
@@ -1272,6 +1273,38 @@ cat: service.test.json: No such file or directory
 
 
 
+<h2><a name="kubectl-bkl">kubectl bkl</a></h2>
+
+<code><prompt>$ </prompt></key><cmd>kubectl</cmd> <focus><string>bkl</string></focus> <string>&lt;kubectl_commands&gt;</string></code>
+
+<vSpace></vSpace>
+
+<p><ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.</p>
+
+<code># deploy.dev.yaml and deploy.yaml are bkl layer files
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl apply</string> <flag>-f deploy.dev.yaml</flag>
+deployment.apps/deploy-dev unchanged</code>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
+<h2><a name="docker">Docker</a></h2>
+
+<p>bkl docker images are available at <ifocus>ghcr.io/gopatchy/bkl:latest</ifocus> for amd64 and arm64. Compose these images for your development and CI/CD workflows.</p>
+
+<label>Dockerfile</label>
+<code class="labeled"><cmd>FROM</cmd> <string>ghcr.io/gopatchy/bkl:latest</string> <flag>AS</flag> <key>bkl</key>
+
+<cmd>FROM</cmd> <string>debian:latest</string> <flag>AS</flag> <key>build</key>
+<cmd>COPY</cmd> <flag>--from=bkl</flag> <string>/bin /bin</string></code>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+
+
 <h2><a name="diff">diff</a></h2>
 
 <p>It's easy to see differences between processed bkl files using shell syntax.</p>
@@ -1289,23 +1322,6 @@ a: 1                              a: 1
 b: 2                            <focus>&lt;</focus>
 c: 3                              c: 3
 </code>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
-
-
-
-<h2><a name="kubectl-bkl">kubectl bkl</a></h2>
-
-<code><prompt>$ </prompt></key><cmd>kubectl</cmd> <focus><string>bkl</string></focus> <string>&lt;kubectl_commands&gt;</string></code>
-
-<vSpace></vSpace>
-
-<p><ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.</p>
-
-<code># deploy.dev.yaml and deploy.yaml are bkl layer files
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl apply</string> <flag>-f deploy.dev.yaml</flag>
-deployment.apps/deploy-dev unchanged</code>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
