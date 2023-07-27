@@ -1,0 +1,2 @@
+a: $merge:b
+b: $merge:a

@@ -7,6 +7,7 @@ var (
 	Err = fmt.Errorf("bkl error")
 
 	// Format and system errors
+	ErrCircularRef      = fmt.Errorf("circular reference (%w)", Err)
 	ErrExtraKeys        = fmt.Errorf("extra keys (%w)", Err)
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
 	ErrInvalidIndex     = fmt.Errorf("invalid index (%w)", Err)
