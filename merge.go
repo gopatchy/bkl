@@ -2,8 +2,6 @@ package bkl
 
 import (
 	"fmt"
-
-	"github.com/gopatchy/bkl/polyfill"
 )
 
 func merge(dst any, src any) (any, error) {
@@ -40,12 +38,12 @@ func mergeMap(dst map[string]any, src any) (map[string]any, error) {
 }
 
 func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error) {
-	replace, src := popMapBoolValue(src, "$replace", true)
-	if replace {
+	replace, found := getMapBoolValue(src, "$replace")
+	if found && replace {
+		delete(src, "$replace")
+
 		return src, nil
 	}
-
-	dst = polyfill.MapsClone(dst)
 
 	for k, v := range src {
 		existing, found := dst[k]

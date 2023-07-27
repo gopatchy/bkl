@@ -37,6 +37,28 @@ func SlicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
 }
 
 // Copied from go1.21 slices
+func SlicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
+	for i, v := range s {
+		if del(v) {
+			j := i
+
+			for i++; i < len(s); i++ {
+				v = s[i]
+
+				if !del(v) {
+					s[j] = v
+					j++
+				}
+			}
+
+			return s[:j]
+		}
+	}
+
+	return s
+}
+
+// Copied from go1.21 slices
 func SlicesReverse[S ~[]E, E any](s S) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]

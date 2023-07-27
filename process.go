@@ -9,6 +9,8 @@ func Process(obj, mergeFrom any, mergeFromDocs []any) (any, error) {
 	return process(obj, mergeFrom, mergeFromDocs, 0)
 }
 
+// process() and descendants intentionally mutate obj to handle chained
+// references
 func process(obj, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
 	if depth > 1000 {
 		return nil, fmt.Errorf("%#v: %w", obj, ErrCircularRef)
@@ -30,8 +32,10 @@ func process(obj, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
 }
 
 func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
-	m, obj := popMapValue(obj, "$merge")
+	m := obj["$merge"]
 	if m != nil {
+		delete(obj, "$merge")
+
 		in, err := get(mergeFrom, mergeFromDocs, m)
 		if err != nil {
 			return nil, err
@@ -45,8 +49,10 @@ func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth in
 		return process(next, mergeFrom, mergeFromDocs, depth)
 	}
 
-	m, obj = popMapValue(obj, "$replace")
+	m = obj["$replace"]
 	if m != nil {
+		delete(obj, "$replace")
+
 		next, err := get(mergeFrom, mergeFromDocs, m)
 		if err != nil {
 			return nil, err
@@ -55,27 +61,28 @@ func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth in
 		return process(next, mergeFrom, mergeFromDocs, depth)
 	}
 
-	output, obj := popMapBoolValue(obj, "$output", false)
-	if output {
+	output, found := getMapBoolValue(obj, "$output")
+	if found && !output {
 		return nil, nil
 	}
 
-	encode, obj := popMapStringValue(obj, "$encode")
+	encode := getMapStringValue(obj, "$encode")
+	if encode != "" {
+		delete(obj, "$encode")
+	}
 
-	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
+	for k, v := range obj {
 		v2, err := process(v, mergeFrom, mergeFromDocs, depth)
 		if err != nil {
 			return nil, err
 		}
 
 		if v2 == nil {
-			return nil, nil
+			delete(obj, k)
+			continue
 		}
 
-		return map[string]any{k: v2}, nil
-	})
-	if err != nil {
-		return nil, err
+		obj[k] = v2
 	}
 
 	if encode != "" {

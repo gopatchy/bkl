@@ -20,6 +20,10 @@ func SlicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
 	return slices.Clone(s)
 }
 
+func SlicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
+	return slices.DeleteFunc(s, del)
+}
+
 func SlicesReverse[S ~[]E, E any](s S) {
 	slices.Reverse(s)
 }
