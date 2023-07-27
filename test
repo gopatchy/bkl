@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 ROOT=$(pwd)
 GOCMD=${GOCMD:=go}
@@ -21,6 +21,10 @@ done
 export PATH=$ROOT:$PATH
 
 for TEST in tests/*; do
+	if [[ "$1" != "" && "tests/$1" != $TEST ]]; then
+		continue
+	fi
+
 	echo TEST $TEST
 	cd $TEST
 
