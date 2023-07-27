@@ -83,22 +83,28 @@ func (p *Parser) MergeParser(other *Parser) error {
 // instead.
 func (p *Parser) MergePatch(index int, patch any) error {
 	if patchMap, ok := patch.(map[string]any); ok {
-		m, found := patchMap["$match"]
-		if found {
-			delete(patchMap, "$match")
+		var m any
 
-			index = -1
+		m, patch = popMapValue(patchMap, "$match")
+		if m != nil {
+			found := false
 
 			for i, doc := range p.docs {
 				if match(doc, m) {
-					index = i
-					break
+					found = true
+
+					err := p.MergePatch(i, patch)
+					if err != nil {
+						return err
+					}
 				}
 			}
 
-			if index == -1 {
+			if !found {
 				return fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
 			}
+
+			return nil
 		}
 	}
 
