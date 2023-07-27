@@ -109,7 +109,12 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 				fatal(err)
 			}
 
-			base, err = bkl.Process(base, target)
+			docs, err := bs[1].Documents()
+			if err != nil {
+				fatal(err)
+			}
+
+			base, err = bkl.Process(base, target, docs)
 			if err != nil {
 				fatal(err)
 			}

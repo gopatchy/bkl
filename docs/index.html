@@ -920,6 +920,53 @@ ifocus * {
 <vSpace></vSpace>
 <vSpace></vSpace>
 
+<p>You can also merge across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:</p>
+
+<split3a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<key>c</key>: <number>3</number>
+<focus><key>$merge</key>:
+  <key>$match</key>:
+    <key>a</key>: <number>1</number></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<focus><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number></focus>
+<key>c</key>: <number>3</number></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<key>d</key>: <number>4</number>
+<focus><key>$merge</key>:
+  <key>$match</key>:
+    <key>a</key>: <number>1</number>
+  <key>$path</key>: <string>b</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<focus><key>c</key>: <number>3</number></focus>
+<key>d</key>: <number>4</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
 
 
 <h2><a name="replace">$replace</a></h2>
@@ -981,8 +1028,54 @@ ifocus * {
 </split3a>
 
 <vSpace></vSpace>
+<vSpace></vSpace>
 
 <p>Note that <ifocus>$merge</ifocus> and <ifocus>$replace</ifocus> are equivalent for scalar values.</p>
+
+<p>You can also replace across documents using <ifocus>$replace</ifocus> and optionally <ifocus>$path</ifocus>:</p>
+
+<split3a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<key>c</key>: <number>3</number>
+<focus><key>$replace</key>:
+  <key>$match</key>:
+    <key>a</key>: <number>1</number></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<focus><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number></focus></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<key>d</key>: <number>4</number>
+<focus><key>$replace</key>:
+  <key>$match</key>:
+    <key>a</key>: <number>1</number>
+  <key>$path</key>: <string>b</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<focus><key>c</key>: <number>3</number></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 
 
