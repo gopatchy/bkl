@@ -34,9 +34,7 @@ func getPath(obj any, parts []string) (any, error) {
 }
 
 func getCross(docs []any, conf map[string]any) (any, error) {
-	var m any
-
-	m, conf = popMapValue(conf, "$match")
+	m, _ := popMapValue(conf, "$match")
 	if m == nil {
 		return nil, fmt.Errorf("%#v: %w", conf, ErrMissingMatch)
 	}
@@ -53,9 +51,7 @@ func getCross(docs []any, conf map[string]any) (any, error) {
 		return nil, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
 	}
 
-	var path string
-
-	path, _ = popMapStringValue(conf, "$path")
+	path, _ := popMapStringValue(conf, "$path")
 	if path != "" {
 		parts := strings.Split(path, ".")
 		return getPath(val, parts)

@@ -32,6 +32,7 @@ func process(obj, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
 }
 
 func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
+	// TODO: Clean up
 	m := obj["$merge"]
 	if m != nil {
 		delete(obj, "$merge")
@@ -103,6 +104,7 @@ func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth in
 }
 
 func processList(obj []any, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
+	// TODO: Clean up
 	path, obj, err := popListMapStringValue(obj, "$merge")
 	if err != nil {
 		return nil, err
@@ -179,6 +181,7 @@ func processList(obj []any, mergeFrom any, mergeFromDocs []any, depth int) (any,
 }
 
 func processString(obj string, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
+	// TODO: Clean up?
 	if strings.HasPrefix(obj, "$merge:") {
 		path := strings.TrimPrefix(obj, "$merge:")
 

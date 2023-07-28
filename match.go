@@ -1,6 +1,7 @@
 package bkl
 
 func match(obj any, pat any) bool {
+	// TODO: Clean up
 	switch patType := pat.(type) {
 	case map[string]any:
 		objMap, ok := obj.(map[string]any)

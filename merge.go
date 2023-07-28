@@ -87,6 +87,7 @@ func mergeList(dst []any, src any) (any, error) {
 }
 
 func mergeListList(dst []any, src []any) ([]any, error) {
+	// TODO: Clean up
 	replace, src := popListString(src, "$replace")
 	if replace {
 		return src, nil

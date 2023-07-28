@@ -6,6 +6,8 @@ import (
 )
 
 func env(obj any) any {
+	// TODO: Clean up
+	// TODO: Missing env should be error
 	switch objType := obj.(type) {
 	case map[string]any:
 		ret := map[string]any{}

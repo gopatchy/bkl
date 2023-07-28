@@ -5,6 +5,7 @@ import (
 )
 
 func normalize(obj any) (any, error) {
+	// TODO: Clean up
 	switch objType := obj.(type) {
 	case map[any]any:
 		return nil, fmt.Errorf("numeric keys not supported (%w)", ErrInvalidType)

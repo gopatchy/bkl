@@ -8,6 +8,7 @@ import (
 )
 
 func validate(obj any) error {
+	// TODO: Clean up
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		for k, v := range obj2 {

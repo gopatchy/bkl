@@ -21,6 +21,7 @@ func findOutputsMap(obj map[string]any) (any, []any) {
 	ret := map[string]any{}
 	outs := []any{}
 
+	// TODO: Why not pop
 	if hasMapBoolValue(obj, "$output", true) {
 		outs = append(outs, ret)
 	}
@@ -50,6 +51,7 @@ func findOutputsList(obj []any) (any, []any) {
 
 	for _, v := range obj {
 		if vMap, ok := v.(map[string]any); ok {
+			// TODO: Why not pop?
 			if hasMapBoolValue(vMap, "$output", true) {
 				output = true
 				continue
