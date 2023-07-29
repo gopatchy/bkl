@@ -36,6 +36,7 @@ docker:
 
 pkg:
 	#!/bin/bash -e
+	VER=$(git tag --sort=v:refname | tail -1)
 	for PLATFORM in linux/arm64 linux/amd64 darwin/arm64 darwin/amd64; do
 		echo $PLATFORM
 		export GOOS=$(echo $PLATFORM | cut -d / -f 1)
@@ -44,6 +45,6 @@ pkg:
 		cp LICENSE $DIR
 		go build -trimpath -ldflags=-extldflags=-static -o $DIR ./...
 		cd $DIR
-		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH.tar.gz *
+		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH-$VER.tar.gz *
 		cd ~-
 	done
