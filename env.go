@@ -7,19 +7,18 @@ import (
 )
 
 func env(obj any) (any, error) {
-	// TODO: Missing env should be error
-	switch objType := obj.(type) {
+	switch obj2 := obj.(type) {
 	case map[string]any:
-		return envMap(objType)
+		return envMap(obj2)
 
 	case []any:
-		return envList(objType)
+		return envList(obj2)
 
 	case string:
-		return envString(objType)
+		return envString(obj2)
 
 	default:
-		return objType, nil
+		return obj2, nil
 	}
 }
 

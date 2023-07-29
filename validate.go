@@ -8,38 +8,56 @@ import (
 )
 
 func validate(obj any) error {
-	// TODO: Clean up
 	switch obj2 := obj.(type) {
 	case map[string]any:
-		for k, v := range obj2 {
-			err := validate(k)
-			if err != nil {
-				return fmt.Errorf("%s: %w", k, err)
-			}
-
-			err = validate(v)
-			if err != nil {
-				return fmt.Errorf("%s: %w", k, err)
-			}
-		}
+		return validateMap(obj2)
 
 	case []any:
-		for _, v := range obj2 {
-			err := validate(v)
-			if err != nil {
-				return err
-			}
-		}
+		return validateList(obj2)
 
 	case string:
-		if obj2 == "$required" {
-			return ErrRequiredField
+		return validateString(obj2)
+
+	default:
+		return nil
+	}
+}
+
+func validateMap(obj map[string]any) error {
+	for k, v := range obj {
+		err := validate(k)
+		if err != nil {
+			return fmt.Errorf("%s: %w", k, err)
 		}
 
-		us := utf8string.NewString(obj2)
-		if us.RuneCount() >= 2 && us.At(0) == '$' && unicode.IsLower(us.At(1)) {
-			return fmt.Errorf("%s: %w", obj2, ErrInvalidDirective)
+		err = validate(v)
+		if err != nil {
+			return fmt.Errorf("%s: %w", k, err)
 		}
+	}
+
+	return nil
+}
+
+func validateList(obj []any) error {
+	for _, v := range obj {
+		err := validate(v)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validateString(obj string) error {
+	if obj == "$required" {
+		return ErrRequiredField
+	}
+
+	us := utf8string.NewString(obj)
+	if us.RuneCount() >= 2 && us.At(0) == '$' && unicode.IsLower(us.At(1)) {
+		return fmt.Errorf("%s: %w", obj, ErrInvalidDirective)
 	}
 
 	return nil
