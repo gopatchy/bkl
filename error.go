@@ -8,6 +8,7 @@ var (
 
 	// Format and system errors
 	ErrCircularRef      = fmt.Errorf("circular reference (%w)", Err)
+	ErrExtraEntries     = fmt.Errorf("extra entries (%w)", Err)
 	ErrExtraKeys        = fmt.Errorf("extra keys (%w)", Err)
 	ErrInvalidDirective = fmt.Errorf("invalid directive (%w)", Err)
 	ErrInvalidIndex     = fmt.Errorf("invalid index (%w)", Err)

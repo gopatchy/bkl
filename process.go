@@ -32,34 +32,14 @@ func process(obj, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
 }
 
 func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
-	// TODO: Clean up
 	m := obj["$merge"]
 	if m != nil {
-		delete(obj, "$merge")
-
-		in, err := get(mergeFrom, mergeFromDocs, m)
-		if err != nil {
-			return nil, err
-		}
-
-		next, err := mergeMap(obj, in)
-		if err != nil {
-			return nil, err
-		}
-
-		return process(next, mergeFrom, mergeFromDocs, depth)
+		return processMapMerge(obj, mergeFrom, mergeFromDocs, m, depth)
 	}
 
 	m = obj["$replace"]
 	if m != nil {
-		delete(obj, "$replace")
-
-		next, err := get(mergeFrom, mergeFromDocs, m)
-		if err != nil {
-			return nil, err
-		}
-
-		return process(next, mergeFrom, mergeFromDocs, depth)
+		return processMapReplace(mergeFrom, mergeFromDocs, m, depth)
 	}
 
 	output, found := getMapBoolValue(obj, "$output")
@@ -87,55 +67,68 @@ func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth in
 	}
 
 	if encode != "" {
-		f, err := GetFormat(encode)
-		if err != nil {
-			return nil, err
-		}
-
-		enc, err := f.Marshal(obj)
-		if err != nil {
-			return nil, err
-		}
-
-		return string(enc), nil
+		return processMapEncode(encode, obj)
 	}
 
 	return obj, nil
 }
 
+func processMapMerge(obj map[string]any, mergeFrom any, mergeFromDocs []any, m any, depth int) (any, error) {
+	delete(obj, "$merge")
+
+	in, err := get(mergeFrom, mergeFromDocs, m)
+	if err != nil {
+		return nil, err
+	}
+
+	next, err := mergeMap(obj, in)
+	if err != nil {
+		return nil, err
+	}
+
+	return process(next, mergeFrom, mergeFromDocs, depth)
+}
+
+func processMapReplace(mergeFrom any, mergeFromDocs []any, m any, depth int) (any, error) {
+	next, err := get(mergeFrom, mergeFromDocs, m)
+	if err != nil {
+		return nil, err
+	}
+
+	return process(next, mergeFrom, mergeFromDocs, depth)
+}
+
+func processMapEncode(encode string, obj any) (string, error) {
+	f, err := GetFormat(encode)
+	if err != nil {
+		return "", err
+	}
+
+	enc, err := f.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+
+	return string(enc), nil
+}
+
 func processList(obj []any, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
-	// TODO: Clean up
-	path, obj, err := popListMapStringValue(obj, "$merge")
+	m, obj, err := popListMapValue(obj, "$merge")
 	if err != nil {
 		return nil, err
 	}
 
-	if path != "" {
-		in, err := get(mergeFrom, mergeFromDocs, path)
-		if err != nil {
-			return nil, err
-		}
-
-		next, err := mergeList(obj, in)
-		if err != nil {
-			return nil, err
-		}
-
-		return process(next, mergeFrom, mergeFromDocs, depth)
+	if m != nil {
+		return processListMerge(obj, mergeFrom, mergeFromDocs, m, depth)
 	}
 
-	path, obj, err = popListMapStringValue(obj, "$replace")
+	m, obj, err = popListMapValue(obj, "$replace")
 	if err != nil {
 		return nil, err
 	}
 
-	if path != "" {
-		next, err := get(mergeFrom, mergeFromDocs, path)
-		if err != nil {
-			return nil, err
-		}
-
-		return process(next, mergeFrom, mergeFromDocs, depth)
+	if m != nil {
+		return processListReplace(mergeFrom, mergeFromDocs, m, depth)
 	}
 
 	if hasListMapBoolValue(obj, "$output", false) {
@@ -164,45 +157,79 @@ func processList(obj []any, mergeFrom any, mergeFromDocs []any, depth int) (any,
 	}
 
 	if encode != "" {
-		f, found := formatByExtension[encode]
-		if !found {
-			return nil, fmt.Errorf("%s: %w", encode, ErrUnknownFormat)
-		}
-
-		enc, err := f.Marshal(obj)
-		if err != nil {
-			return nil, err
-		}
-
-		return string(enc), nil
+		return processListEncode(encode, obj)
 	}
 
 	return obj, nil
 }
 
+func processListMerge(obj []any, mergeFrom any, mergeFromDocs []any, m any, depth int) (any, error) {
+	in, err := get(mergeFrom, mergeFromDocs, m)
+	if err != nil {
+		return nil, err
+	}
+
+	next, err := mergeList(obj, in)
+	if err != nil {
+		return nil, err
+	}
+
+	return process(next, mergeFrom, mergeFromDocs, depth)
+}
+
+func processListReplace(mergeFrom any, mergeFromDocs []any, m any, depth int) (any, error) {
+	next, err := get(mergeFrom, mergeFromDocs, m)
+	if err != nil {
+		return nil, err
+	}
+
+	return process(next, mergeFrom, mergeFromDocs, depth)
+}
+
+func processListEncode(encode string, obj any) (any, error) {
+	f, err := GetFormat(encode)
+	if err != nil {
+		return nil, err
+	}
+
+	enc, err := f.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	return string(enc), nil
+}
+
 func processString(obj string, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
-	// TODO: Clean up?
 	if strings.HasPrefix(obj, "$merge:") {
-		path := strings.TrimPrefix(obj, "$merge:")
-
-		in, err := get(mergeFrom, mergeFromDocs, path)
-		if err != nil {
-			return nil, err
-		}
-
-		return process(in, mergeFrom, mergeFromDocs, depth)
+		return processStringMerge(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
 	if strings.HasPrefix(obj, "$replace:") {
-		path := strings.TrimPrefix(obj, "$replace:")
-
-		in, err := get(mergeFrom, mergeFromDocs, path)
-		if err != nil {
-			return nil, err
-		}
-
-		return process(in, mergeFrom, mergeFromDocs, depth)
+		return processStringReplace(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
 	return obj, nil
+}
+
+func processStringMerge(obj string, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
+	path := strings.TrimPrefix(obj, "$merge:")
+
+	in, err := get(mergeFrom, mergeFromDocs, path)
+	if err != nil {
+		return nil, err
+	}
+
+	return process(in, mergeFrom, mergeFromDocs, depth)
+}
+
+func processStringReplace(obj string, mergeFrom any, mergeFromDocs []any, depth int) (any, error) {
+	path := strings.TrimPrefix(obj, "$replace:")
+
+	in, err := get(mergeFrom, mergeFromDocs, path)
+	if err != nil {
+		return nil, err
+	}
+
+	return process(in, mergeFrom, mergeFromDocs, depth)
 }

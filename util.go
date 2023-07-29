@@ -110,6 +110,35 @@ func popListString(l []any, v string) (bool, []any) {
 	return found, l
 }
 
+func popListMapValue(l []any, k string) (any, []any, error) {
+	var ret any
+
+	l, err := filterList(l, func(x any) ([]any, error) {
+		xMap, ok := x.(map[string]any)
+		if !ok {
+			return []any{x}, nil
+		}
+
+		val, xMap := popMapValue(xMap, k)
+		if val != nil {
+			if ret != nil {
+				return nil, fmt.Errorf("%#v: %w", l, ErrExtraKeys)
+			}
+
+			ret = val
+
+			return nil, nil
+		}
+
+		return []any{xMap}, nil
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return ret, l, nil
+}
+
 func hasListMapBoolValue(l []any, k string, v bool) bool {
 	for _, x := range l {
 		xMap, ok := x.(map[string]any)
