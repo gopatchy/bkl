@@ -465,12 +465,26 @@ ifocus * {
 
 <h2><a name="inputs">Inputs</a></h2>
 
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
+<label>Commandline Layering</label>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
 
 <vSpace></vSpace>
 
 <p>Specifying multiple input files evaluates them as normal then merges them onto each other in order.</p>
 
+<vSpace></vSpace>
+
+<label>stdin</label>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus>-- <string>-.yaml</string></focus> &lt;&lt;'EOF'
+<key>a</key>: <number>1</number>
+EOF</code>
+
+<vSpace></vSpace>
+
+<p>Specifying an input file with the base name <ifocus>-</ifocus> and a valid format extension causes bkl to read that format from standard input. Use <ifocus>--</ifocus> before the filename to avoid it being treated as a flag.</p>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 
 <h2><a name="symlinks">Symlinks</a></h2>

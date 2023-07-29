@@ -25,12 +25,20 @@ func loadFile(path string) (*file, error) {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
-	fh, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", path, err)
+	var fh io.ReadCloser
+
+	if strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)) == "-" {
+		fh = os.Stdin
 	}
 
-	defer fh.Close()
+	if fh == nil {
+		fh, err = os.Open(path)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", path, err)
+		}
+
+		defer fh.Close()
+	}
 
 	raw, err := io.ReadAll(fh)
 	if err != nil {

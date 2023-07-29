@@ -22,6 +22,11 @@ func FileMatch(path string) (string, string, error) {
 	}
 
 	withoutExt := strings.TrimSuffix(path, "."+f)
+
+	if filepath.Base(withoutExt) == "-" {
+		return path, f, nil
+	}
+
 	realPath := findFile(withoutExt)
 
 	if realPath == "" {
