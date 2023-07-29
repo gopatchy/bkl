@@ -231,7 +231,11 @@ func (p *Parser) OutputDocumentsIndex(index int) ([]any, error) {
 		return nil, nil
 	}
 
-	obj, outs := findOutputs(obj)
+	obj, outs, err := findOutputs(obj)
+	if err != nil {
+		return nil, err
+	}
+
 	if len(outs) == 0 {
 		outs = append(outs, obj)
 	}

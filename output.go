@@ -4,7 +4,7 @@ import (
 	"github.com/gopatchy/bkl/polyfill"
 )
 
-func findOutputs(obj any) (any, []any) {
+func findOutputs(obj any) (any, []any, error) {
 	switch objType := obj.(type) {
 	case map[string]any:
 		return findOutputsMap(objType)
@@ -13,16 +13,16 @@ func findOutputs(obj any) (any, []any) {
 		return findOutputsList(objType)
 
 	default:
-		return obj, []any{}
+		return obj, []any{}, nil
 	}
 }
 
-func findOutputsMap(obj map[string]any) (any, []any) {
+func findOutputsMap(obj map[string]any) (any, []any, error) {
 	ret := map[string]any{}
 	outs := []any{}
 
-	// TODO: Why not pop
-	if hasMapBoolValue(obj, "$output", true) {
+	output, obj := popMapBoolValue(obj, "$output", true)
+	if output {
 		outs = append(outs, ret)
 	}
 
@@ -30,35 +30,35 @@ func findOutputsMap(obj map[string]any) (any, []any) {
 	polyfill.SlicesSort(keys)
 
 	for _, k := range keys {
-		if k == "$output" {
-			continue
-		}
-
 		v := obj[k]
 
-		vNew, subOuts := findOutputs(v)
+		vNew, subOuts, err := findOutputs(v)
+		if err != nil {
+			return nil, nil, err
+		}
+
 		outs = append(outs, subOuts...)
 		ret[k] = vNew
 	}
 
-	return ret, outs
+	return ret, outs, nil
 }
 
-func findOutputsList(obj []any) (any, []any) {
+func findOutputsList(obj []any) (any, []any, error) {
 	ret := []any{}
 	outs := []any{}
-	output := false
+
+	output, obj, err := popListMapBoolValue(obj, "$output", true)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	for _, v := range obj {
-		if vMap, ok := v.(map[string]any); ok {
-			// TODO: Why not pop?
-			if hasMapBoolValue(vMap, "$output", true) {
-				output = true
-				continue
-			}
+		vNew, subOuts, err := findOutputs(v)
+		if err != nil {
+			return nil, nil, err
 		}
 
-		vNew, subOuts := findOutputs(v)
 		outs = append(outs, subOuts...)
 		ret = append(ret, vNew)
 	}
@@ -67,5 +67,5 @@ func findOutputsList(obj []any) (any, []any) {
 		outs = append(outs, any(ret))
 	}
 
-	return ret, outs
+	return ret, outs, nil
 }
