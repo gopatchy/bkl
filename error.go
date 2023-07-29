@@ -15,6 +15,7 @@ var (
 	ErrInvalidType      = fmt.Errorf("invalid type (%w)", Err)
 	ErrMarshal          = fmt.Errorf("encoding error (%w)", Err)
 	ErrRefNotFound      = fmt.Errorf("reference not found (%w)", Err)
+	ErrMissingEnv       = fmt.Errorf("missing environment variable (%w)", Err)
 	ErrMissingFile      = fmt.Errorf("missing file (%w)", Err)
 	ErrMissingMatch     = fmt.Errorf("missing $match (%w)", Err)
 	ErrNoMatchFound     = fmt.Errorf("no document/entry matched $match (%w)", Err)

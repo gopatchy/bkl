@@ -56,7 +56,10 @@ func loadFile(path string) (*file, error) {
 			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
-		doc = env(doc)
+		doc, err = env(doc)
+		if err != nil {
+			return nil, fmt.Errorf("[doc%d]: %w", i, err)
+		}
 
 		f.docs = append(f.docs, doc)
 	}

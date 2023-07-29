@@ -1,38 +1,64 @@
 package bkl
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
 
-func env(obj any) any {
-	// TODO: Clean up
+func env(obj any) (any, error) {
 	// TODO: Missing env should be error
 	switch objType := obj.(type) {
 	case map[string]any:
-		ret := map[string]any{}
-		for k, v := range objType {
-			ret[env(k).(string)] = env(v)
-		}
-
-		return ret
+		return envMap(objType)
 
 	case []any:
-		ret := []any{}
-		for _, v := range objType {
-			ret = append(ret, env(v))
-		}
-
-		return ret
+		return envList(objType)
 
 	case string:
-		if !strings.HasPrefix(objType, "$env:") {
-			return objType
-		}
-
-		return os.Getenv(strings.TrimPrefix(objType, "$env:"))
+		return envString(objType)
 
 	default:
-		return objType
+		return objType, nil
 	}
+}
+
+func envMap(obj map[string]any) (map[string]any, error) {
+	return filterMap(obj, func(k string, v any) (map[string]any, error) {
+		k, err := envString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		v, err = env(v)
+		if err != nil {
+			return nil, err
+		}
+
+		return map[string]any{k: v}, nil
+	})
+}
+
+func envList(obj []any) ([]any, error) {
+	return filterList(obj, func(v any) ([]any, error) {
+		v, err := env(v)
+		if err != nil {
+			return nil, err
+		}
+
+		return []any{v}, nil
+	})
+}
+
+func envString(obj string) (string, error) {
+	if !strings.HasPrefix(obj, "$env:") {
+		return obj, nil
+	}
+
+	v, found := os.LookupEnv(strings.TrimPrefix(obj, "$env:"))
+	if !found {
+		return "", fmt.Errorf("%s: %w", obj, ErrMissingEnv)
+	}
+
+	return v, nil
 }
