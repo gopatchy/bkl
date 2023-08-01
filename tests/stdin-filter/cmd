@@ -1,0 +1,9 @@
+bkl -- -.yaml <<'EOF'
+$parent: a
+$match: null
+$output: false
+---
+$match:
+  a: 2
+$output: true
+EOF
