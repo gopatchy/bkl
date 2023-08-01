@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.ya\x0e\x0e\x0eml/")
+[]byte("0.ya\x0e")
+string("0")
+[]byte("0")
