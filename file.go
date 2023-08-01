@@ -27,7 +27,7 @@ func loadFile(path string) (*file, error) {
 
 	var fh io.ReadCloser
 
-	if strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)) == "-" {
+	if isStdin(path) {
 		fh = os.Stdin
 	}
 
@@ -118,6 +118,10 @@ func (f *file) parentFromDirective() (*string, error) {
 }
 
 func (f *file) parentFromSymlink() (*string, error) {
+	if isStdin(f.path) {
+		return nil, nil
+	}
+
 	dest, err := filepath.EvalSymlinks(f.path)
 	if err != nil {
 		return nil, err
@@ -134,6 +138,10 @@ func (f *file) parentFromSymlink() (*string, error) {
 }
 
 func (f *file) parentFromFilename() (*string, error) {
+	if isStdin(f.path) {
+		return &baseTemplate, nil
+	}
+
 	dir := filepath.Dir(f.path)
 	base := filepath.Base(f.path)
 
@@ -157,4 +165,8 @@ func (f *file) parentFromFilename() (*string, error) {
 
 		return &extPath, nil
 	}
+}
+
+func isStdin(path string) bool {
+	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)) == "-"
 }
