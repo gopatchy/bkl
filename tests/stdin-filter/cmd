@@ -1,6 +1,6 @@
 bkl -- -.yaml <<'EOF'
 $parent: a
-$match: null
+$match: {}
 $output: false
 ---
 $match:
