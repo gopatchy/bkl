@@ -27,6 +27,17 @@ func hasMapNilValue(m map[string]any, k string) bool {
 	return v == nil
 }
 
+func popMapNilValue(m map[string]any, k string) (bool, map[string]any) {
+	if hasMapNilValue(m, k) {
+		m = polyfill.MapsClone(m)
+		delete(m, k)
+
+		return true, m
+	}
+
+	return false, m
+}
+
 func toBool(a any) (bool, bool) {
 	v, ok := a.(bool)
 	return v, ok

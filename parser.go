@@ -82,30 +82,13 @@ func (p *Parser) MergeParser(other *Parser) error {
 // index is only a hint; if the patch contains a $match entry, that is used
 // instead.
 func (p *Parser) MergePatch(index int, patch any) error {
-	if patchMap, ok := patch.(map[string]any); ok {
-		var m any
+	match, err := p.mergePatchMatch(patch)
+	if err != nil {
+		return err
+	}
 
-		m, patch = popMapValue(patchMap, "$match")
-		if m != nil {
-			found := false
-
-			for i, doc := range p.docs {
-				if match(doc, m) {
-					found = true
-
-					err := p.MergePatch(i, patch)
-					if err != nil {
-						return err
-					}
-				}
-			}
-
-			if !found {
-				return fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
-			}
-
-			return nil
-		}
+	if match {
+		return nil
 	}
 
 	if index >= len(p.docs) {
@@ -120,6 +103,42 @@ func (p *Parser) MergePatch(index int, patch any) error {
 	p.docs[index] = merged
 
 	return nil
+}
+
+func (p *Parser) mergePatchMatch(patch any) (bool, error) {
+	patchMap, ok := patch.(map[string]any)
+	if !ok {
+		return false, nil
+	}
+
+	isNil, patch := popMapNilValue(patchMap, "$match")
+	if isNil {
+		return true, p.MergePatch(len(p.docs), patch)
+	}
+
+	m, patch := popMapValue(patchMap, "$match")
+	if m == nil {
+		return false, nil
+	}
+
+	found := false
+
+	for i, doc := range p.docs {
+		if match(doc, m) {
+			found = true
+
+			err := p.MergePatch(i, patch)
+			if err != nil {
+				return false, err
+			}
+		}
+	}
+
+	if !found {
+		return false, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+	}
+
+	return true, nil
 }
 
 // MergeFile parses the file at path and merges its contents into the
