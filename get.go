@@ -43,6 +43,10 @@ func getCross(docs []any, conf map[string]any) (any, error) {
 
 	for _, doc := range docs {
 		if match(doc, m) {
+			if val != nil {
+				return nil, fmt.Errorf("%#v: %w", m, ErrMultiMatch)
+			}
+
 			val = doc
 		}
 	}
