@@ -4,6 +4,6 @@ $match: {}
 $output: false
 ---
 $match:
-  a: 2
+  a: 3
 $output: true
 EOF
