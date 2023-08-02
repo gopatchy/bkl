@@ -3,6 +3,8 @@ package bkl
 import (
 	"fmt"
 	"strings"
+
+	"github.com/gopatchy/bkl/polyfill"
 )
 
 func Process(obj, mergeFrom any, mergeFromDocs []any) (any, error) {
@@ -52,7 +54,12 @@ func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth in
 		delete(obj, "$encode")
 	}
 
-	for k, v := range obj {
+	keys := polyfill.MapsKeys(obj)
+	polyfill.SlicesSort(keys)
+
+	for _, k := range keys {
+		v := obj[k]
+
 		v2, err := process(v, mergeFrom, mergeFromDocs, depth)
 		if err != nil {
 			return nil, err
