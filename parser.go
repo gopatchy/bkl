@@ -39,12 +39,12 @@ import (
 //
 // Output phase 1 (process)
 //   - $merge
+//   - $replace: map
 //   - $replace: string
-//   - $output: false
 //   - $encode
 //
 // Output phase 2 (output)
-//   - $output: true
+//   - $output
 type Parser struct {
 	docs  []any
 	debug bool
@@ -240,7 +240,24 @@ func (p *Parser) OutputDocumentsIndex(index int) ([]any, error) {
 		outs = append(outs, obj)
 	}
 
-	err = validate(obj)
+	outs, err = filterList(outs, func(v any) ([]any, error) {
+		v2, err := filterOutput(v)
+		if err != nil {
+			return nil, err
+		}
+
+		if v2 == nil {
+			return nil, nil
+		}
+
+		err = validate(v2)
+		if err != nil {
+			return nil, err
+		}
+
+		return []any{v2}, nil
+	})
+
 	if err != nil {
 		return nil, err
 	}

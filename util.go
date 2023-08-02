@@ -233,7 +233,12 @@ func popListMapStringValue(l []any, k string) (string, []any, error) {
 func filterMap(m map[string]any, filter func(string, any) (map[string]any, error)) (map[string]any, error) {
 	ret := map[string]any{}
 
-	for k, v := range m {
+	ks := polyfill.MapsKeys(m)
+	polyfill.SlicesSort(ks)
+
+	for _, k := range ks {
+		v := m[k]
+
 		m2, err := filter(k, v)
 		if err != nil {
 			return nil, err

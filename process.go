@@ -44,11 +44,6 @@ func processMap(obj map[string]any, mergeFrom any, mergeFromDocs []any, depth in
 		return processMapReplace(mergeFrom, mergeFromDocs, m, depth)
 	}
 
-	output, found := getMapBoolValue(obj, "$output")
-	if found && !output {
-		return nil, nil
-	}
-
 	encode := getMapStringValue(obj, "$encode")
 	if encode != "" {
 		delete(obj, "$encode")
@@ -136,10 +131,6 @@ func processList(obj []any, mergeFrom any, mergeFromDocs []any, depth int) (any,
 
 	if m != nil {
 		return processListReplace(mergeFrom, mergeFromDocs, m, depth)
-	}
-
-	if hasListMapBoolValue(obj, "$output", false) {
-		return nil, nil
 	}
 
 	encode, obj, err := popListMapStringValue(obj, "$encode")
