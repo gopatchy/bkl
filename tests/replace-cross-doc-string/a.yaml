@@ -1,0 +1,9 @@
+a: 1
+b: foo
+$output: false
+---
+c: 3
+$replace:
+  $match:
+    a: 1
+  $path: b
