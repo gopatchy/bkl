@@ -6,7 +6,6 @@ import (
 
 	"github.com/gopatchy/bkl/polyfill"
 	"github.com/pelletier/go-toml/v2"
-	"gopkg.in/yaml.v3"
 )
 
 type Format struct {
@@ -20,17 +19,14 @@ var formatByExtension = map[string]Format{
 	"json": {
 		marshal:         jsonMarshal,
 		unmarshalStream: jsonUnmarshalStream,
-		delimiter:       "",
 	},
 	"jsonl": {
 		marshal:         jsonMarshal,
 		unmarshalStream: jsonUnmarshalStream,
-		delimiter:       "",
 	},
 	"json-pretty": {
 		marshal:         jsonMarshalPretty,
 		unmarshalStream: jsonUnmarshalStream,
-		delimiter:       "",
 	},
 	"toml": {
 		marshal:   toml.Marshal,
@@ -38,9 +34,9 @@ var formatByExtension = map[string]Format{
 		delimiter: "---\n",
 	},
 	"yaml": {
-		marshal:   yamlMarshal,
-		unmarshal: yaml.Unmarshal,
-		delimiter: "---\n",
+		marshal:         yamlMarshal,
+		unmarshalStream: yamlUnmarshalStream,
+		delimiter:       "---\n",
 	},
 }
 
