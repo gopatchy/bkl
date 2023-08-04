@@ -106,7 +106,7 @@ func processMapEncode(encode string, obj any) (string, error) {
 		return "", err
 	}
 
-	enc, err := f.Marshal(obj)
+	enc, err := f.MarshalStream([]any{obj})
 	if err != nil {
 		return "", err
 	}
@@ -190,7 +190,7 @@ func processListEncode(encode string, obj any) (any, error) {
 		return nil, err
 	}
 
-	enc, err := f.Marshal(obj)
+	enc, err := f.MarshalStream([]any{obj})
 	if err != nil {
 		return nil, err
 	}

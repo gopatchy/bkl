@@ -18,11 +18,11 @@ type Format struct {
 
 var formatByExtension = map[string]Format{
 	"json": {
-		marshal:         jsonMarshal,
+		marshalStream:   jsonMarshalStream,
 		unmarshalStream: jsonUnmarshalStream,
 	},
 	"jsonl": {
-		marshal:         jsonMarshal,
+		marshalStream:   jsonMarshalStream,
 		unmarshalStream: jsonUnmarshalStream,
 	},
 	"json-pretty": {
