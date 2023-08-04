@@ -13,24 +13,34 @@ import (
 type Format struct {
 	marshal   func(any) ([]byte, error)
 	unmarshal func([]byte, any) error
+	delimiter string
 }
 
 var formatByExtension = map[string]Format{
 	"json": {
 		marshal:   jsonMarshal,
 		unmarshal: json.Unmarshal,
+		delimiter: "",
+	},
+	"jsonl": {
+		marshal:   jsonMarshal,
+		unmarshal: json.Unmarshal,
+		delimiter: "",
 	},
 	"json-pretty": {
 		marshal:   jsonMarshalPretty,
 		unmarshal: json.Unmarshal,
+		delimiter: "",
 	},
 	"toml": {
 		marshal:   toml.Marshal,
 		unmarshal: toml.Unmarshal,
+		delimiter: "---\n",
 	},
 	"yaml": {
 		marshal:   yamlMarshal,
 		unmarshal: yaml.Unmarshal,
+		delimiter: "---\n",
 	},
 }
 
@@ -68,7 +78,7 @@ func (f *Format) MarshalStream(vs []any) ([]byte, error) {
 		bs = append(bs, b)
 	}
 
-	return bytes.Join(bs, []byte("---\n")), nil
+	return bytes.Join(bs, []byte(f.delimiter)), nil
 }
 
 func (f *Format) Unmarshal(in []byte) (any, error) {
