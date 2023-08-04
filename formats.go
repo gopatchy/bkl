@@ -26,7 +26,7 @@ var formatByExtension = map[string]Format{
 		unmarshalStream: jsonUnmarshalStream,
 	},
 	"json-pretty": {
-		marshal:         jsonMarshalPretty,
+		marshalStream:   jsonMarshalStreamPretty,
 		unmarshalStream: jsonUnmarshalStream,
 	},
 	"toml": {

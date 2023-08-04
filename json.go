@@ -21,14 +21,16 @@ func jsonMarshalStream(vs []any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func jsonMarshalPretty(v any) ([]byte, error) {
+func jsonMarshalStreamPretty(vs []any) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	enc := json.NewEncoder(buf)
 	enc.SetIndent("", "  ")
 
-	err := enc.Encode(v)
-	if err != nil {
-		return nil, err
+	for _, v := range vs {
+		err := enc.Encode(v)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return buf.Bytes(), nil
