@@ -37,7 +37,7 @@ func yamlMarshalStream(vs []any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-var yamlRE = regexp.MustCompile("(?m)^---$")
+var yamlRE = regexp.MustCompile(`(?m)^---$`)
 
 func yamlUnmarshalStream(in []byte) ([]any, error) {
 	// Differs from repeated yaml.Decode by treating "---\n---" as an empty
