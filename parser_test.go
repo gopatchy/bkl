@@ -166,23 +166,6 @@ func ExampleParser_Output() {
 	// c: 3
 }
 
-func ExampleParser_OutputIndex() {
-	b := bkl.New()
-
-	if err := b.MergeFileLayers("tests/stream-add/a.b.yaml"); err != nil {
-		panic(err)
-	}
-
-	blobs, err := b.OutputIndex(1, "yaml") // second document
-	if err != nil {
-		panic(err)
-	}
-
-	os.Stdout.Write(blobs[0]) // first output of second document
-	// Output:
-	// c: 3
-}
-
 func ExampleParser_OutputToFile() {
 	b := bkl.New()
 
@@ -230,23 +213,6 @@ func ExampleParser_OutputToWriter() {
 	// a: 1
 	// b: 2
 	// ---
-	// c: 3
-}
-
-func ExampleParser_Outputs() {
-	b := bkl.New()
-
-	if err := b.MergeFileLayers("tests/stream-add/a.b.yaml"); err != nil {
-		panic(err)
-	}
-
-	blobs, err := b.Outputs("yaml")
-	if err != nil {
-		panic(err)
-	}
-
-	os.Stdout.Write(blobs[1]) // second overall output
-	// Output:
 	// c: 3
 }
 

@@ -10,6 +10,7 @@ import (
 
 type Format struct {
 	marshal         func(any) ([]byte, error)
+	marshalStream   func([]any) ([]byte, error)
 	unmarshal       func([]byte, any) error
 	unmarshalStream func([]byte) ([]any, error)
 	delimiter       string
@@ -34,9 +35,8 @@ var formatByExtension = map[string]Format{
 		delimiter: "---\n",
 	},
 	"yaml": {
-		marshal:         yamlMarshal,
+		marshalStream:   yamlMarshalStream,
 		unmarshalStream: yamlUnmarshalStream,
-		delimiter:       "---\n",
 	},
 }
 
@@ -63,6 +63,10 @@ func (f *Format) Marshal(v any) ([]byte, error) {
 }
 
 func (f *Format) MarshalStream(vs []any) ([]byte, error) {
+	if f.marshalStream != nil {
+		return f.marshalStream(vs)
+	}
+
 	bs := [][]byte{}
 
 	for _, v := range vs {
