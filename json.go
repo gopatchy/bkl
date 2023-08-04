@@ -3,6 +3,8 @@ package bkl
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
 )
 
 func jsonMarshal(v any) ([]byte, error) {
@@ -25,4 +27,24 @@ func jsonMarshalPretty(v any) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func jsonUnmarshalStream(in []byte) ([]any, error) {
+	dec := json.NewDecoder(bytes.NewReader(in))
+	ret := []any{}
+
+	for {
+		var obj any
+
+		err := dec.Decode(&obj)
+		if errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, obj)
+	}
+
+	return ret, nil
 }

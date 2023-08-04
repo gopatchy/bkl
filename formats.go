@@ -2,7 +2,6 @@ package bkl
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 
 	"github.com/gopatchy/bkl/polyfill"
@@ -11,26 +10,27 @@ import (
 )
 
 type Format struct {
-	marshal   func(any) ([]byte, error)
-	unmarshal func([]byte, any) error
-	delimiter string
+	marshal         func(any) ([]byte, error)
+	unmarshal       func([]byte, any) error
+	unmarshalStream func([]byte) ([]any, error)
+	delimiter       string
 }
 
 var formatByExtension = map[string]Format{
 	"json": {
-		marshal:   jsonMarshal,
-		unmarshal: json.Unmarshal,
-		delimiter: "",
+		marshal:         jsonMarshal,
+		unmarshalStream: jsonUnmarshalStream,
+		delimiter:       "",
 	},
 	"jsonl": {
-		marshal:   jsonMarshal,
-		unmarshal: json.Unmarshal,
-		delimiter: "",
+		marshal:         jsonMarshal,
+		unmarshalStream: jsonUnmarshalStream,
+		delimiter:       "",
 	},
 	"json-pretty": {
-		marshal:   jsonMarshalPretty,
-		unmarshal: json.Unmarshal,
-		delimiter: "",
+		marshal:         jsonMarshalPretty,
+		unmarshalStream: jsonUnmarshalStream,
+		delimiter:       "",
 	},
 	"toml": {
 		marshal:   toml.Marshal,
@@ -93,6 +93,10 @@ func (f *Format) Unmarshal(in []byte) (any, error) {
 }
 
 func (f *Format) UnmarshalStream(in []byte) ([]any, error) {
+	if f.unmarshalStream != nil {
+		return f.unmarshalStream(in)
+	}
+
 	ret := []any{}
 
 	for i, raw := range splitStream(in) {
