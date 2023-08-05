@@ -443,6 +443,8 @@ BKL</h1>
 
 <vSpace></vSpace>
 
+<p><ifocus>jsonl</ifocus> is an alias for <ifocus>json</ifocus> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.</p>
+
 <p>You can also set the output format implicitly by using a different file extension.</p>
 
 <code><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.<focus>yaml</focus></string>   # real file is service.test.<focus>toml</focus>
@@ -537,7 +539,9 @@ EOF</code>
 
 <h2><a name="streams">Streams</a></h2>
 
-<p>bkl understands input streams (multi-document YAML files delimited with <ifocus>---</ifocus>). To layer them, it has to match documents between layers. It does this using document ordering within layer files by default but can be overridden with <ifocus>$match</ifocus>.</p>
+<p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).</p>
+
+<p>To layer streams, bkl has match documents between layers. It does this using document ordering within layer files by default but can be overridden with <ifocus>$match</ifocus>.</p>
 
 <split5a>
 
