@@ -296,7 +296,7 @@ func writeFile(t *testing.T, filename string, content []byte) (string, error) {
 
 	path := filepath.Join(t.TempDir(), filename)
 
-	err := os.WriteFile(path, content, 0600)
+	err := os.WriteFile(path, content, 0o600)
 	if err != nil {
 		return "", err
 	}

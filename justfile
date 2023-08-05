@@ -4,7 +4,7 @@ default: tidy test
 
 tidy:
 	{{go}} mod tidy
-	goimports -l -w -gofumpt .
+	gofumpt -l -w .
 
 test:
 	{{go}} vet ./...

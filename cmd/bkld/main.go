@@ -141,7 +141,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	fh := os.Stdout
 
 	if opts.OutputPath != nil {
-		fh, err = os.OpenFile(string(*opts.OutputPath), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		fh, err = os.OpenFile(string(*opts.OutputPath), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 		if err != nil {
 			fatal(err)
 		}

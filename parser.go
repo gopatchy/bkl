@@ -325,7 +325,7 @@ func (p *Parser) OutputToFile(path, format string) error {
 		format = ext(path)
 	}
 
-	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
 		return polyfill.ErrorsJoin(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
 	}
