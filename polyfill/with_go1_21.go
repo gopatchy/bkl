@@ -6,6 +6,8 @@ import (
 	"cmp"
 	"maps"
 	"slices"
+
+	xmaps "golang.org/x/exp/maps"
 )
 
 func MapsClone[M ~map[K]V, K comparable, V any](m M) M { //nolint:ireturn
@@ -13,7 +15,8 @@ func MapsClone[M ~map[K]V, K comparable, V any](m M) M { //nolint:ireturn
 }
 
 func MapsKeys[M ~map[K]V, K comparable, V any](m M) []K { //nolint:ireturn
-	return maps.Keys(m)
+	// Added to 1.21 maps then removed again
+	return xmaps.Keys(m)
 }
 
 func SlicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
