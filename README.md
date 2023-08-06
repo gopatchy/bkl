@@ -2,5 +2,5 @@
 
 Layered configuration language
 
-![Go Reference](docs/go-reference.svg)
-![GitHub: bkl](docs/github-bkl.svg)
+![Go Reference](https://bkl.gopatchy.io/go-reference.svg)
+![GitHub: bkl](https://bkl.gopatchy.io/github-bkl.svg)
