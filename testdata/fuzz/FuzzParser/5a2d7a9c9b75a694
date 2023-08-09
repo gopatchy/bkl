@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.toml")
+[]byte("0=1000000000001.0667")
+string("0.toml")
+[]byte("0=1000000000001.0667")
