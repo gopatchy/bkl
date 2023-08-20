@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.json")
+[]byte("0-1E-700-1E700")
+string("0.json")
+[]byte("0-1E-700-1E700")
