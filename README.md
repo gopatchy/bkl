@@ -8,6 +8,8 @@ Write your configuration in your favorite format: [JSON](https://json.org/), [YA
 [![GitHub: bkl](https://bkl.gopatchy.io/github-bkl.svg)](https://github.com/gopatchy/bkl/)
 [![Discord: bkl](https://bkl.gopatchy.io/discord-bkl.svg)](https://discord.gg/UZCFZ37d)
 
+## Example
+
 ### service.yaml
 ```yaml
 addr: 127.0.0.1
@@ -27,3 +29,25 @@ addr = '127.0.0.1'
 name = 'myService'
 port = 8081
 ```
+
+bkl knows that `service.test.toml` inherits from `service.yaml` by the filename pattern (override with `$parent`) and uses filename extensions to determine formats.
+
+## Install
+
+```console
+$ go install github.com/gopatchy/bkl/...@latest
+```
+
+Verify that `~/go/bin` is in your `$PATH`.
+
+You can also download binaries directly [here](https://github.com/gopatchy/bkl/releases).
+
+## Documentation
+
+You can find detailed language and tool documentation including examples and advanced usage [here](https://bkl.gopatchy.io/).
+
+bkl is usable as a library from your Golang code. Documentation and examples are available [here](https://pkg.go.dev/github.com/gopatchy/bkl).
+
+## Support
+
+bkl support is available via [Discord](https://discord.gg/UZCFZ37d). You can report bugs or request features by filing [GitHub Issues](https://github.com/gopatchy/bkl/issues).
