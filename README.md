@@ -23,8 +23,6 @@ port = 8081
 ### Run it!
 ```console
 $ bkl service.test.toml
-```
-```toml
 addr = '127.0.0.1'
 name = 'myService'
 port = 8081
