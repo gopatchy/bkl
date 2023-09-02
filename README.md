@@ -7,3 +7,25 @@ Write your configuration in your favorite format: [JSON](https://json.org/), [YA
 [![Go Reference](https://bkl.gopatchy.io/go-reference.svg)](https://pkg.go.dev/github.com/gopatchy/bkl)
 [![GitHub: bkl](https://bkl.gopatchy.io/github-bkl.svg)](https://github.com/gopatchy/bkl/)
 [![Discord: bkl](https://bkl.gopatchy.io/discord-bkl.svg)](https://discord.gg/UZCFZ37d)
+
+### service.yaml
+```yaml
+addr: 127.0.0.1
+name: myService
+port: 8080
+```
+
+### service.test.toml
+```toml
+port = 8081
+```
+
+### Run it!
+```console
+$ bkl service.test.toml
+```
+```toml
+addr = '127.0.0.1'
+name = 'myService'
+port = 8081
+```
