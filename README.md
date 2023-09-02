@@ -6,7 +6,7 @@ Write your configuration in your favorite format: [JSON](https://json.org/), [YA
 
 [![Go Reference](https://bkl.gopatchy.io/go-reference.svg)](https://pkg.go.dev/github.com/gopatchy/bkl)
 [![GitHub: bkl](https://bkl.gopatchy.io/github-bkl.svg)](https://github.com/gopatchy/bkl/)
-[![Discord: bkl](https://bkl.gopatchy.io/discord-bkl.svg)](https://discord.gg/UZCFZ37d)
+[![Discord: bkl](https://bkl.gopatchy.io/discord-bkl.svg)](https://discord.gg/PgJBv9tm)
 
 ## Example
 
@@ -50,4 +50,4 @@ bkl is usable as a library from your Golang code. Documentation and examples are
 
 ## Support
 
-bkl support is available via [Discord](https://discord.gg/UZCFZ37d). You can report bugs or request features by filing [GitHub Issues](https://github.com/gopatchy/bkl/issues).
+bkl support is available via [Discord](https://discord.gg/PgJBv9tm). You can report bugs or request features by filing [GitHub Issues](https://github.com/gopatchy/bkl/issues).
