@@ -46,5 +46,6 @@ You can also download binaries directly [here](https://github.com/gopatchy/bkl/r
 
 * [Language documentation including examples](https://bkl.gopatchy.io/)
 * [Golang library reference](https://pkg.go.dev/github.com/gopatchy/bkl)
-* [Support via Discord](https://discord.gg/TyDAmqkz3m)
-* [Bug and feature request tracking via GitHub issues](https://github.com/gopatchy/bkl/)
+* [Support (Discord)](https://discord.gg/TyDAmqkz3m)
+* [Bug and feature request tracking (GitHub issues)](https://github.com/gopatchy/bkl/issues)
+* [Source code (GitHub)](https://github.com/gopatchy/bkl/)
