@@ -6,7 +6,7 @@ Write your configuration in your favorite format: [JSON](https://json.org/), [YA
 
 [![Go Reference](https://bkl.gopatchy.io/go-reference.svg)](https://pkg.go.dev/github.com/gopatchy/bkl)
 [![GitHub: bkl](https://bkl.gopatchy.io/github-bkl.svg)](https://github.com/gopatchy/bkl/)
-[![Discord: bkl](https://bkl.gopatchy.io/discord-bkl.svg)](https://discord.gg/PgJBv9tm)
+[![Discord: bkl](https://bkl.gopatchy.io/discord-bkl.svg)](https://discord.gg/TyDAmqkz3m)
 
 ## Example
 
@@ -42,12 +42,9 @@ Verify that `~/go/bin` is in your `$PATH`.
 
 You can also download binaries directly [here](https://github.com/gopatchy/bkl/releases).
 
-## Documentation
+## Links
 
-You can find detailed language and tool documentation including examples and advanced usage [here](https://bkl.gopatchy.io/).
-
-bkl is usable as a library from your Golang code. Documentation and examples are available [here](https://pkg.go.dev/github.com/gopatchy/bkl).
-
-## Support
-
-bkl support is available via [Discord](https://discord.gg/PgJBv9tm). You can report bugs or request features by filing [GitHub Issues](https://github.com/gopatchy/bkl/issues).
+* [Language documentation including examples](https://bkl.gopatchy.io/)
+* [Golang library reference](https://pkg.go.dev/github.com/gopatchy/bkl)
+* [Support via Discord](https://discord.gg/TyDAmqkz3m)
+* [Bug and feature request tracking via GitHub issues](https://github.com/gopatchy/bkl/)
