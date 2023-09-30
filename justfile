@@ -14,9 +14,9 @@ test:
 	GOCMD={{go}} ./test
 
 polytest:
-	@just go=go1.21.0
-	@just go=go1.20.7
-	@just go=go1.19.12
+	@just go=go1.21.1
+	@just go=go1.20.8
+	@just go=go1.19.13
 	@just go=go1.18.10
 
 fuzz:
