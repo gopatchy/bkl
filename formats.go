@@ -30,6 +30,10 @@ var formatByExtension = map[string]Format{
 		MarshalStream:   yamlMarshalStream,
 		UnmarshalStream: yamlUnmarshalStream,
 	},
+	"yml": {
+		MarshalStream:   yamlMarshalStream,
+		UnmarshalStream: yamlUnmarshalStream,
+	},
 }
 
 func GetFormat(name string) (*Format, error) {
