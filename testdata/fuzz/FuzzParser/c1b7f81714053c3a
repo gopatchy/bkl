@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.yml")
+[]byte("Y:\n  A00:\n    - A: 1\nA00:\n  - A: 1\n  - A0000000: Y000000\n")
+string("0")
+[]byte("")

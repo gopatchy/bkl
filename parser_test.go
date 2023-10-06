@@ -264,7 +264,10 @@ func FuzzParser(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, filename1 string, content1 []byte, filename2 string, content2 []byte) {
-		if strings.HasSuffix(filepath.Base(filename1), ".yaml") || strings.HasSuffix(filepath.Base(filename2), ".yaml") {
+		if strings.HasSuffix(filepath.Base(filename1), ".yaml") ||
+			strings.HasSuffix(filepath.Base(filename1), ".yml") ||
+			strings.HasSuffix(filepath.Base(filename2), ".yaml") ||
+			strings.HasSuffix(filepath.Base(filename2), ".yml") {
 			// TODO: Remove once fixed upstream: https://github.com/go-yaml/yaml/issues/932
 			return
 		}

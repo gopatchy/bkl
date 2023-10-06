@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.yml")
+[]byte("\"00\\\r\xf6")
+string("0")
+[]byte("0")
