@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"encoding/csv"
 	"fmt"
 	"strings"
 )
@@ -8,8 +9,7 @@ import (
 func get(obj any, docs []any, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
-		parts := strings.Split(m2, ".")
-		return getPath(obj, parts)
+		return getPathFromString(obj, m2)
 
 	case map[string]any:
 		return getCross(docs, m2)
@@ -17,6 +17,18 @@ func get(obj any, docs []any, m any) (any, error) {
 	default:
 		return nil, fmt.Errorf("%T as reference: %w", m, ErrInvalidType)
 	}
+}
+
+func getPathFromString(obj any, path string) (any, error) {
+	r := csv.NewReader(strings.NewReader(path))
+	r.Comma = '.'
+
+	parts, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	return getPath(obj, parts)
 }
 
 func getPath(obj any, parts []string) (any, error) {
@@ -57,8 +69,7 @@ func getCross(docs []any, conf map[string]any) (any, error) {
 
 	path, _ := popMapStringValue(conf, "$path")
 	if path != "" {
-		parts := strings.Split(path, ".")
-		return getPath(val, parts)
+		return getPathFromString(val, path)
 	}
 
 	return val, nil
