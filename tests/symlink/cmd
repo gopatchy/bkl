@@ -1,1 +1,1 @@
-bkl -f yaml c.d.yaml
+bkl c.d.yaml

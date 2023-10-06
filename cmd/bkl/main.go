@@ -62,12 +62,6 @@ Related tools:
 	}
 
 	for _, path := range opts.Positional.InputPaths {
-		fileP := bkl.New()
-
-		if opts.Verbose {
-			fileP.SetDebug(true)
-		}
-
 		realPath, f, err := bkl.FileMatch(string(path))
 		if err != nil {
 			fatal(err)
@@ -78,16 +72,11 @@ Related tools:
 		}
 
 		if opts.SkipParent {
-			err = fileP.MergeFile(realPath)
+			err = p.MergeFile(realPath)
 		} else {
-			err = fileP.MergeFileLayers(realPath)
+			err = p.MergeFileLayers(realPath)
 		}
 
-		if err != nil {
-			fatal(err)
-		}
-
-		err = p.MergeParser(fileP)
 		if err != nil {
 			fatal(err)
 		}

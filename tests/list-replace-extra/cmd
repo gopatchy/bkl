@@ -1,1 +1,1 @@
-! bkl -f yaml a.b.yaml
+! bkl a.b.yaml

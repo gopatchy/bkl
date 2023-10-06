@@ -1,1 +1,1 @@
-bkl -f toml a.b.toml
+bkl a.b.toml

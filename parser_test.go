@@ -94,11 +94,11 @@ func ExampleParser_MergeParser() {
 	b1 := bkl.New()
 	b2 := bkl.New()
 
-	if err := b1.MergeFileLayers("tests/tree/a.b.yaml"); err != nil {
+	if err := b1.MergeFileLayers("tests/args/a.b.yaml"); err != nil {
 		panic(err)
 	}
 
-	if err := b2.MergeFileLayers("tests/tree/c.d.yaml"); err != nil {
+	if err := b2.MergeFileLayers("tests/args/c.d.yaml"); err != nil {
 		panic(err)
 	}
 

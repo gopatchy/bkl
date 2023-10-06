@@ -1,1 +1,1 @@
-! bkl -f yaml a.b.yaml 2>/dev/null
+! bkl a.b.yaml 2>/dev/null
