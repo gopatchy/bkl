@@ -8,4 +8,4 @@ d: 4
 $merge:
   $match:
     a: 1
-  $path: b."c.d"
+  $path: [b, c.d]

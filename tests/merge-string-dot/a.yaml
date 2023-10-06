@@ -2,4 +2,4 @@ foo:
   c.d: bar
 zig:
   b: 2
-  zag: $merge:foo."c.d"
+  zag: $merge:[foo,c.d]

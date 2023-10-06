@@ -1,15 +1,19 @@
 package bkl
 
 import (
-	"encoding/csv"
 	"fmt"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 func get(obj any, docs []any, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
 		return getPathFromString(obj, m2)
+
+	case []any:
+		return getPathFromList(obj, m2)
 
 	case map[string]any:
 		return getCross(docs, m2)
@@ -19,16 +23,33 @@ func get(obj any, docs []any, m any) (any, error) {
 	}
 }
 
-func getPathFromString(obj any, path string) (any, error) {
-	r := csv.NewReader(strings.NewReader(path))
-	r.Comma = '.'
+func getPathFromList(obj any, path []any) (any, error) {
+	path2, err := toStringList(path)
+	if err != nil {
+		return nil, fmt.Errorf("%v: %w", path, err)
+	}
 
-	parts, err := r.Read()
+	return getPath(obj, path2)
+}
+
+func getPathFromString(obj any, path string) (any, error) {
+	var path2 any
+	err := yaml.Unmarshal([]byte(path), &path2)
 	if err != nil {
 		return nil, err
 	}
 
-	return getPath(obj, parts)
+	switch path3 := path2.(type) {
+	case string:
+		parts := strings.Split(path3, ".")
+		return getPath(obj, parts)
+
+	case []any:
+		return getPathFromList(obj, path3)
+
+	default:
+		return nil, fmt.Errorf("%T as reference: %w", path2, ErrInvalidType)
+	}
 }
 
 func getPath(obj any, parts []string) (any, error) {
@@ -41,7 +62,7 @@ func getPath(obj any, parts []string) (any, error) {
 		return getPath(objType[parts[0]], parts[1:])
 
 	default:
-		return nil, fmt.Errorf("%s: %w", strings.Join(parts, "."), ErrRefNotFound)
+		return nil, fmt.Errorf("%v: %w", parts, ErrRefNotFound)
 	}
 }
 
@@ -67,9 +88,9 @@ func getCross(docs []any, conf map[string]any) (any, error) {
 		return nil, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
 	}
 
-	path, _ := popMapStringValue(conf, "$path")
-	if path != "" {
-		return getPathFromString(val, path)
+	path, _ := popMapValue(conf, "$path")
+	if path != nil {
+		return get(val, docs, path)
 	}
 
 	return val, nil

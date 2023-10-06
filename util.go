@@ -277,3 +277,19 @@ func filterList(l []any, filter func(any) ([]any, error)) ([]any, error) {
 
 	return ret, nil
 }
+
+func toStringList(l []any) ([]string, error) {
+	ret := []string{}
+
+	for _, v := range l {
+		switch v2 := v.(type) {
+		case string:
+			ret = append(ret, v2)
+
+		default:
+			return nil, fmt.Errorf("%T: %w", v, ErrInvalidType)
+		}
+	}
+
+	return ret, nil
+}
