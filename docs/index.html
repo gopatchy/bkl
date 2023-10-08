@@ -481,11 +481,11 @@ BKL</h1>
 <h2><a name="inputs">Inputs</a></h2>
 
 <label>Commandline Layering</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # (a.yaml + a.b.yaml) + (c.yaml + c.d.yaml)</code>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</code>
 
 <vSpace></vSpace>
 
-<p>Specifying multiple input files evaluates them as normal then merges them onto each other in order.</p>
+<p>Specifying multiple input files merges all layers in order.</p>
 
 <vSpace></vSpace>
 
