@@ -190,31 +190,10 @@ func (p *Parser) mergeFile(f *file) error {
 // MergeFileLayers determines relevant layers from the supplied path and merges
 // them in order.
 func (p *Parser) MergeFileLayers(path string) error {
-	files := []*file{}
-
-	for {
-		p.log("[%s] loading", path)
-
-		file, err := loadFile(path)
-		if err != nil {
-			return err
-		}
-
-		files = append(files, file)
-
-		parent, err := file.parent()
-		if err != nil {
-			return err
-		}
-
-		if *parent == baseTemplate {
-			break
-		}
-
-		path = *parent
+	files, err := p.loadFileAndParents(path)
+	if err != nil {
+		return err
 	}
-
-	polyfill.SlicesReverse(files)
 
 	for _, f := range files {
 		err := p.mergeFile(f)
@@ -388,4 +367,31 @@ func (p *Parser) log(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
+}
+
+func (p *Parser) loadFileAndParents(path string) ([]*file, error) {
+	p.log("[%s] loading", path)
+
+	f, err := loadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	parents, err := f.parents()
+	if err != nil {
+		return nil, err
+	}
+
+	files := []*file{}
+
+	for _, parent := range parents {
+		parentFiles, err := p.loadFileAndParents(parent)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, parentFiles...)
+	}
+
+	return append(files, f), nil
 }

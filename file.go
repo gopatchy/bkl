@@ -13,8 +13,6 @@ type file struct {
 	docs []any
 }
 
-var baseTemplate = ""
-
 func loadFile(path string) (*file, error) {
 	f := &file{
 		path: path,
@@ -67,57 +65,76 @@ func loadFile(path string) (*file, error) {
 	return f, nil
 }
 
-func (f *file) parent() (*string, error) {
-	parent, err := f.parentFromDirective()
+func (f *file) parents() ([]string, error) {
+	parents, err := f.parentsFromDirective()
 	if err != nil {
 		return nil, err
 	}
 
-	if parent != nil {
-		return parent, nil
+	if parents != nil {
+		return parents, nil
 	}
 
-	parent, err = f.parentFromSymlink()
+	parents, err = f.parentsFromSymlink()
 	if err != nil {
 		return nil, err
 	}
 
-	if parent != nil {
-		return parent, nil
+	if parents != nil {
+		return parents, nil
 	}
 
-	return f.parentFromFilename()
+	return f.parentsFromFilename()
 }
 
-func (f *file) parentFromDirective() (*string, error) {
-	docMap, ok := f.docs[0].(map[string]any)
-	if !ok {
-		return nil, nil
-	}
+func (f *file) parentsFromDirective() ([]string, error) {
+	parents := []string{}
+	noParent := false
 
-	if hasMapNilValue(docMap, "$parent") || hasMapBoolValue(docMap, "$parent", false) {
+	for _, doc := range f.docs {
+		docMap, ok := doc.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if hasMapNilValue(docMap, "$parent") || hasMapBoolValue(docMap, "$parent", false) {
+			delete(docMap, "$parent")
+			noParent = true
+		}
+
+		parent := getMapStringValue(docMap, "$parent")
+		if parent == "" {
+			continue
+		}
+
 		delete(docMap, "$parent")
-		return &baseTemplate, nil
+
+		parent = filepath.Join(filepath.Dir(f.path), parent)
+
+		parentPath := findFile(parent)
+		if parentPath == "" {
+			return nil, fmt.Errorf("%s: %w", parent, ErrMissingFile)
+		}
+
+		parents = append(parents, parentPath)
 	}
 
-	parent := getMapStringValue(docMap, "$parent")
-	if parent == "" {
+	if noParent {
+		if len(parents) > 0 {
+			return nil, fmt.Errorf("$parent=false and $parent=<string> in same file: %w", ErrConflictingParent)
+		}
+
+		return []string{}, nil
+	}
+
+	if len(parents) == 0 {
 		return nil, nil
 	}
 
-	delete(docMap, "$parent")
-
-	parent = filepath.Join(filepath.Dir(f.path), parent)
-
-	parentPath := findFile(parent)
-	if parentPath == "" {
-		return nil, fmt.Errorf("%s: %w", parent, ErrMissingFile)
-	}
-
-	return &parentPath, nil
+	return parents, nil
 }
 
-func (f *file) parentFromSymlink() (*string, error) {
+func (f *file) parentsFromSymlink() ([]string, error) {
 	if isStdin(f.path) {
 		return nil, nil
 	}
@@ -134,12 +151,12 @@ func (f *file) parentFromSymlink() (*string, error) {
 
 	f.path = dest
 
-	return f.parentFromFilename()
+	return f.parentsFromFilename()
 }
 
-func (f *file) parentFromFilename() (*string, error) {
+func (f *file) parentsFromFilename() ([]string, error) {
 	if isStdin(f.path) {
-		return &baseTemplate, nil
+		return []string{}, nil
 	}
 
 	dir := filepath.Dir(f.path)
@@ -153,7 +170,7 @@ func (f *file) parentFromFilename() (*string, error) {
 		return nil, fmt.Errorf("[%s] %w", f.path, ErrInvalidFilename)
 
 	case len(parts) == 2:
-		return &baseTemplate, nil
+		return []string{}, nil
 
 	default:
 		layerPath := filepath.Join(dir, strings.Join(parts[:len(parts)-2], "."))
@@ -163,7 +180,7 @@ func (f *file) parentFromFilename() (*string, error) {
 			return nil, fmt.Errorf("[%s]: %w", layerPath, ErrMissingFile)
 		}
 
-		return &extPath, nil
+		return []string{extPath}, nil
 	}
 }
 
