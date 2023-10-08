@@ -117,12 +117,12 @@ func ExampleParser_MergeParser() {
 func ExampleParser_MergePatch() {
 	b := bkl.New()
 
-	err := b.MergePatch(0, map[string]any{"a": 1})
+	err := b.MergePatch(map[string]any{"a": 1}, true)
 	if err != nil {
 		panic(err)
 	}
 
-	err = b.MergePatch(0, map[string]any{"b": 2})
+	err = b.MergePatch(map[string]any{"b": 2}, false)
 	if err != nil {
 		panic(err)
 	}

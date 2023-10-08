@@ -65,8 +65,8 @@ func (p *Parser) SetDebug(debug bool) {
 // MergeParser applies other's internal document state to ours using bkl's
 // merge semantics.
 func (p *Parser) MergeParser(other *Parser) error {
-	for i, doc := range other.docs {
-		err := p.MergePatch(i, doc)
+	for _, doc := range other.docs {
+		err := p.MergePatch(doc, false)
 		if err != nil {
 			return err
 		}
@@ -76,25 +76,34 @@ func (p *Parser) MergeParser(other *Parser) error {
 }
 
 // MergePatch applies the supplied patch to the [Parser]'s current internal
-// document state at the specified document index using bkl's merge
-// semantics.
-//
-// index is only a hint; if the patch contains a $match entry, that is used
-// instead.
-func (p *Parser) MergePatch(index int, patch any) error {
-	match, err := p.mergePatchMatch(patch)
+// document state using bkl's merge semantics. If expand is true, documents
+// without $match will append; otherwise this is an error.
+func (p *Parser) MergePatch(patch any, expand bool) error {
+	matched, err := p.mergePatchMatch(patch)
 	if err != nil {
 		return err
 	}
 
-	if match {
+	if matched {
 		return nil
 	}
 
-	if index >= len(p.docs) {
-		p.docs = append(p.docs, make([]any, index-len(p.docs)+1)...)
+	if expand {
+		p.docs = append(p.docs, nil)
+		return p.mergePatch(patch, len(p.docs)-1)
 	}
 
+	// Don't require $match when there's only one document
+	if len(p.docs) == 1 {
+		return p.mergePatch(patch, 0)
+	}
+
+	return fmt.Errorf("%v: %w", patch, ErrMissingMatch)
+}
+
+// mergePatch applies the supplied patch to the document at the specified
+// index.
+func (p *Parser) mergePatch(patch any, index int) error {
 	merged, err := merge(p.docs[index], patch)
 	if err != nil {
 		return err
@@ -105,6 +114,9 @@ func (p *Parser) MergePatch(index int, patch any) error {
 	return nil
 }
 
+// mergePatchMatch attempts to apply the supplied patch to one or more
+// documents specified by $match. It returns success and error separately;
+// (false, nil) means no $match directive. Zero matches is an error.
 func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 	patchMap, ok := patch.(map[string]any)
 	if !ok {
@@ -113,7 +125,9 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 
 	isNil, patch := popMapNilValue(patchMap, "$match")
 	if isNil {
-		return true, p.MergePatch(len(p.docs), patch)
+		// Explicit append
+		p.docs = append(p.docs, nil)
+		return true, p.mergePatch(patch, len(p.docs)-1)
 	}
 
 	m, patch := popMapValue(patchMap, "$match")
@@ -121,21 +135,22 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 		return false, nil
 	}
 
+	// Must find at least one match
 	found := false
 
 	for i, doc := range p.docs {
 		if match(doc, m) {
-			found = true
-
-			err := p.MergePatch(i, patch)
+			err := p.mergePatch(patch, i)
 			if err != nil {
-				return false, err
+				return true, err
 			}
+
+			found = true
 		}
 	}
 
 	if !found {
-		return false, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+		return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
 	}
 
 	return true, nil
@@ -151,10 +166,19 @@ func (p *Parser) MergeFile(path string) error {
 		return err
 	}
 
+	return p.mergeFile(f)
+}
+
+// mergeFile applies an already-parsed file object into the [Parser]'s
+// document state.
+func (p *Parser) mergeFile(f *file) error {
+	// First file in an empty parser can append without $match
+	first := len(p.docs) == 0
+
 	for i, doc := range f.docs {
 		p.log("[%s] merging", f.path)
 
-		err = p.MergePatch(i, doc)
+		err := p.MergePatch(doc, first)
 		if err != nil {
 			return fmt.Errorf("[%s:doc%d]: %w", f.path, i, err)
 		}
@@ -193,13 +217,9 @@ func (p *Parser) MergeFileLayers(path string) error {
 	polyfill.SlicesReverse(files)
 
 	for _, f := range files {
-		for i, doc := range f.docs {
-			p.log("[%s] merging", f.path)
-
-			err := p.MergePatch(i, doc)
-			if err != nil {
-				return fmt.Errorf("[%s:doc%d]: %w", f.path, i, err)
-			}
+		err := p.mergeFile(f)
+		if err != nil {
+			return err
 		}
 	}
 

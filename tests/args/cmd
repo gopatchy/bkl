@@ -1,1 +1,1 @@
-bkl a.b.yaml c.d.yaml
+bkl -v a.b.yaml c.d.yaml
