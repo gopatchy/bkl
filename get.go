@@ -25,7 +25,14 @@ func get(obj any, docs []any, m any) (any, error) {
 
 func getPathFromList(obj any, docs []any, path []any) (any, error) {
 	if len(path) > 0 {
+		var pat any
+
 		pat, ok := path[0].(map[string]any)
+
+		if !ok {
+			pat, ok = path[0].([]any)
+		}
+
 		if ok {
 			path = path[1:]
 
