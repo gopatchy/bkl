@@ -88,8 +88,8 @@ func getPath(obj any, parts []string) (any, error) {
 }
 
 func getCross(docs []any, conf map[string]any) (any, error) {
-	pat, _ := popMapValue(conf, "$match")
-	if pat == nil {
+	found, pat, _ := popMapValue(conf, "$match")
+	if !found {
 		return nil, fmt.Errorf("%#v: %w", conf, ErrMissingMatch)
 	}
 
@@ -98,8 +98,8 @@ func getCross(docs []any, conf map[string]any) (any, error) {
 		return nil, err
 	}
 
-	path, _ := popMapValue(conf, "$path")
-	if path != nil {
+	found, path, _ := popMapValue(conf, "$path")
+	if found {
 		return get(doc, docs, path)
 	}
 

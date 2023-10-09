@@ -1,0 +1,10 @@
+$parent:
+  - c
+  - d
+$match:
+  c: 3
+a: 1
+---
+$match:
+  d: 4
+b: 2

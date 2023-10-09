@@ -123,20 +123,19 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 		return false, nil
 	}
 
-	isNil, patch := popMapNilValue(patchMap, "$match")
-	if isNil {
+	found, m, patch := popMapValue(patchMap, "$match")
+	if !found {
+		return false, nil
+	}
+
+	if m == nil {
 		// Explicit append
 		p.docs = append(p.docs, nil)
 		return true, p.mergePatch(patch, len(p.docs)-1)
 	}
 
-	m, patch := popMapValue(patchMap, "$match")
-	if m == nil {
-		return false, nil
-	}
-
 	// Must find at least one match
-	found := false
+	found = false
 
 	for i, doc := range p.docs {
 		if match(doc, m) {
@@ -159,9 +158,7 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 // MergeFile parses the file at path and merges its contents into the
 // [Parser]'s document state using bkl's merge semantics.
 func (p *Parser) MergeFile(path string) error {
-	p.log("[%s] loading", path)
-
-	f, err := loadFile(path)
+	f, err := p.loadFile(path)
 	if err != nil {
 		return err
 	}
@@ -367,31 +364,4 @@ func (p *Parser) log(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
-}
-
-func (p *Parser) loadFileAndParents(path string) ([]*file, error) {
-	p.log("[%s] loading", path)
-
-	f, err := loadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	parents, err := f.parents()
-	if err != nil {
-		return nil, err
-	}
-
-	files := []*file{}
-
-	for _, parent := range parents {
-		parentFiles, err := p.loadFileAndParents(parent)
-		if err != nil {
-			return nil, err
-		}
-
-		files = append(files, parentFiles...)
-	}
-
-	return append(files, f), nil
 }

@@ -13,7 +13,9 @@ type file struct {
 	docs []any
 }
 
-func loadFile(path string) (*file, error) {
+func (p *Parser) loadFile(path string) (*file, error) {
+	p.log("[%s] loading", path)
+
 	f := &file{
 		path: path,
 	}
@@ -65,6 +67,31 @@ func loadFile(path string) (*file, error) {
 	return f, nil
 }
 
+func (p *Parser) loadFileAndParents(path string) ([]*file, error) {
+	f, err := p.loadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	parents, err := f.parents()
+	if err != nil {
+		return nil, err
+	}
+
+	files := []*file{}
+
+	for _, parent := range parents {
+		parentFiles, err := p.loadFileAndParents(parent)
+		if err != nil {
+			return nil, err
+		}
+
+		files = append(files, parentFiles...)
+	}
+
+	return append(files, f), nil
+}
+
 func (f *file) parents() ([]string, error) {
 	parents, err := f.parentsFromDirective()
 	if err != nil {
@@ -91,32 +118,43 @@ func (f *file) parentsFromDirective() ([]string, error) {
 	parents := []string{}
 	noParent := false
 
-	for _, doc := range f.docs {
+	for i, doc := range f.docs {
 		docMap, ok := doc.(map[string]any)
 		if !ok {
 			continue
 		}
 
-		if hasMapNilValue(docMap, "$parent") || hasMapBoolValue(docMap, "$parent", false) {
-			delete(docMap, "$parent")
-			noParent = true
-		}
+		var found bool
+		var val any
+		found, val, docMap = popMapValue(docMap, "$parent")
+		f.docs[i] = docMap
 
-		parent := getMapStringValue(docMap, "$parent")
-		if parent == "" {
+		if !found {
 			continue
 		}
 
-		delete(docMap, "$parent")
+		switch val2 := val.(type) {
+		case string:
+			parents = append(parents, val2)
 
-		parent = filepath.Join(filepath.Dir(f.path), parent)
+		case []any:
+			val3, err := toStringList(val2)
+			if err != nil {
+				return nil, fmt.Errorf("$parent=%#v: %w", val2, ErrInvalidParent)
+			}
 
-		parentPath := findFile(parent)
-		if parentPath == "" {
-			return nil, fmt.Errorf("%s: %w", parent, ErrMissingFile)
+			parents = append(parents, val3...)
+
+		case bool:
+			if val2 {
+				return nil, fmt.Errorf("$parent=true: %w", ErrInvalidParent)
+			}
+
+			noParent = true
+
+		case nil:
+			noParent = true
 		}
-
-		parents = append(parents, parentPath)
 	}
 
 	if noParent {
@@ -131,7 +169,7 @@ func (f *file) parentsFromDirective() ([]string, error) {
 		return nil, nil
 	}
 
-	return parents, nil
+	return f.toAbsolutePaths(parents)
 }
 
 func (f *file) parentsFromSymlink() ([]string, error) {
@@ -182,6 +220,23 @@ func (f *file) parentsFromFilename() ([]string, error) {
 
 		return []string{extPath}, nil
 	}
+}
+
+func (f *file) toAbsolutePaths(paths []string) ([]string, error) {
+	ret := []string{}
+
+	for _, path := range paths {
+		path = filepath.Join(filepath.Dir(f.path), path)
+
+		path2 := findFile(path)
+		if path2 == "" {
+			return nil, fmt.Errorf("%s: %w", path, ErrMissingFile)
+		}
+
+		ret = append(ret, path2)
+	}
+
+	return ret, nil
 }
 
 func isStdin(path string) bool {

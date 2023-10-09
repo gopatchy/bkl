@@ -15,6 +15,7 @@ var (
 	ErrInvalidIndex      = fmt.Errorf("invalid index (%w)", Err)
 	ErrInvalidFilename   = fmt.Errorf("invalid filename (%w)", Err)
 	ErrInvalidType       = fmt.Errorf("invalid type (%w)", Err)
+	ErrInvalidParent     = fmt.Errorf("invalid $parent (%w)", Err)
 	ErrMarshal           = fmt.Errorf("encoding error (%w)", Err)
 	ErrRefNotFound       = fmt.Errorf("reference not found (%w)", Err)
 	ErrMissingEnv        = fmt.Errorf("missing environment variable (%w)", Err)

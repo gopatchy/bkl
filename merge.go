@@ -114,8 +114,8 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			continue
 		}
 
-		del, vMap := popMapValue(vMap, "$delete")
-		if del != nil {
+		found, del, vMap := popMapValue(vMap, "$delete")
+		if found {
 			if len(vMap) > 0 {
 				return nil, fmt.Errorf("%#v: %w", vMap, ErrExtraKeys)
 			}
@@ -128,8 +128,8 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			continue
 		}
 
-		m, vMap := popMapValue(vMap, "$match")
-		if m != nil {
+		found, m, vMap := popMapValue(vMap, "$match")
+		if found {
 			dst, err = mergeListMatch(dst, m, vMap)
 			if err != nil {
 				return nil, err
@@ -172,8 +172,8 @@ func mergeListDelete(obj []any, del any) ([]any, error) {
 func mergeListMatch(obj []any, m any, v map[string]any) ([]any, error) {
 	var val any = v
 
-	v2, v := popMapValue(v, "$value")
-	if v2 != nil {
+	found, v2, v := popMapValue(v, "$value")
+	if found {
 		if len(v) > 0 {
 			return nil, fmt.Errorf("%#v: %w", v, ErrExtraKeys)
 		}
@@ -181,7 +181,7 @@ func mergeListMatch(obj []any, m any, v map[string]any) ([]any, error) {
 		val = v2
 	}
 
-	found := false
+	found = false
 
 	obj, err := filterList(obj, func(v2 any) ([]any, error) {
 		if match(v2, m) {

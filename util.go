@@ -6,36 +6,16 @@ import (
 	"github.com/gopatchy/bkl/polyfill"
 )
 
-func popMapValue(m map[string]any, k string) (any, map[string]any) {
+func popMapValue(m map[string]any, k string) (bool, any, map[string]any) {
 	v, found := m[k]
 	if !found {
-		return nil, m
+		return false, nil, m
 	}
 
 	m = polyfill.MapsClone(m)
 	delete(m, k)
 
-	return v, m
-}
-
-func hasMapNilValue(m map[string]any, k string) bool {
-	v, found := m[k]
-	if !found {
-		return false
-	}
-
-	return v == nil
-}
-
-func popMapNilValue(m map[string]any, k string) (bool, map[string]any) {
-	if hasMapNilValue(m, k) {
-		m = polyfill.MapsClone(m)
-		delete(m, k)
-
-		return true, m
-	}
-
-	return false, m
+	return true, v, m
 }
 
 func toBool(a any) (bool, bool) {
@@ -130,8 +110,8 @@ func popListMapValue(l []any, k string) (any, []any, error) {
 			return []any{x}, nil
 		}
 
-		val, xMap := popMapValue(xMap, k)
-		if val != nil {
+		found, val, xMap := popMapValue(xMap, k)
+		if found {
 			if ret != nil {
 				return nil, fmt.Errorf("%#v: %w", l, ErrExtraKeys)
 			}
