@@ -522,7 +522,14 @@ EOF</code>
 
 <vSpace></vSpace>
 
-<p><ifocus>$parent</ifocus> can only be used at the root of the first document in a file. bkl will still check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.</p>
+<p>bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.</p>
+
+<label>Multiple Parents</label>
+<code class="labeled"><focus><key>$parent</key>:
+- <string>a</string>
+- <string>b</string></focus></code>
+
+<p>Setting <ifocus>$parent</ifocus> to a list inherits from multiple files. All parent files are loaded before the child. As this loads multiple parent documents, <ifocus><a href="#streams">$match</a></ifocus> is required in any child documents.</p>
 
 <label>Set Parent In CLI</label>
 <code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
@@ -547,26 +554,9 @@ EOF</code>
 
 <p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).</p>
 
-<p>To layer streams, bkl has match documents between layers. It does this using document ordering within layer files by default but can be overridden with <ifocus>$match</ifocus>.</p>
+<p>To layer streams, bkl has to match documents between layers. If there is more than one possible match (e.g. the parent file contains multiple documents), <ifocus>$match</ifocus> is required in each child document to disambiguate.</p>
 
 <split5a>
-
-<code><key>a</key>: <number>1</number>
----
-<key>b</key>: <number>2</number></code>
-
-<op>+</op>
-
-<code><key>c</key>: <number>3</number></code>
-
-<op>=</op>
-
-<code><key>a</key>: <number>1</number>
-<focus><key>c</key>: <number>3</number></focus>
----
-<key>b</key>: <number>2</number></code>
-
-<vSpace class="span5"></vSpace>
 
 <code><key>a</key>: <number>1</number>
 ---
@@ -1069,6 +1059,48 @@ EOF</code>
 <vSpace></vSpace>
 <vSpace></vSpace>
 
+<p><ifocus>$merge</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:</p>
+
+<split3a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<key>c</key>: <number>3</number>
+<focus><key>$merge</key>: <value>[{a: 1}]</value></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<focus><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number></focus>
+<key>c</key>: <number>3</number></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<key>d</key>: <number>4</number>
+<focus><key>$merge</key>: <value>[{a: 1}, b]</value></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<focus><key>c</key>: <number>3</number></focus>
+<key>d</key>: <number>4</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
 
 
 <h2><a name="replace">$replace</a></h2>
@@ -1134,7 +1166,7 @@ EOF</code>
 
 <p>Note that <ifocus>$merge</ifocus> and <ifocus>$replace</ifocus> are equivalent for scalar values.</p>
 
-<p>You can also replace across documents using <ifocus>$replace</ifocus> and optionally <ifocus>$path</ifocus>:</p>
+<p>You can also replace across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:</p>
 
 <split3a>
 
@@ -1165,6 +1197,46 @@ EOF</code>
   <key>$match</key>:
     <key>a</key>: <number>1</number>
   <key>$path</key>: <string>b</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<focus><key>c</key>: <number>3</number></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+<p><ifocus>$replace</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:</p>
+
+<split3a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<key>c</key>: <number>3</number>
+<focus><key>$replace</key>: <value>[{a: 1}]</value></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+---
+<focus><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number></focus></code>
+
+<vSpace class="span3"></vSpace>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <number>3</number>
+---
+<key>d</key>: <number>4</number>
+<focus><key>$replace</key>: <value>[{a: 1}, b]</value></focus></code>
 
 <op>=</op>
 
