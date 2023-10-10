@@ -78,9 +78,14 @@ func getPath(obj any, parts []string) (any, error) {
 		return obj, nil
 	}
 
-	switch objType := obj.(type) {
+	switch obj2 := obj.(type) {
 	case map[string]any:
-		return getPath(objType[parts[0]], parts[1:])
+		val, found := obj2[parts[0]]
+		if !found {
+			return nil, fmt.Errorf("%v: %w", parts, ErrRefNotFound)
+		}
+
+		return getPath(val, parts[1:])
 
 	default:
 		return nil, fmt.Errorf("%v: %w", parts, ErrRefNotFound)

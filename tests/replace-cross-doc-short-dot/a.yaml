@@ -1,0 +1,8 @@
+$output: false
+a: 1
+b:
+  c:
+    d: 4
+---
+e: 5
+$replace: [{a: 1}, b.c]
