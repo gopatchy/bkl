@@ -45,6 +45,19 @@ import (
 //
 // Output phase 2 (output)
 //   - $output
+//
+// # Document Layer Matching Logic
+//
+// When applying a new document to internal state, it may be merged into one or
+// more existing documents or appended as a new document. To select merge
+// targets, Parser considers (in order):
+//   - If $match:
+//   - $match: null -> append
+//   - $match within parent documents -> merge
+//   - $match any documents -> merge
+//   - No matching documents -> error
+//   - If parent documents -> merge into all parents
+//   - If no parent documents -> append
 type Parser struct {
 	docs  []any
 	debug bool
@@ -145,7 +158,7 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 // MergeFile parses the file at path and merges its contents into the
 // [Parser]'s document state using bkl's merge semantics.
 func (p *Parser) MergeFile(path string) error {
-	f, err := p.loadFile(path)
+	f, err := p.loadFile(path, nil)
 	if err != nil {
 		return err
 	}
@@ -174,7 +187,7 @@ func (p *Parser) mergeFile(f *file) error {
 // MergeFileLayers determines relevant layers from the supplied path and merges
 // them in order.
 func (p *Parser) MergeFileLayers(path string) error {
-	files, err := p.loadFileAndParents(path)
+	files, err := p.loadFileAndParents(path, nil)
 	if err != nil {
 		return err
 	}

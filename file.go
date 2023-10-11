@@ -6,19 +6,25 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"go.jetpack.io/typeid"
 )
 
 type file struct {
-	path string
-	docs []any
+	id    typeid.TypeID
+	child *file
+	path  string
+	docs  []any
 }
 
-func (p *Parser) loadFile(path string) (*file, error) {
-	p.log("[%s] loading", path)
-
+func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	f := &file{
-		path: path,
+		id:    typeid.Must(typeid.New("file")),
+		child: child,
+		path:  path,
 	}
+
+	p.log("[%s] loading", f)
 
 	format, err := GetFormat(ext(path))
 	if err != nil {
@@ -67,8 +73,8 @@ func (p *Parser) loadFile(path string) (*file, error) {
 	return f, nil
 }
 
-func (p *Parser) loadFileAndParents(path string) ([]*file, error) {
-	f, err := p.loadFile(path)
+func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
+	f, err := p.loadFile(path, child)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +87,7 @@ func (p *Parser) loadFileAndParents(path string) ([]*file, error) {
 	files := []*file{}
 
 	for _, parent := range parents {
-		parentFiles, err := p.loadFileAndParents(parent)
+		parentFiles, err := p.loadFileAndParents(parent, f)
 		if err != nil {
 			return nil, err
 		}
@@ -237,6 +243,10 @@ func (f *file) toAbsolutePaths(paths []string) ([]string, error) {
 	}
 
 	return ret, nil
+}
+
+func (f *file) String() string {
+	return f.path
 }
 
 func isStdin(path string) bool {
