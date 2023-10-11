@@ -90,30 +90,6 @@ func ExampleParser_MergeFileLayers() {
 	// {"addr":"127.0.0.1","name":"myService","port":8081}
 }
 
-func ExampleParser_MergeParser() {
-	b1 := bkl.New()
-	b2 := bkl.New()
-
-	if err := b1.MergeFileLayers("tests/args/a.b.yaml"); err != nil {
-		panic(err)
-	}
-
-	if err := b2.MergeFileLayers("tests/args/c.d.yaml"); err != nil {
-		panic(err)
-	}
-
-	err := b2.MergeParser(b1)
-	if err != nil {
-		panic(err)
-	}
-
-	if err = b2.OutputToWriter(os.Stdout, "json"); err != nil {
-		panic(err)
-	}
-	// Output:
-	// {"a":1,"b":2,"c":3,"d":4}
-}
-
 func ExampleParser_MergePatch() {
 	b := bkl.New()
 

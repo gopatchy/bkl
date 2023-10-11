@@ -62,19 +62,6 @@ func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
 }
 
-// MergeParser applies other's internal document state to ours using bkl's
-// merge semantics.
-func (p *Parser) MergeParser(other *Parser) error {
-	for _, doc := range other.docs {
-		err := p.MergePatch(doc, false)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // MergePatch applies the supplied patch to the [Parser]'s current internal
 // document state using bkl's merge semantics. If expand is true, documents
 // without $match will append; otherwise this is an error.
