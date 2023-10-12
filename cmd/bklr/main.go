@@ -64,20 +64,20 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		format = *opts.OutputFormat
 	}
 
-	docs := []any{}
+	docs, err := b.Documents()
+	if err != nil {
+		fatal(err)
+	}
 
-	for i := 0; i < b.NumDocuments(); i++ {
-		doc, err := b.Document(i)
-		if err != nil {
-			fatal(err)
-		}
+	outs := []any{}
 
+	for _, doc := range docs {
 		doc, err = required(doc)
 		if err != nil {
 			fatal(err)
 		}
 
-		docs = append(docs, doc)
+		outs = append(outs, doc)
 	}
 
 	f, err := bkl.GetFormat(format)
@@ -85,7 +85,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	enc, err := f.MarshalStream(docs)
+	enc, err := f.MarshalStream(outs)
 	if err != nil {
 		fatal(err)
 	}

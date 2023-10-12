@@ -16,9 +16,14 @@ import (
 func ExampleNew() {
 	b := bkl.New()
 
-	fmt.Println(b.NumDocuments())
+	docs, err := b.Documents()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(docs)
 	// Output:
-	// 0
+	// []
 }
 
 func ExampleParser() {
@@ -37,19 +42,19 @@ func ExampleParser() {
 	// {"addr":"127.0.0.1","name":"myService","port":8081}
 }
 
-func ExampleParser_Document() {
+func ExampleParser_Documents() {
 	b := bkl.New()
 
 	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
 		panic(err)
 	}
 
-	doc, err := b.Document(0)
+	docs, err := b.Documents()
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(doc)
+	fmt.Println(docs[0])
 	// Output:
 	// map[addr:127.0.0.1 name:myService port:8081]
 }
@@ -108,18 +113,6 @@ func ExampleParser_MergePatch() {
 	}
 	// Output:
 	// {"a":1,"b":2}
-}
-
-func ExampleParser_NumDocuments() {
-	b := bkl.New()
-
-	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
-		panic(err)
-	}
-
-	fmt.Println(b.NumDocuments())
-	// Output:
-	// 1
 }
 
 func ExampleParser_Output() {

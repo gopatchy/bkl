@@ -15,3 +15,7 @@ func newDocument() *document {
 		id: typeid.Must(typeid.New("doc")),
 	}
 }
+
+func (d *document) String() string {
+	return d.id.String()
+}
