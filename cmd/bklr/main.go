@@ -69,15 +69,13 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	outs := []any{}
+	if len(docs) != 1 {
+		fatal(fmt.Errorf("bklr operates on exactly 1 source document"))
+	}
 
-	for _, doc := range docs {
-		doc, err = required(doc)
-		if err != nil {
-			fatal(err)
-		}
-
-		outs = append(outs, doc)
+	out, err := required(docs[0])
+	if err != nil {
+		fatal(err)
 	}
 
 	f, err := bkl.GetFormat(format)
@@ -85,7 +83,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	enc, err := f.MarshalStream(outs)
+	enc, err := f.MarshalStream([]any{out})
 	if err != nil {
 		fatal(err)
 	}
