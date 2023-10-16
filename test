@@ -20,10 +20,14 @@ done
 
 export PATH=$ROOT:$PATH
 
+FOUND=n
+
 for TEST in tests/*; do
 	if [[ "$1" != "" && "tests/$1" != $TEST ]]; then
 		continue
 	fi
+
+	FOUND=y
 
 	echo TEST $TEST
 	cd $TEST
@@ -33,3 +37,8 @@ for TEST in tests/*; do
 	cd ~-
 	echo "	PASS"
 done
+
+if [[ "$1" != "" && $FOUND == n ]]; then
+	echo "No test matching '$1' found"
+	exit 1
+fi

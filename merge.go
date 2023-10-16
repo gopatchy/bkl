@@ -4,6 +4,17 @@ import (
 	"fmt"
 )
 
+func mergeDocs(doc, patch *Document) error {
+	merged, err := merge(doc.Data, patch.Data)
+	if err != nil {
+		return err
+	}
+
+	doc.Data = merged
+
+	return nil
+}
+
 func merge(dst any, src any) (any, error) {
 	switch dst2 := dst.(type) {
 	case map[string]any:

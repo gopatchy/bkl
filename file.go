@@ -137,16 +137,7 @@ func (f *file) parentsFromDirective() ([]string, error) {
 	noParent := false
 
 	for _, doc := range f.docs {
-		docMap, ok := doc.Data.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		var found bool
-		var val any
-		found, val, docMap = popMapValue(docMap, "$parent")
-		doc.Data = docMap
-
+		found, val := doc.PopMapValue("$parent")
 		if !found {
 			continue
 		}

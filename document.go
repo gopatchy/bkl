@@ -36,6 +36,30 @@ func (d *Document) AllParents() []*Document {
 	return ret
 }
 
+func (d *Document) DataAsMap() map[string]any {
+	dataMap, ok := d.Data.(map[string]any)
+	if ok {
+		return dataMap
+	} else {
+		return nil
+	}
+}
+
+func (d *Document) PopMapValue(key string) (bool, any) {
+	dataMap := d.DataAsMap()
+	if dataMap == nil {
+		return false, nil
+	}
+
+	found, val, data := popMapValue(dataMap, key)
+
+	if found {
+		d.Data = data
+	}
+
+	return found, val
+}
+
 func (d *Document) String() string {
 	return d.ID.String()
 }

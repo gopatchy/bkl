@@ -81,7 +81,7 @@ func (p *Parser) SetDebug(debug bool) {
 // internal document state using bkl's merge semantics. If expand is true,
 // documents without $match will append; otherwise this is an error.
 func (p *Parser) MergeDocument(doc *Document, expand bool) error {
-	matched, err := p.mergePatchMatch(doc.Data)
+	matched, err := p.mergePatchMatch(doc)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (p *Parser) MergeDocument(doc *Document, expand bool) error {
 
 	// Don't require $match when there's only one document
 	if len(p.docs) == 1 {
-		return p.mergePatch(doc.Data, p.docs[0])
+		return p.mergePatch(doc, p.docs[0])
 	}
 
 	return fmt.Errorf("%v: %w", doc, ErrMissingMatch)
@@ -105,27 +105,15 @@ func (p *Parser) MergeDocument(doc *Document, expand bool) error {
 
 // mergePatch applies the supplied patch to the document at the specified
 // index.
-func (p *Parser) mergePatch(patch any, doc *Document) error {
-	merged, err := merge(doc.Data, patch)
-	if err != nil {
-		return err
-	}
-
-	doc.Data = merged
-
-	return nil
+func (p *Parser) mergePatch(patch, doc *Document) error {
+	return mergeDocs(doc, patch)
 }
 
 // mergePatchMatch attempts to apply the supplied patch to one or more
 // documents specified by $match. It returns success and error separately;
 // (false, nil) means no $match directive. Zero matches is an error.
-func (p *Parser) mergePatchMatch(patch any) (bool, error) {
-	patchMap, ok := patch.(map[string]any)
-	if !ok {
-		return false, nil
-	}
-
-	found, m, patch := popMapValue(patchMap, "$match")
+func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
+	found, m := patch.PopMapValue("$match")
 	if !found {
 		return false, nil
 	}
@@ -141,7 +129,7 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 	found = false
 
 	for _, doc := range p.docs {
-		if match(doc.Data, m) {
+		if matchDoc(doc, m) {
 			err := p.mergePatch(patch, doc)
 			if err != nil {
 				return true, err

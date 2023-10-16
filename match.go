@@ -1,5 +1,9 @@
 package bkl
 
+func matchDoc(doc *Document, pat any) bool {
+	return match(doc.Data, pat)
+}
+
 func match(obj any, pat any) bool {
 	switch pat2 := pat.(type) {
 	case map[string]any:
