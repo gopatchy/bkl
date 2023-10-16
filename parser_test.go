@@ -95,15 +95,15 @@ func ExampleParser_MergeFileLayers() {
 	// {"addr":"127.0.0.1","name":"myService","port":8081}
 }
 
-func ExampleParser_MergePatch() {
+func ExampleParser_MergeDocument() {
 	b := bkl.New()
 
-	err := b.MergePatch(map[string]any{"a": 1}, true)
+	err := b.MergeDocument(bkl.NewDocumentWithData(map[string]any{"a": 1}), true)
 	if err != nil {
 		panic(err)
 	}
 
-	err = b.MergePatch(map[string]any{"b": 2}, false)
+	err = b.MergeDocument(bkl.NewDocumentWithData(map[string]any{"b": 2}), false)
 	if err != nil {
 		panic(err)
 	}

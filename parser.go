@@ -77,11 +77,11 @@ func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
 }
 
-// MergePatch applies the supplied patch to the [Parser]'s current internal
-// document state using bkl's merge semantics. If expand is true, documents
-// without $match will append; otherwise this is an error.
-func (p *Parser) MergePatch(patch any, expand bool) error {
-	matched, err := p.mergePatchMatch(patch)
+// MergeDocument applies the supplied Document to the [Parser]'s current
+// internal document state using bkl's merge semantics. If expand is true,
+// documents without $match will append; otherwise this is an error.
+func (p *Parser) MergeDocument(doc *Document, expand bool) error {
+	matched, err := p.mergePatchMatch(doc.Data)
 	if err != nil {
 		return err
 	}
@@ -91,19 +91,16 @@ func (p *Parser) MergePatch(patch any, expand bool) error {
 	}
 
 	if expand {
-		doc := NewDocument()
 		p.docs = append(p.docs, doc)
-		return p.mergePatch(patch, doc)
+		return nil
 	}
 
 	// Don't require $match when there's only one document
 	if len(p.docs) == 1 {
-		for _, doc := range p.docs {
-			return p.mergePatch(patch, doc)
-		}
+		return p.mergePatch(doc.Data, p.docs[0])
 	}
 
-	return fmt.Errorf("%v: %w", patch, ErrMissingMatch)
+	return fmt.Errorf("%v: %w", doc, ErrMissingMatch)
 }
 
 // mergePatch applies the supplied patch to the document at the specified
@@ -199,7 +196,7 @@ func (p *Parser) mergeFile(f *file) error {
 	for _, doc := range f.docs {
 		p.log("[%s] merging", f.path)
 
-		err := p.MergePatch(doc.Data, first)
+		err := p.MergeDocument(doc, first)
 		if err != nil {
 			return fmt.Errorf("[%s:%s]: %w", f, doc, err)
 		}

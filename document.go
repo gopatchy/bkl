@@ -16,6 +16,12 @@ func NewDocument() *Document {
 	}
 }
 
+func NewDocumentWithData(data any) *Document {
+	doc := NewDocument()
+	doc.Data = data
+	return doc
+}
+
 func (d *Document) String() string {
 	return d.ID.String()
 }
