@@ -4,7 +4,7 @@ set -eo pipefail
 
 ROOT=$(pwd)
 GOCMD=${GOCMD:=go}
-BINS="bkl bkld bklr"
+BINS="bkl bkld bkli bklr"
 
 function cleanup {
 	for BIN in $BINS; do
