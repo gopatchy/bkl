@@ -15,12 +15,7 @@ import (
 
 func ExampleNew() {
 	b := bkl.New()
-
-	docs, err := b.Documents()
-	if err != nil {
-		panic(err)
-	}
-
+	docs := b.Documents()
 	fmt.Println(docs)
 	// Output:
 	// []
@@ -49,12 +44,8 @@ func ExampleParser_Documents() {
 		panic(err)
 	}
 
-	docs, err := b.Documents()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(docs[0])
+	docs := b.Documents()
+	fmt.Println(docs[0].Data)
 	// Output:
 	// map[addr:127.0.0.1 name:myService port:8081]
 }

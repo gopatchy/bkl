@@ -64,16 +64,13 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		format = *opts.OutputFormat
 	}
 
-	docs, err := b.Documents()
-	if err != nil {
-		fatal(err)
-	}
+	docs := b.Documents()
 
 	if len(docs) != 1 {
 		fatal(fmt.Errorf("bklr operates on exactly 1 source document"))
 	}
 
-	out, err := required(docs[0])
+	out, err := required(docs[0].Data)
 	if err != nil {
 		fatal(err)
 	}

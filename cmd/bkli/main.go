@@ -73,21 +73,18 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 			fatal(err)
 		}
 
-		docs, err := b.Documents()
-		if err != nil {
-			fatal(err)
-		}
+		docs := b.Documents()
 
 		if len(docs) != 1 {
 			fatal(fmt.Errorf("bklr operates on exactly 1 source document"))
 		}
 
 		if p == 0 {
-			doc = docs[0]
+			doc = docs[0].Data
 			continue
 		}
 
-		doc, err = intersect(docs[0], doc)
+		doc, err = intersect(docs[0].Data, doc)
 		if err != nil {
 			fatal(err)
 		}

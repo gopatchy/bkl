@@ -123,14 +123,11 @@ func getOnlyDocument(path string) (any, string, error) {
 		return nil, "", err
 	}
 
-	docs, err := b.Documents()
-	if err != nil {
-		return nil, "", err
-	}
+	docs := b.Documents()
 
 	if len(docs) != 1 {
 		return nil, "", fmt.Errorf("bkld operates on exactly 1 source document per file")
 	}
 
-	return docs[0], f, nil
+	return docs[0].Data, f, nil
 }
