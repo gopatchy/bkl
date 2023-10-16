@@ -101,10 +101,12 @@ func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
 }
 
 func (f *file) setParents() {
-	for iter := f.child; iter != nil; iter = iter.child {
-		for _, doc := range iter.docs {
-			doc.Parents = append(doc.Parents, f.docs...)
-		}
+	if f.child == nil {
+		return
+	}
+
+	for _, doc := range f.child.docs {
+		doc.Parents = append(doc.Parents, f.docs...)
 	}
 }
 

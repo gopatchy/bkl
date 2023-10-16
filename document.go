@@ -22,6 +22,16 @@ func NewDocumentWithData(data any) *Document {
 	return doc
 }
 
+func (d *Document) AllParents() []*Document {
+	ret := append([]*Document{}, d.Parents...)
+
+	for _, parent := range d.Parents {
+		ret = append(ret, parent.AllParents()...)
+	}
+
+	return ret
+}
+
 func (d *Document) String() string {
 	return d.ID.String()
 }
