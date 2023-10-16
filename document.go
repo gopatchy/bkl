@@ -4,18 +4,18 @@ import (
 	"go.jetpack.io/typeid"
 )
 
-type document struct {
-	id      typeid.TypeID
-	parents []*document
-	data    any
+type Document struct {
+	ID      typeid.TypeID
+	Parents []*Document
+	Data    any
 }
 
-func newDocument() *document {
-	return &document{
-		id: typeid.Must(typeid.New("doc")),
+func NewDocument() *Document {
+	return &Document{
+		ID: typeid.Must(typeid.New("doc")),
 	}
 }
 
-func (d *document) String() string {
-	return d.id.String()
+func (d *Document) String() string {
+	return d.ID.String()
 }
