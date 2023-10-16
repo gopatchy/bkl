@@ -67,11 +67,10 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
-		doc2 := NewDocument()
-		doc2.Data = doc
-
-		f.docs = append(f.docs, doc2)
+		f.docs = append(f.docs, NewDocumentWithData(doc))
 	}
+
+	f.setParents()
 
 	return f, nil
 }
@@ -99,6 +98,14 @@ func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
 	}
 
 	return append(files, f), nil
+}
+
+func (f *file) setParents() {
+	for iter := f.child; iter != nil; iter = iter.child {
+		for _, doc := range iter.docs {
+			doc.Parents = append(doc.Parents, f.docs...)
+		}
+	}
 }
 
 func (f *file) parents() ([]string, error) {

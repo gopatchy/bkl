@@ -193,8 +193,10 @@ func (p *Parser) mergeFile(f *file) error {
 	// First file in an empty parser can append without $match
 	first := len(p.docs) == 0
 
+	p.log("[%s] merging", f)
+
 	for _, doc := range f.docs {
-		p.log("[%s] merging", f.path)
+		p.log("[%s] merging", doc)
 
 		err := p.MergeDocument(doc, first)
 		if err != nil {

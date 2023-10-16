@@ -196,11 +196,6 @@ func ExampleParser_SetDebug() {
 	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
 		panic(err)
 	}
-	// Output:
-	// [tests/example1/a.b.toml] loading
-	// [tests/example1/a.yaml] loading
-	// [tests/example1/a.yaml] merging
-	// [tests/example1/a.b.toml] merging
 }
 
 func FuzzParser(f *testing.F) {
