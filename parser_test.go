@@ -98,12 +98,16 @@ func ExampleParser_MergeFileLayers() {
 func ExampleParser_MergeDocument() {
 	b := bkl.New()
 
-	err := b.MergeDocument(bkl.NewDocumentWithData(map[string]any{"a": 1}), true)
+	doc1 := bkl.NewDocumentWithData(map[string]any{"a": 1})
+	doc2 := bkl.NewDocumentWithData(map[string]any{"b": 2})
+	doc2.Parents = append(doc2.Parents, doc1)
+
+	err := b.MergeDocument(doc1, true)
 	if err != nil {
 		panic(err)
 	}
 
-	err = b.MergeDocument(bkl.NewDocumentWithData(map[string]any{"b": 2}), false)
+	err = b.MergeDocument(doc2, false)
 	if err != nil {
 		panic(err)
 	}
