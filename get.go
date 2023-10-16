@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func get(obj any, docs []any, m any) (any, error) {
+func get(obj any, docs []*Document, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
 		return getPathFromString(obj, docs, m2)
@@ -23,7 +23,7 @@ func get(obj any, docs []any, m any) (any, error) {
 	}
 }
 
-func getPathFromList(obj any, docs []any, path []any) (any, error) {
+func getPathFromList(obj any, docs []*Document, path []any) (any, error) {
 	if len(path) > 0 {
 		var pat any
 
@@ -53,7 +53,7 @@ func getPathFromList(obj any, docs []any, path []any) (any, error) {
 	return getPath(obj, path2)
 }
 
-func getPathFromString(obj any, docs []any, path string) (any, error) {
+func getPathFromString(obj any, docs []*Document, path string) (any, error) {
 	var path2 any
 	err := yaml.Unmarshal([]byte(path), &path2)
 	if err != nil {
@@ -92,7 +92,7 @@ func getPath(obj any, parts []string) (any, error) {
 	}
 }
 
-func getCross(docs []any, conf map[string]any) (any, error) {
+func getCross(docs []*Document, conf map[string]any) (any, error) {
 	found, pat, _ := popMapValue(conf, "$match")
 	if !found {
 		return nil, fmt.Errorf("%#v: %w", conf, ErrMissingMatch)
@@ -111,11 +111,11 @@ func getCross(docs []any, conf map[string]any) (any, error) {
 	return doc, nil
 }
 
-func getCrossDoc(docs []any, pat any) (any, error) {
-	var ret any
+func getCrossDoc(docs []*Document, pat any) (any, error) {
+	var ret *Document
 
 	for _, doc := range docs {
-		if match(doc, pat) {
+		if matchDoc(doc, pat) {
 			if ret != nil {
 				return nil, fmt.Errorf("%#v: %w", pat, ErrMultiMatch)
 			}
@@ -128,5 +128,5 @@ func getCrossDoc(docs []any, pat any) (any, error) {
 		return nil, fmt.Errorf("%#v: %w", pat, ErrNoMatchFound)
 	}
 
-	return ret, nil
+	return ret.Data, nil
 }

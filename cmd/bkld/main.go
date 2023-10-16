@@ -55,7 +55,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
 
-	base, f, err := getOnlyDocument(string(opts.Positional.BasePath))
+	baseDoc, f, err := getOnlyDocument(string(opts.Positional.BasePath))
 	if err != nil {
 		fatal(err)
 	}
@@ -65,17 +65,17 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		format = f
 	}
 
-	target, _, err := getOnlyDocument(string(opts.Positional.TargetPath))
+	targetDoc, _, err := getOnlyDocument(string(opts.Positional.TargetPath))
 	if err != nil {
 		fatal(err)
 	}
 
-	base, err = bkl.Process(base, target, []any{target})
+	base, err := bkl.Process(baseDoc.Data, targetDoc.Data, []*bkl.Document{targetDoc})
 	if err != nil {
 		fatal(err)
 	}
 
-	doc, err := diff(target, base)
+	doc, err := diff(targetDoc.Data, base)
 	if err != nil {
 		fatal(err)
 	}
@@ -110,7 +110,7 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-func getOnlyDocument(path string) (any, string, error) {
+func getOnlyDocument(path string) (*bkl.Document, string, error) {
 	realPath, f, err := bkl.FileMatch(path)
 	if err != nil {
 		return nil, "", err
@@ -129,5 +129,5 @@ func getOnlyDocument(path string) (any, string, error) {
 		return nil, "", fmt.Errorf("bkld operates on exactly 1 source document per file")
 	}
 
-	return docs[0].Data, f, nil
+	return docs[0], f, nil
 }
