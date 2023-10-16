@@ -37,23 +37,6 @@ func SlicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
 }
 
 // Copied from go1.21 slices
-func Compare[S ~[]E, E cmp.Ordered](s1, s2 S) int {
-	for i, v1 := range s1 {
-		if i >= len(s2) {
-			return +1
-		}
-		v2 := s2[i]
-		if c := cmp.Compare(v1, v2); c != 0 {
-			return c
-		}
-	}
-	if len(s1) < len(s2) {
-		return -1
-	}
-	return 0
-}
-
-// Copied from go1.21 slices
 func SlicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 	for i, v := range s {
 		if del(v) {

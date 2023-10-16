@@ -6,15 +6,12 @@
 package bkl
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"sort"
 
 	"github.com/gopatchy/bkl/polyfill"
-	"go.jetpack.io/typeid"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -62,7 +59,7 @@ import (
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
 type Parser struct {
-	docs  map[typeid.TypeID]*document
+	docs  []*document
 	debug bool
 }
 
@@ -71,7 +68,6 @@ type Parser struct {
 // New always succeeds and returns a Parser instance.
 func New() *Parser {
 	return &Parser{
-		docs:  map[typeid.TypeID]*document{},
 		debug: os.Getenv("BKL_DEBUG") != "",
 	}
 }
@@ -96,7 +92,7 @@ func (p *Parser) MergePatch(patch any, expand bool) error {
 
 	if expand {
 		doc := newDocument()
-		p.docs[doc.id] = doc
+		p.docs = append(p.docs, doc)
 		return p.mergePatch(patch, doc)
 	}
 
@@ -140,7 +136,7 @@ func (p *Parser) mergePatchMatch(patch any) (bool, error) {
 	if m == nil {
 		// Explicit append
 		doc := newDocument()
-		p.docs[doc.id] = doc
+		p.docs = append(p.docs, doc)
 		return true, p.mergePatch(patch, doc)
 	}
 
@@ -286,29 +282,6 @@ func (p *Parser) OutputDocuments() ([]any, error) {
 		}
 
 		ret = append(ret, outs...)
-	}
-
-	var err error
-
-	// TODO: Don't Marshal() each doc repeatedly
-	sort.Slice(ret, func(i, j int) bool {
-		iJS, errInt := json.Marshal(ret[i])
-		if errInt != nil {
-			err = errInt
-			return false
-		}
-
-		jJS, errInt := json.Marshal(ret[j])
-		if errInt != nil {
-			err = errInt
-			return false
-		}
-
-		return polyfill.SlicesCompare(iJS, jJS) < 0
-	})
-
-	if err != nil {
-		return nil, err
 	}
 
 	return ret, nil

@@ -23,10 +23,6 @@ func SlicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
 	return slices.Clone(s)
 }
 
-func SlicesCompare[S ~[]E, E cmp.Ordered](s1, s2 S) int {
-	return slices.Compare(s1, s2)
-}
-
 func SlicesDeleteFunc[S ~[]E, E any](s S, del func(E) bool) S { //nolint:ireturn
 	return slices.DeleteFunc(s, del)
 }
