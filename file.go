@@ -14,7 +14,7 @@ type file struct {
 	id    typeid.TypeID
 	child *file
 	path  string
-	docs  []any
+	docs  []*document
 }
 
 func (p *Parser) loadFile(path string, child *file) (*file, error) {
@@ -67,7 +67,10 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
-		f.docs = append(f.docs, doc)
+		doc2 := newDocument()
+		doc2.data = doc
+
+		f.docs = append(f.docs, doc2)
 	}
 
 	return f, nil
@@ -124,8 +127,8 @@ func (f *file) parentsFromDirective() ([]string, error) {
 	parents := []string{}
 	noParent := false
 
-	for i, doc := range f.docs {
-		docMap, ok := doc.(map[string]any)
+	for _, doc := range f.docs {
+		docMap, ok := doc.data.(map[string]any)
 		if !ok {
 			continue
 		}
@@ -133,7 +136,7 @@ func (f *file) parentsFromDirective() ([]string, error) {
 		var found bool
 		var val any
 		found, val, docMap = popMapValue(docMap, "$parent")
-		f.docs[i] = docMap
+		doc.data = docMap
 
 		if !found {
 			continue

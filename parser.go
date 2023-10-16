@@ -199,7 +199,7 @@ func (p *Parser) mergeFile(f *file) error {
 	for _, doc := range f.docs {
 		p.log("[%s] merging", f.path)
 
-		err := p.MergePatch(doc, first)
+		err := p.MergePatch(doc.data, first)
 		if err != nil {
 			return fmt.Errorf("[%s:%s]: %w", f, doc, err)
 		}
