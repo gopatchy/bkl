@@ -22,6 +22,10 @@ func NewDocumentWithData(data any) *Document {
 	return doc
 }
 
+func (d *Document) AddParents(parents ...*Document) {
+	d.Parents = append(d.Parents, parents...)
+}
+
 func (d *Document) AllParents() []*Document {
 	ret := append([]*Document{}, d.Parents...)
 

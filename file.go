@@ -106,7 +106,7 @@ func (f *file) setParents() {
 	}
 
 	for _, doc := range f.child.docs {
-		doc.Parents = append(doc.Parents, f.docs...)
+		doc.AddParents(f.docs...)
 	}
 }
 
