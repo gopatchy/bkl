@@ -7,13 +7,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func get(obj any, docs []*Document, m any) (any, error) {
+func get(doc *Document, docs []*Document, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
-		return getPathFromString(obj, docs, m2)
+		return getPathFromString(doc.Data, docs, m2)
 
 	case []any:
-		return getPathFromList(obj, docs, m2)
+		return getPathFromList(doc.Data, docs, m2)
 
 	case map[string]any:
 		return getCross(docs, m2)
@@ -36,12 +36,12 @@ func getPathFromList(obj any, docs []*Document, path []any) (any, error) {
 		if ok {
 			path = path[1:]
 
-			var err error
-
-			obj, err = getCrossDoc(docs, pat)
+			doc, err := getCrossDoc(docs, pat)
 			if err != nil {
 				return nil, err
 			}
+
+			obj = doc.Data
 		}
 	}
 
@@ -108,10 +108,10 @@ func getCross(docs []*Document, conf map[string]any) (any, error) {
 		return get(doc, docs, path)
 	}
 
-	return doc, nil
+	return doc.Data, nil
 }
 
-func getCrossDoc(docs []*Document, pat any) (any, error) {
+func getCrossDoc(docs []*Document, pat any) (*Document, error) {
 	var ret *Document
 
 	for _, doc := range docs {
@@ -128,5 +128,5 @@ func getCrossDoc(docs []*Document, pat any) (any, error) {
 		return nil, fmt.Errorf("%#v: %w", pat, ErrNoMatchFound)
 	}
 
-	return ret.Data, nil
+	return ret, nil
 }

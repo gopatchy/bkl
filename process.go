@@ -78,7 +78,7 @@ func processMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docume
 func processMapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
 	delete(obj, "$merge")
 
-	in, err := get(mergeFrom.Data, mergeFromDocs, m)
+	in, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func processMapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*D
 }
 
 func processMapReplace(mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
-	next, err := get(mergeFrom.Data, mergeFromDocs, m)
+	next, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func processList(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dept
 }
 
 func processListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
-	in, err := get(mergeFrom.Data, mergeFromDocs, m)
+	in, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func processListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document,
 }
 
 func processListReplace(mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
-	next, err := get(mergeFrom.Data, mergeFromDocs, m)
+	next, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, d
 func processStringMerge(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
 	path := strings.TrimPrefix(obj, "$merge:")
 
-	in, err := get(mergeFrom.Data, mergeFromDocs, path)
+	in, err := get(mergeFrom, mergeFromDocs, path)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +224,7 @@ func processStringMerge(obj string, mergeFrom *Document, mergeFromDocs []*Docume
 func processStringReplace(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
 	path := strings.TrimPrefix(obj, "$replace:")
 
-	in, err := get(mergeFrom.Data, mergeFromDocs, path)
+	in, err := get(mergeFrom, mergeFromDocs, path)
 	if err != nil {
 		return nil, err
 	}
