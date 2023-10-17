@@ -90,13 +90,7 @@ func (p *Parser) MergeDocument(patch *Document) error {
 		return nil
 	}
 
-	parents := patch.AllParents()
-
-	for _, doc := range p.docs {
-		if _, found := parents[doc.ID]; !found {
-			continue
-		}
-
+	for _, doc := range p.parents(patch) {
 		matched = true
 
 		err = mergeDocs(doc, patch)
@@ -110,6 +104,20 @@ func (p *Parser) MergeDocument(patch *Document) error {
 	}
 
 	return nil
+}
+
+func (p *Parser) parents(patch *Document) []*Document {
+	ret := []*Document{}
+
+	parents := patch.AllParents()
+
+	for _, doc := range p.docs {
+		if _, found := parents[doc.ID]; found {
+			ret = append(ret, doc)
+		}
+	}
+
+	return ret
 }
 
 // mergePatchMatch attempts to apply the supplied patch to one or more
@@ -128,25 +136,27 @@ func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
 		return true, mergeDocs(doc, patch)
 	}
 
-	// Must find at least one match
-	found = false
+	// Try parents, then all docs
+	for _, docs := range [][]*Document{p.parents(patch), p.docs} {
+		found = false
 
-	for _, doc := range p.docs {
-		if matchDoc(doc, m) {
-			err := mergeDocs(doc, patch)
-			if err != nil {
-				return true, err
+		for _, doc := range docs {
+			if matchDoc(doc, m) {
+				err := mergeDocs(doc, patch)
+				if err != nil {
+					return true, err
+				}
+
+				found = true
 			}
+		}
 
-			found = true
+		if found {
+			return true, nil
 		}
 	}
 
-	if !found {
-		return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
-	}
-
-	return true, nil
+	return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
 }
 
 // MergeFile parses the file at path and merges its contents into the
