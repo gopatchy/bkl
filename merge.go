@@ -11,6 +11,7 @@ func mergeDocs(doc, patch *Document) error {
 	}
 
 	doc.Data = merged
+	patch.Parents = append(patch.Parents, doc)
 
 	return nil
 }
