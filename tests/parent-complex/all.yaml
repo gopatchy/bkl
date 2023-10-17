@@ -1,0 +1,3 @@
+$parent:
+- resources.user1
+- resources.user2
