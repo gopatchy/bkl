@@ -27,6 +27,10 @@ func MapsKeys[M ~map[K]V, K comparable, V any](m M) []K { //nolint:ireturn
 	return maps.Keys(m)
 }
 
+func MapsValues[M ~map[K]V, K comparable, V any](m M) []V { //nolint:ireturn
+	return maps.Values(m)
+}
+
 // Copied from go1.21 slices
 func SlicesClone[S ~[]E, E any](s S) S { //nolint:ireturn
 	if s == nil {

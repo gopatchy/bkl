@@ -93,12 +93,12 @@ func ExampleParser_MergeDocument() {
 	doc2 := bkl.NewDocumentWithData(map[string]any{"b": 2})
 	doc2.AddParents(doc1)
 
-	err := b.MergeDocument(doc1, true)
+	err := b.MergeDocument(doc1)
 	if err != nil {
 		panic(err)
 	}
 
-	err = b.MergeDocument(doc2, false)
+	err = b.MergeDocument(doc2)
 	if err != nil {
 		panic(err)
 	}

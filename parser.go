@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/gopatchy/bkl/polyfill"
+	"go.jetpack.io/typeid"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -80,7 +81,7 @@ func (p *Parser) SetDebug(debug bool) {
 // MergeDocument applies the supplied Document to the [Parser]'s current
 // internal document state using bkl's merge semantics. If expand is true,
 // documents without $match will append; otherwise this is an error.
-func (p *Parser) MergeDocument(patch *Document, expand bool) error {
+func (p *Parser) MergeDocument(patch *Document) error {
 	matched, err := p.mergePatchMatch(patch)
 	if err != nil {
 		return err
@@ -90,17 +91,31 @@ func (p *Parser) MergeDocument(patch *Document, expand bool) error {
 		return nil
 	}
 
-	if expand {
+	docIDs := map[typeid.TypeID]bool{}
+
+	for _, doc := range p.docs {
+		docIDs[doc.ID] = true
+	}
+
+	for _, parent := range patch.AllParents() {
+		if !docIDs[parent.ID] {
+			// Parent but not in the parser's state
+			continue
+		}
+
+		matched = true
+
+		err = mergeDocs(parent, patch)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !matched {
 		p.docs = append(p.docs, patch)
-		return nil
 	}
 
-	// Don't require $match when there's only one document
-	if len(p.docs) == 1 {
-		return mergeDocs(p.docs[0], patch)
-	}
-
-	return fmt.Errorf("%v: %w", patch, ErrMissingMatch)
+	return nil
 }
 
 // mergePatchMatch attempts to apply the supplied patch to one or more
@@ -172,15 +187,12 @@ func (p *Parser) MergeFileLayers(path string) error {
 // mergeFile applies an already-parsed file object into the [Parser]'s
 // document state.
 func (p *Parser) mergeFile(f *file) error {
-	// First file in an empty parser can append without $match
-	first := len(p.docs) == 0
-
 	p.log("[%s] merging", f)
 
 	for _, doc := range f.docs {
 		p.log("[%s] merging", doc)
 
-		err := p.MergeDocument(doc, first)
+		err := p.MergeDocument(doc)
 		if err != nil {
 			return fmt.Errorf("[%s:%s]: %w", f, doc, err)
 		}

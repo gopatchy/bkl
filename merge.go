@@ -29,7 +29,7 @@ func merge(dst any, src any) (any, error) {
 
 	default:
 		if src == dst {
-			return nil, fmt.Errorf("%v: %w", src, ErrUselessOverride)
+			return nil, fmt.Errorf("%#v: %w", src, ErrUselessOverride)
 		}
 
 		return src, nil
