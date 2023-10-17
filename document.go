@@ -1,7 +1,6 @@
 package bkl
 
 import (
-	"github.com/gopatchy/bkl/polyfill"
 	"go.jetpack.io/typeid"
 )
 
@@ -27,9 +26,13 @@ func (d *Document) AddParents(parents ...*Document) {
 	d.Parents = append(d.Parents, parents...)
 }
 
-func (d *Document) AllParents() []*Document {
+func (d *Document) AllParents() map[typeid.TypeID]*Document {
 	parents := map[typeid.TypeID]*Document{}
+	d.allParents(parents)
+	return parents
+}
 
+func (d *Document) allParents(parents map[typeid.TypeID]*Document) {
 	for _, parent := range d.Parents {
 		parents[parent.ID] = parent
 
@@ -37,8 +40,6 @@ func (d *Document) AllParents() []*Document {
 			parents[doc.ID] = doc
 		}
 	}
-
-	return polyfill.MapsValues(parents)
 }
 
 func (d *Document) DataAsMap() map[string]any {

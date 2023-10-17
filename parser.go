@@ -12,7 +12,6 @@ import (
 	"os"
 
 	"github.com/gopatchy/bkl/polyfill"
-	"go.jetpack.io/typeid"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -91,21 +90,16 @@ func (p *Parser) MergeDocument(patch *Document) error {
 		return nil
 	}
 
-	docIDs := map[typeid.TypeID]bool{}
+	parents := patch.AllParents()
 
 	for _, doc := range p.docs {
-		docIDs[doc.ID] = true
-	}
-
-	for _, parent := range patch.AllParents() {
-		if !docIDs[parent.ID] {
-			// Parent but not in the parser's state
+		if _, found := parents[doc.ID]; !found {
 			continue
 		}
 
 		matched = true
 
-		err = mergeDocs(parent, patch)
+		err = mergeDocs(doc, patch)
 		if err != nil {
 			return err
 		}
