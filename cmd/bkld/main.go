@@ -70,7 +70,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	base, err := bkl.Process(baseDoc.Data, targetDoc.Data, []*bkl.Document{targetDoc})
+	base, err := bkl.Process(baseDoc.Data, targetDoc, []*bkl.Document{targetDoc})
 	if err != nil {
 		fatal(err)
 	}
