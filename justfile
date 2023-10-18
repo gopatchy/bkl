@@ -43,7 +43,7 @@ pkg:
 		export GOARCH=$(echo $PLATFORM | cut -d / -f 2)
 		DIR=$(mktemp --directory)
 		cp LICENSE $DIR
-		go build -trimpath -ldflags=-extldflags=-static -o $DIR ./...
+		CGO_ENABLED=0 go build -trimpath -ldflags=-extldflags=-static -o $DIR ./...
 		cd $DIR
 		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH-$VER.tar.gz *
 		cd ~-
