@@ -524,22 +524,24 @@ EOF</code>
 
 <p>bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.</p>
 
-<label>Multiple Parents</label>
+<label>Parent List</label>
 <code class="labeled"><focus><key>$parent</key>:
 - <string>a</string>
 - <string>b</string></focus></code>
 
 <vSpace></vSpace>
 
-<label>Parent Wildcards</label>
+<label>Parent Wildcard</label>
 <code class="labeled"><focus><key>$parent</key>: <string>a.*</string></focus></code>
 
 <vSpace></vSpace>
 
-<p>Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child. `*` does not match `.` -- `a.*` matches `a.b.yaml` but not `a.b.c.yaml`.</p>
+<p>Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.</p>
+
+<p><ifocus>*</ifocus> does not match <ifocus>.</ifocus>. <ifocus>a.*</ifocus> matches <ifocus>a.b.yaml</ifocus> but not <ifocus>a.b.c.yaml</ifocus>.</p>
 
 <label>Set Parent In CLI</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
 <prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
 
 <vSpace></vSpace>
