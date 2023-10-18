@@ -52,3 +52,31 @@ func findFile(path string) string {
 
 	return ""
 }
+
+func globFiles(path string) ([]string, error) {
+	pat := fmt.Sprintf("%s.*", path)
+	patDots := strings.Count(pat, ".")
+
+	matches, err := filepath.Glob(pat)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := []string{}
+
+	for _, match := range matches {
+		if strings.Count(match, ".") != patDots {
+			// Wildcard matched a "."
+			continue
+		}
+
+		if _, found := formatByExtension[ext(match)]; !found {
+			// Unsupported extension
+			continue
+		}
+
+		ret = append(ret, match)
+	}
+
+	return ret, nil
+}

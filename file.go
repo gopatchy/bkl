@@ -237,12 +237,16 @@ func (f *file) toAbsolutePaths(paths []string) ([]string, error) {
 	for _, path := range paths {
 		path = filepath.Join(filepath.Dir(f.path), path)
 
-		path2 := findFile(path)
-		if path2 == "" {
+		matches, err := globFiles(path)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(matches) == 0 {
 			return nil, fmt.Errorf("%s: %w", path, ErrMissingFile)
 		}
 
-		ret = append(ret, path2)
+		ret = append(ret, matches...)
 	}
 
 	return ret, nil
