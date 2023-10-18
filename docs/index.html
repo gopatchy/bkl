@@ -529,14 +529,22 @@ EOF</code>
 - <string>a</string>
 - <string>b</string></focus></code>
 
-<p>Setting <ifocus>$parent</ifocus> to a list inherits from multiple files. All parent files are loaded before the child. As this loads multiple parent documents, <ifocus><a href="#streams">$match</a></ifocus> is required in any child documents.</p>
+<vSpace></vSpace>
 
-<label>Set Parent In CLI</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
+<label>Parent Wildcards</label>
+<code class="labeled"><focus><key>$parent</key>: <string>a.*</string></focus></code>
 
 <vSpace></vSpace>
 
-<p>The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>. Layer order can then be specified with just commandline argument order.</p>
+<p>Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.</p>
+
+<label>Set Parent In CLI</label>
+<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+<prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
+
+<vSpace></vSpace>
+
+<p>Layer order can be specified with commandline argument order. The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>.</p>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
@@ -554,7 +562,7 @@ EOF</code>
 
 <p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).</p>
 
-<p>To layer streams, bkl has to match documents between layers. If there is more than one possible match (e.g. the parent file contains multiple documents), <ifocus>$match</ifocus> is required in each child document to disambiguate.</p>
+<p>To layer streams, bkl has to match documents between layers. If there is more than one possible match (e.g. the parent files contain multiple documents), documents without explicit <ifocus>$match</ifocus> are applied to all parent documents.</p>
 
 <split5a>
 
@@ -580,9 +588,27 @@ EOF</code>
 <vSpace></vSpace>
 <vSpace></vSpace>
 
-<p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element.</p>
+<p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.</p>
 
 <split5a>
+
+<code><key>a</key>: <number>1</number>
+---
+<key>b</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code><key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<focus><key>c</key>: <number>3</number></focus>
+---
+<key>b</key>: <number>2</number>
+<focus><key>c</key>: <number>3</number></focus></code>
+
+<vSpace class="span5"></vSpace>
 
 <code><key>a</key>: <number>1</number>
 ---
@@ -604,25 +630,6 @@ EOF</code>
 <key>b</key>: <number>2</number>
 ---
 <key>a</key>: <number>1</number>
-<focus><key>c</key>: <number>3</number></focus></code>
-
-<vSpace class="span5"></vSpace>
-
-<code><key>a</key>: <number>1</number>
----
-<key>b</key>: <number>2</number></code>
-
-<op>+</op>
-
-<code><focus><key>$match</key>: {}</focus>
-<key>c</key>: <number>3</number></code>
-
-<op>=</op>
-
-<code><key>a</key>: <number>1</number>
-<focus><key>c</key>: <number>3</number></focus>
----
-<key>b</key>: <number>2</number>
 <focus><key>c</key>: <number>3</number></focus></code>
 
 </split5a>
