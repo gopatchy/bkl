@@ -1,0 +1,3 @@
+a:
+  $value: $env:FOO
+  $encode: base64
