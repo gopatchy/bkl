@@ -37,20 +37,20 @@ func process(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int)
 }
 
 func processMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
-	if found, val, obj := popMapValue(obj, "$merge"); found {
-		return processMapMerge(obj, mergeFrom, mergeFromDocs, val, depth)
+	if found, v, obj := popMapValue(obj, "$merge"); found {
+		return processMapMerge(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
-	if found, val, obj := popMapValue(obj, "$replace"); found {
-		return processMapReplace(obj, mergeFrom, mergeFromDocs, val, depth)
+	if found, v, obj := popMapValue(obj, "$replace"); found {
+		return processMapReplace(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
-	if found, val, obj := popMapValue(obj, "$encode"); found {
-		return processMapEncode(obj, mergeFrom, mergeFromDocs, val, depth)
+	if found, v, obj := popMapValue(obj, "$encode"); found {
+		return processEncode(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
-	if found, val, obj := popMapValue(obj, "$value"); found {
-		return processMapValue(obj, mergeFrom, mergeFromDocs, val, depth)
+	if found, v, obj := popMapValue(obj, "$value"); found {
+		return processMapValue(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
 	keys := polyfill.MapsKeys(obj)
@@ -75,8 +75,8 @@ func processMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docume
 	return obj, nil
 }
 
-func processMapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val any, depth int) (any, error) {
-	in, err := get(mergeFrom, mergeFromDocs, val)
+func processMapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+	in, err := get(mergeFrom, mergeFromDocs, v)
 	if err != nil {
 		return nil, err
 	}
@@ -89,8 +89,8 @@ func processMapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*D
 	return process(next, mergeFrom, mergeFromDocs, depth)
 }
 
-func processMapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val any, depth int) (any, error) {
-	next, err := get(mergeFrom, mergeFromDocs, val)
+func processMapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+	next, err := get(mergeFrom, mergeFromDocs, v)
 	if err != nil {
 		return nil, err
 	}
@@ -98,49 +98,8 @@ func processMapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs []
 	return process(next, mergeFrom, mergeFromDocs, depth)
 }
 
-func processMapEncode(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val any, depth int) (any, error) {
-	obj2, err := process(obj, mergeFrom, mergeFromDocs, depth)
-	if err != nil {
-		return nil, err
-	}
-
-	switch val2 := val.(type) {
-	case string:
-		return processEncode(obj2, mergeFrom, mergeFromDocs, val2, depth)
-
-	default:
-		return nil, fmt.Errorf("encode: %T: %w", val, ErrInvalidType)
-	}
-}
-
-func processEncode(obj any, mergeFrom *Document, mergeFromDocs []*Document, val string, depth int) (any, error) {
-	switch val {
-	case "base64":
-		obj2, ok := obj.(string)
-
-		if !ok {
-			return nil, fmt.Errorf("base64 of %T: %w", val, ErrInvalidType)
-		}
-
-		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
-
-	default:
-		f, err := GetFormat(val)
-		if err != nil {
-			return "", err
-		}
-
-		enc, err := f.MarshalStream([]any{obj})
-		if err != nil {
-			return "", err
-		}
-
-		return string(enc), nil
-	}
-}
-
-func processMapValue(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val any, depth int) (any, error) {
-	return process(val, mergeFrom, mergeFromDocs, depth)
+func processMapValue(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+	return process(v, mergeFrom, mergeFromDocs, depth)
 }
 
 func processList(obj []any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
@@ -159,12 +118,16 @@ func processList(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dept
 	}
 
 	if m != nil {
-		return processListReplace(mergeFrom, mergeFromDocs, m, depth)
+		return processListReplace(obj, mergeFrom, mergeFromDocs, m, depth)
 	}
 
-	encode, obj, err := popListMapStringValue(obj, "$encode")
+	m, obj, err = popListMapValue(obj, "$encode")
 	if err != nil {
 		return nil, err
+	}
+
+	if m != nil {
+		return processEncode(obj, mergeFrom, mergeFromDocs, m, depth)
 	}
 
 	obj, err = filterList(obj, func(v any) ([]any, error) {
@@ -181,10 +144,6 @@ func processList(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dept
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	if encode != "" {
-		return processListEncode(encode, obj)
 	}
 
 	return obj, nil
@@ -204,27 +163,13 @@ func processListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document,
 	return process(next, mergeFrom, mergeFromDocs, depth)
 }
 
-func processListReplace(mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
+func processListReplace(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
 	next, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
 	}
 
 	return process(next, mergeFrom, mergeFromDocs, depth)
-}
-
-func processListEncode(encode string, obj any) (any, error) {
-	f, err := GetFormat(encode)
-	if err != nil {
-		return nil, err
-	}
-
-	enc, err := f.MarshalStream([]any{obj})
-	if err != nil {
-		return nil, err
-	}
-
-	return string(enc), nil
 }
 
 func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
@@ -259,4 +204,61 @@ func processStringReplace(obj string, mergeFrom *Document, mergeFromDocs []*Docu
 	}
 
 	return process(in, mergeFrom, mergeFromDocs, depth)
+}
+
+func processEncode(obj any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+	obj2, err := process(obj, mergeFrom, mergeFromDocs, depth)
+	if err != nil {
+		return nil, err
+	}
+
+	return processEncodeAny(obj2, mergeFrom, mergeFromDocs, v, depth)
+}
+
+func processEncodeAny(obj any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+	switch v2 := v.(type) {
+	case string:
+		return processEncodeString(obj, mergeFrom, mergeFromDocs, v2, depth)
+
+	case []any:
+		for _, v3 := range v2 {
+			var err error
+
+			obj, err = processEncodeAny(obj, mergeFrom, mergeFromDocs, v3, depth)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return obj, nil
+
+	default:
+		return nil, fmt.Errorf("encode: %T: %w", v, ErrInvalidType)
+	}
+}
+
+func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document, v string, depth int) (any, error) {
+	switch v {
+	case "base64":
+		obj2, ok := obj.(string)
+
+		if !ok {
+			return nil, fmt.Errorf("base64 of %T: %w", v, ErrInvalidType)
+		}
+
+		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
+
+	default:
+		f, err := GetFormat(v)
+		if err != nil {
+			return "", err
+		}
+
+		enc, err := f.MarshalStream([]any{obj})
+		if err != nil {
+			return "", err
+		}
+
+		return string(enc), nil
+	}
 }
