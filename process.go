@@ -251,12 +251,12 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 	default:
 		f, err := GetFormat(v)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		enc, err := f.MarshalStream([]any{obj})
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		return string(enc), nil
