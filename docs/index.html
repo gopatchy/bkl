@@ -880,6 +880,42 @@ EOF</code>
 <vSpace></vSpace>
 <vSpace></vSpace>
 
+<p><ifocus>base64</ifocus> is also a valid encoding. To encode a scalar, use <ifocus>$value</ifocus>.</p>
+
+<split3a>
+
+<code><key>a</key>:
+  <focus><key>$value</key>: <number>2</number>
+  <key>$encode</key>: <string>base64</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>Mg==</string></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+<p>You can stack encodings by passing an ordered list to <ifocus>$encode</ifocus>.</p>
+
+<split3a>
+
+<code><key>a</key>:
+  <key>b</key>: <number>2</number>
+  <focus><key>$encode</key>:
+    - <string>json</string>
+	- <string>base64</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>eyJiIjoyfQ==</string></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
 
 
 <h2><a name="required">$required</a></h2>
