@@ -1,0 +1,3 @@
+a:
+  $value: b
+  $encode: base64

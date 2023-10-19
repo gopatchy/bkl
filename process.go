@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strings"
 
@@ -98,32 +99,44 @@ func processMapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs []
 }
 
 func processMapEncode(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val any, depth int) (any, error) {
-	switch val2 := val.(type) {
-	case string:
-		return processMapEncodeString(obj, mergeFrom, mergeFromDocs, val2, depth)
-
-	default:
-		return nil, fmt.Errorf("%T: %w", val, ErrInvalidType)
-	}
-}
-
-func processMapEncodeString(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val string, depth int) (any, error) {
 	obj2, err := process(obj, mergeFrom, mergeFromDocs, depth)
 	if err != nil {
 		return nil, err
 	}
 
-	f, err := GetFormat(val)
-	if err != nil {
-		return "", err
-	}
+	switch val2 := val.(type) {
+	case string:
+		return processEncode(obj2, mergeFrom, mergeFromDocs, val2, depth)
 
-	enc, err := f.MarshalStream([]any{obj2})
-	if err != nil {
-		return "", err
+	default:
+		return nil, fmt.Errorf("encode: %T: %w", val, ErrInvalidType)
 	}
+}
 
-	return string(enc), nil
+func processEncode(obj any, mergeFrom *Document, mergeFromDocs []*Document, val string, depth int) (any, error) {
+	switch val {
+	case "base64":
+		obj2, ok := obj.(string)
+
+		if !ok {
+			return nil, fmt.Errorf("base64 of %T: %w", val, ErrInvalidType)
+		}
+
+		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
+
+	default:
+		f, err := GetFormat(val)
+		if err != nil {
+			return "", err
+		}
+
+		enc, err := f.MarshalStream([]any{obj})
+		if err != nil {
+			return "", err
+		}
+
+		return string(enc), nil
+	}
 }
 
 func processMapValue(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, val any, depth int) (any, error) {
