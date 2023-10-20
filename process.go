@@ -37,7 +37,10 @@ func process(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int)
 }
 
 func processMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
-	if found, v, obj := popMapValue(obj, "$merge"); found {
+	// Not copying obj before merge preserves the layering behavior that
+	// tests/merge-race relies upon.
+	if v, found := obj["$merge"]; found {
+		delete(obj, "$merge")
 		return processMapMerge(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
