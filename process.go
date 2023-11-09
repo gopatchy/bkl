@@ -236,7 +236,7 @@ func processEncodeAny(obj any, mergeFrom *Document, mergeFromDocs []*Document, v
 		return obj, nil
 
 	default:
-		return nil, fmt.Errorf("encode: %T: %w", v, ErrInvalidType)
+		return nil, fmt.Errorf("$encode: %T: %w", v, ErrInvalidType)
 	}
 }
 
@@ -245,6 +245,21 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 	case "base64":
 		obj2 := fmt.Sprintf("%v", obj)
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
+
+	case "join":
+		obj2, ok := obj.([]any)
+
+		if !ok {
+			return nil, fmt.Errorf("$encode: join of non-list %T: %w", obj, ErrInvalidType)
+		}
+
+		strs := []string{}
+
+		for _, obj3 := range obj2 {
+			strs = append(strs, fmt.Sprintf("%v", obj3))
+		}
+
+		return strings.Join(strs, ""), nil
 
 	default:
 		f, err := GetFormat(v)

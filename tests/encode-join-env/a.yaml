@@ -1,0 +1,3 @@
+a:
+  $value: [a-, $env:FOO, -b]
+  $encode: join
