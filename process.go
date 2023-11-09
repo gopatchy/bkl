@@ -243,12 +243,7 @@ func processEncodeAny(obj any, mergeFrom *Document, mergeFromDocs []*Document, v
 func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document, v string, depth int) (any, error) {
 	switch v {
 	case "base64":
-		obj2, ok := obj.(string)
-
-		if !ok {
-			return nil, fmt.Errorf("base64 of %T: %w", v, ErrInvalidType)
-		}
-
+		obj2 := fmt.Sprintf("%v", obj)
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
 
 	default:
