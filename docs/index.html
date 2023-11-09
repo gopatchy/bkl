@@ -880,7 +880,7 @@ EOF</code>
 <vSpace></vSpace>
 <vSpace></vSpace>
 
-<p><ifocus>base64</ifocus> encoding is also supported. To encode a scalar, use <ifocus>$value</ifocus>.</p>
+<p><ifocus>$encode: base64</ifocus> converts its input value to a string then encodes as base64. To encode a scalar, use <ifocus>$value</ifocus>.</p>
 
 <split3a>
 
@@ -891,6 +891,23 @@ EOF</code>
 <op>=</op>
 
 <code><key>a</key>: <focus><string>Mg==</string></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
+<p><ifocus>$encode: join</ifocus> takes a list of values, converts each one to a string, then joins them into a single string.</p>
+
+<split3a>
+
+<code><key>a</key>:
+  <focus><key>$value</key>: [<string>foo</string>, <string>bar</string>]
+  <key>$encode</key>: <string>join</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>foobar</string></focus></code>
 
 </split3a>
 
