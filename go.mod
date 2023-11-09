@@ -8,7 +8,7 @@ require (
 	github.com/samber/lo v1.38.1
 	github.com/stretchr/testify v1.8.4
 	go.jetpack.io/typeid v0.1.0
-	golang.org/x/exp v0.0.0-20231005195138-3e424a577f31
+	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -17,5 +17,5 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 )
