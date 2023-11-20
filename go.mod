@@ -7,7 +7,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.0
 	github.com/samber/lo v1.38.1
 	github.com/stretchr/testify v1.8.4
-	go.jetpack.io/typeid v0.1.0
+	go.jetpack.io/typeid v1.0.0
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678
 	gopkg.in/yaml.v3 v3.0.1
 )
