@@ -10,8 +10,16 @@ import (
 	"go.jetpack.io/typeid"
 )
 
+type filePrefix struct{}
+
+func (filePrefix) Prefix() string { return "file" }
+
+type fileID struct {
+	typeid.TypeID[filePrefix]
+}
+
 type file struct {
-	id    typeid.TypeID
+	id    fileID
 	child *file
 	path  string
 	docs  []*Document
@@ -19,7 +27,7 @@ type file struct {
 
 func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	f := &file{
-		id:    typeid.Must(typeid.New("file")),
+		id:    typeid.Must(typeid.New[fileID]()),
 		child: child,
 		path:  path,
 	}

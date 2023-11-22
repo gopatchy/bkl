@@ -4,15 +4,23 @@ import (
 	"go.jetpack.io/typeid"
 )
 
+type DocPrefix struct{}
+
+func (DocPrefix) Prefix() string { return "doc" }
+
+type DocID struct {
+	typeid.TypeID[DocPrefix]
+}
+
 type Document struct {
-	ID      typeid.TypeID
+	ID      DocID
 	Parents []*Document
 	Data    any
 }
 
 func NewDocument() *Document {
 	return &Document{
-		ID: typeid.Must(typeid.New("doc")),
+		ID: typeid.Must(typeid.New[DocID]()),
 	}
 }
 
@@ -26,13 +34,13 @@ func (d *Document) AddParents(parents ...*Document) {
 	d.Parents = append(d.Parents, parents...)
 }
 
-func (d *Document) AllParents() map[typeid.TypeID]*Document {
-	parents := map[typeid.TypeID]*Document{}
+func (d *Document) AllParents() map[DocID]*Document {
+	parents := map[DocID]*Document{}
 	d.allParents(parents)
 	return parents
 }
 
-func (d *Document) allParents(parents map[typeid.TypeID]*Document) {
+func (d *Document) allParents(parents map[DocID]*Document) {
 	for _, parent := range d.Parents {
 		parents[parent.ID] = parent
 
