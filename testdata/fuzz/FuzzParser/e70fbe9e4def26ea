@@ -1,0 +1,5 @@
+go test fuzz v1
+string("0.ymal/")
+[]byte("\xb9 0\n- 0\n- 0\n- \x1b\n-")
+string("0")
+[]byte("\xb9")

@@ -1,0 +1,5 @@
+go test fuzz v1
+string("8.toml")
+[]byte("[1]\n[00]\n[7Az77]\n[0c]\n[cc1b]\n[Z2a228]\n[0c0072]\n[ZBX81A0]\n[A7BA1772]\n[2c2ZZ8]\n[708YY10A]\n[9AZ082]\n[AB11]\n[9.ZZ21201c]\n[ABAA2]\n[078Z07z8]")
+string("Z")
+[]byte("Zy")
