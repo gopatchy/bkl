@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/pelletier/go-toml/v2 v2.1.0
-	github.com/samber/lo v1.38.1
+	github.com/samber/lo v1.39.0
 	github.com/stretchr/testify v1.8.4
 	go.jetpack.io/typeid v1.0.0
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678
