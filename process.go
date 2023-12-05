@@ -253,6 +253,14 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 		obj2 := fmt.Sprintf("%v", obj)
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
 
+	case "flags":
+		obj, err := processEncodeString(obj, mergeFrom, mergeFromDocs, "tolist:=", depth+1)
+		if err != nil {
+			return nil, err
+		}
+
+		return processEncodeString(obj, mergeFrom, mergeFromDocs, "prefix:--", depth+1)
+
 	case "join":
 		delim := ""
 
