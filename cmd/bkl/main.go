@@ -14,23 +14,14 @@ type options struct {
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
 	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
+	Version      bool            `short:"V" long:"version" description:"print version and exit"`
 
 	Positional struct {
-		InputPaths []flags.Filename `positional-arg-name:"inputPath" required:"1" description:"input file path"`
+		InputPaths []flags.Filename `positional-arg-name:"inputPath" required:"0" description:"input file path"`
 	} `positional-args:"yes"`
 }
 
 func main() {
-	if os.Getenv("BKL_VERSION") != "" {
-		bi, ok := debug.ReadBuildInfo()
-		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
-		}
-
-		fmt.Printf("%s", bi)
-		os.Exit(0)
-	}
-
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)
@@ -47,6 +38,21 @@ Related tools:
 
 	_, err := fp.Parse()
 	if err != nil {
+		os.Exit(1)
+	}
+
+	if opts.Version || os.Getenv("BKL_VERSION") != "" {
+		bi, ok := debug.ReadBuildInfo()
+		if !ok {
+			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
+		}
+
+		fmt.Printf("%s", bi)
+		os.Exit(0)
+	}
+
+	if len(opts.Positional.InputPaths) == 0 {
+		fp.WriteHelp(os.Stderr)
 		os.Exit(1)
 	}
 
