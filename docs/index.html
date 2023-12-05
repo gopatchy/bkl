@@ -922,6 +922,24 @@ EOF</code>
 <vSpace></vSpace>
 <vSpace></vSpace>
 
+<p><ifocus>$encode: tolist:X</ifocus> converts a map into a list, joining keys and values with a given delimiter.</p>
+
+<split3a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<focus><key>$encode</key>: <string style="font-variant-ligatures: none;">tolist:=</string></focus></code>
+
+<op>=</op>
+
+<code>- <string>a=1</string>
+- <string>b=2</string></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
+
 <p>You can stack encodings by passing an ordered list to <ifocus>$encode</ifocus>.</p>
 
 <split3a>
