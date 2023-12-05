@@ -233,6 +233,11 @@ label {
 	width: fit-content;
 }
 
+label.invisible {
+	background: transparent;
+	color: transparent;
+}
+
 code {
 	color: var(--neutral7);
 	background: var(--neutral0);
@@ -862,6 +867,9 @@ EOF</code>
 <split3a>
 
 <label>json</label>
+<noop></noop>
+<label class="invisible"></label>
+
 <code class="labeled"><key>a</key>:
   <key>b</key>: <number>2</number>
   <key>c</key>: <number>3</number>
