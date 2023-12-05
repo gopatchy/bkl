@@ -262,19 +262,32 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
 
-		strs, ok := obj.([]string)
-		if !ok {
-			obj2, ok := obj.([]any)
-			if !ok {
-				return nil, fmt.Errorf("$encode: join of non-list %T: %w", obj, ErrInvalidType)
-			}
-
-			for _, obj3 := range obj2 {
-				strs = append(strs, fmt.Sprintf("%v", obj3))
-			}
+		strs, err := toStringListPermissive(obj)
+		if err != nil {
+			return nil, fmt.Errorf("$encode: %s: %w", v, err)
 		}
 
 		return strings.Join(strs, delim), nil
+
+	case "prefix":
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
+
+		prefix := parts[1]
+
+		strs, err := toStringListPermissive(obj)
+		if err != nil {
+			return nil, fmt.Errorf("$encode: %s: %w", v, err)
+		}
+
+		ret := []string{}
+
+		for _, str := range strs {
+			ret = append(ret, fmt.Sprintf("%s%s", prefix, str))
+		}
+
+		return ret, nil
 
 	case "tolist":
 		if len(parts) != 2 {
@@ -285,12 +298,16 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 
 		obj2, ok := obj.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("$encode: tolist of non-map %T: %w", obj, ErrInvalidType)
+			return nil, fmt.Errorf("$encode: %s of non-map %T: %w", v, obj, ErrInvalidType)
 		}
 
 		ret := []string{}
 
-		for k, v := range obj2 {
+		keys := polyfill.MapsKeys(obj2)
+		polyfill.SlicesSort(keys)
+
+		for _, k := range keys {
+			v := obj2[k]
 			ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
 		}
 

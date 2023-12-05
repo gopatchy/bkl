@@ -866,6 +866,34 @@ EOF</code>
 
 <split3a>
 
+<label>base64</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>a</key>:
+  <focus><key>$value</key>: <number>2</number>
+  <key>$encode</key>: <string>base64</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>Mg==</string></focus></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>join</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>a</key>:
+  <focus><key>$value</key>: [<string>foo</string>, <string>bar</string>]
+  <key>$encode</key>: <string>join:/</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>foo/bar</string></focus></code>
+
+<vSpace class="span3"></vSpace>
+
 <label>json</label>
 <noop></noop>
 <label class="invisible"></label>
@@ -898,31 +926,20 @@ EOF</code>
 
 <vSpace class="span3"></vSpace>
 
-<label>base64</label>
+<label>prefix</label>
 <noop></noop>
 <label class="invisible"></label>
 
 <code class="labeled"><key>a</key>:
-  <focus><key>$value</key>: <number>2</number>
-  <key>$encode</key>: <string>base64</string></focus></code>
+  <focus>- <string>b</string>
+  - <number>3</number>
+  <key>$encode</key>: <string>prefix:X</string></focus></code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>Mg==</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<label>join</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>:
-  <focus><key>$value</key>: [<string>foo</string>, <string>bar</string>]
-  <key>$encode</key>: <string>join:/</string></focus></code>
-
-<op>=</op>
-
-<code><key>a</key>: <focus><string>foo/bar</string></focus></code>
+<code><key>a</key>:
+  <focus>- <string>Xb</string>
+  - <string>X3</string></focus></code>
 
 <vSpace class="span3"></vSpace>
 

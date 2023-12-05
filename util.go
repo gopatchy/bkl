@@ -273,3 +273,20 @@ func toStringList(l []any) ([]string, error) {
 
 	return ret, nil
 }
+
+func toStringListPermissive(v any) ([]string, error) {
+	switch v2 := v.(type) {
+	case []string:
+		return v2, nil
+
+	case []any:
+		ret := []string{}
+		for _, v3 := range v2 {
+			ret = append(ret, fmt.Sprintf("%v", v3))
+		}
+		return ret, nil
+
+	default:
+		return nil, fmt.Errorf("%T: %w", v, ErrInvalidType)
+	}
+}
