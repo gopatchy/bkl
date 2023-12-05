@@ -254,22 +254,27 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
 
 	case "join":
-		if len(parts) != 1 {
+		delim := ""
+
+		if len(parts) == 2 {
+			delim = parts[1]
+		} else if len(parts) != 1 {
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
 
-		obj2, ok := obj.([]any)
+		strs, ok := obj.([]string)
 		if !ok {
-			return nil, fmt.Errorf("$encode: join of non-list %T: %w", obj, ErrInvalidType)
+			obj2, ok := obj.([]any)
+			if !ok {
+				return nil, fmt.Errorf("$encode: join of non-list %T: %w", obj, ErrInvalidType)
+			}
+
+			for _, obj3 := range obj2 {
+				strs = append(strs, fmt.Sprintf("%v", obj3))
+			}
 		}
 
-		strs := []string{}
-
-		for _, obj3 := range obj2 {
-			strs = append(strs, fmt.Sprintf("%v", obj3))
-		}
-
-		return strings.Join(strs, ""), nil
+		return strings.Join(strs, delim), nil
 
 	case "tolist":
 		if len(parts) != 2 {

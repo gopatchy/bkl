@@ -918,11 +918,11 @@ EOF</code>
 
 <code class="labeled"><key>a</key>:
   <focus><key>$value</key>: [<string>foo</string>, <string>bar</string>]
-  <key>$encode</key>: <string>join</string></focus></code>
+  <key>$encode</key>: <string>join:/</string></focus></code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>foobar</string></focus></code>
+<code><key>a</key>: <focus><string>foo/bar</string></focus></code>
 
 <vSpace class="span3"></vSpace>
 
@@ -949,11 +949,12 @@ EOF</code>
 
 <code class="labeled"><key>a</key>:
   <key>b</key>: <number>2</number>
-  <focus><key>$encode</key>: [<string>json</string>, <string>base64</string>]</focus></code>
+  <key>c</key>: <number>3</number>
+  <focus><key>$encode</key>: [<string>tolist:=</string>, "<string>join:,</string>"]</focus></code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>eyJiIjoyfQ==</string></focus></code>
+<code><key>a</key>: <focus><string>b=2,c=3</string></focus></code>
 
 </split3a>
 
