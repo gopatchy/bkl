@@ -882,7 +882,11 @@ EOF</code>
 
 <vSpace class="span3"></vSpace>
 
-<code><key>a</key>:
+<label>json (list)</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>a</key>:
   - <key>b</key>: <number>2</number>
   - <key>c</key>: <number>3</number>
   - <focus><key>$encode</key>: <string>json</string></focus></code>
@@ -892,16 +896,13 @@ EOF</code>
 <code><key>a</key>: <focus>|<string>
   [{"b":2},{"c":3}]</string></focus></code>
 
-</split3a>
+<vSpace class="span3"></vSpace>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
+<label>base64</label>
+<noop></noop>
+<label class="invisible"></label>
 
-<p><ifocus>$encode: base64</ifocus> converts its input value to a string then encodes as base64. To encode a scalar, use <ifocus>$value</ifocus>.</p>
-
-<split3a>
-
-<code><key>a</key>:
+<code class="labeled"><key>a</key>:
   <focus><key>$value</key>: <number>2</number>
   <key>$encode</key>: <string>base64</string></focus></code>
 
@@ -909,16 +910,13 @@ EOF</code>
 
 <code><key>a</key>: <focus><string>Mg==</string></focus></code>
 
-</split3a>
+<vSpace class="span3"></vSpace>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
+<label>join</label>
+<noop></noop>
+<label class="invisible"></label>
 
-<p><ifocus>$encode: join</ifocus> takes a list of values, converts each one to a string, then joins them into a single string.</p>
-
-<split3a>
-
-<code><key>a</key>:
+<code class="labeled"><key>a</key>:
   <focus><key>$value</key>: [<string>foo</string>, <string>bar</string>]
   <key>$encode</key>: <string>join</string></focus></code>
 
@@ -926,16 +924,13 @@ EOF</code>
 
 <code><key>a</key>: <focus><string>foobar</string></focus></code>
 
-</split3a>
+<vSpace class="span3"></vSpace>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
+<label>tolist</label>
+<noop></noop>
+<label class="invisible"></label>
 
-<p><ifocus>$encode: tolist:X</ifocus> converts a map into a list, joining keys and values with a given delimiter.</p>
-
-<split3a>
-
-<code><key>a</key>:
+<code class="labeled"><key>a</key>:
   <focus><key>b</key>: <number>2</number>
   <key>c</key>: <number>3</number>
   <key>$encode</key>: <string style="font-variant-ligatures: none;">tolist:=</string></focus></code>
@@ -946,16 +941,13 @@ EOF</code>
   <focus>- <string>b=2</string>
   - <string>c=3</string></focus></code>
 
-</split3a>
+<vSpace class="span3"></vSpace>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
+<label>Stacking</label>
+<noop></noop>
+<label class="invisible"></label>
 
-<p>You can stack encodings by passing an ordered list to <ifocus>$encode</ifocus>.</p>
-
-<split3a>
-
-<code><key>a</key>:
+<code class="labeled"><key>a</key>:
   <key>b</key>: <number>2</number>
   <focus><key>$encode</key>: [<string>json</string>, <string>base64</string>]</focus></code>
 
