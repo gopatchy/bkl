@@ -11,6 +11,7 @@ var (
 	ErrConflictingParent = fmt.Errorf("conflicting $parent (%w)", Err)
 	ErrExtraEntries      = fmt.Errorf("extra entries (%w)", Err)
 	ErrExtraKeys         = fmt.Errorf("extra keys (%w)", Err)
+	ErrInvalidArguments  = fmt.Errorf("invalid arguments (%w)", Err)
 	ErrInvalidDirective  = fmt.Errorf("invalid directive (%w)", Err)
 	ErrInvalidIndex      = fmt.Errorf("invalid index (%w)", Err)
 	ErrInvalidFilename   = fmt.Errorf("invalid filename (%w)", Err)

@@ -241,14 +241,24 @@ func processEncodeAny(obj any, mergeFrom *Document, mergeFromDocs []*Document, v
 }
 
 func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document, v string, depth int) (any, error) {
-	switch v {
+	parts := strings.Split(v, ":")
+	cmd := parts[0]
+
+	switch cmd {
 	case "base64":
+		if len(parts) != 1 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
+
 		obj2 := fmt.Sprintf("%v", obj)
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
 
 	case "join":
-		obj2, ok := obj.([]any)
+		if len(parts) != 1 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
 
+		obj2, ok := obj.([]any)
 		if !ok {
 			return nil, fmt.Errorf("$encode: join of non-list %T: %w", obj, ErrInvalidType)
 		}
@@ -261,8 +271,32 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 
 		return strings.Join(strs, ""), nil
 
+	case "tolist":
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
+
+		delim := parts[1]
+
+		obj2, ok := obj.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("$encode: tolist of non-map %T: %w", obj, ErrInvalidType)
+		}
+
+		ret := []string{}
+
+		for k, v := range obj2 {
+			ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
+		}
+
+		return ret, nil
+
 	default:
-		f, err := GetFormat(v)
+		if len(parts) != 1 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
+
+		f, err := GetFormat(cmd)
 		if err != nil {
 			return nil, err
 		}
