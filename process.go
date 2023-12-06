@@ -316,7 +316,12 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 
 		for _, k := range keys {
 			v := obj2[k]
-			ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
+
+			if v2, ok := v.(string); ok && v2 == "" {
+				ret = append(ret, k)
+			} else {
+				ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
+			}
 		}
 
 		return ret, nil
