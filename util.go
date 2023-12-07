@@ -110,6 +110,10 @@ func popListMapValue(l []any, k string) (any, []any, error) {
 			return []any{x}, nil
 		}
 
+		if len(xMap) != 1 {
+			return []any{x}, nil
+		}
+
 		found, val, xMap := popMapValue(xMap, k)
 		if found {
 			if ret != nil {
@@ -275,18 +279,15 @@ func toStringList(l []any) ([]string, error) {
 }
 
 func toStringListPermissive(v any) ([]string, error) {
-	switch v2 := v.(type) {
-	case []string:
-		return v2, nil
-
-	case []any:
-		ret := []string{}
-		for _, v3 := range v2 {
-			ret = append(ret, fmt.Sprintf("%v", v3))
-		}
-		return ret, nil
-
-	default:
+	v2, ok := v.([]any)
+	if !ok {
 		return nil, fmt.Errorf("%T: %w", v, ErrInvalidType)
 	}
+
+	ret := []string{}
+	for _, v3 := range v2 {
+		ret = append(ret, fmt.Sprintf("%v", v3))
+	}
+
+	return ret, nil
 }

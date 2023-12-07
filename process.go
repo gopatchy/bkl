@@ -253,13 +253,31 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 		obj2 := fmt.Sprintf("%v", obj)
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
 
-	case "flags":
-		obj, err := processEncodeString(obj, mergeFrom, mergeFromDocs, "tolist:=", depth+1)
-		if err != nil {
-			return nil, err
+	case "concat":
+		if len(parts) != 1 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
 
-		return processEncodeString(obj, mergeFrom, mergeFromDocs, "prefix:--", depth+1)
+		obj2, ok := obj.([]any)
+		if !ok {
+			return nil, fmt.Errorf("$encode: %s of non-list %T: %w", v, obj, ErrInvalidType)
+		}
+
+		ret := []any{}
+
+		for _, iter := range obj2 {
+			iter2, ok := iter.([]any)
+			if !ok {
+				return nil, fmt.Errorf("$encode: %s list contains non-list child %T: %w", v, obj, ErrInvalidType)
+			}
+
+			ret = append(ret, iter2...)
+		}
+
+		return ret, nil
+
+	case "flags":
+		return processEncodeAny(obj, mergeFrom, mergeFromDocs, []any{"tolist:=", "prefix:--"}, depth+1)
 
 	case "join":
 		delim := ""
@@ -289,7 +307,7 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 			return nil, fmt.Errorf("$encode: %s: %w", v, err)
 		}
 
-		ret := []string{}
+		ret := []any{}
 
 		for _, str := range strs {
 			ret = append(ret, fmt.Sprintf("%s%s", prefix, str))
@@ -309,7 +327,7 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 			return nil, fmt.Errorf("$encode: %s of non-map %T: %w", v, obj, ErrInvalidType)
 		}
 
-		ret := []string{}
+		ret := []any{}
 
 		keys := polyfill.MapsKeys(obj2)
 		polyfill.SlicesSort(keys)
