@@ -870,108 +870,31 @@ EOF</code>
 <noop></noop>
 <label class="invisible"></label>
 
-<code class="labeled"><key>a</key>:
-  <focus><key>$value</key>: <number>2</number>
-  <key>$encode</key>: <string>base64</string></focus></code>
+<code class="labeled"><key>$value</key>: <number>a</number>
+<focus><key>$encode</key>: <string>base64</string></focus></code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>Mg==</string></focus></code>
+<code><string>YQ==</string></code>
 
 <vSpace class="span3"></vSpace>
 
-<label>join</label>
+<label>concat</label>
 <noop></noop>
 <label class="invisible"></label>
 
-<code class="labeled"><key>a</key>:
-  <focus><key>$value</key>: [<string>foo</string>, <string>bar</string>]
-  <key>$encode</key>: <string>join:/</string></focus></code>
+<code class="labeled">- - <string>a</string>
+  - <string>b</string>
+- - <string>c</string>
+  - <number>4</number>
+- <focus><key>$encode</key>: <string>concat</string></focus></code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>foo/bar</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<label>json</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>:
-  <key>b</key>: <number>2</number>
-  <key>c</key>: <number>3</number>
-  <focus><key>$encode</key>: <string>json</string></focus></code>
-
-<op>=</op>
-
-<code><key>a</key>: <focus>|<string>
-  {"b":2,"c":3}</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<label>json (list)</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>:
-  - <key>b</key>: <number>2</number>
-  - <key>c</key>: <number>3</number>
-  - <focus><key>$encode</key>: <string>json</string></focus></code>
-
-<op>=</op>
-
-<code><key>a</key>: <focus>|<string>
-  [{"b":2},{"c":3}]</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<label>prefix</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>:
-  <focus>- <string>b</string>
-  - <number>3</number>
-  <key>$encode</key>: <string>prefix:X</string></focus></code>
-
-<op>=</op>
-
-<code><key>a</key>:
-  <focus>- <string>Xb</string>
-  - <string>X3</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<label>tolist</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>:
-  <focus><key>b</key>: <number>2</number>
-  <key>c</key>: <number>3</number>
-  <key>$encode</key>: <string>tolist:=</string></focus></code>
-
-<op>=</op>
-
-<code><key>a</key>:
-  <focus>- <string>b=2</string>
-  - <string>c=3</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<label>Stacking</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>:
-  <key>b</key>: <number>2</number>
-  <key>c</key>: <number>3</number>
-  <focus><key>$encode</key>: [<string>tolist:=</string>, "<string>join:,</string>"]</focus></code>
-
-<op>=</op>
-
-<code><key>a</key>: <focus><string>b=2,c=3</string></focus></code>
+<code>- <string>a</string>
+- <string>b</string>
+- <string>c</string>
+- <number>4</number></code>
 
 <vSpace class="span3"></vSpace>
 
@@ -979,17 +902,102 @@ EOF</code>
 <noop></noop>
 <label class="invisible"></label>
 
-<code class="labeled"><key>a</key>:
-  <focus><key>b</key>: <number>2</number>
-  <key>c</key>: <number>3</number>
-  <key>$encode</key>: <string>flags</string>
-  # [tolist:=, prefix:--]</focus></code>
+<code class="labeled"><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<focus><key>$encode</key>: <string>flags</string></focus>
+# [tolist:=, prefix:--]</code>
 
 <op>=</op>
 
-<code><key>a</key>:
-  <focus>- <string>--b=2</string>
-  - <string>--c=3</string></focus></code>
+<code>- <string>--a=1</string>
+- <string>--b=2</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>join</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>$value</key>: [<string>a</string>, <string>b</string>]
+<focus><key>$encode</key>: <string>join:/</string></focus></code>
+
+<op>=</op>
+
+<code><string>a/b</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>json</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<focus><key>$encode</key>: <string>json</string></focus></code>
+
+<op>=</op>
+
+<code>|<string>
+  {"a":1,"b":2}</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>json (list)</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled">- <key>a</key>: <number>1</number>
+- <key>b</key>: <number>2</number>
+- <focus><key>$encode</key>: <string>json</string></focus></code>
+
+<op>=</op>
+
+<code>|<string>
+  [{"a":1},{"b":2}]</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>prefix</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled">- <string>a</string>
+- <number>2</number>
+- <focus><key>$encode</key>: <string>prefix:X</string></focus></code>
+
+<op>=</op>
+
+<code>- <string>Xa</string>
+- <string>X2</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>tolist</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<focus><key>$encode</key>: <string>tolist:=</string></focus></code>
+
+<op>=</op>
+
+<code>- <string>a=1</string>
+- <string>b=2</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>Stacking</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled"><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<focus><key>$encode</key>: [<string>tolist:=</string>, "<string>join:,</string>"]</focus></code>
+
+<op>=</op>
+
+<code><string>a=1,b=2</string></code>
 
 </split3a>
 

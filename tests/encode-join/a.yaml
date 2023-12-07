@@ -1,3 +1,2 @@
-a:
-  $value: [a, 24, b]
-  $encode: join
+$value: [a, 24, b]
+$encode: join

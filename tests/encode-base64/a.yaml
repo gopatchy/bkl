@@ -1,3 +1,2 @@
-a:
-  $value: b
-  $encode: base64
+$value: a
+$encode: base64

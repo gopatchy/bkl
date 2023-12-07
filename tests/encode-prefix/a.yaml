@@ -1,4 +1,3 @@
-a:
-  - b
-  - 3
-  - $encode: prefix:X
+- a
+- 2
+- $encode: prefix:X
