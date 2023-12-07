@@ -268,7 +268,7 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 		for _, iter := range obj2 {
 			iter2, ok := iter.([]any)
 			if !ok {
-				return nil, fmt.Errorf("$encode: %s list contains non-list child %T: %w", v, obj, ErrInvalidType)
+				ret = append(ret, iter)
 			}
 
 			ret = append(ret, iter2...)
