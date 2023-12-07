@@ -1,5 +1,9 @@
 package bkl
 
+import (
+	"strings"
+)
+
 func matchDoc(doc *Document, pat any) bool {
 	return match(doc.Data, pat)
 }
@@ -21,6 +25,14 @@ func matchMap(obj any, pat map[string]any) bool {
 	objMap, ok := obj.(map[string]any)
 	if !ok {
 		return false
+	}
+
+	if len(objMap) == 1 {
+		for k := range objMap {
+			if strings.HasPrefix(k, "$") {
+				return false
+			}
+		}
 	}
 
 	for pk, pv := range pat {
