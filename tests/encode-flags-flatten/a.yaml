@@ -4,6 +4,6 @@
   d: 4
   e: ""
   $encode: flags
-- - f
-  - g
-- $encode: concat
+- f
+- g
+- $encode: flatten

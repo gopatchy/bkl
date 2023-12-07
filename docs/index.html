@@ -879,25 +879,6 @@ EOF</code>
 
 <vSpace class="span3"></vSpace>
 
-<label>concat</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled">- - <string>a</string>
-  - <string>b</string>
-- - <string>c</string>
-  - <number>4</number>
-- <focus><key>$encode</key>: <string>concat</string></focus></code>
-
-<op>=</op>
-
-<code>- <string>a</string>
-- <string>b</string>
-- <string>c</string>
-- <number>4</number></code>
-
-<vSpace class="span3"></vSpace>
-
 <label>flags</label>
 <noop></noop>
 <label class="invisible"></label>
@@ -911,6 +892,27 @@ EOF</code>
 
 <code>- <string>--a=1</string>
 - <string>--b=2</string></code>
+
+<vSpace class="span3"></vSpace>
+
+<label>flatten</label>
+<noop></noop>
+<label class="invisible"></label>
+
+<code class="labeled">- - <string>a</string>
+  - <string>b</string>
+- - <string>c</string>
+  - <number>4</number>
+- <string>e</string>
+- <focus><key>$encode</key>: <string>flatten</string></focus></code>
+
+<op>=</op>
+
+<code>- <string>a</string>
+- <string>b</string>
+- <string>c</string>
+- <number>4</number>
+- <string>e</string></code>
 
 <vSpace class="span3"></vSpace>
 

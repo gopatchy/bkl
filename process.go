@@ -253,7 +253,10 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 		obj2 := fmt.Sprintf("%v", obj)
 		return base64.StdEncoding.EncodeToString([]byte(obj2)), nil
 
-	case "concat":
+	case "flags":
+		return processEncodeAny(obj, mergeFrom, mergeFromDocs, []any{"tolist:=", "prefix:--"}, depth+1)
+
+	case "flatten":
 		if len(parts) != 1 {
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
@@ -275,9 +278,6 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 		}
 
 		return ret, nil
-
-	case "flags":
-		return processEncodeAny(obj, mergeFrom, mergeFromDocs, []any{"tolist:=", "prefix:--"}, depth+1)
 
 	case "join":
 		delim := ""
