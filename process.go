@@ -322,27 +322,12 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 
 		delim := parts[1]
 
-		obj2, ok := obj.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("$encode: %s of non-map %T: %w", v, obj, ErrInvalidType)
+		obj2, ok := obj.([]any)
+		if ok {
+			return processToListList(obj2, delim)
 		}
 
-		ret := []any{}
-
-		keys := polyfill.MapsKeys(obj2)
-		polyfill.SlicesSort(keys)
-
-		for _, k := range keys {
-			v := obj2[k]
-
-			if v2, ok := v.(string); ok && v2 == "" {
-				ret = append(ret, k)
-			} else {
-				ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
-			}
-		}
-
-		return ret, nil
+		return processToListMap(obj, delim)
 
 	default:
 		if len(parts) != 1 {
@@ -361,4 +346,43 @@ func processEncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document
 
 		return string(enc), nil
 	}
+}
+
+func processToListList(obj []any, delim string) ([]any, error) {
+	ret := []any{}
+
+	for _, iter := range obj {
+		vals, err := processToListMap(iter, delim)
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, vals...)
+	}
+
+	return ret, nil
+}
+
+func processToListMap(obj any, delim string) ([]any, error) {
+	obj2, ok := obj.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("$encode: tolist of non-map %#v: %w", obj, ErrInvalidType)
+	}
+
+	ret := []any{}
+
+	keys := polyfill.MapsKeys(obj2)
+	polyfill.SlicesSort(keys)
+
+	for _, k := range keys {
+		v := obj2[k]
+
+		if v2, ok := v.(string); ok && v2 == "" {
+			ret = append(ret, k)
+		} else {
+			ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
+		}
+	}
+
+	return ret, nil
 }
