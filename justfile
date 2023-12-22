@@ -44,7 +44,7 @@ pkg:
 		DIR=$(mktemp --directory)
 		cp LICENSE $DIR
 		TAG=$(git describe --abbrev=0 --tags)
-		CGO_ENABLED=0 go build -tags bkl-$TAG -trimpath -ldflags=-extldflags=-static -o $DIR ./...
+		CGO_ENABLED=0 go build -tags bkl-$TAG,bkl-src-pkg -trimpath -ldflags=-extldflags=-static -o $DIR ./...
 		cd $DIR
 		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH-$VER.tar.gz *
 		cd ~-
