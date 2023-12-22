@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
+	"strings"
 
 	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
+	"golang.org/x/exp/constraints"
 )
 
 type options struct {
@@ -42,13 +44,7 @@ Related tools:
 	}
 
 	if opts.Version || os.Getenv("BKL_VERSION") != "" {
-		bi, ok := debug.ReadBuildInfo()
-		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
-		}
-
-		fmt.Printf("%s", bi)
-		os.Exit(0)
+		version()
 	}
 
 	if len(opts.Positional.InputPaths) == 0 {
@@ -99,7 +95,66 @@ Related tools:
 	}
 }
 
+func version() {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
+	}
+
+	ver, src := versionFromBuildInfo(bi)
+	fmt.Printf("%s (%s)\n", ver, src)
+
+	fmt.Printf("%s", bi)
+	os.Exit(0)
+}
+
+func versionFromBuildInfo(bi *debug.BuildInfo) (string, string) {
+	if strings.HasPrefix(bi.Main.Version, "v") {
+		return fmt.Sprintf("bkl-%s", bi.Main.Version), "(go-install)"
+	}
+
+	for _, s := range bi.Settings {
+		if s.Key != "-tags" {
+			continue
+		}
+
+		tags := strings.Split(s.Value, ",")
+
+		ver := ""
+		src := "unknown"
+
+		for _, tag := range tags {
+			if strings.HasPrefix(tag, "bkl-v") {
+				ver = tag
+			} else if strings.HasPrefix(tag, "bkl-src-") {
+				src = strings.TrimPrefix(tag, "bkl-src-")
+			}
+		}
+
+		if ver != "" {
+			return ver, src
+		}
+	}
+
+	for _, s := range bi.Settings {
+		if s.Key != "vcs.revision" {
+			continue
+		}
+
+		return fmt.Sprintf("bkl-%s", s.Value[0:min(len(s.Value)-1, 10)]), "git"
+	}
+
+	return "bkl-[unknown]", "unknown"
+}
+
 func fatal(err error) {
 	fmt.Fprintf(os.Stderr, "%s\n", err)
 	os.Exit(1)
+}
+
+func min[T constraints.Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
 }
