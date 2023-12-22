@@ -110,7 +110,7 @@ func version() {
 
 func versionFromBuildInfo(bi *debug.BuildInfo) (string, string) {
 	if strings.HasPrefix(bi.Main.Version, "v") {
-		return fmt.Sprintf("bkl-%s", bi.Main.Version), "(go-install)"
+		return fmt.Sprintf("bkl-%s", bi.Main.Version), "go-install"
 	}
 
 	for _, s := range bi.Settings {
