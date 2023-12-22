@@ -31,20 +31,19 @@ todo:
 
 docker:
 	#!/bin/bash -e
-	VER=$(git tag --sort=v:refname | tail -1)
+	VER=$(git describe --abbrev=0 --tags)
 	docker buildx build --target=dist --platform=linux/arm64,linux/amd64 --provenance=false --build-arg=git_tag=$VER --push --tag=ghcr.io/gopatchy/bkl:${VER#v} --tag=ghcr.io/gopatchy/bkl:latest .
 
 pkg:
 	#!/bin/bash -e
-	VER=$(git tag --sort=v:refname | tail -1)
+	VER=$(git describe --abbrev=0 --tags)
 	for PLATFORM in linux/arm64 linux/amd64 darwin/arm64 darwin/amd64; do
 		echo $PLATFORM
 		export GOOS=$(echo $PLATFORM | cut -d / -f 1)
 		export GOARCH=$(echo $PLATFORM | cut -d / -f 2)
 		DIR=$(mktemp --directory)
 		cp LICENSE $DIR
-		TAG=$(git describe --abbrev=0 --tags)
-		CGO_ENABLED=0 go build -tags bkl-$TAG,bkl-src-pkg -trimpath -ldflags=-extldflags=-static -o $DIR ./...
+		CGO_ENABLED=0 go build -tags bkl-$VER,bkl-src-pkg -trimpath -ldflags=-extldflags=-static -o $DIR ./...
 		cd $DIR
 		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH-$VER.tar.gz *
 		cd ~-
