@@ -6,7 +6,7 @@ require (
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/samber/lo v1.39.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.jetpack.io/typeid v1.0.0
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
 	gopkg.in/yaml.v3 v3.0.1
