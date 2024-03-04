@@ -31,7 +31,7 @@ func WrapOrDie(cmd string) {
 	args := slices.Clone(os.Args[1:])
 
 	for i, arg := range args {
-		realPath, f, err := bkl.FileMatch(arg)
+		realPath, f, err := bkl.FileMatch(arg, false)
 		if err != nil {
 			continue
 		}

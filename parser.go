@@ -59,8 +59,9 @@ import (
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
 type Parser struct {
-	docs  []*Document
-	debug bool
+	docs           []*Document
+	debug          bool
+	missingAsEmpty bool
 }
 
 // New creates and returns a new [Parser] with an empty starting document set.
@@ -75,6 +76,11 @@ func New() *Parser {
 // SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
+}
+
+// SetMissingAsEmpty enables or disables treating missing files as empty.
+func (p *Parser) SetMissingAsEmpty(missingAsEmpty bool) {
+	p.missingAsEmpty = missingAsEmpty
 }
 
 // MergeDocument applies the supplied Document to the [Parser]'s current

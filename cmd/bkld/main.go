@@ -111,7 +111,7 @@ func fatal(err error) {
 }
 
 func getOnlyDocument(path string) (*bkl.Document, string, error) {
-	realPath, f, err := bkl.FileMatch(path)
+	realPath, f, err := bkl.FileMatch(path, false)
 	if err != nil {
 		return nil, "", err
 	}

@@ -15,7 +15,7 @@ import (
 //
 // Returns the real filename and the requested output format, or
 // ("", "", error).
-func FileMatch(path string) (string, string, error) {
+func FileMatch(path string, missingAsEmpty bool) (string, string, error) {
 	f := ext(path)
 	if _, found := formatByExtension[f]; !found {
 		return "", "", fmt.Errorf("%s: %w", f, ErrInvalidType)
@@ -30,6 +30,10 @@ func FileMatch(path string) (string, string, error) {
 	realPath := findFile(withoutExt)
 
 	if realPath == "" {
+		if missingAsEmpty {
+			return path, f, nil
+		}
+
 		return "", "", fmt.Errorf("%s.*: %w", withoutExt, ErrMissingFile)
 	}
 

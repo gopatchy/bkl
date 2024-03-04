@@ -57,7 +57,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	var doc any
 
 	for p, path := range opts.Positional.InputPaths {
-		realPath, f, err := bkl.FileMatch(string(path))
+		realPath, f, err := bkl.FileMatch(string(path), false)
 		if err != nil {
 			fatal(err)
 		}

@@ -44,7 +44,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	realPath, format, err := bkl.FileMatch(string(opts.Positional.InputPath))
+	realPath, format, err := bkl.FileMatch(string(opts.Positional.InputPath), false)
 	if err != nil {
 		fatal(err)
 	}

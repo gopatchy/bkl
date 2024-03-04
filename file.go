@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -48,6 +49,10 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	if fh == nil {
 		fh, err = os.Open(path)
 		if err != nil {
+			if p.missingAsEmpty && errors.Is(err, os.ErrNotExist) {
+				return f, nil
+			}
+
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}
 
@@ -89,12 +94,12 @@ func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
 		return nil, err
 	}
 
-	parents, err := f.parents()
+	files := []*file{}
+
+	parents, err := f.parents(p.missingAsEmpty)
 	if err != nil {
 		return nil, err
 	}
-
-	files := []*file{}
 
 	for _, parent := range parents {
 		parentFiles, err := p.loadFileAndParents(parent, f)
@@ -118,7 +123,7 @@ func (f *file) setParents() {
 	}
 }
 
-func (f *file) parents() ([]string, error) {
+func (f *file) parents(missingAsEmpty bool) ([]string, error) {
 	parents, err := f.parentsFromDirective()
 	if err != nil {
 		return nil, err
@@ -128,7 +133,7 @@ func (f *file) parents() ([]string, error) {
 		return parents, nil
 	}
 
-	parents, err = f.parentsFromSymlink()
+	parents, err = f.parentsFromSymlink(missingAsEmpty)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +142,7 @@ func (f *file) parents() ([]string, error) {
 		return parents, nil
 	}
 
-	return f.parentsFromFilename()
+	return f.parentsFromFilename(missingAsEmpty)
 }
 
 func (f *file) parentsFromDirective() ([]string, error) {
@@ -189,13 +194,17 @@ func (f *file) parentsFromDirective() ([]string, error) {
 	return f.toAbsolutePaths(parents)
 }
 
-func (f *file) parentsFromSymlink() ([]string, error) {
+func (f *file) parentsFromSymlink(missingAsEmpty bool) ([]string, error) {
 	if isStdin(f.path) {
 		return nil, nil
 	}
 
 	dest, err := filepath.EvalSymlinks(f.path)
 	if err != nil {
+		if missingAsEmpty && errors.Is(err, os.ErrNotExist) {
+			return f.parentsFromFilename(missingAsEmpty)
+		}
+
 		return nil, err
 	}
 
@@ -206,10 +215,10 @@ func (f *file) parentsFromSymlink() ([]string, error) {
 
 	f.path = dest
 
-	return f.parentsFromFilename()
+	return f.parentsFromFilename(missingAsEmpty)
 }
 
-func (f *file) parentsFromFilename() ([]string, error) {
+func (f *file) parentsFromFilename(missingAsEmpty bool) ([]string, error) {
 	if isStdin(f.path) {
 		return []string{}, nil
 	}
@@ -232,6 +241,10 @@ func (f *file) parentsFromFilename() ([]string, error) {
 
 		extPath := findFile(layerPath)
 		if extPath == "" {
+			if missingAsEmpty {
+				return []string{fmt.Sprintf("%s.%s", layerPath, parts[len(parts)-1])}, nil
+			}
+
 			return nil, fmt.Errorf("[%s]: %w", layerPath, ErrMissingFile)
 		}
 

@@ -12,11 +12,12 @@ import (
 )
 
 type options struct {
-	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
-	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
-	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
-	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
-	Version      bool            `short:"V" long:"version" description:"print version and exit"`
+	MissingAsEmpty bool            `short:"e" long:"missing-as-empty" description:"treat missing files as empty"`
+	OutputPath     *flags.Filename `short:"o" long:"output" description:"output file path"`
+	OutputFormat   *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
+	SkipParent     bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
+	Verbose        bool            `short:"v" long:"verbose" description:"enable verbose logging"`
+	Version        bool            `short:"V" long:"version" description:"print version and exit"`
 
 	Positional struct {
 		InputPaths []flags.Filename `positional-arg-name:"inputPath" required:"0" description:"input file path"`
@@ -58,13 +59,17 @@ Related tools:
 		p.SetDebug(true)
 	}
 
+	if opts.MissingAsEmpty {
+		p.SetMissingAsEmpty(true)
+	}
+
 	format := ""
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
 	}
 
 	for _, path := range opts.Positional.InputPaths {
-		realPath, f, err := bkl.FileMatch(string(path))
+		realPath, f, err := bkl.FileMatch(string(path), opts.MissingAsEmpty)
 		if err != nil {
 			fatal(err)
 		}
