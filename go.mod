@@ -8,7 +8,7 @@ require (
 	github.com/samber/lo v1.39.0
 	github.com/stretchr/testify v1.9.0
 	go.jetpack.io/typeid v1.0.0
-	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	gopkg.in/yaml.v3 v3.0.1
 )
 
