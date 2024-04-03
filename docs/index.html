@@ -1748,8 +1748,8 @@ c: 3                              c: 3
 
 <label>Export Existing Config</label>
 <code class="labeled"># "kubectl neat" removes status and default value fields
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> <string>deploy deploy-dev</string> &gt; <string>deploy-dev-orig.yaml</string>
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> <string>deploy deploy-prod</string> &gt; <string>deploy-prod-orig.yaml</string></code>
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> -- <string>deploy deploy-dev</string> &gt; <string>deploy-dev-orig.yaml</string>
+<prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> -- <string>deploy deploy-prod</string> &gt; <string>deploy-prod-orig.yaml</string></code>
 
 <vSpace></vSpace>
 
