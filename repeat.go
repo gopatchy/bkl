@@ -9,7 +9,8 @@ func repeat(doc *Document) ([]*Document, error) {
 	case map[string]any:
 		return repeatMap(doc, obj)
 
-	// TODO: repeatList()
+	case []any:
+		return repeatList(doc, obj)
 
 	default:
 		return []*Document{doc}, nil
@@ -19,6 +20,20 @@ func repeat(doc *Document) ([]*Document, error) {
 func repeatMap(doc *Document, data map[string]any) ([]*Document, error) {
 	if found, v, data := popMapValue(data, "$repeat"); found {
 		doc.Data = data
+		return repeatDoc(doc, v)
+	}
+
+	return []*Document{doc}, nil
+}
+
+func repeatList(doc *Document, data []any) ([]*Document, error) {
+	v, data2, err := popListMapValue(data, "$repeat")
+	if err != nil {
+		return nil, err
+	}
+
+	if v != nil {
+		doc.Data = data2
 		return repeatDoc(doc, v)
 	}
 
