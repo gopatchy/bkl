@@ -3,6 +3,7 @@ package bkl
 import (
 	"encoding/base64"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/gopatchy/bkl/polyfill"
@@ -184,6 +185,10 @@ func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, d
 		return processStringReplace(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
+	if strings.HasPrefix(obj, `$"`) && strings.HasSuffix(obj, `"`) {
+		return processStringInterp(obj, mergeFrom, mergeFromDocs, depth)
+	}
+
 	for k, v := range mergeFrom.Vars {
 		if obj == k {
 			return v, nil
@@ -213,6 +218,33 @@ func processStringReplace(obj string, mergeFrom *Document, mergeFromDocs []*Docu
 	}
 
 	return process(in, mergeFrom, mergeFromDocs, depth)
+}
+
+var interpRE = regexp.MustCompile(`{.*?}`)
+
+func processStringInterp(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+	obj = strings.TrimSuffix(strings.TrimPrefix(obj, `$"`), `"`)
+
+	var err error
+
+	obj = interpRE.ReplaceAllStringFunc(obj, func(m string) string {
+		m = strings.TrimSuffix(strings.TrimPrefix(m, `{`), `}`)
+
+		var v any
+
+		v, err = get(mergeFrom, mergeFromDocs, m)
+		if err != nil {
+			return "{ERROR}"
+		}
+
+		return fmt.Sprintf("%v", v)
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return obj, nil
 }
 
 func processEncode(obj any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
