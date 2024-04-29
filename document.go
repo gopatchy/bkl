@@ -16,11 +16,13 @@ type Document struct {
 	ID      DocID
 	Parents []*Document
 	Data    any
+	Vars    map[string]any
 }
 
 func NewDocument() *Document {
 	return &Document{
-		ID: typeid.Must(typeid.New[DocID]()),
+		ID:   typeid.Must(typeid.New[DocID]()),
+		Vars: map[string]any{},
 	}
 }
 
@@ -48,6 +50,25 @@ func (d *Document) allParents(parents map[DocID]*Document) {
 			parents[doc.ID] = doc
 		}
 	}
+}
+
+func (d *Document) Clone() (*Document, error) {
+	data, err := deepClone(d.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	d2 := NewDocumentWithData(data)
+
+	for _, parent := range d.Parents {
+		d2.Parents = append(d2.Parents, parent)
+	}
+
+	for k, v := range d.Vars {
+		d2.Vars[k] = v
+	}
+
+	return d2, nil
 }
 
 func (d *Document) DataAsMap() map[string]any {

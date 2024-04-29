@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/gopatchy/bkl/polyfill"
@@ -287,6 +288,22 @@ func toStringListPermissive(v any) ([]string, error) {
 	ret := []string{}
 	for _, v3 := range v2 {
 		ret = append(ret, fmt.Sprintf("%v", v3))
+	}
+
+	return ret, nil
+}
+
+func deepClone(v any) (any, error) {
+	js, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret any
+
+	err = json.Unmarshal(js, &ret)
+	if err != nil {
+		return nil, err
 	}
 
 	return ret, nil

@@ -184,6 +184,12 @@ func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, d
 		return processStringReplace(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
+	for k, v := range mergeFrom.Vars {
+		if obj == k {
+			return v, nil
+		}
+	}
+
 	return obj, nil
 }
 

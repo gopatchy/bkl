@@ -33,7 +33,10 @@ import (
 // Merge phase 2 (evaluate)
 //   - $env
 //
-// Merge phase 3 (merge)
+// Merge phase 3 (repeat)
+//   - $repeat
+//
+// Merge phase 4 (merge)
 //   - $delete
 //   - $replace: true
 //

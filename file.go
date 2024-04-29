@@ -75,7 +75,16 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
-		f.docs = append(f.docs, NewDocumentWithData(doc))
+		docObj := NewDocumentWithData(doc)
+
+		repeated, err := repeat(docObj)
+		if err != nil {
+			return nil, fmt.Errorf("[doc%d]: %w", i, err)
+		}
+
+		for _, docObj := range repeated {
+			f.docs = append(f.docs, docObj)
+		}
 	}
 
 	f.setParents()
