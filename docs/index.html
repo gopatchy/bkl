@@ -340,12 +340,14 @@ ifocus * {
 	<li><a href="#streams">Streams</a></li>
 	<li><a href="#maps">Maps</a></li>
 	<li><a href="#lists">Lists</a></li>
+	<li><a href="#interp">$""</a></li>
 	<li><a href="#env">$env</a></li>
 	<li><a href="#encode">$encode</a></li>
 	<li><a href="#required">$required</a></li>
 	<li><a href="#merge">$merge</a></li>
 	<li><a href="#replace">$replace</a></li>
 	<li><a href="#output">$output</a></li>
+	<li><a href="#repeat">$repeat</a></li>
 	<li><a href="#toml">TOML</a></li>
 	<li><a href="#bklb">bklb</a></li>
 	<li><a href="#bkld">bkld</a></li>
@@ -814,6 +816,31 @@ EOF</code>
 </split5a>
 
 <vSpace class="span5"></vSpace>
+
+
+
+<h2><a name="interp">$""</a></h2>
+
+<p>Use <ifocus>$""</ifocus> to interpolate format strings with <a href="#merge"><ifocus>$merge</ifocus></a>-style references.</p>
+
+<split3a>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <string>foo</string>
+<key>d</key>: <focus><string>$"{b.c} bar {a} 2"</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+<key>b</key>:
+  <key>c</key>: <string>foo</string>
+<key>d</key>: <focus><string>foo bar 1 2</string></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 
 
@@ -1465,6 +1492,31 @@ EOF</code>
 <vSpace></vSpace>
 
 <p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
+
+
+
+<h2><a name="repeat">$repeat</a></h2>
+
+<p><ifocus>$repeat:</ifocus> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <ifocus>$repeat</ifocus> can be used to reference the zero-based repeat index.</p>
+
+<split3a>
+
+<code><key>a</key>: <string>foo</string>
+<key>b</key>: <focus><string>$repeat</string</focus>
+<focus><key>$repeat</key>: <number>2</number></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <string>foo</string>
+<key>b</key>: <number>0</number>
+---
+<key>a</key>: <string>foo</string>
+<key>b</key>: <number>1</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 
 
