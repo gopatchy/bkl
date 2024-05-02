@@ -30,4 +30,5 @@ var (
 	ErrUnknownFormat     = fmt.Errorf("unknown format (%w)", Err)
 	ErrUnmarshal         = fmt.Errorf("decoding error (%w)", Err)
 	ErrUselessOverride   = fmt.Errorf("useless override (%w)", Err)
+	ErrVariableNotFound  = fmt.Errorf("variable not found (%w)", Err)
 )

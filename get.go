@@ -10,7 +10,12 @@ import (
 func get(doc *Document, docs []*Document, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
-		return getPathFromString(doc.Data, docs, m2)
+		ret, err := getPathFromString(doc.Data, docs, m2)
+		if err != nil {
+			return getVar(doc, docs, m2)
+		}
+
+		return ret, nil
 
 	case []any:
 		return getPathFromList(doc.Data, docs, m2)
@@ -129,4 +134,14 @@ func getCrossDoc(docs []*Document, pat any) (*Document, error) {
 	}
 
 	return ret, nil
+}
+
+func getVar(doc *Document, docs []*Document, name string) (any, error) {
+	for k, v := range doc.Vars {
+		if name == k {
+			return v, nil
+		}
+	}
+
+	return nil, fmt.Errorf("%s: %w", name, ErrVariableNotFound)
 }

@@ -189,10 +189,9 @@ func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, d
 		return processStringInterp(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
-	for k, v := range mergeFrom.Vars {
-		if obj == k {
-			return v, nil
-		}
+	ret, err := getVar(mergeFrom, mergeFromDocs, obj)
+	if err == nil {
+		return ret, nil
 	}
 
 	return obj, nil
