@@ -252,6 +252,11 @@ func processEncode(obj any, mergeFrom *Document, mergeFromDocs []*Document, v an
 		return nil, err
 	}
 
+	err = validate(obj2)
+	if err != nil {
+		return nil, err
+	}
+
 	return processEncodeAny(obj2, mergeFrom, mergeFromDocs, v, depth)
 }
 
