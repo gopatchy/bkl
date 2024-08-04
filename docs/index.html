@@ -846,7 +846,7 @@ EOF</code>
 
 <h2><a name="env">$env</a></h2>
 
-<p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys, values, and directives.</p>
+<p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys and values.</p>
 
 <split3a>
 
@@ -865,19 +865,6 @@ EOF</code>
 <op>=</op>
 
 <code><key>a</key>: <focus><string>test</string></focus></code>
-
-<vSpace class="span3"></vSpace>
-
-<code># export FOO=a
-<key>a</key>:
-  <key>b</key>: <number>1</number>
-<key>c</key>:
-  <key>$output</key>: <bool>true</bool>
-  <key>$merge</key>: <focus><string>$env:FOO</string></focus></code>
-
-<op>=</op>
-
-<code><focus><key>b</key>: <number>1</number></focus></code>
 
 </split3a>
 

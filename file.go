@@ -70,11 +70,6 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
-		doc, err = env(doc)
-		if err != nil {
-			return nil, fmt.Errorf("[doc%d]: %w", i, err)
-		}
-
 		docObj := NewDocumentWithData(doc)
 
 		repeated, err := repeat(docObj)

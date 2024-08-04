@@ -30,13 +30,10 @@ import (
 // Merge phase 1 (load)
 //   - $parent
 //
-// Merge phase 2 (evaluate)
-//   - $env
-//
-// Merge phase 3 (repeat)
+// Merge phase 2 (repeat)
 //   - $repeat
 //
-// Merge phase 4 (merge)
+// Merge phase 3 (merge)
 //   - $delete
 //   - $replace: true
 //
@@ -44,6 +41,8 @@ import (
 //   - $merge
 //   - $replace: map
 //   - $replace: string
+//   - $""
+//   - $env
 //   - $encode
 //
 // Output phase 2 (output)
