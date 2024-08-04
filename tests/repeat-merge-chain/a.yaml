@@ -1,0 +1,7 @@
+a: {}
+---
+$match:
+  a: {}
+$repeat: 2
+a:
+  $"b{$repeat}": $repeat

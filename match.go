@@ -1,9 +1,5 @@
 package bkl
 
-import (
-	"strings"
-)
-
 func matchDoc(doc *Document, pat any) bool {
 	return match(doc.Data, pat)
 }
@@ -29,7 +25,7 @@ func matchMap(obj any, pat map[string]any) bool {
 
 	if len(objMap) == 1 {
 		for k := range objMap {
-			if strings.HasPrefix(k, "$") {
+			if k == "$merge" || k == "$replace" || k == "$encode" {
 				return false
 			}
 		}
