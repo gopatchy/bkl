@@ -1,10 +1,10 @@
 package bkl
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/gopatchy/bkl/polyfill"
+	"gopkg.in/yaml.v3"
 )
 
 func popMapValue(m map[string]any, k string) (bool, any, map[string]any) {
@@ -294,14 +294,14 @@ func toStringListPermissive(v any) ([]string, error) {
 }
 
 func deepClone(v any) (any, error) {
-	js, err := json.Marshal(v)
+	yml, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
 
 	var ret any
 
-	err = json.Unmarshal(js, &ret)
+	err = yaml.Unmarshal(yml, &ret)
 	if err != nil {
 		return nil, err
 	}
