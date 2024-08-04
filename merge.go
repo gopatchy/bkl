@@ -13,6 +13,10 @@ func mergeDocs(doc, patch *Document) error {
 	doc.Data = merged
 	patch.Parents = append(patch.Parents, doc)
 
+	for k, v := range patch.Vars {
+		doc.Vars[k] = v
+	}
+
 	return nil
 }
 

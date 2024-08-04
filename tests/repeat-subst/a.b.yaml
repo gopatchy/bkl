@@ -1,0 +1,5 @@
+$match:
+  a: 1
+$repeat: 1
+c:
+  d: $"foo-{$repeat}"
