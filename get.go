@@ -12,7 +12,7 @@ func get(doc *Document, docs []*Document, m any) (any, error) {
 	case string:
 		ret, err := getPathFromString(doc.Data, docs, m2)
 		if err != nil {
-			return getVar(doc, docs, m2)
+			return getVar(doc, m2)
 		}
 
 		return ret, nil
@@ -136,7 +136,7 @@ func getCrossDoc(docs []*Document, pat any) (*Document, error) {
 	return ret, nil
 }
 
-func getVar(doc *Document, docs []*Document, name string) (any, error) {
+func getVar(doc *Document, name string) (any, error) {
 	for k, v := range doc.Vars {
 		if name == k {
 			return v, nil

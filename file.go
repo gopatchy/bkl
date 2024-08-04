@@ -60,16 +60,22 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 
 	for i, doc := range docs {
 		id := fmt.Sprintf("%s|doc%d", f, i)
+
 		doc, err = normalize(doc)
 		if err != nil {
-			return nil, fmt.Errorf("[doc%d]: %w", i, err)
+			return nil, fmt.Errorf("[%s]: %w", id, err)
 		}
 
 		docObj := NewDocumentWithData(id, doc)
 
+		docObj.Data, err = constEval(docObj.Data, docObj)
+		if err != nil {
+			return nil, fmt.Errorf("[%s]: %w", docObj, err)
+		}
+
 		repeated, err := repeat(docObj)
 		if err != nil {
-			return nil, fmt.Errorf("[doc%d]: %w", i, err)
+			return nil, fmt.Errorf("[%s]: %w", docObj, err)
 		}
 
 		for _, docObj := range repeated {

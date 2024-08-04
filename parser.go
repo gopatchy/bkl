@@ -30,7 +30,8 @@ import (
 // Merge phase 1 (load)
 //   - $parent
 //
-// Merge phase 2 (repeat)
+// Merge phase 2 (const, repeat)
+//   - $env
 //   - $repeat
 //
 // Merge phase 3 (merge)
@@ -42,7 +43,6 @@ import (
 //   - $replace: map
 //   - $replace: string
 //   - $""
-//   - $env
 //   - $encode
 //
 // Output phase 2 (output)

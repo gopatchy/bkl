@@ -195,11 +195,6 @@ func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, d
 		return processStringInterp(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
-	ret, err := getVar(mergeFrom, mergeFromDocs, obj)
-	if err == nil {
-		return ret, nil
-	}
-
 	return obj, nil
 }
 
@@ -233,6 +228,10 @@ func processStringInterp(obj string, mergeFrom *Document, mergeFromDocs []*Docum
 	var err error
 
 	obj = interpRE.ReplaceAllStringFunc(obj, func(m string) string {
+		if err != nil {
+			return "{ERROR}"
+		}
+
 		m = strings.TrimSuffix(strings.TrimPrefix(m, `{`), `}`)
 
 		var v any
