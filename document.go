@@ -2,6 +2,8 @@ package bkl
 
 import (
 	"fmt"
+	"os"
+	"strings"
 )
 
 type Document struct {
@@ -14,7 +16,7 @@ type Document struct {
 func NewDocument(id string) *Document {
 	return &Document{
 		ID:   id,
-		Vars: map[string]any{},
+		Vars: envVars(),
 	}
 }
 
@@ -89,4 +91,15 @@ func (d *Document) PopMapValue(key string) (bool, any) {
 
 func (d *Document) String() string {
 	return d.ID
+}
+
+func envVars() map[string]any {
+	vars := map[string]any{}
+
+	for _, s := range os.Environ() {
+		kv := strings.SplitN(s, "=", 2)
+		vars[fmt.Sprintf("$env:%s", kv[0])] = kv[1]
+	}
+
+	return vars
 }

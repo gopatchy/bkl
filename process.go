@@ -3,7 +3,6 @@ package bkl
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
@@ -196,10 +195,6 @@ func processString(obj string, mergeFrom *Document, mergeFromDocs []*Document, d
 		return processStringInterp(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
-	if strings.HasPrefix(obj, "$env:") {
-		return processStringEnv(obj, mergeFrom, mergeFromDocs, depth)
-	}
-
 	ret, err := getVar(mergeFrom, mergeFromDocs, obj)
 	if err == nil {
 		return ret, nil
@@ -255,15 +250,6 @@ func processStringInterp(obj string, mergeFrom *Document, mergeFromDocs []*Docum
 	}
 
 	return obj, nil
-}
-
-func processStringEnv(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
-	v, found := os.LookupEnv(strings.TrimPrefix(obj, "$env:"))
-	if !found {
-		return "", fmt.Errorf("%s: %w", obj, ErrMissingEnv)
-	}
-
-	return v, nil
 }
 
 func processEncode(obj any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
