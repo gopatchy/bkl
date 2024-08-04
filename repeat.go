@@ -54,7 +54,7 @@ func repeatInt(doc *Document, count int) ([]*Document, error) {
 	ret := []*Document{}
 
 	for i := 0; i < count; i++ {
-		doc2, err := doc.Clone()
+		doc2, err := doc.Clone(fmt.Sprintf("repeat%d", i))
 		if err != nil {
 			return nil, err
 		}

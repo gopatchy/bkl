@@ -1,33 +1,25 @@
 package bkl
 
 import (
-	"go.jetpack.io/typeid"
+	"fmt"
 )
 
-type DocPrefix struct{}
-
-func (DocPrefix) Prefix() string { return "doc" }
-
-type DocID struct {
-	typeid.TypeID[DocPrefix]
-}
-
 type Document struct {
-	ID      DocID
+	ID      string
 	Parents []*Document
 	Data    any
 	Vars    map[string]any
 }
 
-func NewDocument() *Document {
+func NewDocument(id string) *Document {
 	return &Document{
-		ID:   typeid.Must(typeid.New[DocID]()),
+		ID:   id,
 		Vars: map[string]any{},
 	}
 }
 
-func NewDocumentWithData(data any) *Document {
-	doc := NewDocument()
+func NewDocumentWithData(id string, data any) *Document {
+	doc := NewDocument(id)
 	doc.Data = data
 	return doc
 }
@@ -36,13 +28,13 @@ func (d *Document) AddParents(parents ...*Document) {
 	d.Parents = append(d.Parents, parents...)
 }
 
-func (d *Document) AllParents() map[DocID]*Document {
-	parents := map[DocID]*Document{}
+func (d *Document) AllParents() map[string]*Document {
+	parents := map[string]*Document{}
 	d.allParents(parents)
 	return parents
 }
 
-func (d *Document) allParents(parents map[DocID]*Document) {
+func (d *Document) allParents(parents map[string]*Document) {
 	for _, parent := range d.Parents {
 		parents[parent.ID] = parent
 
@@ -52,13 +44,13 @@ func (d *Document) allParents(parents map[DocID]*Document) {
 	}
 }
 
-func (d *Document) Clone() (*Document, error) {
+func (d *Document) Clone(suffix string) (*Document, error) {
 	data, err := deepClone(d.Data)
 	if err != nil {
 		return nil, err
 	}
 
-	d2 := NewDocumentWithData(data)
+	d2 := NewDocumentWithData(fmt.Sprintf("%s|%s", d, suffix), data)
 
 	for _, parent := range d.Parents {
 		d2.Parents = append(d2.Parents, parent)
@@ -96,5 +88,5 @@ func (d *Document) PopMapValue(key string) (bool, any) {
 }
 
 func (d *Document) String() string {
-	return d.ID.String()
+	return d.ID
 }

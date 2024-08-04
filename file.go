@@ -6,20 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"go.jetpack.io/typeid"
 )
 
-type filePrefix struct{}
-
-func (filePrefix) Prefix() string { return "file" }
-
-type fileID struct {
-	typeid.TypeID[filePrefix]
-}
-
 type file struct {
-	id    fileID
+	id    string
 	child *file
 	path  string
 	docs  []*Document
@@ -27,9 +17,13 @@ type file struct {
 
 func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	f := &file{
-		id:    typeid.Must(typeid.New[fileID]()),
+		id:    path,
 		child: child,
 		path:  path,
+	}
+
+	if child != nil {
+		f.id = fmt.Sprintf("%s|%s", child.id, f.id)
 	}
 
 	p.log("[%s] loading", f)
@@ -65,12 +59,13 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	}
 
 	for i, doc := range docs {
+		id := fmt.Sprintf("%s|doc%d", f, i)
 		doc, err = normalize(doc)
 		if err != nil {
 			return nil, fmt.Errorf("[doc%d]: %w", i, err)
 		}
 
-		docObj := NewDocumentWithData(doc)
+		docObj := NewDocumentWithData(id, doc)
 
 		repeated, err := repeat(docObj)
 		if err != nil {
@@ -265,7 +260,7 @@ func (f *file) toAbsolutePaths(paths []string) ([]string, error) {
 }
 
 func (f *file) String() string {
-	return f.path
+	return f.id
 }
 
 func isStdin(path string) bool {

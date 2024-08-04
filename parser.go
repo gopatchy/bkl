@@ -133,7 +133,7 @@ func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
 
 	if m == nil {
 		// Explicit append
-		doc := NewDocument()
+		doc := NewDocument(fmt.Sprintf("%s|matchnull", patch.ID))
 		p.docs = append(p.docs, doc)
 		return true, mergeDocs(doc, patch)
 	}
