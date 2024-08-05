@@ -62,7 +62,6 @@ func processMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docume
 
 	for _, k := range keys {
 		v := obj[k]
-		delete(obj, k)
 
 		v2, err := process(v, mergeFrom, mergeFromDocs, depth)
 		if err != nil {
@@ -79,6 +78,7 @@ func processMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docume
 			return nil, err
 		}
 
+		delete(obj, k)
 		obj[k2.(string)] = v2
 	}
 
