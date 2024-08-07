@@ -92,6 +92,15 @@ func (p *Parser) MergeDocument(patch *Document) error {
 		return nil
 	}
 
+	cloned, err := p.clonePatchMatch(patch)
+	if err != nil {
+		return err
+	}
+
+	if cloned {
+		return nil
+	}
+
 	for _, doc := range p.parents(patch) {
 		matched = true
 
@@ -138,27 +147,69 @@ func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
 		return true, mergeDocs(doc, patch)
 	}
 
-	// Try parents, then all docs
-	for _, docs := range [][]*Document{p.parents(patch), p.docs} {
-		found = false
+	docs := p.findMatches(patch, m)
+	if len(docs) == 0 {
+		return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+	}
 
-		for _, doc := range docs {
-			if matchDoc(doc, m) {
-				err := mergeDocs(doc, patch)
-				if err != nil {
-					return true, err
-				}
-
-				found = true
-			}
-		}
-
-		if found {
-			return true, nil
+	for _, doc := range docs {
+		err := mergeDocs(doc, patch)
+		if err != nil {
+			return true, err
 		}
 	}
 
-	return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+	return true, nil
+}
+
+func (p *Parser) clonePatchMatch(patch *Document) (bool, error) {
+	found, m := patch.PopMapValue("$clone")
+	if !found {
+		return false, nil
+	}
+
+	docs := p.findMatches(patch, m)
+	if len(docs) == 0 {
+		return true, fmt.Errorf("%#v: %w", m, ErrNoCloneFound)
+	}
+
+	for _, doc := range docs {
+		clone, err := doc.Clone("clone")
+		if err != nil {
+			return true, err
+		}
+
+		p.docs = append(p.docs, clone)
+
+		// Remove `$output: false` if we're cloning a template
+		_, _ = clone.PopMapValue("$output")
+
+		err = mergeDocs(clone, patch)
+		if err != nil {
+			return true, err
+		}
+	}
+
+	return true, nil
+}
+
+func (p *Parser) findMatches(doc *Document, pat any) []*Document {
+	ret := []*Document{}
+
+	// Try parents, then all docs
+	for _, ds := range [][]*Document{p.parents(doc), p.docs} {
+		for _, d := range ds {
+			if matchDoc(d, pat) {
+				ret = append(ret, d)
+			}
+		}
+
+		if len(ret) > 0 {
+			return ret
+		}
+	}
+
+	return nil
 }
 
 // MergeFile parses the file at path and merges its contents into the

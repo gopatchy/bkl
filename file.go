@@ -78,9 +78,7 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[%s]: %w", docObj, err)
 		}
 
-		for _, docObj := range repeated {
-			f.docs = append(f.docs, docObj)
-		}
+		f.docs = append(f.docs, repeated...)
 	}
 
 	f.setParents()

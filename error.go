@@ -25,6 +25,7 @@ var (
 	ErrMissingMatch      = fmt.Errorf("missing $match (%w)", Err)
 	ErrMultiMatch        = fmt.Errorf("multiple documents $match (%w)", Err)
 	ErrNoMatchFound      = fmt.Errorf("no document/entry matched $match (%w)", Err)
+	ErrNoCloneFound      = fmt.Errorf("no document/entry matched $clone (%w)", Err)
 	ErrOutputFile        = fmt.Errorf("error opening output file (%w)", Err)
 	ErrRequiredField     = fmt.Errorf("required field not set (%w)", Err)
 	ErrUnknownFormat     = fmt.Errorf("unknown format (%w)", Err)

@@ -1,0 +1,4 @@
+$repeat: 2
+$clone:
+  b: $required
+b: $repeat
