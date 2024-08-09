@@ -1,4 +1,4 @@
 $repeat: 2
-$clone:
+$match:
   b: $required
 b: $repeat

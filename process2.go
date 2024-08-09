@@ -274,6 +274,10 @@ func process2String(obj string, mergeFrom *Document, mergeFromDocs []*Document, 
 		return process2StringInterp(obj, mergeFrom, mergeFromDocs, depth)
 	}
 
+	if strings.HasPrefix(obj, "$env:") || obj == "$repeat" {
+		return getVar(mergeFrom, obj)
+	}
+
 	return obj, nil
 }
 

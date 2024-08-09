@@ -59,7 +59,17 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	if err != nil {
 		fatal(err)
 	}
-	// 	for _, path := range []string{string(opts.Positional.BasePath), string(opts.Positional.TargetPath)} {
+
+	baseDocs, err := baseDoc.Process([]*bkl.Document{baseDoc})
+	if err != nil {
+		fatal(err)
+	}
+
+	if len(baseDocs) != 1 {
+		fatal(fmt.Errorf("bkld operates on exactly 1 source document per file"))
+	}
+
+	baseDoc = baseDocs[0]
 
 	if format == "" {
 		format = f
@@ -70,12 +80,18 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	base, err := bkl.Process(baseDoc.Data, targetDoc, []*bkl.Document{targetDoc})
+	targetDocs, err := targetDoc.Process([]*bkl.Document{targetDoc})
 	if err != nil {
 		fatal(err)
 	}
 
-	doc, err := diff(targetDoc.Data, base)
+	if len(targetDocs) != 1 {
+		fatal(fmt.Errorf("bkld operates on exactly 1 source document per file"))
+	}
+
+	targetDoc = targetDocs[0]
+
+	doc, err := diff(targetDoc.Data, baseDoc.Data)
 	if err != nil {
 		fatal(err)
 	}

@@ -60,12 +60,6 @@ func repeatInt(doc *Document, count int) ([]*Document, error) {
 		}
 
 		doc2.Vars["$repeat"] = i
-
-		doc2.Data, err = constEval(doc2.Data, doc2)
-		if err != nil {
-			return nil, err
-		}
-
 		ret = append(ret, doc2)
 	}
 

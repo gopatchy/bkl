@@ -89,6 +89,29 @@ func (d *Document) PopMapValue(key string) (bool, any) {
 	return found, val
 }
 
+func (d *Document) Process(mergeFromDocs []*Document) ([]*Document, error) {
+	var err error
+
+	d.Data, err = process1(d.Data, d, mergeFromDocs, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	docs, err := repeat(d)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, doc := range docs {
+		doc.Data, err = process2(doc.Data, doc, mergeFromDocs, 0)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return docs, nil
+}
+
 func (d *Document) String() string {
 	return d.ID
 }
