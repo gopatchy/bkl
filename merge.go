@@ -61,7 +61,6 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 	replace, found := getMapBoolValue(src, "$replace")
 	if found && replace {
 		delete(src, "$replace")
-
 		return src, nil
 	}
 
@@ -74,7 +73,6 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 			}
 
 			delete(dst, k)
-
 			continue
 		}
 

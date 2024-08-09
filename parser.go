@@ -27,25 +27,28 @@ import (
 // Directive evaluation order can matter, e.g. if you $merge a subtree that
 // contains an $output directive.
 //
-// Merge phase 1 (load)
+// Phase 1
 //   - $parent
 //
-// Merge phase 2 (const, repeat)
-//   - $env
-//   - $repeat
-//
-// Merge phase 3 (merge)
+// Phase 2
 //   - $delete
 //   - $replace: true
 //
-// Output phase 1 (process)
+// Phase 3
 //   - $merge
 //   - $replace: map
 //   - $replace: string
+//
+// Phase 4
+//   - $repeat
+//
+// Phase 5
 //   - $""
 //   - $encode
+//   - $env
+//   - $value
 //
-// Output phase 2 (output)
+// Phase 6
 //   - $output
 //
 // # Document Layer Matching Logic
