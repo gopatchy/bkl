@@ -130,6 +130,23 @@ func ExampleParser_Output() {
 	// c: 3
 }
 
+func ExampleParser_Output_literal_dollar() {
+	b := bkl.New()
+
+	if err := b.MergeFileLayers("tests/literal-dollar/a.yaml"); err != nil {
+		panic(err)
+	}
+
+	blob, err := b.Output("json")
+	if err != nil {
+		panic(err)
+	}
+
+	os.Stdout.Write(blob)
+	// Output:
+	// {"listKey":["$instance",{"nested":{"$key":"$value"}}],"mapKey":"$pod"}
+}
+
 func ExampleParser_OutputToFile() {
 	b := bkl.New()
 

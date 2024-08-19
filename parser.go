@@ -266,7 +266,7 @@ func (p *Parser) outputDocument(doc *Document) ([]any, error) {
 			return nil, err
 		}
 
-		return []any{v2}, nil
+		return []any{finalizeOutput(v2)}, nil
 	})
 }
 
