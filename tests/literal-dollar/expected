@@ -1,0 +1,5 @@
+listKey:
+  - $instance
+  - nested:
+      $key: $value
+mapKey: $pod
