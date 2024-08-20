@@ -3,9 +3,10 @@ package bkl
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/gopatchy/bkl/polyfill"
 	"regexp"
 	"strings"
+
+	"github.com/gopatchy/bkl/polyfill"
 )
 
 func process2(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
