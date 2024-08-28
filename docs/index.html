@@ -618,7 +618,6 @@ EOF</code>
 </split5a>
 
 <vSpace></vSpace>
-<vSpace></vSpace>
 
 <p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.</p>
 
@@ -649,6 +648,32 @@ EOF</code>
 </split5a>
 
 <vSpace></vSpace>
+
+<p><ifocus>$invert: true</ifocus> inside a <ifocus>$match</ifocus> block inverts the match, causing it to apply to any documents that do not contain the match criteria.</p>
+
+<split5a>
+
+<code><key>a</key>: <number>1</number>
+---
+<key>b</key>: <number>2</number></code>
+
+<op>+</op>
+
+<code><key>$match</key>:
+  <key>a</key>: <number>1</number>
+  <focus><key>$invert</key>: <bool>true</bool></focus>
+<key>c</key>: <number>3</number></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>1</number>
+---
+<key>b</key>: <number>2</number>
+<focus><key>c</key>: <number>3</number></focus></code>
+
+
+</split5a>
+
 <vSpace></vSpace>
 
 <p><ifocus>$match: null</ifocus> forces the updates to apply to a new document.</p>
