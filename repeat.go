@@ -45,7 +45,7 @@ func repeatList(doc *Document, data []any) ([]*Document, error) {
 func repeatDoc(doc *Document, v any) ([]*Document, error) {
 	switch v2 := v.(type) {
 	case int:
-		return repeatFromInt(doc, "$repeat", v2)
+		return repeatFromInt(doc, "$repeat", v2, map[string]any{})
 
 	case map[string]any:
 		return repeatFromMap(doc, v2)
@@ -55,7 +55,7 @@ func repeatDoc(doc *Document, v any) ([]*Document, error) {
 	}
 }
 
-func repeatFromInt(doc *Document, name string, count int) ([]*Document, error) {
+func repeatFromInt(doc *Document, name string, count int, vars map[string]any) ([]*Document, error) {
 	ret := []*Document{}
 
 	for i := 0; i < count; i++ {
@@ -65,6 +65,11 @@ func repeatFromInt(doc *Document, name string, count int) ([]*Document, error) {
 		}
 
 		doc2.Vars[name] = i
+
+		for k, v := range vars {
+			doc2.Vars[k] = v
+		}
+
 		ret = append(ret, doc2)
 	}
 
@@ -77,6 +82,11 @@ func repeatFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
 	names := polyfill.MapsKeys(rs)
 	polyfill.SlicesSort(names)
 
+	vars := map[string]any{}
+	for k, v := range rs {
+		vars[fmt.Sprintf("$repeat.%s", k)] = v
+	}
+
 	for _, name := range names {
 		count := rs[name]
 
@@ -88,7 +98,7 @@ func repeatFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
 		tmp := []*Document{}
 
 		for _, d := range docs {
-			ds, err := repeatFromInt(d, fmt.Sprintf("$repeat:%s", name), count2)
+			ds, err := repeatFromInt(d, fmt.Sprintf("$repeat:%s", name), count2, vars)
 			if err != nil {
 				return nil, err
 			}
