@@ -1503,6 +1503,35 @@ EOF</code>
 </split3a>
 
 <vSpace></vSpace>
+
+<p><ifocus>$repeat:</ifocus> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.</p>
+
+<split3a>
+
+<code><focus><key>$repeat</key>:
+  <key>a</key>: <number>2</number>
+  <key>b</key>: <number>3</number></focus>
+<key>$value</key>: <string>$"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</string></code>
+
+<op>=</op>
+
+<code><string>0,0</string>
+---
+<string>0,1</string>
+---
+<string>0,2</string>
+---
+<string>1,0</string>
+---
+<string>1,1</string>
+---
+<string>1,2</string></code>
+
+</split3a>
+
+
+
+<vSpace></vSpace>
 <vSpace></vSpace>
 
 
