@@ -18,6 +18,11 @@ func match(obj any, pat any) bool {
 }
 
 func matchMap(obj any, pat map[string]any) bool {
+	invert, pat := popMapBoolValue(pat, "$invert", true)
+	if invert {
+		return !matchMap(obj, pat)
+	}
+
 	objMap, ok := obj.(map[string]any)
 	if !ok {
 		return false

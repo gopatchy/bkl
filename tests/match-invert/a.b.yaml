@@ -1,0 +1,4 @@
+$match:
+  b: 2
+  $invert: true
+c: 3
