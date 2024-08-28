@@ -303,6 +303,13 @@ func process2StringInterp(obj string, mergeFrom *Document, mergeFromDocs []*Docu
 			return "{ERROR}"
 		}
 
+		if v2, ok := v.(string); ok {
+			v, err = process2String(v2, mergeFrom, mergeFromDocs, depth + 1)
+			if err != nil {
+				return "{ERROR}"
+			}
+		}
+
 		return fmt.Sprintf("%v", v)
 	})
 
