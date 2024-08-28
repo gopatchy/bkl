@@ -2,6 +2,8 @@ package bkl
 
 import (
 	"fmt"
+
+	"github.com/gopatchy/bkl/polyfill"
 )
 
 func repeat(doc *Document) ([]*Document, error) {
@@ -45,8 +47,8 @@ func repeatDoc(doc *Document, v any) ([]*Document, error) {
 	case int:
 		return repeatFromInt(doc, "$repeat", v2)
 
-	case []any:
-		return repeatFromList(doc, v2)
+	case map[string]any:
+		return repeatFromMap(doc, v2)
 
 	default:
 		return nil, fmt.Errorf("$repeat: %T (%w)", v, ErrInvalidRepeat)
@@ -69,42 +71,24 @@ func repeatFromInt(doc *Document, name string, count int) ([]*Document, error) {
 	return ret, nil
 }
 
-func repeatFromList(doc *Document, rs []any) ([]*Document, error) {
+func repeatFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
 	docs := []*Document{doc}
 
-	for _, r := range rs {
-		r2, ok := r.(map[string]any)
+	names := polyfill.MapsKeys(rs)
+	polyfill.SlicesSort(names)
+
+	for _, name := range names {
+		count := rs[name]
+
+		count2, ok := count.(int)
 		if !ok {
-			return nil, fmt.Errorf("%T (%w)", 2, ErrInvalidRepeat)
-		}
-
-		var found bool
-		var v any
-
-		var count int
-		if found, v, r2 = popMapValue(r2, "$count"); found {
-			count, ok = v.(int)
-			if !ok {
-				return nil, fmt.Errorf("%T (%w)", v, ErrInvalidRepeatCount)
-			}
-		} else {
-			return nil, fmt.Errorf("%#v (%w)", r, ErrMissingRepeatCount)
-		}
-
-		var name string
-		if found, v, r2 = popMapValue(r2, "$name"); found {
-			name, ok = v.(string)
-			if !ok {
-				return nil, fmt.Errorf("%T (%w)", v, ErrInvalidRepeatName)
-			}
-		} else {
-			return nil, fmt.Errorf("%#v (%w)", r, ErrMissingRepeatName)
+			return nil, fmt.Errorf("%T (%w)", count, ErrInvalidRepeat)
 		}
 
 		tmp := []*Document{}
 
 		for _, d := range docs {
-			ds, err := repeatFromInt(d, name, count)
+			ds, err := repeatFromInt(d, fmt.Sprintf("$repeat:%s", name), count2)
 			if err != nil {
 				return nil, err
 			}

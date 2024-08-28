@@ -1,6 +1,8 @@
 $repeat:
-  - $name: x
-    $count: 2
-  - $name: y
-    $count: 2
-$value: $"x={x} y={y}"
+  x: 2
+  y: 3
+a: $"x={$repeat:x} y={$repeat:y}"
+b:
+  $merge: [$repeat, x]
+c:
+  $merge: [$repeat, y]
