@@ -1,0 +1,6 @@
+$repeat:
+  - $name: x
+    $count: 2
+  - $name: y
+    $count: 2
+$value: $"x={x} y={y}"
