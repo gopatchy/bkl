@@ -298,7 +298,7 @@ func process2StringInterp(obj string, mergeFrom *Document, mergeFromDocs []*Docu
 
 		var v any
 
-		v, err = get(mergeFrom, mergeFromDocs, m)
+		v, err = getWithVar(mergeFrom, mergeFromDocs, m)
 		if err != nil {
 			return "{ERROR}"
 		}

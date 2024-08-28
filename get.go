@@ -7,15 +7,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func getWithVar(doc *Document, docs []*Document, m any) (any, error) {
+	ret, err := get(doc, docs, m)
+	if err != nil {
+		switch m2 := m.(type) {
+		case string:
+			return getVar(doc, m2)
+
+		default:
+			return nil, err
+		}
+	}
+
+	return ret, nil
+}
+
 func get(doc *Document, docs []*Document, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
-		ret, err := getPathFromString(doc.Data, docs, m2)
-		if err != nil {
-			return getVar(doc, m2)
-		}
-
-		return ret, nil
+		return getPathFromString(doc.Data, docs, m2)
 
 	case []any:
 		return getPathFromList(doc.Data, docs, m2)
