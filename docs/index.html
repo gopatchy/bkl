@@ -348,6 +348,7 @@ ifocus * {
 	<li><a href="#replace">$replace</a></li>
 	<li><a href="#output">$output</a></li>
 	<li><a href="#repeat">$repeat</a></li>
+	<li><a href="#escape">$$</a></li>
 	<li><a href="#toml">TOML</a></li>
 	<li><a href="#bklb">bklb</a></li>
 	<li><a href="#bkld">bkld</a></li>
@@ -1554,7 +1555,24 @@ EOF</code>
 
 </split3a>
 
+<vSpace></vSpace>
+<vSpace></vSpace>
 
+
+
+<h2><a name="escape">$$</a></h2>
+
+<p><ifocus>$$</ifocus> translates to a literal <ifocus>$</ifocus> in cases where it would otherwise trigger special handling.</p>
+
+<split3a>
+
+<code><key>a</key>: <focus><string>$$env:foo</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <focus><string>$env:foo</string></focus></code>
+
+</split3a>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
