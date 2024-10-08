@@ -36,6 +36,10 @@ func process2Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docum
 		return process2Encode(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
+	if found, v, obj := popMapValue(obj, "$decode"); found {
+		return process2Decode(obj, mergeFrom, mergeFromDocs, v, depth)
+	}
+
 	if found, v, obj := popMapValue(obj, "$value"); found {
 		if len(obj) != 0 {
 			return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
@@ -209,6 +213,58 @@ func process2EncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Documen
 
 		return string(enc), nil
 	}
+}
+
+func process2Decode(obj any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+	switch v2 := v.(type) {
+	case string:
+		return process2DecodeString(obj, mergeFrom, mergeFromDocs, v2, depth)
+
+	default:
+		return nil, fmt.Errorf("$decode: %T: %w", v, ErrInvalidType)
+	}
+}
+
+func process2DecodeString(obj any, mergeFrom *Document, mergeFromDocs []*Document, v string, depth int) (any, error) {
+	switch obj2 := obj.(type) {
+	case map[string]any:
+		return process2DecodeStringMap(obj2, mergeFrom, mergeFromDocs, v, depth)
+
+	default:
+		return nil, fmt.Errorf("$decode: %T: %w", obj, ErrInvalidType)
+	}
+}
+
+func process2DecodeStringMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v string, depth int) (any, error) {
+	found, val, obj := popMapValue(obj, "$value")
+	if !found {
+		return nil, fmt.Errorf("$decode: missing $value in %#v (#w)", obj, ErrInvalidType)
+	}
+
+	val2, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("$value: %T (%w)", val, ErrInvalidType)
+	}
+
+	if len(obj) != 0 {
+		return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
+	}
+
+	f, err := GetFormat(v)
+	if err != nil {
+		return nil, err
+	}
+
+	decs, err := f.UnmarshalStream([]byte(val2))
+	if err != nil {
+		return nil, err
+	}
+
+	if len(decs) != 1 {
+		return nil, fmt.Errorf("%#v (%w)", val2, ErrUnmarshal)
+	}
+
+	return process2(decs[0], mergeFrom, mergeFromDocs, depth)
 }
 
 func process2ToListList(obj []any, delim string) ([]any, error) {
