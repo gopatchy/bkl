@@ -37,6 +37,10 @@ func process2Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docum
 	}
 
 	if found, v, obj := popMapValue(obj, "$value"); found {
+		if len(obj) != 0 {
+			return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
+		}
+
 		return process2MapValue(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
