@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/gopatchy/bkl/polyfill"
 )
 
 func process2(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
@@ -290,12 +288,7 @@ func process2ToListMap(obj any, delim string) ([]any, error) {
 
 	ret := []any{}
 
-	keys := polyfill.MapsKeys(obj2)
-	polyfill.SlicesSort(keys)
-
-	for _, k := range keys {
-		v := obj2[k]
-
+	for k, v := range sortedMap(obj2) {
 		if v2, ok := v.(string); ok && v2 == "" {
 			ret = append(ret, k)
 		} else {

@@ -2,8 +2,6 @@ package bkl
 
 import (
 	"fmt"
-
-	"github.com/gopatchy/bkl/polyfill"
 )
 
 func repeat(doc *Document) ([]*Document, error) {
@@ -79,17 +77,12 @@ func repeatFromInt(doc *Document, name string, count int, vars map[string]any) (
 func repeatFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
 	docs := []*Document{doc}
 
-	names := polyfill.MapsKeys(rs)
-	polyfill.SlicesSort(names)
-
 	vars := map[string]any{}
 	for k, v := range rs {
 		vars[fmt.Sprintf("$repeat.%s", k)] = v
 	}
 
-	for _, name := range names {
-		count := rs[name]
-
+	for name, count := range sortedMap(rs) {
 		count2, ok := count.(int)
 		if !ok {
 			return nil, fmt.Errorf("%T (%w)", count, ErrInvalidRepeat)

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"maps"
 	"reflect"
-
-	"github.com/gopatchy/bkl/polyfill"
+	"slices"
 )
 
 func diff(dst, src any) (any, error) {
@@ -105,12 +105,12 @@ outer2:
 		v1Map, ok := v1.(map[string]any)
 		if ok {
 			del := map[string]any{
-				"$delete": polyfill.MapsClone(v1Map),
+				"$delete": maps.Clone(v1Map),
 			}
 			ret = append(ret, del)
 		} else {
 			// Give up patching individual entries, replace the whole list
-			dst = polyfill.SlicesClone(dst)
+			dst = slices.Clone(dst)
 			dst = append(dst, map[string]any{"$replace": true})
 			return dst, nil
 		}

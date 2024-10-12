@@ -13,14 +13,6 @@ test:
 	{{go}} tool cover -html=cover.out -o=cover.html
 	GOCMD={{go}} ./test
 
-polytest:
-	@just go=go1.23.0
-	@just go=go1.22.7
-	@just go=go1.21.13
-	@just go=go1.20.14
-	@just go=go1.19.13
-	@just go=go1.18.10
-
 fuzz:
 	{{go}} test -fuzz FuzzParser
 

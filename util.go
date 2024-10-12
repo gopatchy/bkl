@@ -1,9 +1,12 @@
 package bkl
 
 import (
+	"cmp"
 	"fmt"
+	"iter"
+	"maps"
+	"slices"
 
-	"github.com/gopatchy/bkl/polyfill"
 	"gopkg.in/yaml.v3"
 )
 
@@ -13,7 +16,7 @@ func popMapValue(m map[string]any, k string) (bool, any, map[string]any) {
 		return false, nil, m
 	}
 
-	m = polyfill.MapsClone(m)
+	m = maps.Clone(m)
 	delete(m, k)
 
 	return true, v, m
@@ -46,7 +49,7 @@ func popMapBoolValue(m map[string]any, k string, v bool) (bool, map[string]any) 
 	found := hasMapBoolValue(m, k, v)
 
 	if found {
-		m = polyfill.MapsClone(m)
+		m = maps.Clone(m)
 		delete(m, k)
 	}
 
@@ -75,7 +78,7 @@ func popMapStringValue(m map[string]any, k string) (string, map[string]any) {
 	v := getMapStringValue(m, k)
 
 	if v != "" {
-		m = polyfill.MapsClone(m)
+		m = maps.Clone(m)
 		delete(m, k)
 	}
 
@@ -226,15 +229,20 @@ func popListMapStringValue(l []any, k string) (string, []any, error) {
 	return v2, l, nil
 }
 
+func sortedMap[Map ~map[K]V, K cmp.Ordered, V any](m Map) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for _, k := range slices.Sorted(maps.Keys(m)) {
+			if !yield(k, m[k]) {
+				return
+			}
+		}
+	}
+}
+
 func filterMap(m map[string]any, filter func(string, any) (map[string]any, error)) (map[string]any, error) {
 	ret := map[string]any{}
 
-	ks := polyfill.MapsKeys(m)
-	polyfill.SlicesSort(ks)
-
-	for _, k := range ks {
-		v := m[k]
-
+	for k, v := range sortedMap(m) {
 		m2, err := filter(k, v)
 		if err != nil {
 			return nil, err

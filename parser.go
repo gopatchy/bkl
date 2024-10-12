@@ -6,12 +6,11 @@
 package bkl
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
-
-	"github.com/gopatchy/bkl/polyfill"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -313,7 +312,7 @@ func (p *Parser) OutputToFile(path, format string) error {
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return polyfill.ErrorsJoin(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
+		return errors.Join(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
 	}
 
 	defer fh.Close()
@@ -342,7 +341,7 @@ func (p *Parser) OutputToWriter(fh io.Writer, format string) error {
 
 	_, err = fh.Write(out)
 	if err != nil {
-		return polyfill.ErrorsJoin(ErrOutputFile, err)
+		return errors.Join(ErrOutputFile, err)
 	}
 
 	return nil
