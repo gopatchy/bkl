@@ -1,0 +1,5 @@
+a:
+  - $match:
+      b: 1
+    $value:
+      d: 4
