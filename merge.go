@@ -91,7 +91,7 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 	return dst, nil
 }
 
-func mergeList(dst []any, src any) (any, error) {
+func mergeList(dst []any, src any) ([]any, error) {
 	switch src2 := src.(type) {
 	case []any:
 		return mergeListList(dst, src2)
@@ -171,7 +171,6 @@ func mergeListDelete(obj []any, del any) ([]any, error) {
 
 		return []any{v}, nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
