@@ -84,7 +84,12 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 
 			dst[k] = v2
 		} else {
-			dst[k] = v
+			var err error
+
+			dst[k], err = deepClone(v)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
