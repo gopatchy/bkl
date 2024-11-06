@@ -236,7 +236,7 @@ func process2DecodeString(obj any, mergeFrom *Document, mergeFromDocs []*Documen
 func process2DecodeStringMap(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v string, depth int) (any, error) {
 	found, val, obj := popMapValue(obj, "$value")
 	if !found {
-		return nil, fmt.Errorf("$decode: missing $value in %#v (#w)", obj, ErrInvalidType)
+		return nil, fmt.Errorf("$decode: missing $value in %#v (%w)", obj, ErrInvalidType)
 	}
 
 	val2, ok := val.(string)

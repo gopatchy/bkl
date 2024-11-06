@@ -1,0 +1,9 @@
+foo:
+  bar:
+    - a: 1
+  zag:
+    - c: 3
+zig:
+  - b: 2
+  - $merge: foo.zag
+  - $merge: foo.bar

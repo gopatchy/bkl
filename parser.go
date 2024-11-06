@@ -44,6 +44,7 @@ import (
 // Phase 5
 //   - $""
 //   - $encode
+//   - $decode
 //   - $env
 //   - $repeat
 //   - $value

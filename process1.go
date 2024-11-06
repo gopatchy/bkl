@@ -82,16 +82,35 @@ func process1MapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs [
 }
 
 func process1List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
-	m, obj, err := popListMapValue(obj, "$merge")
-	if err != nil {
-		return nil, err
+	merge := []any{}
+
+	obj, err := filterList(obj, func(v any) ([]any, error) {
+		v2, ok := v.(map[string]any)
+		if !ok {
+			return []any{v}, nil
+		}
+
+		if len(v2) != 1 {
+			return []any{v}, nil
+		}
+
+		found, val, v2 := popMapValue(v2, "$merge")
+		if found {
+			merge = append(merge, val)
+			return nil, nil
+		}
+
+		return []any{v2}, nil
+	})
+
+	for _, m := range merge {
+		obj, err = process1ListMerge(obj, mergeFrom, mergeFromDocs, m, depth)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if m != nil {
-		return process1ListMerge(obj, mergeFrom, mergeFromDocs, m, depth)
-	}
-
-	m, obj, err = popListMapValue(obj, "$replace")
+	m, obj, err := popListMapValue(obj, "$replace")
 	if err != nil {
 		return nil, err
 	}
@@ -114,18 +133,13 @@ func process1List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dep
 	})
 }
 
-func process1ListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
+func process1ListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) ([]any, error) {
 	in, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
 	}
 
-	next, err := mergeList(obj, in)
-	if err != nil {
-		return nil, err
-	}
-
-	return process1(next, mergeFrom, mergeFromDocs, depth)
+	return mergeList(obj, in)
 }
 
 func process1ListReplace(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
