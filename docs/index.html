@@ -341,6 +341,7 @@ ifocus * {
 	<li><a href="#maps">Maps</a></li>
 	<li><a href="#lists">Lists</a></li>
 	<li><a href="#interp">$""</a></li>
+	<li><a href="#decode">$decode</a></li>
 	<li><a href="#env">$env</a></li>
 	<li><a href="#encode">$encode</a></li>
 	<li><a href="#required">$required</a></li>
@@ -868,6 +869,26 @@ EOF</code>
 <vSpace></vSpace>
 <vSpace></vSpace>
 
+
+
+<h2><a name="decode">$decode</a></h2>
+
+<p><ifocus>$decode</ifocus> transforms a string into a tree by parsing standard formats.</p>
+
+<split3a>
+
+<code><key>$value</key>: |
+  <focus><string>{"a":1}</string></focus>
+<focus><key>$decode</key>: <string>json</string></focus></code>
+
+<op>=</op>
+
+<code><focus><key>a</key>: <number>1</number></focus></code>
+
+</split3a>
+
+<vSpace></vSpace>
+<vSpace></vSpace>
 
 
 <h2><a name="env">$env</a></h2>
