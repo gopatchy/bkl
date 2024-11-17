@@ -194,6 +194,18 @@ func process2EncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Documen
 
 		return process2ToListMap(obj, delim)
 
+	case "values":
+		if len(parts) != 1 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
+
+		obj2, ok := obj.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("$encode: %s: %w (%T)", v, ErrInvalidType, obj)
+		}
+
+		return process2ValuesMap(obj2)
+
 	default:
 		if len(parts) != 1 {
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
@@ -371,4 +383,14 @@ func process2StringInterp(obj string, mergeFrom *Document, mergeFromDocs []*Docu
 	}
 
 	return obj, nil
+}
+
+func process2ValuesMap(obj map[string]any) ([]any, error) {
+	vals := []any{}
+
+	for _, v := range sortedMap(obj) {
+		vals = append(vals, v)
+	}
+
+	return vals, nil
 }
