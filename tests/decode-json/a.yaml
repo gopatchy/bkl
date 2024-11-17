@@ -1,3 +1,4 @@
 a:
-  $value: "{\"foo\":\"bar\"}"
+  $value: |
+    {"foo":"bar"}
   $decode: json
