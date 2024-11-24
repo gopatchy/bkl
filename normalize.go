@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -17,6 +18,9 @@ func normalize(obj any) (any, error) {
 
 	case []any:
 		return normalizeList(obj2)
+
+	case json.Number:
+		return normalizeNumber(obj2)
 
 	default:
 		return obj2, nil
@@ -53,4 +57,16 @@ func normalizeList(obj []any) ([]any, error) {
 
 		return []any{v2}, nil
 	})
+}
+
+func normalizeNumber(obj json.Number) (any, error) {
+	if num, err := obj.Int64(); err == nil {
+		if num == int64(int(num)) {
+			return int(num), nil
+		} else {
+			return num, nil
+		}
+	}
+
+	return obj.Float64()
 }

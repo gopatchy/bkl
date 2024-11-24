@@ -38,6 +38,7 @@ func jsonMarshalStreamPretty(vs []any) ([]byte, error) {
 
 func jsonUnmarshalStream(in []byte) ([]any, error) {
 	dec := json.NewDecoder(bytes.NewReader(in))
+	dec.UseNumber()
 	ret := []any{}
 
 	for {
