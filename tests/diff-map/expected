@@ -1,3 +1,4 @@
+$match: {}
 b: 2
 c: $delete
 d: 4

@@ -1,10 +1,35 @@
 package main
 
 import (
+	"github.com/gopatchy/bkl"
 	"maps"
 	"reflect"
 	"slices"
 )
+
+func diffDoc(dst, src *bkl.Document) (any, error) {
+	doc, err := diff(dst.Data, src.Data)
+	if err != nil {
+		fatal(err)
+	}
+
+	switch doc2 := doc.(type) {
+	case map[string]any:
+		doc2["$match"] = map[string]any{}
+		return doc2, nil
+
+	case []any:
+		doc2 = append([]any{
+			map[string]any{
+				"$match": map[string]any{},
+			},
+		}, doc2...)
+		return doc2, nil
+
+	default:
+		return doc, nil
+	}
+}
 
 func diff(dst, src any) (any, error) {
 	switch dst2 := dst.(type) {

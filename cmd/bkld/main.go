@@ -91,7 +91,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 
 	targetDoc = targetDocs[0]
 
-	doc, err := diff(targetDoc.Data, baseDoc.Data)
+	doc, err := diffDoc(targetDoc, baseDoc)
 	if err != nil {
 		fatal(err)
 	}
@@ -122,7 +122,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 }
 
 func fatal(err error) {
-	fmt.Fprintf(os.Stderr, "%s\n", err)
+	_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 	os.Exit(1)
 }
 
