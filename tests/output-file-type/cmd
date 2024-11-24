@@ -1,4 +1,3 @@
-bkl -o out.json a.b.yaml
+bkl -o $TESTTMP/out.json a.b.yaml
 echo X
-cat out.json
-rm -f out.json
+cat $TESTTMP/out.json

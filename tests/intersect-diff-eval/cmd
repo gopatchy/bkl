@@ -1,0 +1,4 @@
+bkli -o $TESTTMP/base.json a.yaml b.yaml
+bkld -o $TESTTMP/bdiff.yaml $TESTTMP/base.json b.yaml
+echo X
+bkl -P $TESTTMP/base.json $TESTTMP/bdiff.yaml

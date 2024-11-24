@@ -4,21 +4,18 @@ set -eo pipefail
 
 ROOT=$(pwd)
 GOCMD=${GOCMD:=go}
+BKLTMP=$(mktemp -d)
 BINS="bkl bkld bkli bklr"
 
 function cleanup {
-	for BIN in $BINS; do
-		rm $ROOT/$BIN
-	done
+	rm -Rf $BKLTMP $TESTTMP
 }
 
-trap cleanup EXIT
-
 for BIN in $BINS; do
-	$GOCMD build ./cmd/$BIN
+	$GOCMD build -o $BKLTMP/$BIN ./cmd/$BIN
 done
 
-export PATH=$ROOT:$PATH
+export PATH=$BKLTMP:$PATH
 
 FOUND=n
 
@@ -32,13 +29,26 @@ for TEST in tests/*; do
 	echo TEST $TEST
 	cd $TEST
 
-	source cmd >/dev/null 2>&1
+	TESTTMP=$(mktemp -d)
 
-	diff -ud expected <(source cmd)
+  set +e
+  if ! source cmd >/dev/null 2>&1; then
+    printf "	\e[31mFAIL\e[0m\n"
+    source cmd
+    cleanup
+    exit 1
+  fi
+  set -e
+
+	diff -ud expected <(source cmd 2>/dev/null)
 
 	cd ~-
-	echo "	PASS"
+	printf "	\e[32mPASS\e[0m\n"
+
+	rm -Rf $TESTTMP
 done
+
+cleanup
 
 if [[ "$1" != "" && $FOUND == n ]]; then
 	echo "No test matching '$1' found"

@@ -1,4 +1,3 @@
-bkl -o out.yaml a.b.yaml
+bkl -o $TESTTMP/out.yaml a.b.yaml
 echo X
-cat out.yaml
-rm -f out.yaml
+cat $TESTTMP/out.yaml
