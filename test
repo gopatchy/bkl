@@ -23,7 +23,7 @@ export PATH=$ROOT:$PATH
 FOUND=n
 
 for TEST in tests/*; do
-	if [[ "$1" != "" && "tests/$1" != $TEST ]]; then
+	if [[ "$1" != "" && "tests/$1" != "$TEST" ]]; then
 		continue
 	fi
 
@@ -31,6 +31,8 @@ for TEST in tests/*; do
 
 	echo TEST $TEST
 	cd $TEST
+
+	source cmd >/dev/null 2>&1
 
 	diff -ud expected <(source cmd)
 
