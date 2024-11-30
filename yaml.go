@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
@@ -67,8 +68,6 @@ func yamlUnmarshalStream(in []byte) ([]any, error) {
 }
 
 func yamlTranslateNode(node *yaml.Node) (any, error) {
-	// fmt.Printf("kind=%d value=%s\n", node.Kind, node.Value)
-
 	switch node.Kind {
 	case yaml.DocumentNode:
 		return yamlTranslateNode(node.Content[0])
@@ -102,30 +101,26 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 		return ret, nil
 
 	case yaml.ScalarNode:
-		var ret any
+		switch node.ShortTag() {
+		case "!!bool":
+			return strconv.ParseBool(node.Value)
 
-		if node.Value == "" {
-			return "", nil
-		}
+		case "!!int":
+			v, err := strconv.ParseInt(node.Value, 10, 32)
+			if err == nil {
+				return int(v), nil
+			}
 
-		err := yaml.Unmarshal([]byte(node.Value), &ret)
-		if err != nil {
-			return nil, err
-		}
+			return strconv.ParseInt(node.Value, 10, 64)
 
-		switch ret.(type) {
-		case float64:
-			return ret, nil
-		case int64:
-			return ret, nil
-		case int:
-			return ret, nil
-		case bool:
-			return ret, nil
-		case nil:
-			return ret, nil
-		default:
+		case "!!null":
+			return nil, nil
+
+		case "!!str":
 			return node.Value, nil
+
+		default:
+			return nil, fmt.Errorf("unknown yaml short tag: %s (%w)", node.ShortTag(), ErrInvalidType)
 		}
 
 	case yaml.AliasNode:
