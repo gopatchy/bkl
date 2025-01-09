@@ -1,2 +1,3 @@
 list:
-  - $repeat:itemNum:2: $"item-{repeat:itemNum}"
+  - $repeat:itemNum:2:
+    - $"item-{repeat:itemNum}"

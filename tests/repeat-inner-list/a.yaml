@@ -1,5 +1,5 @@
 - foo
 - $repeat:
     itemNum: 2
-    $value:
+    $contents:
       - $"item-{repeat:itemNum}"
