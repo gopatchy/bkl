@@ -1,0 +1,2 @@
+$repeat:itemNum:2:
+  $"item-{repeat:itemNum}": a

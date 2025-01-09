@@ -1,0 +1,3 @@
+list:
+  - $repeat:a:2: $"a{repeat:a}"
+  - $repeat:b:3: $"b{repeat:b}"

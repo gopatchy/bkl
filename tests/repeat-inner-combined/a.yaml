@@ -1,0 +1,8 @@
+$repeat: 2
+v: w
+$"doc{repeat}":
+  - x
+  - $repeat:a:2:
+      y: z
+      $repeat:b:2:
+        $"b{repeat:b}": $"a{repeat:a}"

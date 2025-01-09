@@ -1,0 +1,5 @@
+map:
+  $repeat:a:2:
+    $"a{repeat:a}": foo
+  $repeat:b:3:
+    $"b{repeat:b}": bar
