@@ -97,7 +97,7 @@ func (d *Document) Process(mergeFromDocs []*Document) ([]*Document, error) {
 		return nil, err
 	}
 
-	docs, err := repeat(d)
+	docs, err := repeatDoc(d)
 	if err != nil {
 		return nil, err
 	}

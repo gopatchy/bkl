@@ -30,6 +30,21 @@ func process2(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int
 }
 
 func process2Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
+		switch v2 := v.(type) {
+		case map[string]any:
+			if found, r, v3 := popMapValue(v2, "$repeat"); found {
+				return process2RepeatObj(v3, mergeFrom, mergeFromDocs, k, r, depth)
+			}
+		}
+
+		return map[string]any{k: v}, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
 	if found, v, obj := popMapValue(obj, "$encode"); found {
 		return process2Encode(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
@@ -393,4 +408,40 @@ func process2ValuesMap(obj map[string]any) ([]any, error) {
 	}
 
 	return vals, nil
+}
+
+func process2RepeatObj(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, k string, r any, depth int) (map[string]any, error) {
+	r2, ok := r.(int)
+	if !ok {
+		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
+	}
+
+	ret := map[string]any{}
+
+	for i := 0; i < r2; i++ {
+		mergeFrom2, err := mergeFrom.Clone("$repeat")
+		if err != nil {
+			return nil, err
+		}
+
+		mergeFrom2.Vars["$repeat"] = i
+
+		v2, err := process2(v, mergeFrom2, mergeFromDocs, depth)
+		if err != nil {
+			return nil, err
+		}
+
+		if v2 == nil {
+			return map[string]any{}, nil
+		}
+
+		k2, err := process2(k, mergeFrom2, mergeFromDocs, depth)
+		if err != nil {
+			return nil, err
+		}
+
+		ret[k2.(string)] = v2
+	}
+
+	return ret, nil
 }

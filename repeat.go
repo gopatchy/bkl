@@ -4,29 +4,29 @@ import (
 	"fmt"
 )
 
-func repeat(doc *Document) ([]*Document, error) {
+func repeatDoc(doc *Document) ([]*Document, error) {
 	switch obj := doc.Data.(type) {
 	case map[string]any:
-		return repeatMap(doc, obj)
+		return repeatDocMap(doc, obj)
 
 	case []any:
-		return repeatList(doc, obj)
+		return repeatDocList(doc, obj)
 
 	default:
 		return []*Document{doc}, nil
 	}
 }
 
-func repeatMap(doc *Document, data map[string]any) ([]*Document, error) {
+func repeatDocMap(doc *Document, data map[string]any) ([]*Document, error) {
 	if found, v, data := popMapValue(data, "$repeat"); found {
 		doc.Data = data
-		return repeatDoc(doc, v)
+		return repeatDocGen(doc, v)
 	}
 
 	return []*Document{doc}, nil
 }
 
-func repeatList(doc *Document, data []any) ([]*Document, error) {
+func repeatDocList(doc *Document, data []any) ([]*Document, error) {
 	v, data2, err := popListMapValue(data, "$repeat")
 	if err != nil {
 		return nil, err
@@ -34,26 +34,26 @@ func repeatList(doc *Document, data []any) ([]*Document, error) {
 
 	if v != nil {
 		doc.Data = data2
-		return repeatDoc(doc, v)
+		return repeatDocGen(doc, v)
 	}
 
 	return []*Document{doc}, nil
 }
 
-func repeatDoc(doc *Document, v any) ([]*Document, error) {
+func repeatDocGen(doc *Document, v any) ([]*Document, error) {
 	switch v2 := v.(type) {
 	case int:
-		return repeatFromInt(doc, "$repeat", v2, map[string]any{})
+		return repeatDocGenFromInt(doc, "$repeat", v2, map[string]any{})
 
 	case map[string]any:
-		return repeatFromMap(doc, v2)
+		return repeatDocGenFromMap(doc, v2)
 
 	default:
 		return nil, fmt.Errorf("$repeat: %T (%w)", v, ErrInvalidRepeat)
 	}
 }
 
-func repeatFromInt(doc *Document, name string, count int, vars map[string]any) ([]*Document, error) {
+func repeatDocGenFromInt(doc *Document, name string, count int, vars map[string]any) ([]*Document, error) {
 	ret := []*Document{}
 
 	for i := 0; i < count; i++ {
@@ -74,7 +74,7 @@ func repeatFromInt(doc *Document, name string, count int, vars map[string]any) (
 	return ret, nil
 }
 
-func repeatFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
+func repeatDocGenFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
 	docs := []*Document{doc}
 
 	vars := map[string]any{}
@@ -91,7 +91,7 @@ func repeatFromMap(doc *Document, rs map[string]any) ([]*Document, error) {
 		tmp := []*Document{}
 
 		for _, d := range docs {
-			ds, err := repeatFromInt(d, fmt.Sprintf("$repeat:%s", name), count2, vars)
+			ds, err := repeatDocGenFromInt(d, fmt.Sprintf("$repeat:%s", name), count2, vars)
 			if err != nil {
 				return nil, err
 			}
