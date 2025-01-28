@@ -252,13 +252,20 @@ func (p *Parser) outputDocument(doc *Document) ([]any, error) {
 	}
 
 	return filterList(outs, func(v any) ([]any, error) {
+		switch obj := v.(type) {
+		case map[string]any:
+			if hasMapBoolValue(obj, "$output", false) {
+				return nil, nil
+			}
+		case []any:
+			if hasListMapBoolValue(obj, "$output", false) {
+				return nil, nil
+			}
+		}
+
 		v2, err := filterOutput(v)
 		if err != nil {
 			return nil, err
-		}
-
-		if v2 == nil {
-			return nil, nil
 		}
 
 		err = validate(v2)
