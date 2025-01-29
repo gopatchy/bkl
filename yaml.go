@@ -89,7 +89,7 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 	case yaml.MappingNode:
 		ret := map[string]any{}
 
-		mergedIndices := map[int]bool{}
+		// First see if there's a merge statement, and merge the referenced map(s) into ret.
 		for i := 0; i+1 < len(node.Content); i += 2 {
 			if node.Content[i].Value == "<<" {
 				v2, err := yamlTranslateNode(node.Content[i+1])
@@ -101,13 +101,12 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 				if err != nil {
 					return nil, err
 				}
-
-				mergedIndices[i] = true
 			}
 		}
 
+		// Next iterate over all the local values of the map.
 		for i := 0; i+1 < len(node.Content); i += 2 {
-			if mergedIndices[i] {
+			if node.Content[i].Value == "<<" {
 				continue
 			}
 
