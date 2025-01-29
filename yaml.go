@@ -113,10 +113,18 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 
 			return strconv.ParseInt(node.Value, 10, 64)
 
+		case "!!float":
+			v, err := strconv.ParseFloat(node.Value, 32)
+			if err == nil {
+				return v, nil
+			}
+
+			return strconv.ParseFloat(node.Value, 64)
+
 		case "!!null":
 			return nil, nil
 
-		case "!!str":
+		case "!!str", "!!timestamp":
 			return node.Value, nil
 
 		default:

@@ -1,0 +1,5 @@
+bool: true
+float: 0.5
+int: 42
+str: hello
+timestamp: "2022-02-05T10:30:00.1Z"
