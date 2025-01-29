@@ -89,7 +89,28 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 	case yaml.MappingNode:
 		ret := map[string]any{}
 
+		mergedIndices := map[int]bool{}
 		for i := 0; i+1 < len(node.Content); i += 2 {
+			if node.Content[i].Value == "<<" {
+				v2, err := yamlTranslateNode(node.Content[i+1])
+				if err != nil {
+					return nil, err
+				}
+
+				err = yamlMerge(&ret, v2, node.Content[i+1])
+				if err != nil {
+					return nil, err
+				}
+
+				mergedIndices[i] = true
+			}
+		}
+
+		for i := 0; i+1 < len(node.Content); i += 2 {
+			if mergedIndices[i] {
+				continue
+			}
+
 			v2, err := yamlTranslateNode(node.Content[i+1])
 			if err != nil {
 				return nil, err
@@ -140,4 +161,29 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 	default:
 		return nil, fmt.Errorf("unknown yaml type: %d (%w)", node.Kind, ErrInvalidType)
 	}
+}
+
+// Merge mapping or list of mappings into a destination mapping, as per https://yaml.org/type/merge.html
+func yamlMerge(dst *map[string]any, src any, node *yaml.Node) error {
+	switch src2 := src.(type) {
+	case map[string]any:
+		for k, v := range src2 {
+			(*dst)[k] = v
+		}
+	case []any:
+		for i := len(src2) - 1; i >= 0; i-- {
+			switch inner := src2[i].(type) {
+			case map[string]any:
+				for k, v := range inner {
+					(*dst)[k] = v
+				}
+			default:
+				return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, ErrInvalidType)
+			}
+		}
+	default:
+		return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, ErrInvalidType)
+	}
+
+	return nil
 }

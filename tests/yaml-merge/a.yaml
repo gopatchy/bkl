@@ -1,0 +1,6 @@
+- &anchor
+  bar: 2
+  foo: 1
+  name: original
+- name: copy
+  <<: *anchor
