@@ -126,6 +126,9 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 	case yaml.AliasNode:
 		return yamlTranslateNode(node.Alias)
 
+	case 0:
+		return nil, nil
+
 	default:
 		return nil, fmt.Errorf("unknown yaml type: %d (%w)", node.Kind, ErrInvalidType)
 	}
