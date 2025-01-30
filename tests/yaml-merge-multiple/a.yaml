@@ -1,0 +1,11 @@
+- &anchor
+  bar: 2
+  foo: 1
+  name: original
+- &otherAnchor
+  baz: 3
+  foo: 4
+- name: copy
+  <<:
+    - *otherAnchor
+    - *anchor
