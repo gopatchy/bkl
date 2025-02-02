@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
+	"runtime/pprof"
 	"strings"
 
 	"github.com/gopatchy/bkl"
@@ -17,6 +18,8 @@ type options struct {
 	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
 	Version      bool            `short:"V" long:"version" description:"print version and exit"`
+
+	CPUProfile   *string         `short:"c" long:"cpu-profile" description:"write CPU profile to file"`
 
 	Positional struct {
 		InputPaths []flags.Filename `positional-arg-name:"inputPath" required:"0" description:"input file path"`
@@ -41,6 +44,16 @@ Related tools:
 	_, err := fp.Parse()
 	if err != nil {
 		os.Exit(1)
+	}
+
+	if opts.CPUProfile != nil {
+		fh, err := os.Create(*opts.CPUProfile)
+		if err != nil {
+			fatal(err)
+		}
+
+		pprof.StartCPUProfile(fh)
+		defer pprof.StopCPUProfile()
 	}
 
 	if opts.Version || os.Getenv("BKL_VERSION") != "" {
