@@ -2,21 +2,17 @@ package bkl
 
 import (
 	"fmt"
-	"os"
-	"strings"
 )
 
 type Document struct {
 	ID      string
 	Parents []*Document
 	Data    any
-	Vars    map[string]any
 }
 
 func NewDocument(id string) *Document {
 	return &Document{
-		ID:   id,
-		Vars: envVars(),
+		ID: id,
 	}
 }
 
@@ -58,10 +54,6 @@ func (d *Document) Clone(suffix string) (*Document, error) {
 		d2.Parents = append(d2.Parents, parent)
 	}
 
-	for k, v := range d.Vars {
-		d2.Vars[k] = v
-	}
-
 	return d2, nil
 }
 
@@ -92,18 +84,20 @@ func (d *Document) PopMapValue(key string) (bool, any) {
 func (d *Document) Process(mergeFromDocs []*Document) ([]*Document, error) {
 	var err error
 
+	ec := NewEvalContext()
+
 	d.Data, err = process1(d.Data, d, mergeFromDocs, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	docs, err := repeatDoc(d)
+	docs, ecs, err := repeatDoc(d, ec)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, doc := range docs {
-		doc.Data, err = process2(doc.Data, doc, mergeFromDocs, 0)
+	for i, doc := range docs {
+		doc.Data, err = process2(doc.Data, doc, mergeFromDocs, ecs[i], 0)
 		if err != nil {
 			return nil, err
 		}
@@ -114,15 +108,4 @@ func (d *Document) Process(mergeFromDocs []*Document) ([]*Document, error) {
 
 func (d *Document) String() string {
 	return d.ID
-}
-
-func envVars() map[string]any {
-	vars := map[string]any{}
-
-	for _, s := range os.Environ() {
-		kv := strings.SplitN(s, "=", 2)
-		vars[fmt.Sprintf("$env:%s", kv[0])] = kv[1]
-	}
-
-	return vars
 }

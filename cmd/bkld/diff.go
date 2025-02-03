@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gopatchy/bkl"
 	"maps"
 	"reflect"
 	"slices"
+
+	"github.com/gopatchy/bkl"
 )
 
 func diffDoc(dst, src *bkl.Document) (any, error) {

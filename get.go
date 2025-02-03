@@ -7,12 +7,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func getWithVar(doc *Document, docs []*Document, m any) (any, error) {
+func getWithVar(doc *Document, docs []*Document, ec *EvalContext, m any) (any, error) {
 	ret, err := get(doc, docs, m)
 	if err != nil {
 		switch m2 := m.(type) {
 		case string:
-			return getVar(doc, m2)
+			return ec.GetVar(m2)
 
 		default:
 			return nil, err
@@ -144,14 +144,4 @@ func getCrossDoc(docs []*Document, pat any) (*Document, error) {
 	}
 
 	return ret, nil
-}
-
-func getVar(doc *Document, name string) (any, error) {
-	for k, v := range doc.Vars {
-		if name == k {
-			return v, nil
-		}
-	}
-
-	return nil, fmt.Errorf("%s: %w", name, ErrVariableNotFound)
 }
