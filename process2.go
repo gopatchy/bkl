@@ -34,7 +34,7 @@ func process2Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docum
 		switch v2 := v.(type) {
 		case map[string]any:
 			if found, r, v3 := popMapValue(v2, "$repeat"); found {
-				return process2RepeatObj(v3, mergeFrom, mergeFromDocs, ec, k, r, depth)
+				return process2RepeatObjMap(v3, mergeFrom, mergeFromDocs, ec, k, r, depth)
 			}
 		}
 
@@ -336,6 +336,13 @@ func process2List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, ec 
 	}
 
 	return filterList(obj, func(v any) ([]any, error) {
+		switch v2 := v.(type) {
+		case map[string]any:
+			if found, r, v3 := popMapValue(v2, "$repeat"); found {
+				return process2RepeatObjList(v3, mergeFrom, mergeFromDocs, ec, r, depth)
+			}
+		}
+
 		v2, err := process2(v, mergeFrom, mergeFromDocs, ec, depth)
 		if err != nil {
 			return nil, err
@@ -409,7 +416,7 @@ func process2ValuesMap(obj map[string]any) ([]any, error) {
 	return vals, nil
 }
 
-func process2RepeatObj(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, k string, r any, depth int) (map[string]any, error) {
+func process2RepeatObjMap(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, k string, r any, depth int) (map[string]any, error) {
 	r2, ok := r.(int)
 	if !ok {
 		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
@@ -427,7 +434,7 @@ func process2RepeatObj(v map[string]any, mergeFrom *Document, mergeFromDocs []*D
 		}
 
 		if v2 == nil {
-			return map[string]any{}, nil
+			continue
 		}
 
 		k2, err := process2(k, mergeFrom, mergeFromDocs, ec, depth)
@@ -436,6 +443,33 @@ func process2RepeatObj(v map[string]any, mergeFrom *Document, mergeFromDocs []*D
 		}
 
 		ret[k2.(string)] = v2
+	}
+
+	return ret, nil
+}
+
+func process2RepeatObjList(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, r any, depth int) ([]any, error) {
+	r2, ok := r.(int)
+	if !ok {
+		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
+	}
+
+	ret := []any{}
+
+	for i := 0; i < r2; i++ {
+		ec := ec.Clone()
+		ec.Vars["$repeat"] = i
+
+		v2, err := process2(v, mergeFrom, mergeFromDocs, ec, depth)
+		if err != nil {
+			return nil, err
+		}
+
+		if v2 == nil {
+			continue
+		}
+
+		ret = append(ret, v2)
 	}
 
 	return ret, nil
