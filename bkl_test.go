@@ -9,9 +9,12 @@ import (
 func Example() {
 	// import "github.com/gopatchy/bkl"
 
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
-	err := b.MergeFileLayers("tests/example1/a.b.toml")
+	err = b.MergeFileLayers("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}

@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -65,22 +66,56 @@ import (
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
 type Parser struct {
-	docs  []*Document
-	debug bool
+	docs     []*Document
+	root     *os.Root
+	rootPath string
+	debug    bool
 }
 
 // New creates and returns a new [Parser] with an empty starting document set.
 //
 // New always succeeds and returns a Parser instance.
-func New() *Parser {
-	return &Parser{
-		debug: os.Getenv("BKL_DEBUG") != "",
+func New() (*Parser, error) {
+	root, err := os.OpenRoot("/")
+	if err != nil {
+		return nil, err
 	}
+
+	return &Parser{
+		root:     root,
+		rootPath: "/",
+		debug:    os.Getenv("BKL_DEBUG") != "",
+	}, nil
 }
 
 // SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
+}
+
+// SetRoot sets a new root sandbox directory relative to the current root.
+func (p *Parser) SetRoot(path string) error {
+	// "sub" -> "/foo/bar/sub"
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+
+	// "/foo/bar/sub" @ root "/foo" -> "bar/sub"
+	rel, err := filepath.Rel(p.rootPath, abs)
+	if err != nil {
+		return err
+	}
+
+	root, err := p.root.OpenRoot(rel)
+	if err != nil {
+		return err
+	}
+
+	p.root = root
+	p.rootPath = filepath.Join(p.rootPath, rel)
+
+	return nil
 }
 
 // MergeDocument applies the supplied Document to the [Parser]'s current

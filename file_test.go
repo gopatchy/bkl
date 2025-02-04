@@ -10,7 +10,8 @@ import (
 func TestSymlink(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/symlink/c.d.yaml"))
 
@@ -23,7 +24,8 @@ func TestSymlink(t *testing.T) {
 func TestParentDirective(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/parent-set/a.b.yaml"))
 

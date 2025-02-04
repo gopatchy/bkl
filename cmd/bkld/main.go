@@ -132,7 +132,10 @@ func getOnlyDocument(path string) (*bkl.Document, string, error) {
 		return nil, "", err
 	}
 
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		return nil, "", err
+	}
 
 	err = b.MergeFileLayers(realPath)
 	if err != nil {

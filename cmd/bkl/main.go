@@ -15,6 +15,7 @@ import (
 type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
+	RootPath     *string         `short:"r" long:"root-path" description:"restrict file access to this root directory"`
 	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
 	Version      bool            `short:"V" long:"version" description:"print version and exit"`
@@ -65,10 +66,20 @@ Related tools:
 		os.Exit(1)
 	}
 
-	p := bkl.New()
+	p, err := bkl.New()
+	if err != nil {
+		fatal(err)
+	}
 
 	if opts.Verbose {
 		p.SetDebug(true)
+	}
+
+	if opts.RootPath != nil {
+		err := p.SetRoot(*opts.RootPath)
+		if err != nil {
+			fatal(err)
+		}
 	}
 
 	format := ""

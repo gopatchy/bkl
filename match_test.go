@@ -10,7 +10,8 @@ import (
 func TestMatchMap(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/match-map/a.b.yaml"))
 
@@ -24,7 +25,8 @@ func TestMatchMap(t *testing.T) {
 func TestMatchList(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/list-delete-partial-list/a.b.yaml"))
 

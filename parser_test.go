@@ -14,7 +14,11 @@ import (
 )
 
 func ExampleNew() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
+
 	docs := b.Documents()
 	fmt.Println(docs)
 	// Output:
@@ -22,10 +26,13 @@ func ExampleNew() {
 }
 
 func ExampleParser() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	// Also parses tests/example1/a.yaml
-	err := b.MergeFileLayers("tests/example1/a.b.toml")
+	err = b.MergeFileLayers("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +45,10 @@ func ExampleParser() {
 }
 
 func ExampleParser_Documents() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	if err := b.MergeFileLayers("tests/example1/a.b.toml"); err != nil {
 		panic(err)
@@ -53,10 +63,13 @@ func ExampleParser_Documents() {
 func ExampleParser_MergeFile() {
 	// Compare to Parser.MergeFileLayers example.
 
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	// Does *not* parse tests/example1/a.yaml
-	err := b.MergeFile("tests/example1/a.b.toml")
+	err = b.MergeFile("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -71,10 +84,13 @@ func ExampleParser_MergeFile() {
 func ExampleParser_MergeFileLayers() {
 	// Compare to Parser.MergeFile example.
 
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	// Also parses tests/example1/a.yaml
-	err := b.MergeFileLayers("tests/example1/a.b.toml")
+	err = b.MergeFileLayers("tests/example1/a.b.toml")
 	if err != nil {
 		panic(err)
 	}
@@ -87,13 +103,16 @@ func ExampleParser_MergeFileLayers() {
 }
 
 func ExampleParser_MergeDocument() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	doc1 := bkl.NewDocumentWithData("a", map[string]any{"a": 1})
 	doc2 := bkl.NewDocumentWithData("b", map[string]any{"b": 2})
 	doc2.AddParents(doc1)
 
-	err := b.MergeDocument(doc1)
+	err = b.MergeDocument(doc1)
 	if err != nil {
 		panic(err)
 	}
@@ -111,7 +130,10 @@ func ExampleParser_MergeDocument() {
 }
 
 func ExampleParser_Output() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	if err := b.MergeFileLayers("tests/output-multi/a.yaml"); err != nil {
 		panic(err)
@@ -131,7 +153,10 @@ func ExampleParser_Output() {
 }
 
 func ExampleParser_Output_literal_dollar() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	if err := b.MergeFileLayers("tests/literal-dollar/a.yaml"); err != nil {
 		panic(err)
@@ -148,7 +173,10 @@ func ExampleParser_Output_literal_dollar() {
 }
 
 func ExampleParser_OutputToFile() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	if err := b.MergeFileLayers("tests/output-multi/a.yaml"); err != nil {
 		panic(err)
@@ -180,13 +208,16 @@ func ExampleParser_OutputToFile() {
 }
 
 func ExampleParser_OutputToWriter() {
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	if err := b.MergeFileLayers("tests/output-multi/a.yaml"); err != nil {
 		panic(err)
 	}
 
-	err := b.OutputToWriter(os.Stdout, "yaml")
+	err = b.OutputToWriter(os.Stdout, "yaml")
 	if err != nil {
 		panic(err)
 	}
@@ -201,7 +232,10 @@ func ExampleParser_SetDebug() {
 	log.Default().SetFlags(0)
 	log.Default().SetOutput(os.Stdout)
 
-	b := bkl.New()
+	b, err := bkl.New()
+	if err != nil {
+		panic(err)
+	}
 
 	b.SetDebug(true)
 
@@ -260,7 +294,11 @@ func FuzzParser(f *testing.F) {
 			return
 		}
 
-		b := bkl.New()
+		b, err := bkl.New()
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		_ = b.MergeFile(path1)
 		_ = b.MergeFile(path2)
 	})

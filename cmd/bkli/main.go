@@ -66,7 +66,10 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 			format = f
 		}
 
-		b := bkl.New()
+		b, err := bkl.New()
+		if err != nil {
+			fatal(err)
+		}
 
 		err = b.MergeFileLayers(realPath)
 		if err != nil {

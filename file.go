@@ -40,7 +40,19 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	}
 
 	if fh == nil {
-		fh, err = os.Open(path)
+		// "a.yaml" -> "/foo/bar/a.yaml"
+		absPath, err := filepath.Abs(path)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", path, err)
+		}
+
+		// "/foo/bar/a.yaml" @ "/foo" -> "bar/a.yaml"
+		relPath, err := filepath.Rel(p.rootPath, absPath)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", path, err)
+		}
+
+		fh, err = p.root.Open(relPath)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}

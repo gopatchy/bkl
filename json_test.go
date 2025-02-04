@@ -10,7 +10,8 @@ import (
 func TestJSONInput(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/json-input/a.b.json"))
 

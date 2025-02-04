@@ -10,7 +10,8 @@ import (
 func TestMapReplace(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/map-replace/a.b.yaml"))
 
@@ -23,7 +24,8 @@ func TestMapReplace(t *testing.T) {
 func TestListMerge(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/list-merge/a.b.yaml"))
 
@@ -36,7 +38,8 @@ func TestListMerge(t *testing.T) {
 func TestListReplace(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/list-replace/a.b.yaml"))
 
@@ -49,7 +52,8 @@ func TestListReplace(t *testing.T) {
 func TestListDelete(t *testing.T) {
 	t.Parallel()
 
-	b := bkl.New()
+	b, err := bkl.New()
+	require.NoError(t, err)
 
 	require.NoError(t, b.MergeFileLayers("tests/list-delete/a.b.yaml"))
 
