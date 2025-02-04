@@ -115,6 +115,8 @@ func (p *Parser) SetRoot(path string) error {
 	p.root = root
 	p.rootPath = filepath.Join(p.rootPath, rel)
 
+	p.log("root=%s", p.rootPath)
+
 	return nil
 }
 
