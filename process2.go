@@ -315,14 +315,26 @@ func process2ToListMap(obj any, delim string) ([]any, error) {
 	ret := []any{}
 
 	for k, v := range sortedMap(obj2) {
-		if v2, ok := v.(string); ok && v2 == "" {
-			ret = append(ret, k)
-		} else {
-			ret = append(ret, fmt.Sprintf("%s%s%v", k, delim, v))
+		switch v2 := v.(type) {
+		case []any:
+			for _, v3 := range v2 {
+				ret = append(ret, process2ToListValue(k, delim, v3))
+			}
+
+		default:
+			ret = append(ret, process2ToListValue(k, delim, v))
 		}
 	}
 
 	return ret, nil
+}
+
+func process2ToListValue(k, delim string, v any) string {
+	if v == "" {
+		return k
+	} else {
+		return fmt.Sprintf("%s%s%v", k, delim, v)
+	}
 }
 
 func process2List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, depth int) (any, error) {
