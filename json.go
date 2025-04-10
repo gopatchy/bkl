@@ -10,6 +10,7 @@ import (
 func jsonMarshalStream(vs []any) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(false)
 
 	for _, v := range vs {
 		err := enc.Encode(v)
@@ -25,6 +26,7 @@ func jsonMarshalStreamPretty(vs []any) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	enc := json.NewEncoder(buf)
 	enc.SetIndent("", "  ")
+	enc.SetEscapeHTML(false)
 
 	for _, v := range vs {
 		err := enc.Encode(v)
