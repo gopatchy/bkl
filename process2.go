@@ -1,7 +1,9 @@
 package bkl
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"regexp"
 	"strings"
@@ -193,6 +195,15 @@ func process2EncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Documen
 		}
 
 		return ret, nil
+
+	case "sha256":
+		if len(parts) != 1 {
+			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+		}
+
+		sh := sha256.New()
+		sh.Write([]byte(fmt.Sprintf("%v", obj)))
+		return hex.EncodeToString(sh.Sum(nil)), nil
 
 	case "tolist":
 		if len(parts) != 2 {
