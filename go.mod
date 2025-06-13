@@ -4,10 +4,10 @@ go 1.24.0
 
 require (
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/pelletier/go-toml/v2 v2.2.3
+	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/samber/lo v1.39.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac
+	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476
 	gopkg.in/yaml.v3 v3.0.1
 )
 
