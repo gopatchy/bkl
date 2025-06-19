@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -88,10 +89,20 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 }
 
 func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
+	return p.loadFileAndParentsInt(path, child, []string{})
+}
+
+func (p *Parser) loadFileAndParentsInt(path string, child *file, stack []string) ([]*file, error) {
+	if slices.Contains(stack, path) {
+		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), ErrCircularRef)
+	}
+
 	f, err := p.loadFile(path, child)
 	if err != nil {
 		return nil, err
 	}
+
+	stack = append(stack, path)
 
 	parents, err := f.parents()
 	if err != nil {
@@ -101,7 +112,7 @@ func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
 	files := []*file{}
 
 	for _, parent := range parents {
-		parentFiles, err := p.loadFileAndParents(parent, f)
+		parentFiles, err := p.loadFileAndParentsInt(parent, f, stack)
 		if err != nil {
 			return nil, err
 		}

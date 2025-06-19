@@ -1,0 +1,4 @@
+# This creates a circular reference back to a.yaml
+# b.yaml → a.yaml → b.yaml (circular)
+$parent: a
+data: "from b.yaml"

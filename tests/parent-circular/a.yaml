@@ -1,0 +1,5 @@
+# Test that circular parent references are handled gracefully
+# a.yaml → b.yaml → a.yaml (circular)
+
+$parent: b
+data: "from a.yaml"
