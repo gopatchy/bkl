@@ -3,7 +3,7 @@ package bkl
 import (
 	"bytes"
 	"fmt"
-	"regexp"
+	"io"
 	"strconv"
 
 	"gopkg.in/yaml.v3"
@@ -39,20 +39,18 @@ func yamlMarshalStream(vs []any) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-var yamlRE = regexp.MustCompile(`(?m)^---$`)
-
 func yamlUnmarshalStream(in []byte) ([]any, error) {
-	// Differs from repeated yaml.Decode by treating "---\n---" as an empty
-	// document rather than skipping it.
-
-	parts := yamlRE.Split(string(in), -1)
+	decoder := yaml.NewDecoder(bytes.NewReader(in))
 	ret := []any{}
 
-	for _, s := range parts {
+	for {
 		var node yaml.Node
 
-		err := yaml.Unmarshal([]byte(s), &node)
+		err := decoder.Decode(&node)
 		if err != nil {
+			if err == io.EOF {
+				break
+			}
 			return nil, err
 		}
 
