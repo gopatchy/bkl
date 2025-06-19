@@ -1,0 +1,4 @@
+# Test for string interpolation with missing variable
+# This should trigger a variable not found error
+
+result: $"Hello {missing_variable} world"
