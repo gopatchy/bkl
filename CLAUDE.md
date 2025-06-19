@@ -1,12 +1,16 @@
-# Claude Code Memory - BKL Project
+# Claude Code Memory - bkl Project
 
 ## Project Overview
-BKL is a layered configuration language parser written in Go that handles YAML/JSON/TOML files with features like:
-- File merging and layering with `$parent` directives
-- Document processing with string interpolation (`$"..."` syntax)
-- Cross-document references and merging
-- Environment variable substitution (`$env:VAR`)
-- Various output formats (JSON, YAML, TOML)
+bkl is a flexible configuration templating language that simplifies configuration management across environments. Key capabilities:
+- **Multi-format support**: Handles YAML, JSON, TOML seamlessly
+- **Automatic inheritance**: Uses filename patterns (e.g., `service.test.yaml` inherits from `service.yaml`)
+- **Manual inheritance**: Via `$parent` directives and wildcard patterns
+- **Intelligent merging**: Maps and lists merge by default, with override options
+- **String interpolation**: `$"Hello {variable}"` syntax for dynamic values
+- **Environment variables**: `$env:VAR` for runtime configuration
+- **Transformations**: `$encode`, `$decode`, `$merge` for data manipulation
+- **Stream processing**: Handle multiple documents with `$match` and `$output`
+- **Utility features**: `$repeat`, `$delete`, `$replace`, required field validation
 
 ## Testing Framework
 - Tests are in `tests/` directory, each test has its own subdirectory
