@@ -150,12 +150,13 @@ func process2EncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Documen
 		ret := []any{}
 
 		for _, iter := range obj2 {
-			iter2, ok := iter.([]any)
-			if !ok {
+			switch iter2 := iter.(type) {
+			case []any:
+				ret = append(ret, iter2...)
+
+			default:
 				ret = append(ret, iter)
 			}
-
-			ret = append(ret, iter2...)
 		}
 
 		return ret, nil
