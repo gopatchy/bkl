@@ -24,6 +24,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `document.go`: Document structure and processing
 - `parser.go`: Main parser logic and document merging
 - `process1.go`/`process2.go`: Document processing phases
+- `merge.go`: Merge logic for combining documents and handling type conflicts
+- `yaml.go`: YAML parsing using standard library decoder instead of regex
 - `error.go`: Centralized error definitions with base `Err`
 
 ## Error Handling Patterns
@@ -48,6 +50,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Code quality**: The linter (`gofumpt`, `go vet`) will automatically format code
 - **Comprehensive testing**: Use `just` to run the full test pipeline before committing
 - **Configuration errors should fail with proper error messages, not silent success**
+- **Always update CLAUDE.md**: After completing any task, update this file with new learnings
+- **File maintenance**: Clean up and reorganize CLAUDE.md sections as needed during updates
 
 ## Commands for Development
 - `just` - Run complete build and test pipeline (preferred)
@@ -59,6 +63,15 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `./test <test-name>` - Run specific integration test
 - `go build ./cmd/bkl` - Build main binary
 - Tests are comprehensive with 160+ integration tests plus Go unit tests
+
+## Merge Behavior
+- Maps merge recursively by default, with special `$replace` directive to override
+- Lists append by default, with `$match`, `$delete`, and `$replace` directives for control
+- **Type conflicts**: Non-map values (strings, numbers, etc.) override maps completely
+  - Previous behavior: merging string into non-empty map would error
+  - Current behavior: string overrides the entire map (implemented in `merge.go:47-48`)
+- Empty maps can be overridden by any value without error
+- Cross-document merging follows filename inheritance patterns
 
 ## Interpolation Syntax
 - String interpolation: `$"Hello {variable} world"`

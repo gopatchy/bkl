@@ -45,11 +45,7 @@ func mergeMap(dst map[string]any, src any) (any, error) {
 		return dst, nil
 
 	default:
-		if len(dst) == 0 {
-			return src, nil
-		}
-
-		return nil, fmt.Errorf("merge map[string]any with %T: %w", src, ErrInvalidType)
+		return src, nil
 	}
 }
 
