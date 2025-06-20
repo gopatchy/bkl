@@ -1,0 +1,13 @@
+servers:
+  server-dev-0:
+    env: dev
+    id: 0
+  server-dev-1:
+    env: dev
+    id: 1
+  server-prod-0:
+    env: prod
+    id: 0
+  server-prod-1:
+    env: prod
+    id: 1

@@ -41,94 +41,26 @@ func repeatDocList(doc *Document, ec *EvalContext, data []any) ([]*Document, []*
 }
 
 func repeatDocGen(doc *Document, ec *EvalContext, v any) ([]*Document, []*EvalContext, error) {
-	switch v2 := v.(type) {
-	case int:
-		return repeatDocGenFromInt(doc, ec, "$repeat", v2)
-
-	case map[string]any:
-		return repeatDocGenFromMap(doc, ec, v2)
-
-	case []any:
-		return repeatDocGenFromList(doc, ec, v2)
-
-	default:
-		return nil, nil, fmt.Errorf("$repeat: %T (%w)", v, ErrInvalidType)
+	contexts, err := repeatGenerateContexts(ec, v)
+	if err != nil {
+		return nil, nil, err
 	}
-}
-
-func repeatDocGenFromInt(doc *Document, ec *EvalContext, name string, count int) ([]*Document, []*EvalContext, error) {
-	docs := []*Document{}
-	ecs := []*EvalContext{}
-
-	for i := 0; i < count; i++ {
-		doc2, err := doc.Clone(fmt.Sprintf("%s=%d", name, i))
+	
+	docs := make([]*Document, len(contexts))
+	ecs := make([]*EvalContext, len(contexts))
+	
+	for i, ctx := range contexts {
+		doc2, err := doc.Clone(fmt.Sprintf("repeat-%d", i))
 		if err != nil {
 			return nil, nil, err
 		}
-
-		ec2 := ec.Clone()
-		ec2.Vars[name] = i
-
-		docs = append(docs, doc2)
-		ecs = append(ecs, ec2)
+		docs[i] = doc2
+		ecs[i] = ctx
 	}
-
+	
 	return docs, ecs, nil
 }
 
-func repeatDocGenFromMap(doc *Document, ec *EvalContext, rs map[string]any) ([]*Document, []*EvalContext, error) {
-	if repeatIsRangeParamsMap(rs) {
-		return repeatDocGenFromRangeParams(doc, ec, rs)
-	}
-
-	ec = ec.Clone()
-
-	for k, v := range rs {
-		ec.Vars[fmt.Sprintf("$repeat.%s", k)] = v
-	}
-
-	docs := []*Document{doc}
-	ecs := []*EvalContext{ec}
-
-	for name, count := range sortedMap(rs) {
-		tmpDocs := []*Document{}
-		tmpECs := []*EvalContext{}
-
-		switch v := count.(type) {
-		case int:
-			for i, d := range docs {
-				ds, es, err := repeatDocGenFromInt(d, ecs[i], fmt.Sprintf("$repeat:%s", name), v)
-				if err != nil {
-					return nil, nil, err
-				}
-
-				tmpDocs = append(tmpDocs, ds...)
-				tmpECs = append(tmpECs, es...)
-			}
-		case map[string]any:
-			if repeatIsRangeParamsMap(v) {
-				for i, d := range docs {
-					ds, es, err := repeatDocGenFromRangeParamsNamed(d, ecs[i], name, v)
-					if err != nil {
-						return nil, nil, err
-					}
-
-					tmpDocs = append(tmpDocs, ds...)
-					tmpECs = append(tmpECs, es...)
-				}
-			} else {
-				return nil, nil, fmt.Errorf("%s: map must contain range parameters ($first, $last, $count, $step) (%w)", name, ErrInvalidRepeat)
-			}
-		default:
-			return nil, nil, fmt.Errorf("%s: %T (%w)", name, count, ErrInvalidRepeat)
-		}
-
-		docs = tmpDocs
-		ecs = tmpECs
-	}
-
-	return docs, ecs, nil
-}
 
 func repeatIsRangeParamsMap(rs map[string]any) bool {
 	for k := range rs {
@@ -140,7 +72,11 @@ func repeatIsRangeParamsMap(rs map[string]any) bool {
 	return false
 }
 
-func repeatDocGenFromRangeParams(doc *Document, ec *EvalContext, rs map[string]any) ([]*Document, []*EvalContext, error) {
+
+
+
+
+func repeatGetRangeParamValues(rs map[string]any) ([]any, error) {
 	first, hasFirst := getMapIntValue(rs, "$first")
 	last, hasLast := getMapIntValue(rs, "$last")
 	count, hasCount := getMapIntValue(rs, "$count")
@@ -151,77 +87,124 @@ func repeatDocGenFromRangeParams(doc *Document, ec *EvalContext, rs map[string]a
 	}
 
 	if step == 0 {
-		return nil, nil, fmt.Errorf("$step cannot be 0 (%w)", ErrInvalidRepeat)
+		return nil, fmt.Errorf("$step cannot be 0 (%w)", ErrInvalidRepeat)
 	}
 
 	if hasCount && count <= 0 {
-		return nil, nil, fmt.Errorf("$count=%d must be positive (%w)", count, ErrInvalidRepeat)
+		return nil, fmt.Errorf("$count=%d must be positive (%w)", count, ErrInvalidRepeat)
 	}
 
 	if hasFirst && hasLast && hasCount {
-		return nil, nil, fmt.Errorf("cannot specify all of $first, $last, and $count (%w)", ErrInvalidRepeat)
+		return nil, fmt.Errorf("cannot specify all of $first, $last, and $count (%w)", ErrInvalidRepeat)
 	} else if hasFirst && hasLast {
 		if (last-first)%step != 0 {
-			return nil, nil, fmt.Errorf("$last=%d - $first=%d must be divisible by $step=%d (%w)", last, first, step, ErrInvalidRepeat)
+			return nil, fmt.Errorf("$last=%d - $first=%d must be divisible by $step=%d (%w)", last, first, step, ErrInvalidRepeat)
 		}
 	} else if hasFirst && hasCount {
 		last = first + (count-1)*step
 	} else if hasLast && hasCount {
 		first = last - (count-1)*step
 	} else {
-		return nil, nil, fmt.Errorf("must specify exactly 2 of $first, $last, $count (%w)", ErrInvalidRepeat)
+		return nil, fmt.Errorf("must specify exactly 2 of $first, $last, $count (%w)", ErrInvalidRepeat)
 	}
 
-	docs := []*Document{}
-	ecs := []*EvalContext{}
-
+	var values []any
 	for value := first; value != last+step; value += step {
-		doc2, err := doc.Clone(fmt.Sprintf("$repeat=%d", value))
-		if err != nil {
-			return nil, nil, err
-		}
-
-		ec2 := ec.Clone()
-		ec2.Vars["$repeat"] = value
-
-		docs = append(docs, doc2)
-		ecs = append(ecs, ec2)
+		values = append(values, value)
 	}
 
-	return docs, ecs, nil
+	return values, nil
 }
 
-func repeatDocGenFromRangeParamsNamed(doc *Document, ec *EvalContext, name string, rs map[string]any) ([]*Document, []*EvalContext, error) {
-	docs, ecs, err := repeatDocGenFromRangeParams(doc, ec, rs)
-	if err != nil {
-		return nil, nil, err
+func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
+	switch r2 := r.(type) {
+	case int:
+		contexts := make([]*EvalContext, r2)
+		for i := 0; i < r2; i++ {
+			ctx := ec.Clone()
+			ctx.Vars["$repeat"] = i
+			contexts[i] = ctx
+		}
+		return contexts, nil
+		
+	case []any:
+		contexts := make([]*EvalContext, len(r2))
+		for i, value := range r2 {
+			ctx := ec.Clone()
+			ctx.Vars["$repeat"] = value
+			contexts[i] = ctx
+		}
+		return contexts, nil
+		
+	case map[string]any:
+		if repeatIsRangeParamsMap(r2) {
+			values, err := repeatGetRangeParamValues(r2)
+			if err != nil {
+				return nil, err
+			}
+			contexts := make([]*EvalContext, len(values))
+			for i, value := range values {
+				ctx := ec.Clone()
+				ctx.Vars["$repeat"] = value
+				contexts[i] = ctx
+			}
+			return contexts, nil
+		}
+		
+		return repeatGenerateContextsFromMap(ec, r2)
+		
+	default:
+		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
 	}
-
-	for i, d := range docs {
-		d.ID = fmt.Sprintf("$repeat:%s=%v", name, ecs[i].Vars["$repeat"])
-		ecs[i].Vars[fmt.Sprintf("$repeat:%s", name)] = ecs[i].Vars["$repeat"]
-		delete(ecs[i].Vars, "$repeat")
-	}
-
-	return docs, ecs, nil
 }
 
-func repeatDocGenFromList(doc *Document, ec *EvalContext, values []any) ([]*Document, []*EvalContext, error) {
-	docs := []*Document{}
-	ecs := []*EvalContext{}
-
-	for _, value := range values {
-		doc2, err := doc.Clone(fmt.Sprintf("$repeat=%v", value))
-		if err != nil {
-			return nil, nil, err
-		}
-
-		ec2 := ec.Clone()
-		ec2.Vars["$repeat"] = value
-
-		docs = append(docs, doc2)
-		ecs = append(ecs, ec2)
+func repeatGenerateContextsFromMap(ec *EvalContext, rs map[string]any) ([]*EvalContext, error) {
+	ec = ec.Clone()
+	for k, v := range rs {
+		ec.Vars[fmt.Sprintf("$repeat.%s", k)] = v
 	}
-
-	return docs, ecs, nil
+	
+	contexts := []*EvalContext{ec}
+	
+	for name, value := range sortedMap(rs) {
+		var newContexts []*EvalContext
+		var values []any
+		var err error
+		
+		switch v := value.(type) {
+		case int:
+			values = make([]any, v)
+			for i := 0; i < v; i++ {
+				values[i] = i
+			}
+			
+		case []any:
+			values = v
+			
+		case map[string]any:
+			if repeatIsRangeParamsMap(v) {
+				values, err = repeatGetRangeParamValues(v)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, fmt.Errorf("%s: map must contain range parameters ($first, $last, $count, $step) (%w)", name, ErrInvalidRepeat)
+			}
+			
+		default:
+			return nil, fmt.Errorf("%s: %T (%w)", name, value, ErrInvalidRepeat)
+		}
+		
+		for _, ctx := range contexts {
+			for _, item := range values {
+				newCtx := ctx.Clone()
+				newCtx.Vars[fmt.Sprintf("$repeat:%s", name)] = item
+				newContexts = append(newContexts, newCtx)
+			}
+		}
+		
+		contexts = newContexts
+	}
+	
+	return contexts, nil
 }

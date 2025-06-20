@@ -1,0 +1,4 @@
+ports:
+  $"port-{$repeat}":
+    number: $repeat
+    $repeat: {$first: 8080, $count: 3}
