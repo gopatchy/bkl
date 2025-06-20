@@ -88,22 +88,36 @@ func repeatDocGenFromMap(doc *Document, ec *EvalContext, rs map[string]any) ([]*
 	ecs := []*EvalContext{ec}
 
 	for name, count := range sortedMap(rs) {
-		count2, ok := count.(int)
-		if !ok {
-			return nil, nil, fmt.Errorf("%T (%w)", count, ErrInvalidRepeat)
-		}
-
 		tmpDocs := []*Document{}
 		tmpECs := []*EvalContext{}
 
-		for i, d := range docs {
-			ds, es, err := repeatDocGenFromInt(d, ecs[i], fmt.Sprintf("$repeat:%s", name), count2)
-			if err != nil {
-				return nil, nil, err
-			}
+		switch v := count.(type) {
+		case int:
+			for i, d := range docs {
+				ds, es, err := repeatDocGenFromInt(d, ecs[i], fmt.Sprintf("$repeat:%s", name), v)
+				if err != nil {
+					return nil, nil, err
+				}
 
-			tmpDocs = append(tmpDocs, ds...)
-			tmpECs = append(tmpECs, es...)
+				tmpDocs = append(tmpDocs, ds...)
+				tmpECs = append(tmpECs, es...)
+			}
+		case map[string]any:
+			if repeatIsRangeParamsMap(v) {
+				for i, d := range docs {
+					ds, es, err := repeatDocGenFromRangeParamsNamed(d, ecs[i], name, v)
+					if err != nil {
+						return nil, nil, err
+					}
+
+					tmpDocs = append(tmpDocs, ds...)
+					tmpECs = append(tmpECs, es...)
+				}
+			} else {
+				return nil, nil, fmt.Errorf("%s: map must contain range parameters ($first, $last, $count, $step) (%w)", name, ErrInvalidRepeat)
+			}
+		default:
+			return nil, nil, fmt.Errorf("%s: %T (%w)", name, count, ErrInvalidRepeat)
 		}
 
 		docs = tmpDocs
@@ -169,6 +183,21 @@ func repeatDocGenFromRangeParams(doc *Document, ec *EvalContext, rs map[string]a
 
 		docs = append(docs, doc2)
 		ecs = append(ecs, ec2)
+	}
+
+	return docs, ecs, nil
+}
+
+func repeatDocGenFromRangeParamsNamed(doc *Document, ec *EvalContext, name string, rs map[string]any) ([]*Document, []*EvalContext, error) {
+	docs, ecs, err := repeatDocGenFromRangeParams(doc, ec, rs)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for i, d := range docs {
+		d.ID = fmt.Sprintf("$repeat:%s=%v", name, ecs[i].Vars["$repeat"])
+		ecs[i].Vars[fmt.Sprintf("$repeat:%s", name)] = ecs[i].Vars["$repeat"]
+		delete(ecs[i].Vars, "$repeat")
 	}
 
 	return docs, ecs, nil
