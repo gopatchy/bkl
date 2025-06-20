@@ -59,6 +59,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **No line numbers**: Don't cite specific line numbers in documentation as they become stale
 - **No implementation details**: Don't describe specific implementation details that change with code
 - **CRITICAL - Test file format**: ALL test expected files MUST end with a newline character. Use `echo "" >> expected` to add trailing newlines when tests fail due to newline mismatches. This is NOT optional.
+- **CRITICAL - Commit steps**: When asked to "commit steps" or "commit", do: 1) stage changes with `git add -A`, 2) commit with simple message, 3) push with `git push`, 4) update CONTEXT.md if needed
 
 ## Commands for Development
 - `just` - Run complete build and test pipeline (preferred)
