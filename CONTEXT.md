@@ -1,4 +1,4 @@
-# Claude Code Memory - bkl Project
+# Context - bkl Project
 
 ## Project Overview
 bkl is a flexible configuration templating language that simplifies configuration management across environments. Key capabilities:
@@ -17,7 +17,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Test structure: `a.yaml` (input), `cmd` (command to run), `expected` (expected output)
 - Use `./test` to run all tests or `./test <test-name>` for specific test
 - For expected failures: use `! bkl` in cmd file and empty expected output
-- Test naming patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, etc.
+- **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
+  - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, `map-delete-*`, etc.
+- **Expected output files**: Always include trailing newline to avoid test failures
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
@@ -50,8 +52,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Code quality**: The linter (`gofumpt`, `go vet`) will automatically format code
 - **Comprehensive testing**: Use `just` to run the full test pipeline before committing
 - **Configuration errors should fail with proper error messages, not silent success**
-- **Always update CLAUDE.md**: After completing any task, update this file with new learnings
-- **File maintenance**: Clean up and reorganize CLAUDE.md sections as needed during updates
+- **Always update CONTEXT.md**: After completing any task, update this file with new learnings
+- **File maintenance**: Clean up and reorganize CONTEXT.md sections as needed during updates
+- **No line numbers**: Don't cite specific line numbers in documentation as they become stale
 
 ## Commands for Development
 - `just` - Run complete build and test pipeline (preferred)
@@ -68,10 +71,10 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Maps merge recursively by default, with special `$replace` directive to override
 - Lists append by default, with `$match`, `$delete`, and `$replace` directives for control
 - **Type conflicts**: Non-map values (strings, numbers, etc.) override maps completely
-  - Previous behavior: merging string into non-empty map would error
-  - Current behavior: string overrides the entire map (implemented in `merge.go:47-48`)
+  - String-to-map override behavior: string overrides the entire map (implemented in `merge.go` `mergeMap` function)
 - Empty maps can be overridden by any value without error
 - Cross-document merging follows filename inheritance patterns
+- **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
 
 ## Interpolation Syntax
 - String interpolation: `$"Hello {variable} world"`
