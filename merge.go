@@ -88,7 +88,7 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 	return dst, nil
 }
 
-func mergeList(dst []any, src any) ([]any, error) {
+func mergeList(dst []any, src any) (any, error) {
 	switch src2 := src.(type) {
 	case []any:
 		return mergeListList(dst, src2)
@@ -97,7 +97,7 @@ func mergeList(dst []any, src any) ([]any, error) {
 		return dst, nil
 
 	default:
-		return nil, fmt.Errorf("merge []any with %T: %w", src, ErrInvalidType)
+		return src, nil
 	}
 }
 

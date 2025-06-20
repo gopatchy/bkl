@@ -86,10 +86,6 @@ func filterOutputMap(obj map[string]any) (any, error) {
 			return nil, err
 		}
 
-		if v2 == nil {
-			return nil, nil
-		}
-
 		return map[string]any{k: v2}, nil
 	})
 }

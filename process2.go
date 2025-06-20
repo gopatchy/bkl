@@ -68,10 +68,6 @@ func process2Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docum
 			return nil, err
 		}
 
-		if v2 == nil {
-			return map[string]any{}, nil
-		}
-
 		k2, err := process2(k, mergeFrom, mergeFromDocs, ec, depth)
 		if err != nil {
 			return nil, err

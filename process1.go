@@ -45,10 +45,6 @@ func process1Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docum
 			return nil, err
 		}
 
-		if v2 == nil {
-			return map[string]any{}, nil
-		}
-
 		k2, err := process1(k, mergeFrom, mergeFromDocs, depth)
 		if err != nil {
 			return nil, err
@@ -103,11 +99,20 @@ func process1List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dep
 		return []any{v2}, nil
 	})
 
-	for _, m := range merge {
-		obj, err = process1ListMerge(obj, mergeFrom, mergeFromDocs, m, depth)
+	for i, m := range merge {
+		result, err := process1ListMerge(obj, mergeFrom, mergeFromDocs, m, depth)
 		if err != nil {
 			return nil, err
 		}
+
+		objList, ok := result.([]any)
+		if !ok {
+			if i < len(merge)-1 {
+				return nil, fmt.Errorf("$merge replaced list with %T, but more $merge directives remain", result)
+			}
+			return result, nil
+		}
+		obj = objList
 	}
 
 	m, obj, err := popListMapValue(obj, "$replace")
@@ -125,15 +130,11 @@ func process1List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dep
 			return nil, err
 		}
 
-		if v2 == nil {
-			return nil, nil
-		}
-
 		return []any{v2}, nil
 	})
 }
 
-func process1ListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) ([]any, error) {
+func process1ListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
 	in, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
