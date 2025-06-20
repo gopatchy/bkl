@@ -296,7 +296,13 @@ func process2DecodeStringMap(obj map[string]any, mergeFrom *Document, mergeFromD
 		return nil, fmt.Errorf("%#v (%w)", val2, ErrUnmarshal)
 	}
 
-	return process2(decs[0], mergeFrom, mergeFromDocs, ec, depth)
+	// First normalize the decoded value
+	normalized, err := normalize(decs[0])
+	if err != nil {
+		return nil, err
+	}
+	
+	return process2(normalized, mergeFrom, mergeFromDocs, ec, depth)
 }
 
 func process2ToListList(obj []any, delim string) ([]any, error) {

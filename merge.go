@@ -93,9 +93,6 @@ func mergeList(dst []any, src any) (any, error) {
 	case []any:
 		return mergeListList(dst, src2)
 
-	case nil:
-		return dst, nil
-
 	default:
 		return src, nil
 	}
