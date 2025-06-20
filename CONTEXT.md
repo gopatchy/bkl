@@ -19,6 +19,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - For expected failures: use `! bkl` in cmd file and empty expected output
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, `map-delete-*`, etc.
+  - Use "null" not "nil" in test names (language perspective vs implementation)
+  - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
 - **Expected output files**: Always include trailing newline to avoid test failures
 - **Debugging test failures**: Command line arguments in `cmd` files must include file extensions (e.g., `bkl a.yaml` not `bkl a`)
 - **Fixing missing newlines**: Use `echo "" >> tests/test-name/expected` to add trailing newline when tests fail due to newline mismatches
@@ -85,13 +87,19 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Lists append by default, with `$match`, `$delete`, and `$replace` directives for control
 - **Type conflicts**: When merging different types, the source value replaces the destination
   - This includes maps, lists, strings, numbers, and null values
+  - Merging any non-map value (including null) into a map replaces the entire map
 - Empty maps can be overridden by any value without error
 - Cross-document merging follows filename inheritance patterns
 - **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
 - **Null handling**: `null` values are preserved and can override existing values
+  - Empty YAML documents (which parse as null) are now preserved in output
+  - Null values in lists are preserved (not filtered out)
+  - Consistent behavior: null is treated like any other value, not as a special "delete" marker
 
 ## Output Directives
 - `$output: true` marks content for inclusion in final output
+- `$output: false` excludes content from final output
+  - Uses a boolean return value to properly distinguish between "value is null" and "exclude from output"
 - **Ambiguity resolution**: In maps within lists, presence of other keys determines scope
   - Map with only `$output: true` → applies to list
   - Map with `$output: true` + other keys → applies to map

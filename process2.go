@@ -374,10 +374,6 @@ func process2List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, ec 
 			return nil, err
 		}
 
-		if v2 == nil {
-			return nil, nil
-		}
-
 		return []any{v2}, nil
 	})
 }
