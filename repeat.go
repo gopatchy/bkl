@@ -49,7 +49,7 @@ func repeatDocGen(doc *Document, ec *EvalContext, v any) ([]*Document, []*EvalCo
 		return repeatDocGenFromMap(doc, ec, v2)
 
 	default:
-		return nil, nil, fmt.Errorf("$repeat: %T (%w)", v, ErrInvalidRepeat)
+		return nil, nil, fmt.Errorf("$repeat: %T (%w)", v, ErrInvalidType)
 	}
 }
 
@@ -74,6 +74,10 @@ func repeatDocGenFromInt(doc *Document, ec *EvalContext, name string, count int)
 }
 
 func repeatDocGenFromMap(doc *Document, ec *EvalContext, rs map[string]any) ([]*Document, []*EvalContext, error) {
+	if repeatIsRangeParamsMap(rs) {
+		return repeatDocGenFromRangeParams(doc, ec, rs)
+	}
+
 	ec = ec.Clone()
 
 	for k, v := range rs {
@@ -104,6 +108,67 @@ func repeatDocGenFromMap(doc *Document, ec *EvalContext, rs map[string]any) ([]*
 
 		docs = tmpDocs
 		ecs = tmpECs
+	}
+
+	return docs, ecs, nil
+}
+
+func repeatIsRangeParamsMap(rs map[string]any) bool {
+	for k := range rs {
+		switch k {
+		case "$first", "$last", "$count", "$step":
+			return true
+		}
+	}
+	return false
+}
+
+func repeatDocGenFromRangeParams(doc *Document, ec *EvalContext, rs map[string]any) ([]*Document, []*EvalContext, error) {
+	first, hasFirst := getMapIntValue(rs, "$first")
+	last, hasLast := getMapIntValue(rs, "$last")
+	count, hasCount := getMapIntValue(rs, "$count")
+	step, hasStep := getMapIntValue(rs, "$step")
+
+	if !hasStep {
+		step = 1
+	}
+
+	if step == 0 {
+		return nil, nil, fmt.Errorf("$step cannot be 0 (%w)", ErrInvalidRepeat)
+	}
+
+	if hasCount && count <= 0 {
+		return nil, nil, fmt.Errorf("$count=%d must be positive (%w)", count, ErrInvalidRepeat)
+	}
+
+	if hasFirst && hasLast && hasCount {
+		return nil, nil, fmt.Errorf("cannot specify all of $first, $last, and $count (%w)", ErrInvalidRepeat)
+	} else if hasFirst && hasLast {
+		if (last-first)%step != 0 {
+			return nil, nil, fmt.Errorf("$last=%d - $first=%d must be divisible by $step=%d (%w)", last, first, step, ErrInvalidRepeat)
+		}
+	} else if hasFirst && hasCount {
+		last = first + (count-1)*step
+	} else if hasLast && hasCount {
+		first = last - (count-1)*step
+	} else {
+		return nil, nil, fmt.Errorf("must specify exactly 2 of $first, $last, $count (%w)", ErrInvalidRepeat)
+	}
+
+	docs := []*Document{}
+	ecs := []*EvalContext{}
+
+	for value := first; value != last+step; value += step {
+		doc2, err := doc.Clone(fmt.Sprintf("$repeat=%d", value))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		ec2 := ec.Clone()
+		ec2.Vars["$repeat"] = value
+
+		docs = append(docs, doc2)
+		ecs = append(ecs, ec2)
 	}
 
 	return docs, ecs, nil

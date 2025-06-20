@@ -18,7 +18,7 @@ import (
 func FileMatch(path string) (string, string, error) {
 	f := ext(path)
 	if _, found := formatByExtension[f]; !found {
-		return "", "", fmt.Errorf("%s: %w", f, ErrInvalidType)
+		return "", "", fmt.Errorf("%s: %w", f, ErrUnknownFormat)
 	}
 
 	withoutExt := strings.TrimSuffix(path, "."+f)

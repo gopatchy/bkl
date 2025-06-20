@@ -20,6 +20,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, `map-delete-*`, etc.
 - **Expected output files**: Always include trailing newline to avoid test failures
+- **Debugging test failures**: Command line arguments in `cmd` files must include file extensions (e.g., `bkl a.yaml` not `bkl a`)
+- **Fixing missing newlines**: Use `echo "" >> tests/test-name/expected` to add trailing newline when tests fail due to newline mismatches
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
@@ -89,3 +91,15 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Environment variables: `$env:VARNAME` 
 - Cross-document references and path navigation supported
 - Missing variables properly return errors
+
+## Repeat Functionality
+- `$repeat` supports three modes: integer count, key-value map, and range parameters
+- **Integer mode**: `$repeat: 5` creates 5 copies with `$repeat` variable as 0,1,2,3,4
+- **Key-value mode**: `$repeat: {x: 2, y: 3}` creates cross-product of iterations
+- **Range parameters mode**: `$repeat: {$first: 5, $last: 10}` creates sequence with specific values
+  - Supports `$first`, `$last`, `$count`, `$step` parameters
+  - Must specify exactly 2 of `$first`, `$last`, `$count` (cannot specify all 3)
+  - `$step` defaults to 1, cannot be 0
+  - `$count` must be positive
+  - For `$first`/`$last` combinations, validates that `(last-first) % step == 0`
+- Range parameters work in both document-level and object-level `$repeat` contexts

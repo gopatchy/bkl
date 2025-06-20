@@ -65,6 +65,20 @@ func toString(a any) string {
 	return v
 }
 
+func toInt(a any) (int, bool) {
+	v, ok := a.(int)
+	return v, ok
+}
+
+func getMapIntValue(m map[string]any, k string) (int, bool) {
+	v, found := m[k]
+	if !found {
+		return 0, false
+	}
+
+	return toInt(v)
+}
+
 func getMapStringValue(m map[string]any, k string) string {
 	v, found := m[k]
 	if !found {
