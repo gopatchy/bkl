@@ -1577,6 +1577,92 @@ EOF</code>
 </split3a>
 
 <vSpace></vSpace>
+
+<p><ifocus>$repeat:</ifocus> can contain a list of values to iterate over:</p>
+
+<split3a>
+
+<code><focus><key>$repeat</key>: [<string>x</string>, <string>y</string>, <string>z</string>]</focus>
+<key>a</key>: <focus><string>$repeat</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <string>x</string>
+---
+<key>a</key>: <string>y</string>
+---
+<key>a</key>: <string>z</string></code>
+
+</split3a>
+
+<vSpace></vSpace>
+
+<p><ifocus>$repeat:</ifocus> supports range parameters for numeric sequences:</p>
+
+<split3a>
+
+<code><focus><key>$repeat</key>:
+  <key>$first</key>: <number>10</number>
+  <key>$count</key>: <number>3</number></focus>
+<key>a</key>: <focus><string>$repeat</string></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>: <number>10</number>
+---
+<key>a</key>: <number>11</number>
+---
+<key>a</key>: <number>12</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+
+<p>Range parameters require exactly 2 of <ifocus>$first</ifocus>, <ifocus>$last</ifocus>, and <ifocus>$count</ifocus>. Optional <ifocus>$step</ifocus> defaults to 1.</p>
+
+<vSpace></vSpace>
+
+<p><ifocus>$repeat:</ifocus> also works at the object level within maps and lists:</p>
+
+<split3a>
+
+<code><key>a</key>:
+  <key>$"b{$repeat}"</key>:
+    <key>c</key>: <focus><string>$repeat</string></focus>
+    <focus><key>$repeat</key>: <number>3</number></focus></code>
+
+<op>=</op>
+
+<code><key>a</key>:
+  <key>b0</key>:
+    <key>c</key>: <number>0</number>
+  <key>b1</key>:
+    <key>c</key>: <number>1</number>
+  <key>b2</key>:
+    <key>c</key>: <number>2</number></code>
+
+</split3a>
+
+<vSpace></vSpace>
+
+<p>Object-level repeat in lists:</p>
+
+<split3a>
+
+<code><key>a</key>:
+  - <key>b</key>: <focus><string>$repeat</string></focus>
+    <focus><key>$repeat</key>: [<string>x</string>, <string>y</string>, <string>z</string>]</focus></code>
+
+<op>=</op>
+
+<code><key>a</key>:
+  - <key>b</key>: <string>x</string>
+  - <key>b</key>: <string>y</string>
+  - <key>b</key>: <string>z</string></code>
+
+</split3a>
+
+<vSpace></vSpace>
 <vSpace></vSpace>
 
 
