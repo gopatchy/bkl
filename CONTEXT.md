@@ -55,6 +55,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Always update CONTEXT.md**: After completing any task, update this file with new learnings
 - **File maintenance**: Clean up and reorganize CONTEXT.md sections as needed during updates
 - **No line numbers**: Don't cite specific line numbers in documentation as they become stale
+- **No implementation details**: Don't describe specific implementation details that change with code
 
 ## Commands for Development
 - `just` - Run complete build and test pipeline (preferred)
@@ -75,6 +76,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Empty maps can be overridden by any value without error
 - Cross-document merging follows filename inheritance patterns
 - **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
+- **Delete after merge**: `$delete` directives work with `$merge` operations in the same map
 
 ## Interpolation Syntax
 - String interpolation: `$"Hello {variable} world"`

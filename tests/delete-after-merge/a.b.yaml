@@ -1,0 +1,4 @@
+x:
+  $merge: a
+  c: $delete
+  d: $delete

@@ -69,6 +69,12 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 		}
 
 		if found {
+			// Check if existing value is $delete - if so, delete the key instead of merging
+			if toString(existing) == "$delete" {
+				delete(dst, k)
+				continue
+			}
+			
 			v2, err := merge(existing, v)
 			if err != nil {
 				return nil, fmt.Errorf("%s %w", k, err)
