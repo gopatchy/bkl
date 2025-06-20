@@ -1,4 +1,6 @@
 cover.out
 cover.html
+integration-coverage.out
+integration-coverage.html
 pkg
 .idea

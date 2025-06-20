@@ -11,9 +11,19 @@ function cleanup {
 	rm -Rf $BKLTMP $TESTTMP
 }
 
-for BIN in $BINS; do
-	$GOCMD build -o $BKLTMP/$BIN ./cmd/$BIN
-done
+# Build binaries (with coverage if COVERAGE env var is set)
+if [[ -n "$COVERAGE" ]]; then
+	export GOCOVERDIR=$BKLTMP/coverdata
+	mkdir -p $GOCOVERDIR
+	
+	for BIN in $BINS; do
+		$GOCMD build -cover -o $BKLTMP/$BIN ./cmd/$BIN
+	done
+else
+	for BIN in $BINS; do
+		$GOCMD build -o $BKLTMP/$BIN ./cmd/$BIN
+	done
+fi
 
 export PATH=$BKLTMP:$PATH
 
@@ -47,6 +57,17 @@ for TEST in tests/*; do
 
 	rm -Rf $TESTTMP
 done
+
+# Generate coverage report if coverage was enabled
+if [[ -n "$COVERAGE" ]]; then
+	echo "Aggregating coverage data..."
+	$GOCMD tool covdata textfmt -i=$GOCOVERDIR -o=$ROOT/integration-coverage.out
+	
+	if [ -f "$ROOT/integration-coverage.out" ]; then
+		$GOCMD tool cover -html=$ROOT/integration-coverage.out -o=$ROOT/integration-coverage.html
+		echo "Coverage report generated: integration-coverage.html"
+	fi
+fi
 
 cleanup
 

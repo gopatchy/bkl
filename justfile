@@ -13,6 +13,9 @@ test:
 	{{go}} tool cover -html=cover.out -o=cover.html
 	GOCMD={{go}} ./test
 
+test-coverage:
+	GOCMD={{go}} COVERAGE=1 ./test
+
 fuzz:
 	{{go}} test -fuzz FuzzParser
 

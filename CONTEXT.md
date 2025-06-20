@@ -69,6 +69,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Generates coverage report at `cover.html`
 - `./test` - Run integration tests only
 - `./test <test-name>` - Run specific integration test
+- `COVERAGE=1 ./test` - Run integration tests with coverage profiling
+  - Generates `integration-coverage.html` and `integration-coverage.out`
+- `just test-coverage` - Run all integration tests with coverage
 - `go build ./cmd/bkl` - Build main binary
 - Tests are comprehensive with 160+ integration tests plus Go unit tests
 
