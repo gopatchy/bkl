@@ -48,6 +48,9 @@ func repeatDocGen(doc *Document, ec *EvalContext, v any) ([]*Document, []*EvalCo
 	case map[string]any:
 		return repeatDocGenFromMap(doc, ec, v2)
 
+	case []any:
+		return repeatDocGenFromList(doc, ec, v2)
+
 	default:
 		return nil, nil, fmt.Errorf("$repeat: %T (%w)", v, ErrInvalidType)
 	}
@@ -198,6 +201,26 @@ func repeatDocGenFromRangeParamsNamed(doc *Document, ec *EvalContext, name strin
 		d.ID = fmt.Sprintf("$repeat:%s=%v", name, ecs[i].Vars["$repeat"])
 		ecs[i].Vars[fmt.Sprintf("$repeat:%s", name)] = ecs[i].Vars["$repeat"]
 		delete(ecs[i].Vars, "$repeat")
+	}
+
+	return docs, ecs, nil
+}
+
+func repeatDocGenFromList(doc *Document, ec *EvalContext, values []any) ([]*Document, []*EvalContext, error) {
+	docs := []*Document{}
+	ecs := []*EvalContext{}
+
+	for _, value := range values {
+		doc2, err := doc.Clone(fmt.Sprintf("$repeat=%v", value))
+		if err != nil {
+			return nil, nil, err
+		}
+
+		ec2 := ec.Clone()
+		ec2.Vars["$repeat"] = value
+
+		docs = append(docs, doc2)
+		ecs = append(ecs, ec2)
 	}
 
 	return docs, ecs, nil

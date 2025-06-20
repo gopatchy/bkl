@@ -1,0 +1,7 @@
+fruits:
+  item-apple:
+    name: apple
+  item-banana:
+    name: banana
+  item-cherry:
+    name: cherry

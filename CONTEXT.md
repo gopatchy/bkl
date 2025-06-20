@@ -93,8 +93,11 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Missing variables properly return errors
 
 ## Repeat Functionality
-- `$repeat` supports three modes: integer count, key-value map, and range parameters
+- `$repeat` supports four modes: integer count, list of values, key-value map, and range parameters
 - **Integer mode**: `$repeat: 5` creates 5 copies with `$repeat` variable as 0,1,2,3,4
+- **List mode**: `$repeat: ["apple", "banana", "cherry"]` creates copies with `$repeat` variable as each list value
+  - Works with any value type: strings, numbers, booleans, etc.
+  - Example: `$repeat: [42, "hello", true]` iterates over mixed types
 - **Key-value mode**: `$repeat: {x: 2, y: 3}` creates cross-product of iterations
 - **Range parameters mode**: `$repeat: {$first: 5, $last: 10}` creates sequence with specific values
   - Supports `$first`, `$last`, `$count`, `$step` parameters
@@ -106,3 +109,5 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Example: `$repeat: {a: 2, b: {$first: 10, $step: 2, $count: 3}}` creates cross-product
   - Mixed integer and range parameter values are supported
 - Range parameters work in both document-level and object-level `$repeat` contexts
+- List mode works in both document-level and object-level `$repeat` contexts
+- When using `$repeat` in map keys, use string interpolation: `$"item-{$repeat}"`

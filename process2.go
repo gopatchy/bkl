@@ -441,16 +441,33 @@ func process2ValuesMap(obj map[string]any) ([]any, error) {
 }
 
 func process2RepeatObjMap(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, k string, r any, depth int) (map[string]any, error) {
-	r2, ok := r.(int)
-	if !ok {
+	switch r2 := r.(type) {
+	case int:
+		return process2RepeatObjMapSimple(v, mergeFrom, mergeFromDocs, ec, k, r2, depth)
+
+	case []any:
+		return process2RepeatObjMapSimple(v, mergeFrom, mergeFromDocs, ec, k, r2, depth)
+
+	case map[string]any:
+		// Handle map-based repeat (key-value iteration or range params)
+		return nil, fmt.Errorf("$repeat: map parameters not supported in object context, only in document context (%w)", ErrInvalidType)
+
+	default:
 		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
+	}
+}
+
+func process2RepeatObjMapSimple(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, k string, r any, depth int) (map[string]any, error) {
+	values, err := getRepeatValues(r)
+	if err != nil {
+		return nil, err
 	}
 
 	ret := map[string]any{}
 
-	for i := 0; i < r2; i++ {
+	for _, value := range values {
 		ec := ec.Clone()
-		ec.Vars["$repeat"] = i
+		ec.Vars["$repeat"] = value
 
 		v2, err := process2(v, mergeFrom, mergeFromDocs, ec, depth)
 		if err != nil {
@@ -473,16 +490,16 @@ func process2RepeatObjMap(v map[string]any, mergeFrom *Document, mergeFromDocs [
 }
 
 func process2RepeatObjList(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, r any, depth int) ([]any, error) {
-	r2, ok := r.(int)
-	if !ok {
-		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
+	values, err := getRepeatValues(r)
+	if err != nil {
+		return nil, err
 	}
 
 	ret := []any{}
 
-	for i := 0; i < r2; i++ {
+	for _, value := range values {
 		ec := ec.Clone()
-		ec.Vars["$repeat"] = i
+		ec.Vars["$repeat"] = value
 
 		v2, err := process2(v, mergeFrom, mergeFromDocs, ec, depth)
 		if err != nil {
@@ -497,4 +514,25 @@ func process2RepeatObjList(v map[string]any, mergeFrom *Document, mergeFromDocs 
 	}
 
 	return ret, nil
+}
+
+func getRepeatValues(r any) ([]any, error) {
+	switch r2 := r.(type) {
+	case int:
+		values := make([]any, r2)
+		for i := 0; i < r2; i++ {
+			values[i] = i
+		}
+		return values, nil
+
+	case []any:
+		return r2, nil
+
+	case map[string]any:
+		// Map parameters are only supported at document level, not object level
+		return nil, fmt.Errorf("$repeat: map parameters not supported in object context (%w)", ErrInvalidType)
+
+	default:
+		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
+	}
 }

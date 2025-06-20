@@ -1,0 +1,4 @@
+fruits:
+  $"item-{$repeat}":
+    name: $repeat
+    $repeat: ["apple", "banana", "cherry"]

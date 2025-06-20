@@ -1,0 +1,11 @@
+type: Type is 42
+value: 42
+---
+type: Type is hello
+value: hello
+---
+type: Type is true
+value: true
+---
+type: Type is 3.140000104904175
+value: 3.140000104904175
