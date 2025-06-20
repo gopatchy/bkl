@@ -78,6 +78,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `just test-coverage` - Run all integration tests with coverage
 - `go build ./cmd/bkl` - Build main binary
 - Tests are comprehensive with many integration tests plus Go unit tests
+- **IMPORTANT**: Never run `bkl` manually for testing - always use `just` or `./test` commands
 
 ## Merge Behavior
 - Maps merge recursively by default, with special `$replace` directive to override

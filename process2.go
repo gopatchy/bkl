@@ -301,7 +301,7 @@ func process2DecodeStringMap(obj map[string]any, mergeFrom *Document, mergeFromD
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return process2(normalized, mergeFrom, mergeFromDocs, ec, depth)
 }
 

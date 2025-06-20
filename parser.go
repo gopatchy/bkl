@@ -289,12 +289,12 @@ func (p *Parser) outputDocument(doc *Document) ([]any, error) {
 	}
 
 	return filterList(outs, func(v any) ([]any, error) {
-		v2, err := filterOutput(v)
+		v2, include, err := filterOutput(v)
 		if err != nil {
 			return nil, err
 		}
 
-		if v2 == nil {
+		if !include {
 			return nil, nil
 		}
 

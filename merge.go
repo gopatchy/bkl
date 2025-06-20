@@ -41,9 +41,6 @@ func mergeMap(dst map[string]any, src any) (any, error) {
 	case map[string]any:
 		return mergeMapMap(dst, src2)
 
-	case nil:
-		return dst, nil
-
 	default:
 		return src, nil
 	}

@@ -61,7 +61,7 @@ func findOutputsList(obj []any) (any, []any, error) {
 	return ret, outs, nil
 }
 
-func filterOutput(obj any) (any, error) {
+func filterOutput(obj any) (any, bool, error) {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		return filterOutputMap(obj2)
@@ -70,46 +70,54 @@ func filterOutput(obj any) (any, error) {
 		return filterOutputList(obj2)
 
 	default:
-		return obj, nil
+		return obj, true, nil
 	}
 }
 
-func filterOutputMap(obj map[string]any) (any, error) {
+func filterOutputMap(obj map[string]any) (any, bool, error) {
 	output, obj := popMapBoolValue(obj, "$output", false)
 	if output {
-		return nil, nil
+		return nil, false, nil
 	}
 
-	return filterMap(obj, func(k string, v any) (map[string]any, error) {
-		v2, err := filterOutput(v)
+	filtered, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
+		v2, include, err := filterOutput(v)
 		if err != nil {
 			return nil, err
+		}
+
+		if !include {
+			return map[string]any{}, nil
 		}
 
 		return map[string]any{k: v2}, nil
 	})
+
+	return filtered, true, err
 }
 
-func filterOutputList(obj []any) (any, error) {
+func filterOutputList(obj []any) (any, bool, error) {
 	output, obj, err := popListMapBoolValue(obj, "$output", false)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	if output {
-		return nil, nil
+		return nil, false, nil
 	}
 
-	return filterList(obj, func(v any) ([]any, error) {
-		v2, err := filterOutput(v)
+	filtered, err := filterList(obj, func(v any) ([]any, error) {
+		v2, include, err := filterOutput(v)
 		if err != nil {
 			return nil, err
 		}
 
-		if v2 == nil {
+		if !include {
 			return nil, nil
 		}
 
 		return []any{v2}, nil
 	})
+
+	return filtered, true, err
 }
