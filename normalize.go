@@ -10,9 +10,6 @@ func normalize(obj any) (any, error) {
 	case map[any]any:
 		return nil, fmt.Errorf("numeric keys not supported (%w)", ErrInvalidType)
 
-	case []map[string]any:
-		return normalizeListMap(obj2)
-
 	case map[string]any:
 		return normalizeMap(obj2)
 
@@ -25,16 +22,6 @@ func normalize(obj any) (any, error) {
 	default:
 		return obj2, nil
 	}
-}
-
-func normalizeListMap(obj []map[string]any) ([]any, error) {
-	obj2 := []any{}
-
-	for _, v := range obj {
-		obj2 = append(obj2, v)
-	}
-
-	return normalizeList(obj2)
 }
 
 func normalizeMap(obj map[string]any) (map[string]any, error) {

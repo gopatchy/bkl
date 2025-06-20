@@ -79,26 +79,6 @@ func getMapIntValue(m map[string]any, k string) (int, bool) {
 	return toInt(v)
 }
 
-func getMapStringValue(m map[string]any, k string) string {
-	v, found := m[k]
-	if !found {
-		return ""
-	}
-
-	return toString(v)
-}
-
-func popMapStringValue(m map[string]any, k string) (string, map[string]any) {
-	v := getMapStringValue(m, k)
-
-	if v != "" {
-		m = maps.Clone(m)
-		delete(m, k)
-	}
-
-	return v, m
-}
-
 func popListString(l []any, v string) (bool, []any) {
 	found := false
 
@@ -200,53 +180,6 @@ func popListMapBoolValue(l []any, k string, v bool) (bool, []any, error) {
 	}
 
 	return true, l, nil
-}
-
-func getListMapStringValue(l []any, k string) string {
-	for _, x := range l {
-		xMap, ok := x.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		v2 := getMapStringValue(xMap, k)
-		if v2 != "" {
-			return v2
-		}
-	}
-
-	return ""
-}
-
-func popListMapStringValue(l []any, k string) (string, []any, error) {
-	v2 := getListMapStringValue(l, k)
-
-	if v2 == "" {
-		return "", l, nil
-	}
-
-	l, err := filterList(l, func(x any) ([]any, error) {
-		xMap, ok := x.(map[string]any)
-		if !ok {
-			return []any{x}, nil
-		}
-
-		v3, xMap := popMapStringValue(xMap, k)
-		if v3 != "" {
-			if len(xMap) > 0 {
-				return nil, fmt.Errorf("%#v: %w", xMap, ErrExtraKeys)
-			}
-
-			return nil, nil
-		}
-
-		return []any{x}, nil
-	})
-	if err != nil {
-		return "", nil, err
-	}
-
-	return v2, l, nil
 }
 
 func sortedMap[Map ~map[K]V, K cmp.Ordered, V any](m Map) iter.Seq2[K, V] {

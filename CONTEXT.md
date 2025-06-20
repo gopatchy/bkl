@@ -83,7 +83,6 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Empty maps can be overridden by any value without error
 - Cross-document merging follows filename inheritance patterns
 - **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
-- **Delete after merge**: `$delete` directives work with `$merge` operations in the same map
 
 ## Output Directives
 - `$output: true` marks content for inclusion in final output

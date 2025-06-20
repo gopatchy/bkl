@@ -442,12 +442,12 @@ func process2ValuesMap(obj map[string]any) ([]any, error) {
 
 func process2RepeatObjMap(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, k string, r any, depth int) (map[string]any, error) {
 	ret := map[string]any{}
-	
+
 	contexts, err := repeatGenerateContexts(ec, r)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	for _, ctx := range contexts {
 		v2, err := process2(v, mergeFrom, mergeFromDocs, ctx, depth)
 		if err != nil {
@@ -469,15 +469,14 @@ func process2RepeatObjMap(v map[string]any, mergeFrom *Document, mergeFromDocs [
 	return ret, nil
 }
 
-
 func process2RepeatObjList(v map[string]any, mergeFrom *Document, mergeFromDocs []*Document, ec *EvalContext, r any, depth int) ([]any, error) {
 	ret := []any{}
-	
+
 	contexts, err := repeatGenerateContexts(ec, r)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	for _, ctx := range contexts {
 		v2, err := process2(v, mergeFrom, mergeFromDocs, ctx, depth)
 		if err != nil {
@@ -493,4 +492,3 @@ func process2RepeatObjList(v map[string]any, mergeFrom *Document, mergeFromDocs 
 
 	return ret, nil
 }
-

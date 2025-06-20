@@ -45,10 +45,10 @@ func repeatDocGen(doc *Document, ec *EvalContext, v any) ([]*Document, []*EvalCo
 	if err != nil {
 		return nil, nil, err
 	}
-	
+
 	docs := make([]*Document, len(contexts))
 	ecs := make([]*EvalContext, len(contexts))
-	
+
 	for i, ctx := range contexts {
 		doc2, err := doc.Clone(fmt.Sprintf("repeat-%d", i))
 		if err != nil {
@@ -57,10 +57,9 @@ func repeatDocGen(doc *Document, ec *EvalContext, v any) ([]*Document, []*EvalCo
 		docs[i] = doc2
 		ecs[i] = ctx
 	}
-	
+
 	return docs, ecs, nil
 }
-
 
 func repeatIsRangeParamsMap(rs map[string]any) bool {
 	for k := range rs {
@@ -71,10 +70,6 @@ func repeatIsRangeParamsMap(rs map[string]any) bool {
 	}
 	return false
 }
-
-
-
-
 
 func repeatGetRangeParamValues(rs map[string]any) ([]any, error) {
 	first, hasFirst := getMapIntValue(rs, "$first")
@@ -126,7 +121,7 @@ func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
 			contexts[i] = ctx
 		}
 		return contexts, nil
-		
+
 	case []any:
 		contexts := make([]*EvalContext, len(r2))
 		for i, value := range r2 {
@@ -135,7 +130,7 @@ func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
 			contexts[i] = ctx
 		}
 		return contexts, nil
-		
+
 	case map[string]any:
 		if repeatIsRangeParamsMap(r2) {
 			values, err := repeatGetRangeParamValues(r2)
@@ -150,9 +145,9 @@ func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
 			}
 			return contexts, nil
 		}
-		
+
 		return repeatGenerateContextsFromMap(ec, r2)
-		
+
 	default:
 		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
 	}
@@ -163,24 +158,24 @@ func repeatGenerateContextsFromMap(ec *EvalContext, rs map[string]any) ([]*EvalC
 	for k, v := range rs {
 		ec.Vars[fmt.Sprintf("$repeat.%s", k)] = v
 	}
-	
+
 	contexts := []*EvalContext{ec}
-	
+
 	for name, value := range sortedMap(rs) {
 		var newContexts []*EvalContext
 		var values []any
 		var err error
-		
+
 		switch v := value.(type) {
 		case int:
 			values = make([]any, v)
 			for i := 0; i < v; i++ {
 				values[i] = i
 			}
-			
+
 		case []any:
 			values = v
-			
+
 		case map[string]any:
 			if repeatIsRangeParamsMap(v) {
 				values, err = repeatGetRangeParamValues(v)
@@ -190,11 +185,11 @@ func repeatGenerateContextsFromMap(ec *EvalContext, rs map[string]any) ([]*EvalC
 			} else {
 				return nil, fmt.Errorf("%s: map must contain range parameters ($first, $last, $count, $step) (%w)", name, ErrInvalidRepeat)
 			}
-			
+
 		default:
 			return nil, fmt.Errorf("%s: %T (%w)", name, value, ErrInvalidRepeat)
 		}
-		
+
 		for _, ctx := range contexts {
 			for _, item := range values {
 				newCtx := ctx.Clone()
@@ -202,9 +197,9 @@ func repeatGenerateContextsFromMap(ec *EvalContext, rs map[string]any) ([]*EvalC
 				newContexts = append(newContexts, newCtx)
 			}
 		}
-		
+
 		contexts = newContexts
 	}
-	
+
 	return contexts, nil
 }
