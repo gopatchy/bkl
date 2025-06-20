@@ -73,16 +73,17 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Generates `integration-coverage.html` and `integration-coverage.out`
 - `just test-coverage` - Run all integration tests with coverage
 - `go build ./cmd/bkl` - Build main binary
-- Tests are comprehensive with 160+ integration tests plus Go unit tests
+- Tests are comprehensive with many integration tests plus Go unit tests
 
 ## Merge Behavior
 - Maps merge recursively by default, with special `$replace` directive to override
 - Lists append by default, with `$match`, `$delete`, and `$replace` directives for control
-- **Type conflicts**: Non-map values (strings, numbers, etc.) override maps completely
-  - String-to-map override behavior: string overrides the entire map (implemented in `merge.go` `mergeMap` function)
+- **Type conflicts**: When merging different types, the source value replaces the destination
+  - This includes maps, lists, strings, numbers, and null values
 - Empty maps can be overridden by any value without error
 - Cross-document merging follows filename inheritance patterns
 - **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
+- **Null handling**: `null` values are preserved and can override existing values
 
 ## Output Directives
 - `$output: true` marks content for inclusion in final output
