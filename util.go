@@ -145,7 +145,8 @@ func hasListMapBoolValue(l []any, k string, v bool) bool {
 			continue
 		}
 
-		if hasMapBoolValue(xMap, k, v) {
+		// Only match if map has exactly 1 key (the directive we're looking for)
+		if len(xMap) == 1 && hasMapBoolValue(xMap, k, v) {
 			return true
 		}
 	}
@@ -161,6 +162,11 @@ func popListMapBoolValue(l []any, k string, v bool) (bool, []any, error) {
 	l, err := filterList(l, func(x any) ([]any, error) {
 		xMap, ok := x.(map[string]any)
 		if !ok {
+			return []any{x}, nil
+		}
+
+		// Only match if map has exactly 1 key (the directive we're looking for)
+		if len(xMap) != 1 {
 			return []any{x}, nil
 		}
 

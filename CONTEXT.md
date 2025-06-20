@@ -78,6 +78,12 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
 - **Delete after merge**: `$delete` directives work with `$merge` operations in the same map
 
+## Output Directives
+- `$output: true` marks content for inclusion in final output
+- **Ambiguity resolution**: In maps within lists, presence of other keys determines scope
+  - Map with only `$output: true` → applies to list
+  - Map with `$output: true` + other keys → applies to map
+
 ## Interpolation Syntax
 - String interpolation: `$"Hello {variable} world"`
 - Environment variables: `$env:VARNAME` 
