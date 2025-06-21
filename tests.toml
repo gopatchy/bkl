@@ -281,6 +281,399 @@ zig:
 # Merge Operations ($merge)
 ###############################################################################
 
+[mergeMap]
+description = "Test map merging with $merge directive"
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $merge: foo.bar
+'''
+
+[mergeCrossDocShortList]
+description = "Test cross-document merging with lists"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- 2
+- 3
+---
+- 1
+- 2
+- 3
+'''
+files."a.yaml" = '''
+- 2
+- 3
+---
+- 1
+- $merge: [[2]]
+'''
+
+[mergeCrossDocShortScalar]
+description = "Test cross-document merging with scalar values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b: 3
+---
+c:
+  $merge: [{a: 1}, b]
+d: 4
+'''
+
+[mergePathDot]
+description = "Test merging with dot notation in path"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+d: 4
+e: 3
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c.d:
+    e: 3
+---
+d: 4
+$merge:
+  $match:
+    a: 1
+  $path: [b, c.d]
+'''
+
+[mergeScalarAsKey]
+description = "Test merging using scalar value as key reference"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+zig: bar
+'''
+files."a.yaml" = '''
+foo: bar
+zig:
+  $merge: foo
+'''
+
+[mergeStringDot]
+description = "Test merging values when key contains dot"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  c.d: bar
+zig:
+  b: 2
+  zag: bar
+'''
+files."a.yaml" = '''
+foo:
+  c.d: bar
+zig:
+  b: 2
+  zag: $merge:[foo,c.d]
+'''
+
+[mergeValueReference]
+description = "Test using $merge within $value directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b:
+    c: 1
+  d: "1"
+'''
+files."a.yaml" = '''
+a:
+  b:
+    c: 1
+  d:
+    $value: ['$merge:a.b.c']
+    $encode: join
+'''
+
+[mergeChainLayers]
+description = "Test chained merge operations across layers"
+eval = "a.b.c.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+'''
+files."a.b.c.yaml" = '''
+c: 3
+'''
+
+[mergeListNil]
+description = "Test merging list with null value"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 1
+- 2
+'''
+files."a.yaml" = '''
+~
+'''
+files."a.b.yaml" = '''
+- 1
+- 2
+'''
+
+[mergeListString]
+description = "Test merging string into list"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+hello
+'''
+files."a.yaml" = '''
+- 1
+- 2
+'''
+files."a.b.yaml" = '''
+hello
+'''
+
+[mergeListWithNull]
+description = "Test merging list containing null values"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 1
+- null
+- 3
+- 4
+'''
+files."a.yaml" = '''
+- 1
+- null
+- 3
+'''
+files."a.b.yaml" = '''
+- 4
+'''
+
+[mergeMapNil]
+description = "Test null value overriding map value"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: null
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+a: null
+'''
+
+[mergeChain]
+description = "Test chained $merge operations"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 1
+c: 4
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+b: $merge:a
+c: $merge:d
+d: 4
+'''
+
+[mergeCrossDoc]
+description = "Test $merge across YAML documents with $match"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+a: 1
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+c: 3
+$merge:
+  $match:
+    a: 1
+'''
+
+[mergeCrossDocList]
+description = "Test merging lists across documents with matching"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- 2
+- 3
+---
+- 1
+- 2
+- 3
+'''
+files."a.yaml" = '''
+- 2
+- 3
+---
+- 1
+- $merge:
+    $match:
+      - 2
+'''
+
+[mergeCrossDocPath]
+description = "Test merging with path selection across documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c: 3
+---
+d: 4
+$merge:
+  $match:
+    a: 1
+  $path: b
+'''
+
+[mergeCrossDocShort]
+description = "Test short syntax for merge across documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c: 3
+---
+d: 4
+$merge: [{a: 1}, b]
+'''
+
+[mergeList]
+description = "Test $merge with list values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - a: 1
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - $merge: foo.bar
+'''
+
+[mergeListMulti]
+description = "Test multiple merges within a list"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  bar:
+    - a: 1
+  zag:
+    - c: 3
+zig:
+  - b: 2
+  - c: 3
+  - a: 1
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - a: 1
+  zag:
+    - c: 3
+zig:
+  - b: 2
+  - $merge: foo.zag
+  - $merge: foo.bar
+'''
+
+[mergeNum]
+description = "Test merging numeric values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: 1
+zig:
+  b: 2
+  zag: 1
+'''
+files."a.yaml" = '''
+foo: 1
+zig:
+  b: 2
+  zag: $merge:foo
+'''
+
+[mergeString]
+description = "Test $merge with string values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+zig:
+  b: 2
+  zag: bar
+'''
+files."a.yaml" = '''
+foo: bar
+zig:
+  b: 2
+  zag: $merge:foo
+'''
+
 ###############################################################################
 # Match Operations ($match)
 ###############################################################################
@@ -293,9 +686,257 @@ zig:
 # Encoding Operations ($encode)
 ###############################################################################
 
+[encodeTolist]
+description = "Test tolist encoding with custom separator"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a=1
+- b=2
+- c
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+c: ""
+$encode: tolist:=
+'''
+
+[encodeValues]
+description = "Test values encoding extracts map values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- 1
+- 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: values
+'''
+
+[encodePrefix]
+description = "Test prefix encoding adds prefix to list items"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- Xa
+- X2
+'''
+files."a.yaml" = '''
+- a
+- 2
+- $encode: prefix:X
+'''
+
+[encodeBase64Number]
+description = "Test base64 encoding of numeric values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: NDI=
+'''
+files."a.yaml" = '''
+a:
+  $value: 42 
+  $encode: base64
+'''
+
+[encodeList]
+description = "Test JSON encoding of list values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: |
+  [{"b":2},{"c":3}]
+'''
+files."a.yaml" = '''
+a:
+  - b: 2
+  - c: 3
+  - $encode: json
+'''
+
+[encodeMap]
+description = "Test JSON encoding of map values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: |
+  {"b":2,"c":3}
+'''
+files."a.yaml" = '''
+a:
+  b: 2
+  c: 3
+  $encode: json
+'''
+
+[encodeJsonList]
+description = "Test JSON encoding of list as multiline string"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+|
+  [{"a":1},{"b":2}]
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+- $encode: json
+'''
+
+[encodeFlags]
+description = "Test flags encoding converts map to command-line flags"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- --a=1
+- --b=2
+- --c
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+c: ""
+$encode: flags
+'''
+
+[encodeFlagsFlatten]
+description = "Test flags encoding with flatten for mixed list content"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a
+- b
+- --c=3
+- --d=4
+- --e
+- f
+- g
+'''
+files."a.yaml" = '''
+- - a
+  - b
+- c: 3
+  d: 4
+  e: ""
+  $encode: flags
+- f
+- g
+- $encode: flatten
+'''
+
+[encodeFlagsSublist]
+description = "Test flags encoding with list values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- --a=1
+- --b=2
+- --b=c
+- --b
+'''
+files."a.yaml" = '''
+a: 1
+b:
+- 2
+- c
+- ""
+$encode: flags
+'''
+
+[encodeMulti]
+description = "Test multiple encoding directives (tolist and join)"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a=1,b=2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: [tolist:=, "join:,"]
+'''
+
+[encodeSha256Number]
+description = "Test SHA256 encoding of numeric values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049
+'''
+files."a.yaml" = '''
+a:
+  $value: 42
+  $encode: sha256
+'''
+
+[encodeTolistLists]
+description = "Test tolist encoding with list of maps"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a=1
+- a=2
+- b=3
+'''
+files."a.yaml" = '''
+- a: 1
+- a: 2
+  b: 3
+- $encode: tolist:=
+'''
+
+[encodeValue]
+description = "Test JSON encoding of simple value"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: |
+  "b"
+'''
+files."a.yaml" = '''
+a:
+  $value: b
+  $encode: json
+'''
+
+[encodeValuesPrefix]
+description = "Test values encoding with prefix field"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- foo
+- 1
+- 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+_prefix: foo
+$encode: values
+'''
+
 ###############################################################################
 # Decoding Operations ($decode)
 ###############################################################################
+
+[decodeValue]
+description = "Test decode JSON with $value and $decode directives"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b: 1
+  c: 2
+'''
+files."a.yaml" = '''
+a:
+  $decode: json
+  $value: '{"b": 1, "c": 2}'
+'''
 
 ###############################################################################
 # String Interpolation
@@ -317,6 +958,89 @@ zig:
 # Input/Output Formats
 ###############################################################################
 
+[jsonInputStreamConcat]
+description = "Test handling of concatenated JSON objects without newlines"
+eval = "a.json"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.json" = '''
+{"a": 1}{"b": 2}
+'''
+
+[jsonInputStreamNewline]
+description = "Test handling of JSON objects separated by newlines (JSON Lines)"
+eval = "a.json"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.json" = '''
+{"a": 1}
+{"b": 2}
+'''
+
+[jsonLargeInt]
+description = "Test preservation of large integer values"
+eval = "a.json"
+format = "json"
+expected = '''
+{"a":9223372036854775807,"b":2147483648}
+'''
+files."a.json" = '''
+{"a": 9223372036854775807, "b": 2147483648}
+'''
+
+[tomlInputStream]
+description = "Test TOML input stream with standard delimiter"
+eval = "a.toml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.toml" = '''
+a = 1
+---
+b = 2
+'''
+
+[tomlInputStreamHugo]
+description = "Test TOML input stream with Hugo-style delimiter"
+eval = "a.toml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.toml" = '''
+a = 1
++++
+b = 2
+'''
+
+[outputTomlStream]
+description = "Test YAML to TOML stream output conversion"
+eval = "a.yaml"
+format = "toml"
+expected = '''
+a = 1
+---
+b = 2
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+
 ###############################################################################
 # Special Values and Edge Cases
 ###############################################################################
@@ -326,21 +1050,6 @@ zig:
 ###############################################################################
 
 
-[mergeMap]
-description = "Test map merging with $merge directive"
-eval = "a.yaml"
-format = "json"
-expected = '''
-{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    a: 1
-zig:
-  b: 2
-  $merge: foo.bar
-'''
 
 ###############################################################################
 # List Operations
@@ -965,117 +1674,6 @@ b: $merge:$repeat
 '''
 
 
-[mergeCrossDocShortList]
-description = "Test cross-document merging with lists"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- 2
-- 3
----
-- 1
-- 2
-- 3
-'''
-files."a.yaml" = '''
-- 2
-- 3
----
-- 1
-- $merge: [[2]]
-'''
-
-[mergeCrossDocShortScalar]
-description = "Test cross-document merging with scalar values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 3
-d: 4
-'''
-files."a.yaml" = '''
-$output: false
-a: 1
-b: 3
----
-c:
-  $merge: [{a: 1}, b]
-d: 4
-'''
-
-[mergePathDot]
-description = "Test merging with dot notation in path"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-d: 4
-e: 3
-'''
-files."a.yaml" = '''
-$output: false
-a: 1
-b:
-  c.d:
-    e: 3
----
-d: 4
-$merge:
-  $match:
-    a: 1
-  $path: [b, c.d]
-'''
-
-[mergeScalarAsKey]
-description = "Test merging using scalar value as key reference"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo: bar
-zig: bar
-'''
-files."a.yaml" = '''
-foo: bar
-zig:
-  $merge: foo
-'''
-
-[mergeStringDot]
-description = "Test merging values when key contains dot"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo:
-  c.d: bar
-zig:
-  b: 2
-  zag: bar
-'''
-files."a.yaml" = '''
-foo:
-  c.d: bar
-zig:
-  b: 2
-  zag: $merge:[foo,c.d]
-'''
-
-[mergeValueReference]
-description = "Test using $merge within $value directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a:
-  b:
-    c: 1
-  d: "1"
-'''
-files."a.yaml" = '''
-a:
-  b:
-    c: 1
-  d:
-    $value: ['$merge:a.b.c']
-    $encode: join
-'''
 
 [interpRepeat]
 description = "Test string interpolation with $repeat directive"
@@ -1264,96 +1862,6 @@ x:
   d: 3
 '''
 
-[mergeChainLayers]
-description = "Test chained merge references across layers"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 1
-c: 1
-d: 1
-'''
-files."a.yaml" = '''
-a: $required
-b: $merge:a
-d: $merge:c
-'''
-files."a.b.yaml" = '''
-a: 1
-c: $merge:b
-'''
-
-
-[mergeListNil]
-description = "Test null value overriding list"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: null
-'''
-files."a.yaml" = '''
-a:
-  - 1
-  - 2
-'''
-files."a.b.yaml" = '''
-a: null
-'''
-
-[mergeListString]
-description = "Test string value overriding list"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: hello
-'''
-files."a.yaml" = '''
-a:
-  - 1
-  - 2
-'''
-files."a.b.yaml" = '''
-a: "hello"
-'''
-
-[mergeListWithNull]
-description = "Test list merge preserving null values"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-x:
-  - 1
-  - null
-  - 3
-  - 4
-  - null
-'''
-files."a.yaml" = '''
-x:
-  - 1
-  - null
-  - 3
-'''
-files."a.b.yaml" = '''
-x:
-  - 4
-  - null
-'''
-
-[mergeMapNil]
-description = "Test null value overriding map value"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: null
-'''
-files."a.yaml" = '''
-a: 1
-'''
-files."a.b.yaml" = '''
-a: null
-'''
 
 
 ###############################################################################
@@ -1526,476 +2034,33 @@ a:
     d: 3
 '''
 
-###############################################################################
-# Merge Directive Tests
-###############################################################################
-
-[mergeChain]
-description = "Test chained $merge operations"
+[outputAfterReplace]
+description = "Test output control after replace operations"
 eval = "a.yaml"
 format = "yaml"
 expected = '''
-a: 1
-b: 1
-c: 4
-d: 4
+c: 2
 '''
 files."a.yaml" = '''
-a: 1
-b: $merge:a
-c: $merge:d
-d: 4
-'''
-
-[mergeCrossDoc]
-description = "Test $merge across YAML documents with $match"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
----
-a: 1
-b: 2
-c: 3
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
----
-c: 3
-$merge:
-  $match:
-    a: 1
-'''
-
-[mergeList]
-description = "Test $merge with list values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo:
-  bar:
-    - a: 1
-zig:
-  - b: 2
-  - a: 1
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    - a: 1
-zig:
-  - b: 2
-  - $merge: foo.bar
-'''
-
-[mergeString]
-description = "Test $merge with string values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo: bar
-zig:
+a:
   b: 2
-  zag: bar
-'''
-files."a.yaml" = '''
-foo: bar
-zig:
-  b: 2
-  zag: $merge:foo
+  $output: false
+c:
+  $replace: a.b
 '''
 
-[mergeCrossDocList]
-description = "Test merging lists across documents with matching"
+[outputTrueWithinFalse]
+description = "Test nested output control (true within false)"
 eval = "a.yaml"
 format = "yaml"
 expected = '''
-- 2
-- 3
----
-- 1
-- 2
-- 3
-'''
-files."a.yaml" = '''
-- 2
-- 3
----
-- 1
-- $merge:
-    $match:
-      - 2
-'''
-
-[mergeCrossDocPath]
-description = "Test merging with path selection across documents"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 3
-d: 4
+b: 2
 '''
 files."a.yaml" = '''
 $output: false
-a: 1
-b:
-  c: 3
----
-d: 4
-$merge:
-  $match:
-    a: 1
-  $path: b
-'''
-
-[mergeCrossDocShort]
-description = "Test short syntax for merge across documents"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 3
-d: 4
-'''
-files."a.yaml" = '''
-$output: false
-a: 1
-b:
-  c: 3
----
-d: 4
-$merge: [{a: 1}, b]
-'''
-
-[mergeListMulti]
-description = "Test multiple merges within a list"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo:
-  bar:
-    - a: 1
-  zag:
-    - c: 3
-zig:
-  - b: 2
-  - c: 3
-  - a: 1
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    - a: 1
-  zag:
-    - c: 3
-zig:
-  - b: 2
-  - $merge: foo.zag
-  - $merge: foo.bar
-'''
-
-[mergeNum]
-description = "Test merging numeric values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo: 1
-zig:
-  b: 2
-  zag: 1
-'''
-files."a.yaml" = '''
-foo: 1
-zig:
-  b: 2
-  zag: $merge:foo
-'''
-
-[encodeTolist]
-description = "Test tolist encoding with custom separator"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- a=1
-- b=2
-- c
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
-c: ""
-$encode: tolist:=
-'''
-
-[encodeValues]
-description = "Test values encoding extracts map values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- 1
-- 2
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
-$encode: values
-'''
-
-[encodePrefix]
-description = "Test prefix encoding adds prefix to list items"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- Xa
-- X2
-'''
-files."a.yaml" = '''
-- a
-- 2
-- $encode: prefix:X
-'''
-
-[encodeBase64Number]
-description = "Test base64 encoding of numeric values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: NDI=
-'''
-files."a.yaml" = '''
-a:
-  $value: 42 
-  $encode: base64
-'''
-
-[encodeList]
-description = "Test JSON encoding of list values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: |
-  [{"b":2},{"c":3}]
-'''
-files."a.yaml" = '''
-a:
-  - b: 2
-  - c: 3
-  - $encode: json
-'''
-
-[encodeMap]
-description = "Test JSON encoding of map values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: |
-  {"b":2,"c":3}
-'''
-files."a.yaml" = '''
 a:
   b: 2
-  c: 3
-  $encode: json
-'''
-
-[encodeJsonList]
-description = "Test JSON encoding of list as multiline string"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-|
-  [{"a":1},{"b":2}]
-'''
-files."a.yaml" = '''
-- a: 1
-- b: 2
-- $encode: json
-'''
-
-[encodeFlags]
-description = "Test flags encoding converts map to command-line flags"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- --a=1
-- --b=2
-- --c
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
-c: ""
-$encode: flags
-'''
-
-[encodeFlagsFlatten]
-description = "Test flags encoding with flatten for mixed list content"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- a
-- b
-- --c=3
-- --d=4
-- --e
-- f
-- g
-'''
-files."a.yaml" = '''
-- - a
-  - b
-- c: 3
-  d: 4
-  e: ""
-  $encode: flags
-- f
-- g
-- $encode: flatten
-'''
-
-[encodeFlagsSublist]
-description = "Test flags encoding with list values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- --a=1
-- --b=2
-- --b=c
-- --b
-'''
-files."a.yaml" = '''
-a: 1
-b:
-- 2
-- c
-- ""
-$encode: flags
-'''
-
-[encodeMulti]
-description = "Test multiple encoding directives (tolist and join)"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a=1,b=2
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
-$encode: [tolist:=, "join:,"]
-'''
-
-[encodeSha256Number]
-description = "Test SHA256 encoding of numeric values"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049
-'''
-files."a.yaml" = '''
-a:
-  $value: 42
-  $encode: sha256
-'''
-
-[encodeTolistLists]
-description = "Test tolist encoding with list of maps"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- a=1
-- a=2
-- b=3
-'''
-files."a.yaml" = '''
-- a: 1
-- a: 2
-  b: 3
-- $encode: tolist:=
-'''
-
-[encodeValue]
-description = "Test JSON encoding of simple value"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: |
-  "b"
-'''
-files."a.yaml" = '''
-a:
-  $value: b
-  $encode: json
-'''
-
-[encodeValuesPrefix]
-description = "Test values encoding with prefix field"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- foo
-- 1
-- 2
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
-_prefix: foo
-$encode: values
-'''
-
-[jsonInputStreamConcat]
-description = "Test handling of concatenated JSON objects without newlines"
-eval = "a.json"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.json" = '''
-{"a": 1}{"b": 2}
-'''
-
-[jsonInputStreamNewline]
-description = "Test handling of JSON objects separated by newlines (JSON Lines)"
-eval = "a.json"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.json" = '''
-{"a": 1}
-{"b": 2}
-'''
-
-[jsonLargeInt]
-description = "Test preservation of large integer values"
-eval = "a.json"
-format = "json"
-expected = '''
-{"a":9223372036854775807,"b":2147483648}
-'''
-files."a.json" = '''
-{"a": 9223372036854775807, "b": 2147483648}
-'''
-
-[decodeValue]
-description = "Test decode JSON with $value and $decode directives"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a:
-  b: 1
-  c: 2
-'''
-files."a.yaml" = '''
-a:
-  $decode: json
-  $value: '{"b": 1, "c": 2}'
+  $output: true
 '''
 
 ###############################################################################
@@ -2063,78 +2128,4 @@ files."a.yaml" = '''
 a: $FOO
 b: ${FOO}
 c: $(FOO)
-'''
-
-[tomlInputStream]
-description = "Test TOML input stream with standard delimiter"
-eval = "a.toml"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.toml" = '''
-a = 1
----
-b = 2
-'''
-
-[tomlInputStreamHugo]
-description = "Test TOML input stream with Hugo-style delimiter"
-eval = "a.toml"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.toml" = '''
-a = 1
-+++
-b = 2
-'''
-
-[outputTomlStream]
-description = "Test YAML to TOML stream output conversion"
-eval = "a.yaml"
-format = "toml"
-expected = '''
-a = 1
----
-b = 2
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-'''
-
-[outputAfterReplace]
-description = "Test output control after replace operations"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 2
-'''
-files."a.yaml" = '''
-a:
-  b: 2
-  $output: false
-c:
-  $replace: a.b
-'''
-
-[outputTrueWithinFalse]
-description = "Test nested output control (true within false)"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-b: 2
-'''
-files."a.yaml" = '''
-$output: false
-a:
-  b: 2
-  $output: true
 '''
