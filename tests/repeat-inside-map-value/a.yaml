@@ -1,4 +1,0 @@
-a:
-  $"b{$repeat}":
-    $repeat: 4
-    $value: 2

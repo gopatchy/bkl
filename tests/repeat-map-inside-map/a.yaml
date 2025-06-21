@@ -1,5 +1,0 @@
-servers:
-  $"server-{$repeat:env}-{$repeat:id}":
-    env: $repeat:env
-    id: $repeat:id
-    $repeat: {env: ["dev", "prod"], id: 2}

@@ -1,6 +1,0 @@
-$repeat:
-  x: 2
-  y: 3
-a: $"x={$repeat:x} y={$repeat:y} xc={$repeat.x} yc={$repeat.y}"
-b: $merge:$repeat.x
-c: $merge:$repeat.y

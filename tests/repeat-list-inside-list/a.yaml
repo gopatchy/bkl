@@ -1,3 +1,0 @@
-fruits:
-  - name: $repeat
-    $repeat: ["apple", "banana", "cherry"]

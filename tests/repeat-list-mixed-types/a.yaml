@@ -1,3 +1,0 @@
-$repeat: [42, "hello", true, 3.14]
-value: $repeat
-type: $"Type is {$repeat}"

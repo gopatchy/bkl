@@ -491,6 +491,207 @@ $repeat: ["apple", "banana", "cherry"]
 fruit: $repeat
 '''
 
+[repeatInsideList]
+description = "Test $repeat directive expanding items within a list"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  - b: 0
+  - b: 1
+  - b: 2
+  - b: 3
+'''
+files."a.yaml" = '''
+a:
+  - $repeat: 4
+    b: $repeat
+'''
+
+[repeatInsideMap]
+description = "Test $repeat with dynamic key generation in maps"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b0:
+    c: 0
+  b1:
+    c: 1
+  b2:
+    c: 2
+  b3:
+    c: 3
+'''
+files."a.yaml" = '''
+a:
+  $"b{$repeat}":
+    $repeat: 4
+    c: $repeat
+'''
+
+[repeatMap]
+description = "Test multi-dimensional repeat with string interpolation"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: x=0 y=0 xc=2 yc=3
+b: 2
+c: 3
+---
+a: x=0 y=1 xc=2 yc=3
+b: 2
+c: 3
+---
+a: x=0 y=2 xc=2 yc=3
+b: 2
+c: 3
+---
+a: x=1 y=0 xc=2 yc=3
+b: 2
+c: 3
+---
+a: x=1 y=1 xc=2 yc=3
+b: 2
+c: 3
+---
+a: x=1 y=2 xc=2 yc=3
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+$repeat:
+  x: 2
+  y: 3
+a: $"x={$repeat:x} y={$repeat:y} xc={$repeat.x} yc={$repeat.y}"
+b: $merge:$repeat.x
+c: $merge:$repeat.y
+'''
+
+[repeatInsideMapValue]
+description = "Test $repeat with simple values in map"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b0: 2
+  b1: 2
+  b2: 2
+  b3: 2
+'''
+files."a.yaml" = '''
+a:
+  $"b{$repeat}":
+    $repeat: 4
+    $value: 2
+'''
+
+[repeatListInsideList]
+description = "Test $repeat with list creating multiple list items"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+fruits:
+  - name: apple
+  - name: banana
+  - name: cherry
+'''
+files."a.yaml" = '''
+fruits:
+  - name: $repeat
+    $repeat: ["apple", "banana", "cherry"]
+'''
+
+[repeatListInsideMap]
+description = "Test $repeat with list creating multiple map entries"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+fruits:
+  item-apple:
+    name: apple
+  item-banana:
+    name: banana
+  item-cherry:
+    name: cherry
+'''
+files."a.yaml" = '''
+fruits:
+  $"item-{$repeat}":
+    name: $repeat
+    $repeat: ["apple", "banana", "cherry"]
+'''
+
+[repeatListMixedTypes]
+description = "Test $repeat with mixed data types creating documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+type: Type is 42
+value: 42
+---
+type: Type is hello
+value: hello
+---
+type: Type is true
+value: true
+---
+type: Type is 3.140000104904175
+value: 3.140000104904175
+'''
+files."a.yaml" = '''
+$repeat: [42, "hello", true, 3.14]
+value: $repeat
+type: $"Type is {$repeat}"
+'''
+
+[repeatMapInsideMap]
+description = "Test $repeat with map creating cartesian product"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+servers:
+  server-dev-0:
+    env: dev
+    id: 0
+  server-dev-1:
+    env: dev
+    id: 1
+  server-prod-0:
+    env: prod
+    id: 0
+  server-prod-1:
+    env: prod
+    id: 1
+'''
+files."a.yaml" = '''
+servers:
+  $"server-{$repeat:env}-{$repeat:id}":
+    env: $repeat:env
+    id: $repeat:id
+    $repeat: {env: ["dev", "prod"], id: 2}
+'''
+
+[replaceList]
+description = "Test $replace directive replacing list contents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - a: 1
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - $replace: foo.bar
+'''
+
 ###############################################################################
 # Type Handling and Format Tests
 ###############################################################################
@@ -577,6 +778,40 @@ a:
   b: 1
 c:
   d: 1
+'''
+
+[outputFalseList]
+description = "Test $output: false directive in list context"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c:
+  - d: 1
+'''
+files."a.yaml" = '''
+a:
+  - $output: false
+  - b: 1
+c:
+  - d: 1
+'''
+
+[outputFalseRoot]
+description = "Test $output: false directive at document root"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+---
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+$output: false
+---
+c: 3
 '''
 
 [outputSingle]
@@ -1164,4 +1399,78 @@ files."a.yaml" = '''
 a: $FOO
 b: ${FOO}
 c: $(FOO)
+'''
+
+[tomlInputStream]
+description = "Test TOML input stream with standard delimiter"
+eval = "a.toml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.toml" = '''
+a = 1
+---
+b = 2
+'''
+
+[tomlInputStreamHugo]
+description = "Test TOML input stream with Hugo-style delimiter"
+eval = "a.toml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.toml" = '''
+a = 1
++++
+b = 2
+'''
+
+[outputTomlStream]
+description = "Test YAML to TOML stream output conversion"
+eval = "a.yaml"
+format = "toml"
+expected = '''
+a = 1
+---
+b = 2
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+
+[outputAfterReplace]
+description = "Test output control after replace operations"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 2
+'''
+files."a.yaml" = '''
+a:
+  b: 2
+  $output: false
+c:
+  $replace: a.b
+'''
+
+[outputTrueWithinFalse]
+description = "Test nested output control (true within false)"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+b: 2
+'''
+files."a.yaml" = '''
+$output: false
+a:
+  b: 2
+  $output: true
 '''
