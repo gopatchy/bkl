@@ -24,7 +24,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Centralized test definitions in TOML format
   - Each test specifies: `description`, `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
   - Run with `go test -run TestLanguage`
-  - Run single test with `go test -run TestLanguage -test.single="test-name"`
+  - Run specific tests with `go test -run TestLanguage -test.filter=test1,test2,test3`
   - Tests run in parallel with in-memory filesystem (fstest.MapFS)
   - Migrated from individual golang test files for better maintainability
   - Test names use camelCase convention

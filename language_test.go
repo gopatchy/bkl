@@ -1,12 +1,14 @@
-package bkl
+package bkl_test
 
 import (
 	"bytes"
 	"flag"
 	"os"
+	"strings"
 	"testing"
 	"testing/fstest"
 
+	"github.com/gopatchy/bkl"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -20,7 +22,7 @@ type TestCase struct {
 
 type TestSuite map[string]TestCase
 
-var singleTest = flag.String("test.single", "", "Run only the specified test from tests.toml")
+var testFilter = flag.String("test.filter", "", "Run only specified tests from tests.toml (comma-separated list)")
 
 func TestLanguage(t *testing.T) {
 	data, err := os.ReadFile("tests.toml")
@@ -34,8 +36,22 @@ func TestLanguage(t *testing.T) {
 		t.Fatalf("Failed to parse tests.toml: %v", err)
 	}
 
+	// Parse filter list
+	filterTests := map[string]bool{}
+	if *testFilter != "" {
+		for _, name := range strings.Split(*testFilter, ",") {
+			name = strings.TrimSpace(name)
+			if name != "" {
+				if _, ok := suite[name]; !ok {
+					t.Fatalf("Test %q not found in tests.toml", name)
+				}
+				filterTests[name] = true
+			}
+		}
+	}
+
 	for testName, testCase := range suite {
-		if *singleTest != "" && testName != *singleTest {
+		if len(filterTests) > 0 && !filterTests[testName] {
 			continue
 		}
 
@@ -50,7 +66,7 @@ func TestLanguage(t *testing.T) {
 				}
 			}
 
-			p, err := NewWithFS(fsys, "/")
+			p, err := bkl.NewWithFS(fsys, "/")
 			if err != nil {
 				t.Fatalf("Failed to create parser: %v", err)
 			}

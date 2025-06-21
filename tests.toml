@@ -752,6 +752,49 @@ files."a.yaml" = '''
 - $encode: prefix:X
 '''
 
+[encodeBase64Number]
+description = "Test base64 encoding of numeric values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: NDI=
+'''
+files."a.yaml" = '''
+a:
+  $value: 42 
+  $encode: base64
+'''
+
+[encodeList]
+description = "Test JSON encoding of list values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: |
+  [{"b":2},{"c":3}]
+'''
+files."a.yaml" = '''
+a:
+  - b: 2
+  - c: 3
+  - $encode: json
+'''
+
+[encodeMap]
+description = "Test JSON encoding of map values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: |
+  {"b":2,"c":3}
+'''
+files."a.yaml" = '''
+a:
+  b: 2
+  c: 3
+  $encode: json
+'''
+
 [decodeValue]
 description = "Test decode JSON with $value and $decode directives"
 eval = "a.yaml"
