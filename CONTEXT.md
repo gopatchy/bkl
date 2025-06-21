@@ -42,30 +42,45 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Use `./test` to run all tests or `./test <test-name>` for specific test
   - For expected failures: use `! bkl` in cmd file and empty expected output
 - **Language tests** (`tests.toml` file):
-  - Centralized test definitions in TOML format
+  - Centralized test definitions in TOML format (119 tests)
   - Each test specifies: `description`, `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
   - Run with `go test -run TestLanguage`
   - Run specific tests with `go test -run TestLanguage -test.filter=test1,test2,test3`
   - Tests run in parallel with in-memory filesystem (fstest.MapFS)
-  - Migrated from individual golang test files for better maintainability
   - Test names use camelCase convention
-  - Organized into sections: Map Operations, List Operations, Match Operations, Parent/Inheritance, Output Control, Special Characters, Format Support, Encode/Decode, Interpolation, Repeat Operations, Type Handling
+  - Organized into well-defined sections:
+    - Delete Operations ($delete)
+    - Replace Operations ($replace) 
+    - Merge Operations ($merge)
+    - Match Operations ($match)
+    - List Operations
+    - Encoding Operations ($encode)
+    - Decoding Operations ($decode)
+    - String Interpolation
+    - Repeat Operations ($repeat)
+    - Output Control ($output)
+    - Parent and Inheritance ($parent)
+    - Input/Output Formats
+    - Special Characters and Escaping
+    - Format Support
+    - Examples and Documentation
+    - Type Handling and Format Tests
+    - YAML and Miscellaneous Tests
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
-  - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, etc.
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
 - `document.go`: Document structure and processing
-- `parser.go`: Main parser logic and document merging
+- `parser.go`: Main parser logic and document merging (uses fs.FS with working directory support)
 - `process1.go`/`process2.go`: Document processing phases
 - `merge.go`: Merge logic for combining documents and handling type conflicts
-- `yaml.go`: YAML parsing using standard library decoder instead of regex
+- `yaml.go`: YAML parsing using standard library decoder
 - `error.go`: Centralized error definitions with base `Err`
-- `fs.go`: Filesystem abstraction with working directory support
+- `fs.go`: Filesystem abstraction with working directory support and glob fixes
 - `filepath.go`: File path utilities and extension handling
-- `language_test.go`: Go test wrapper for tests.toml-based language tests
+- `language_test.go`: Go test wrapper for tests.toml-based language tests (package bkl_test)
 
 ## Error Handling Patterns
 - All errors inherit from base `Err` using `fmt.Errorf("message (%w)", Err)`
