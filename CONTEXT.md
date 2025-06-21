@@ -33,6 +33,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `merge.go`: Merge logic for combining documents and handling type conflicts
 - `yaml.go`: YAML parsing using standard library decoder instead of regex
 - `error.go`: Centralized error definitions with base `Err`
+- `fs.go`: Filesystem abstraction with working directory support
+- `filepath.go`: File path utilities and extension handling
 
 ## Error Handling Patterns
 - All errors inherit from base `Err` using `fmt.Errorf("message (%w)", Err)`
@@ -66,6 +68,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
   1) MUST run all tests before moving on to add any new tests
   2) MUST check with the user before moving on to add any new tests
   3) MUST check with the user before deleting any tests
+- **CRITICAL - Error handling**: Always propagate errors with proper messages, never silently handle errors
+- **CRITICAL - No one-off scripts**: Never create temporary test scripts, always use inline debugging
+- **CRITICAL - Debug output**: When debugging, always output to stderr not stdout to avoid interfering with test output
 
 ## Commands for Development
 - `just` - Run complete build and test pipeline (preferred)
@@ -81,6 +86,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `go build ./cmd/bkl` - Build main binary
 - Tests are comprehensive with many integration tests plus Go unit tests
 - **IMPORTANT**: Never run `bkl` manually for testing - always use `just` or `./test` commands
+- **IMPORTANT**: Never create one-off test scripts - use inline debugging instead
+- **IMPORTANT**: When debugging, output to stderr not stdout to avoid interfering with test output
 
 ## Merge Behavior
 - Maps merge recursively by default, with special `$replace` directive to override

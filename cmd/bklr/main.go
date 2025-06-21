@@ -44,12 +44,12 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	realPath, format, err := bkl.FileMatch(string(opts.Positional.InputPath))
+	b, err := bkl.New()
 	if err != nil {
 		fatal(err)
 	}
 
-	b, err := bkl.New()
+	realPath, format, err := b.FileMatch(string(opts.Positional.InputPath))
 	if err != nil {
 		fatal(err)
 	}

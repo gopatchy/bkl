@@ -41,19 +41,7 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	}
 
 	if fh == nil {
-		// "a.yaml" -> "/foo/bar/a.yaml"
-		absPath, err := filepath.Abs(path)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", path, err)
-		}
-
-		// "/foo/bar/a.yaml" @ "/foo" -> "bar/a.yaml"
-		relPath, err := filepath.Rel(p.rootPath, absPath)
-		if err != nil {
-			return nil, fmt.Errorf("%s: %w", path, err)
-		}
-
-		fh, err = p.root.Open(relPath)
+		fh, err = p.fsys.Open(path)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}
@@ -104,7 +92,7 @@ func (p *Parser) loadFileAndParentsInt(path string, child *file, stack []string)
 
 	stack = append(stack, path)
 
-	parents, err := f.parents()
+	parents, err := f.parents(p.fsys)
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +121,8 @@ func (f *file) setParents() {
 	}
 }
 
-func (f *file) parents() ([]string, error) {
-	parents, err := f.parentsFromDirective()
+func (f *file) parents(fsys *FS) ([]string, error) {
+	parents, err := f.parentsFromDirective(fsys)
 	if err != nil {
 		return nil, err
 	}
@@ -143,19 +131,10 @@ func (f *file) parents() ([]string, error) {
 		return parents, nil
 	}
 
-	parents, err = f.parentsFromSymlink()
-	if err != nil {
-		return nil, err
-	}
-
-	if parents != nil {
-		return parents, nil
-	}
-
-	return f.parentsFromFilename()
+	return f.parentsFromFilename(fsys)
 }
 
-func (f *file) parentsFromDirective() ([]string, error) {
+func (f *file) parentsFromDirective(fsys *FS) ([]string, error) {
 	parents := []string{}
 	noParent := false
 
@@ -201,30 +180,11 @@ func (f *file) parentsFromDirective() ([]string, error) {
 		return nil, nil
 	}
 
-	return f.toAbsolutePaths(parents)
+	return f.toAbsolutePaths(fsys, parents)
 }
 
-func (f *file) parentsFromSymlink() ([]string, error) {
-	if isStdin(f.path) {
-		return nil, nil
-	}
 
-	dest, err := filepath.EvalSymlinks(f.path)
-	if err != nil {
-		return nil, err
-	}
-
-	if dest == f.path {
-		// Not a link
-		return nil, nil
-	}
-
-	f.path = dest
-
-	return f.parentsFromFilename()
-}
-
-func (f *file) parentsFromFilename() ([]string, error) {
+func (f *file) parentsFromFilename(fsys *FS) ([]string, error) {
 	if isStdin(f.path) {
 		return []string{}, nil
 	}
@@ -245,7 +205,7 @@ func (f *file) parentsFromFilename() ([]string, error) {
 	default:
 		layerPath := filepath.Join(dir, strings.Join(parts[:len(parts)-2], "."))
 
-		extPath := findFile(layerPath)
+		extPath := fsys.findFile(layerPath)
 		if extPath == "" {
 			return nil, fmt.Errorf("[%s]: %w", layerPath, ErrMissingFile)
 		}
@@ -254,13 +214,13 @@ func (f *file) parentsFromFilename() ([]string, error) {
 	}
 }
 
-func (f *file) toAbsolutePaths(paths []string) ([]string, error) {
+func (f *file) toAbsolutePaths(fsys *FS, paths []string) ([]string, error) {
 	ret := []string{}
 
 	for _, path := range paths {
 		path = filepath.Join(filepath.Dir(f.path), path)
 
-		matches, err := globFiles(path)
+		matches, err := fsys.globFiles(path)
 		if err != nil {
 			return nil, err
 		}

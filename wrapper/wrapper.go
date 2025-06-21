@@ -31,14 +31,14 @@ func WrapOrDie(cmd string) {
 	args := slices.Clone(os.Args[1:])
 
 	for i, arg := range args {
-		realPath, f, err := bkl.FileMatch(arg)
-		if err != nil {
-			continue
-		}
-
 		b, err := bkl.New()
 		if err != nil {
 			fatal(err)
+		}
+
+		realPath, f, err := b.FileMatch(arg)
+		if err != nil {
+			continue
 		}
 
 		err = b.MergeFileLayers(realPath)

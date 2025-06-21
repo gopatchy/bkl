@@ -9,9 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // A Parser reads input documents, merges layers, and generates outputs.
@@ -66,58 +68,33 @@ import (
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
 type Parser struct {
-	docs     []*Document
-	root     *os.Root
-	rootPath string
-	debug    bool
+	docs  []*Document
+	fsys  *FS
+	debug bool
 }
 
-// New creates and returns a new [Parser] with an empty starting document set.
-//
-// New always succeeds and returns a Parser instance.
 func New() (*Parser, error) {
-	root, err := os.OpenRoot("/")
+	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
+	return NewWithPath("/", wd)
+}
 
+func NewWithPath(path string, wd string) (*Parser, error) {
+	return NewWithFS(os.DirFS(path), wd)
+}
+
+func NewWithFS(fsys fs.FS, wd string) (*Parser, error) {
 	return &Parser{
-		root:     root,
-		rootPath: "/",
-		debug:    os.Getenv("BKL_DEBUG") != "",
+		fsys:  NewFS(fsys, wd),
+		debug: os.Getenv("BKL_DEBUG") != "",
 	}, nil
 }
 
 // SetDebug enables or disables debug log output to stderr.
 func (p *Parser) SetDebug(debug bool) {
 	p.debug = debug
-}
-
-// SetRoot sets a new root sandbox directory relative to the current root.
-func (p *Parser) SetRoot(path string) error {
-	// "sub" -> "/foo/bar/sub"
-	abs, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-
-	// "/foo/bar/sub" @ root "/foo" -> "bar/sub"
-	rel, err := filepath.Rel(p.rootPath, abs)
-	if err != nil {
-		return err
-	}
-
-	root, err := p.root.OpenRoot(rel)
-	if err != nil {
-		return err
-	}
-
-	p.root = root
-	p.rootPath = filepath.Join(p.rootPath, rel)
-
-	p.log("root=%s", p.rootPath)
-
-	return nil
 }
 
 // MergeDocument applies the supplied Document to the [Parser]'s current
@@ -391,4 +368,32 @@ func (p *Parser) log(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
+}
+
+// FileMatch attempts to find a file with the same base name as path, but
+// possibly with a different supported extension. It is intended to support
+// "virtual" filenames that auto-convert from the format of the underlying
+// real file.
+//
+// Returns the real filename and the requested output format, or
+// ("", "", error).
+func (p *Parser) FileMatch(path string) (string, string, error) {
+	format := ext(path)
+	if _, found := formatByExtension[format]; !found {
+		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
+	}
+
+	withoutExt := strings.TrimSuffix(path, "."+format)
+
+	if filepath.Base(withoutExt) == "-" {
+		return path, format, nil
+	}
+
+	realPath := p.fsys.findFile(withoutExt)
+
+	if realPath == "" {
+		return "", "", fmt.Errorf("%s.*: %w", withoutExt, ErrMissingFile)
+	}
+
+	return realPath, format, nil
 }

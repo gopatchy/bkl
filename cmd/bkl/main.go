@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"runtime/pprof"
 	"strings"
@@ -15,7 +16,7 @@ import (
 type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
-	RootPath     *string         `short:"r" long:"root-path" description:"restrict file access to this root directory"`
+	RootPath     string          `short:"r" long:"root-path" description:"restrict file access to this root directory" default:"/"`
 	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
 	Version      bool            `short:"V" long:"version" description:"print version and exit"`
@@ -66,7 +67,22 @@ Related tools:
 		os.Exit(1)
 	}
 
-	p, err := bkl.New()
+	wd, err := os.Getwd()
+	if err != nil {
+		fatal(err)
+	}
+
+	absRootPath, err := filepath.Abs(opts.RootPath)
+	if err != nil {
+		fatal(err)
+	}
+
+	relWd, err := filepath.Rel(absRootPath, wd)
+	if err != nil {
+		fatal(err)
+	}
+
+	p, err := bkl.NewWithPath(absRootPath, relWd)
 	if err != nil {
 		fatal(err)
 	}
@@ -75,20 +91,27 @@ Related tools:
 		p.SetDebug(true)
 	}
 
-	if opts.RootPath != nil {
-		err := p.SetRoot(*opts.RootPath)
-		if err != nil {
-			fatal(err)
-		}
-	}
-
 	format := ""
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
 	}
 
 	for _, path := range opts.Positional.InputPaths {
-		realPath, f, err := bkl.FileMatch(string(path))
+		// Convert user-provided path to be relative to root path
+		absPath, err := filepath.Abs(string(path))
+		if err != nil {
+			fatal(err)
+		}
+
+		relPath, err := filepath.Rel(absRootPath, absPath)
+		if err != nil {
+			fatal(err)
+		}
+
+		// Add leading "/" to make it absolute within the FS
+		relPath = "/" + relPath
+
+		realPath, f, err := p.FileMatch(relPath)
 		if err != nil {
 			fatal(err)
 		}

@@ -127,12 +127,12 @@ func fatal(err error) {
 }
 
 func getOnlyDocument(path string) (*bkl.Document, string, error) {
-	realPath, f, err := bkl.FileMatch(path)
+	b, err := bkl.New()
 	if err != nil {
 		return nil, "", err
 	}
 
-	b, err := bkl.New()
+	realPath, f, err := b.FileMatch(path)
 	if err != nil {
 		return nil, "", err
 	}

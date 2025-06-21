@@ -57,18 +57,18 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	var doc any
 
 	for p, path := range opts.Positional.InputPaths {
-		realPath, f, err := bkl.FileMatch(string(path))
+		b, err := bkl.New()
+		if err != nil {
+			fatal(err)
+		}
+
+		realPath, f, err := b.FileMatch(string(path))
 		if err != nil {
 			fatal(err)
 		}
 
 		if format == "" {
 			format = f
-		}
-
-		b, err := bkl.New()
-		if err != nil {
-			fatal(err)
 		}
 
 		err = b.MergeFileLayers(realPath)
