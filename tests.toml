@@ -1116,6 +1116,76 @@ _prefix: foo
 $encode: values
 '''
 
+[encodeBase64]
+description = "Test base64 encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+YQ==
+'''
+files."a.yaml" = '''
+$value: a
+$encode: base64
+'''
+
+[encodeJson]
+description = "Test JSON encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+|
+  {"a":1,"b":2}
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: json
+'''
+
+[encodeSha256]
+description = "Test SHA-256 encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
+'''
+files."a.yaml" = '''
+$value: a
+$encode: sha256
+'''
+
+[encodeFlatten]
+description = "Test flatten encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a
+- b
+- c
+- d
+- e
+'''
+files."a.yaml" = '''
+- - a
+  - b
+- - c
+  - d
+- e
+- $encode: flatten
+'''
+
+[encodeJoin]
+description = "Test join encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a24b
+'''
+files."a.yaml" = '''
+$value: [a, 24, b]
+$encode: join
+'''
+
 ###############################################################################
 # Decoding Operations ($decode)
 ###############################################################################
@@ -1133,6 +1203,21 @@ files."a.yaml" = '''
 a:
   $decode: json
   $value: '{"b": 1, "c": 2}'
+'''
+
+[decodeJson]
+description = "Test JSON decoding with $decode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  foo: bar
+'''
+files."a.yaml" = '''
+a:
+  $value: |
+    {"foo":"bar"}
+  $decode: json
 '''
 
 ###############################################################################
@@ -1208,9 +1293,185 @@ $repeat: 2
 # Output Control ($output)
 ###############################################################################
 
+[outputMulti]
+description = "Test $output directive for selective output"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+c: 3
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    $output: true
+    a: 1
+    b: 2
+  zig:
+    $output: true
+    c: 3
+'''
+
+[outputFalse]
+description = "Test $output: false directive excludes content"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c:
+  d: 1
+'''
+files."a.yaml" = '''
+a:
+  $output: false
+  b: 1
+c:
+  d: 1
+'''
+
+[outputFalseList]
+description = "Test $output: false directive in list context"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c:
+  - d: 1
+'''
+files."a.yaml" = '''
+a:
+  - $output: false
+  - b: 1
+c:
+  - d: 1
+'''
+
+[outputFalseRoot]
+description = "Test $output: false directive at document root"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+---
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+$output: false
+---
+c: 3
+'''
+
+[outputSingle]
+description = "Test $output: true directive for single section"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    $output: true
+    a: 1
+    b: 2
+'''
+
+[outputList]
+description = "Test $output: true directive in list context"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a: 1
+- b: 2
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - $output: true
+    - a: 1
+    - b: 2
+'''
+
+[outputMapInList]
+description = "Test $output: true directive for map within list"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 2
+d: 3
+'''
+files."a.yaml" = '''
+a:
+  - b: 1
+  - $output: true
+    c: 2
+    d: 3
+'''
+
+[outputAfterReplace]
+description = "Test output control after replace operations"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 2
+'''
+files."a.yaml" = '''
+a:
+  b: 2
+  $output: false
+c:
+  $replace: a.b
+'''
+
+[outputTrueWithinFalse]
+description = "Test nested output control (true within false)"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+b: 2
+'''
+files."a.yaml" = '''
+$output: false
+a:
+  b: 2
+  $output: true
+'''
+
 ###############################################################################
 # Parent and Inheritance ($parent)
 ###############################################################################
+
+[parentSet]
+description = "Test $parent directive for explicit parent file reference"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+$parent: c
+a: 1
+'''
+files."c.yaml" = '''
+b: 2
+'''
+
+[parentNull]
+description = "Test setting $parent to null to prevent inheritance"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+$parent: null
+a: 1
+'''
 
 ###############################################################################
 # Input/Output Formats
@@ -1299,64 +1560,7 @@ a: 1
 b: 2
 '''
 
-###############################################################################
-# Special Values and Edge Cases
-###############################################################################
 
-###############################################################################
-# Cross-Layer Tests
-###############################################################################
-
-
-
-###############################################################################
-# List Operations
-###############################################################################
-
-###############################################################################
-# Parent and Inheritance
-###############################################################################
-
-[parentSet]
-description = "Test $parent directive for explicit parent file reference"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-'''
-files."a.b.yaml" = '''
-$parent: c
-a: 1
-'''
-files."c.yaml" = '''
-b: 2
-'''
-
-###############################################################################
-# Output Control
-###############################################################################
-
-[outputMulti]
-description = "Test $output directive for selective output"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
----
-c: 3
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    $output: true
-    a: 1
-    b: 2
-  zig:
-    $output: true
-    c: 3
-'''
 
 ###############################################################################
 # Special Characters and Escaping
@@ -1420,95 +1624,6 @@ port: 8080
 '''
 files."a.b.toml" = '''
 port = 8081
-'''
-
-###############################################################################
-# Encode/Decode Operations
-###############################################################################
-
-[encodeBase64]
-description = "Test base64 encoding with $encode directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-YQ==
-'''
-files."a.yaml" = '''
-$value: a
-$encode: base64
-'''
-
-[encodeJson]
-description = "Test JSON encoding with $encode directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-|
-  {"a":1,"b":2}
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
-$encode: json
-'''
-
-[decodeJson]
-description = "Test JSON decoding with $decode directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a:
-  foo: bar
-'''
-files."a.yaml" = '''
-a:
-  $value: |
-    {"foo":"bar"}
-  $decode: json
-'''
-
-[encodeSha256]
-description = "Test SHA-256 encoding with $encode directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
-'''
-files."a.yaml" = '''
-$value: a
-$encode: sha256
-'''
-
-[encodeFlatten]
-description = "Test flatten encoding with $encode directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- a
-- b
-- c
-- d
-- e
-'''
-files."a.yaml" = '''
-- - a
-  - b
-- - c
-  - d
-- e
-- $encode: flatten
-'''
-
-[encodeJoin]
-description = "Test join encoding with $encode directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a24b
-'''
-files."a.yaml" = '''
-$value: [a, 24, b]
-$encode: join
 '''
 
 
@@ -1836,18 +1951,6 @@ b: $merge:$repeat
 
 
 
-[parentNull]
-description = "Test setting $parent to null to prevent inheritance"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-'''
-files."a.b.yaml" = '''
-$parent: null
-a: 1
-'''
-
 [mapMerge]
 description = "Test simple map merging"
 eval = "a.b.yaml"
@@ -1929,137 +2032,6 @@ b: 2
 ---
 c: 3
 d: 4
-'''
-
-###############################################################################
-# More Output Control Tests
-###############################################################################
-
-[outputFalse]
-description = "Test $output: false directive excludes content"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c:
-  d: 1
-'''
-files."a.yaml" = '''
-a:
-  $output: false
-  b: 1
-c:
-  d: 1
-'''
-
-[outputFalseList]
-description = "Test $output: false directive in list context"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c:
-  - d: 1
-'''
-files."a.yaml" = '''
-a:
-  - $output: false
-  - b: 1
-c:
-  - d: 1
-'''
-
-[outputFalseRoot]
-description = "Test $output: false directive at document root"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
----
-c: 3
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-$output: false
----
-c: 3
-'''
-
-[outputSingle]
-description = "Test $output: true directive for single section"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    $output: true
-    a: 1
-    b: 2
-'''
-
-[outputList]
-description = "Test $output: true directive in list context"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- a: 1
-- b: 2
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    - $output: true
-    - a: 1
-    - b: 2
-'''
-
-[outputMapInList]
-description = "Test $output: true directive for map within list"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 2
-d: 3
-'''
-files."a.yaml" = '''
-a:
-  - b: 1
-  - $output: true
-    c: 2
-    d: 3
-'''
-
-[outputAfterReplace]
-description = "Test output control after replace operations"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 2
-'''
-files."a.yaml" = '''
-a:
-  b: 2
-  $output: false
-c:
-  $replace: a.b
-'''
-
-[outputTrueWithinFalse]
-description = "Test nested output control (true within false)"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-b: 2
-'''
-files."a.yaml" = '''
-$output: false
-a:
-  b: 2
-  $output: true
 '''
 
 ###############################################################################
