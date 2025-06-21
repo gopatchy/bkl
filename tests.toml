@@ -293,3 +293,268 @@ port: 8080
 files."a.b.toml" = '''
 port = 8081
 '''
+
+###############################################################################
+# Encode/Decode Operations
+###############################################################################
+
+[encodeBase64]
+description = "Test base64 encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+YQ==
+'''
+files."a.yaml" = '''
+$value: a
+$encode: base64
+'''
+
+[encodeJson]
+description = "Test JSON encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+|
+  {"a":1,"b":2}
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: json
+'''
+
+[decodeJson]
+description = "Test JSON decoding with $decode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  foo: bar
+'''
+files."a.yaml" = '''
+a:
+  $value: |
+    {"foo":"bar"}
+  $decode: json
+'''
+
+[encodeSha256]
+description = "Test SHA-256 encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
+'''
+files."a.yaml" = '''
+$value: a
+$encode: sha256
+'''
+
+[encodeFlatten]
+description = "Test flatten encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a
+- b
+- c
+- d
+- e
+'''
+files."a.yaml" = '''
+- - a
+  - b
+- - c
+  - d
+- e
+- $encode: flatten
+'''
+
+[encodeJoin]
+description = "Test join encoding with $encode directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a24b
+'''
+files."a.yaml" = '''
+$value: [a, 24, b]
+$encode: join
+'''
+
+###############################################################################
+# Interpolation
+###############################################################################
+
+[interpSimple]
+description = "Test basic string interpolation"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: foo
+c:
+  d: zig
+e: foo bar zig zag 1 2
+'''
+files."a.yaml" = '''
+a: 1
+b: foo
+c:
+  d: zig
+e: $"{b} bar {c.d} zag {a} 2"
+'''
+
+[interpKey]
+description = "Test interpolation in map keys"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: foo
+foo0: bar
+'''
+files."a.yaml" = '''
+a: foo
+$"{a}0": bar
+'''
+
+[interpInterp]
+description = "Test chained interpolation"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: foo
+b: foo
+c: foo
+'''
+files."a.yaml" = '''
+a: foo
+b: $"{a}"
+c: $"{b}"
+'''
+
+###############################################################################
+# Repeat Operations
+###############################################################################
+
+[repeatDocList]
+description = "Test $repeat directive with list documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- b: 2
+- c: 0
+---
+- b: 2
+- c: 1
+'''
+files."a.yaml" = '''
+- $repeat: 2
+- b: 2
+- c: $repeat
+'''
+
+[repeatDocMap]
+description = "Test $repeat directive with map documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b: 2
+  c: 0
+---
+a:
+  b: 2
+  c: 1
+'''
+files."a.yaml" = '''
+$repeat: 2
+a:
+  b: 2
+  c: $repeat
+'''
+
+[repeatListValues]
+description = "Test $repeat directive with list of values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+fruit: apple
+---
+fruit: banana
+---
+fruit: cherry
+'''
+files."a.yaml" = '''
+$repeat: ["apple", "banana", "cherry"]
+fruit: $repeat
+'''
+
+###############################################################################
+# Type Handling and Format Tests
+###############################################################################
+
+[yamlTypes]
+description = "Test YAML type handling and preservation"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+bool: true
+float: 0.5
+int: 42
+"null": null
+str: hello
+timestamp: "2022-02-05T10:30:00.1Z"
+'''
+files."a.yaml" = '''
+null: null
+bool: true
+str: hello
+int: 42
+float: 0.5
+timestamp: 2022-02-05T10:30:00.1Z
+'''
+
+[jsonFloat]
+description = "Test JSON float number handling"
+eval = "a.json"
+format = "json"
+expected = '''
+{"a":3.14,"b":12300000000}
+'''
+files."a.json" = '''
+{"a": 3.14, "b": 1.23e10}
+'''
+
+[jsonlInput]
+description = "Test JSONL input format"
+eval = "a.jsonl"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+c: 3
+d: 4
+'''
+files."a.jsonl" = '''
+{"a":1,"b":2}
+{"c":3,"d":4}
+'''
+
+[jsonlOutput]
+description = "Test JSONL output format"
+eval = "a.yaml"
+format = "jsonl"
+expected = '''
+{"a":1,"b":2}
+{"c":3,"d":4}
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+c: 3
+d: 4
+'''

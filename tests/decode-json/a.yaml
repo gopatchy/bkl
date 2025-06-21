@@ -1,4 +1,0 @@
-a:
-  $value: |
-    {"foo":"bar"}
-  $decode: json

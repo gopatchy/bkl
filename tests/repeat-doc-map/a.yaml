@@ -1,4 +1,0 @@
-$repeat: 2
-a:
-  b: 2
-  c: $repeat

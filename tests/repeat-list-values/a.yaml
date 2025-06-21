@@ -1,2 +1,0 @@
-$repeat: ["apple", "banana", "cherry"]
-fruit: $repeat

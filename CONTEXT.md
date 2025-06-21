@@ -22,11 +22,13 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - For expected failures: use `! bkl` in cmd file and empty expected output
 - **Language tests** (`tests.toml` file):
   - Centralized test definitions in TOML format
-  - Each test specifies: `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
+  - Each test specifies: `description`, `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
   - Run with `go test -run TestLanguage`
   - Run single test with `go test -run TestLanguage -test.single="test-name"`
   - Tests run in parallel with in-memory filesystem (fstest.MapFS)
   - Migrated from individual golang test files for better maintainability
+  - Test names use camelCase convention
+  - Organized into sections: Map Operations, List Operations, Match Operations, Parent/Inheritance, Output Control, Special Characters, Format Support, Encode/Decode, Interpolation, Repeat Operations, Type Handling
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, etc.
   - Use "null" not "nil" in test names (language perspective vs implementation)

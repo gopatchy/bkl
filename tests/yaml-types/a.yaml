@@ -1,6 +1,0 @@
-null: null
-bool: true
-str: hello
-int: 42
-float: 0.5
-timestamp: 2022-02-05T10:30:00.1Z

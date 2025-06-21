@@ -1,5 +1,0 @@
-a: 1
-b: foo
-c:
-  d: zig
-e: $"{b} bar {c.d} zag {a} 2"
