@@ -335,7 +335,6 @@ ifocus * {
 	<li><a href="#formats">Formats</a></li>
 	<li><a href="#write">Write</a></li>
 	<li><a href="#inputs">Inputs</a></li>
-	<li><a href="#symlinks">Symlinks</a></li>
 	<li><a href="#inheritance">Inheritance</a></li>
 	<li><a href="#streams">Streams</a></li>
 	<li><a href="#maps">Maps</a></li>
@@ -517,17 +516,6 @@ EOF</code>
 
 <vSpace></vSpace>
 <vSpace></vSpace>
-
-
-<h2><a name="symlinks">Symlinks</a></h2>
-
-<code><prompt>$ </prompt><cmd>ln</cmd> <string>-s</string> <focus><string>a.b.yaml</string> <string>c.yaml</string></focus>
-<prompt>$ </prompt><cmd>bkl</cmd> <focus><string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml (c.yaml) + c.d.yaml</code>
-
-<vSpace></vSpace>
-
-<p>bkl follows symbolic links and evaluates the inherited layers on the other side of the symlink.</p>
-
 
 
 <h2><a name="inheritance">Inheritance</a></h2>
