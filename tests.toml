@@ -1,5 +1,5 @@
 ###############################################################################
-# Map Operations
+# Delete Operations ($delete)
 ###############################################################################
 
 [mapDelete]
@@ -37,86 +37,6 @@ files."a.b.yaml" = '''
 x:
   b: $delete
   c: 3
-'''
-
-[mapReplace]
-description = "Test map replacement with $replace directive"
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-{"b":2}
-'''
-files."a.yaml" = '''
-a: 1
-'''
-files."a.b.yaml" = '''
-b: 2
-$replace: true
-'''
-
-[mergeMap]
-description = "Test map merging with $merge directive"
-eval = "a.yaml"
-format = "json"
-expected = '''
-{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    a: 1
-zig:
-  b: 2
-  $merge: foo.bar
-'''
-
-[replaceMap]
-description = "Test map replacement with $replace directive (path reference)"
-eval = "a.yaml"
-format = "json"
-expected = '''
-{"foo":{"bar":{"a":1}},"zig":{"a":1}}
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    a: 1
-zig:
-  b: 2
-  $replace: foo.bar
-'''
-
-###############################################################################
-# List Operations
-###############################################################################
-
-[listMerge]
-description = "Test default list merge behavior (concatenation)"
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-[1,2]
-'''
-files."a.yaml" = '''
-- 1
-'''
-files."a.b.yaml" = '''
-- 2
-'''
-
-[listReplace]
-description = "Test list replacement with $replace directive"
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-[2]
-'''
-files."a.yaml" = '''
-- 1
-'''
-files."a.b.yaml" = '''
-- 2
-- $replace
 '''
 
 [listDelete]
@@ -157,6 +77,290 @@ files."a.b.yaml" = '''
     x:
       - b: 2
 '''
+
+[listDeletePartialMap]
+description = "Test list deletion with partial map matching"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- x: 1
+- x: 3
+'''
+files."a.yaml" = '''
+- x: 1
+- x: 2
+  z: 5
+'''
+files."a.b.yaml" = '''
+- x: 3
+- $delete:
+    x: 2
+'''
+
+[mergeDeleteExisting]
+description = "Test $delete directive behavior in merge"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: $delete
+b: 2
+'''
+files."a.b.yaml" = '''
+a: 1
+c: 3
+'''
+
+###############################################################################
+# Replace Operations ($replace)
+###############################################################################
+
+[mapReplace]
+description = "Test map replacement with $replace directive"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+{"b":2}
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+$replace: true
+'''
+
+[replaceMap]
+description = "Test map replacement with $replace directive (path reference)"
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"foo":{"bar":{"a":1}},"zig":{"a":1}}
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $replace: foo.bar
+'''
+
+[listReplace]
+description = "Test list replacement with $replace directive"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+- $replace
+'''
+
+[replaceCrossDoc]
+description = "Test cross-document replacement with $replace"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+c: 3
+$replace:
+  $match:
+    a: 1
+'''
+
+[replaceCrossDocPath]
+description = "Test cross-document replacement with path extraction"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c: 3
+---
+d: 4
+$replace:
+  $match:
+    a: 1
+  $path: b
+'''
+
+[replaceCrossDocString]
+description = "Test cross-document replacement with string output"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo
+'''
+files."a.yaml" = '''
+a: 1
+b: foo
+$output: false
+---
+c: 3
+$replace:
+  $match:
+    a: 1
+  $path: b
+'''
+
+[replaceString]
+description = "Test string replacement using $replace directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+zig:
+  b: 2
+  zag: bar
+'''
+files."a.yaml" = '''
+foo: bar
+zig:
+  b: 2
+  zag: $replace:foo
+'''
+
+[listReplaceTrue]
+description = "Test list replacement with $replace: true"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 2
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+- $replace: true
+'''
+
+[replaceList]
+description = "Test $replace directive replacing list contents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - a: 1
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - $replace: foo.bar
+'''
+
+###############################################################################
+# Merge Operations ($merge)
+###############################################################################
+
+###############################################################################
+# Match Operations ($match)
+###############################################################################
+
+###############################################################################
+# List Operations
+###############################################################################
+
+###############################################################################
+# Encoding Operations ($encode)
+###############################################################################
+
+###############################################################################
+# Decoding Operations ($decode)
+###############################################################################
+
+###############################################################################
+# String Interpolation
+###############################################################################
+
+###############################################################################
+# Repeat Operations ($repeat)
+###############################################################################
+
+###############################################################################
+# Output Control ($output)
+###############################################################################
+
+###############################################################################
+# Parent and Inheritance ($parent)
+###############################################################################
+
+###############################################################################
+# Input/Output Formats
+###############################################################################
+
+###############################################################################
+# Special Values and Edge Cases
+###############################################################################
+
+###############################################################################
+# Cross-Layer Tests
+###############################################################################
+
+
+[mergeMap]
+description = "Test map merging with $merge directive"
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $merge: foo.bar
+'''
+
+###############################################################################
+# List Operations
+###############################################################################
+
+[listMerge]
+description = "Test default list merge behavior (concatenation)"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[1,2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+'''
+
+
 
 ###############################################################################
 # Match Operations
@@ -760,82 +964,6 @@ a: $repeat
 b: $merge:$repeat
 '''
 
-[replaceCrossDoc]
-description = "Test cross-document replacement with $replace"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
----
-a: 1
-b: 2
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
----
-c: 3
-$replace:
-  $match:
-    a: 1
-'''
-
-[replaceCrossDocPath]
-description = "Test cross-document replacement with path extraction"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 3
-'''
-files."a.yaml" = '''
-$output: false
-a: 1
-b:
-  c: 3
----
-d: 4
-$replace:
-  $match:
-    a: 1
-  $path: b
-'''
-
-[replaceCrossDocString]
-description = "Test cross-document replacement with string output"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo
-'''
-files."a.yaml" = '''
-a: 1
-b: foo
-$output: false
----
-c: 3
-$replace:
-  $match:
-    a: 1
-  $path: b
-'''
-
-[replaceString]
-description = "Test string replacement using $replace directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo: bar
-zig:
-  b: 2
-  zag: bar
-'''
-files."a.yaml" = '''
-foo: bar
-zig:
-  b: 2
-  zag: $replace:foo
-'''
 
 [mergeCrossDocShortList]
 description = "Test cross-document merging with lists"
@@ -991,24 +1119,6 @@ $match:
 b: 2
 '''
 
-[listDeletePartialMap]
-description = "Test list deletion with partial map matching"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-- x: 1
-- x: 3
-'''
-files."a.yaml" = '''
-- x: 1
-- x: 2
-  z: 5
-'''
-files."a.b.yaml" = '''
-- x: 3
-- $delete:
-    x: 2
-'''
 
 [listMatch]
 description = "Test list matching and modification"
@@ -1045,20 +1155,6 @@ files."a.b.yaml" = '''
   $value: 10
 '''
 
-[listReplaceTrue]
-description = "Test list replacement with $replace: true"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-- 2
-'''
-files."a.yaml" = '''
-- 1
-'''
-files."a.b.yaml" = '''
-- 2
-- $replace: true
-'''
 
 [mapMerge]
 description = "Test simple map merging"
@@ -1188,23 +1284,6 @@ a: 1
 c: $merge:b
 '''
 
-[mergeDeleteExisting]
-description = "Test $delete directive behavior in merge"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-c: 3
-'''
-files."a.yaml" = '''
-a: $delete
-b: 2
-'''
-files."a.b.yaml" = '''
-a: 1
-c: 3
-'''
 
 [mergeListNil]
 description = "Test null value overriding list"
@@ -1276,25 +1355,6 @@ files."a.b.yaml" = '''
 a: null
 '''
 
-[replaceList]
-description = "Test $replace directive replacing list contents"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-foo:
-  bar:
-    - a: 1
-zig:
-  - a: 1
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    - a: 1
-zig:
-  - b: 2
-  - $replace: foo.bar
-'''
 
 ###############################################################################
 # Type Handling and Format Tests
