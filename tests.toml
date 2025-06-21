@@ -708,6 +708,111 @@ zig:
   zag: $merge:foo
 '''
 
+[mergeCrossDocList]
+description = "Test merging lists across documents with matching"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- 2
+- 3
+---
+- 1
+- 2
+- 3
+'''
+files."a.yaml" = '''
+- 2
+- 3
+---
+- 1
+- $merge:
+    $match:
+      - 2
+'''
+
+[mergeCrossDocPath]
+description = "Test merging with path selection across documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c: 3
+---
+d: 4
+$merge:
+  $match:
+    a: 1
+  $path: b
+'''
+
+[mergeCrossDocShort]
+description = "Test short syntax for merge across documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c: 3
+---
+d: 4
+$merge: [{a: 1}, b]
+'''
+
+[mergeListMulti]
+description = "Test multiple merges within a list"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  bar:
+    - a: 1
+  zag:
+    - c: 3
+zig:
+  - b: 2
+  - c: 3
+  - a: 1
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - a: 1
+  zag:
+    - c: 3
+zig:
+  - b: 2
+  - $merge: foo.zag
+  - $merge: foo.bar
+'''
+
+[mergeNum]
+description = "Test merging numeric values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: 1
+zig:
+  b: 2
+  zag: 1
+'''
+files."a.yaml" = '''
+foo: 1
+zig:
+  b: 2
+  zag: $merge:foo
+'''
+
 [encodeTolist]
 description = "Test tolist encoding with custom separator"
 eval = "a.yaml"
@@ -793,6 +898,190 @@ a:
   b: 2
   c: 3
   $encode: json
+'''
+
+[encodeJsonList]
+description = "Test JSON encoding of list as multiline string"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+|
+  [{"a":1},{"b":2}]
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+- $encode: json
+'''
+
+[encodeFlags]
+description = "Test flags encoding converts map to command-line flags"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- --a=1
+- --b=2
+- --c
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+c: ""
+$encode: flags
+'''
+
+[encodeFlagsFlatten]
+description = "Test flags encoding with flatten for mixed list content"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a
+- b
+- --c=3
+- --d=4
+- --e
+- f
+- g
+'''
+files."a.yaml" = '''
+- - a
+  - b
+- c: 3
+  d: 4
+  e: ""
+  $encode: flags
+- f
+- g
+- $encode: flatten
+'''
+
+[encodeFlagsSublist]
+description = "Test flags encoding with list values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- --a=1
+- --b=2
+- --b=c
+- --b
+'''
+files."a.yaml" = '''
+a: 1
+b:
+- 2
+- c
+- ""
+$encode: flags
+'''
+
+[encodeMulti]
+description = "Test multiple encoding directives (tolist and join)"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a=1,b=2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: [tolist:=, "join:,"]
+'''
+
+[encodeSha256Number]
+description = "Test SHA256 encoding of numeric values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049
+'''
+files."a.yaml" = '''
+a:
+  $value: 42
+  $encode: sha256
+'''
+
+[encodeTolistLists]
+description = "Test tolist encoding with list of maps"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a=1
+- a=2
+- b=3
+'''
+files."a.yaml" = '''
+- a: 1
+- a: 2
+  b: 3
+- $encode: tolist:=
+'''
+
+[encodeValue]
+description = "Test JSON encoding of simple value"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: |
+  "b"
+'''
+files."a.yaml" = '''
+a:
+  $value: b
+  $encode: json
+'''
+
+[encodeValuesPrefix]
+description = "Test values encoding with prefix field"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- foo
+- 1
+- 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+_prefix: foo
+$encode: values
+'''
+
+[jsonInputStreamConcat]
+description = "Test handling of concatenated JSON objects without newlines"
+eval = "a.json"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.json" = '''
+{"a": 1}{"b": 2}
+'''
+
+[jsonInputStreamNewline]
+description = "Test handling of JSON objects separated by newlines (JSON Lines)"
+eval = "a.json"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.json" = '''
+{"a": 1}
+{"b": 2}
+'''
+
+[jsonLargeInt]
+description = "Test preservation of large integer values"
+eval = "a.json"
+format = "json"
+expected = '''
+{"a":9223372036854775807,"b":2147483648}
+'''
+files."a.json" = '''
+{"a": 9223372036854775807, "b": 2147483648}
 '''
 
 [decodeValue]
