@@ -975,6 +975,307 @@ $parent: null
 a: 1
 '''
 
+[matchEmptyMap]
+description = "Test $match directive with empty map"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: {}
+b: 2
+'''
+files."a.yaml" = '''
+a: {}
+---
+$match:
+  a: {}
+b: 2
+'''
+
+[listDeletePartialMap]
+description = "Test list deletion with partial map matching"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- x: 1
+- x: 3
+'''
+files."a.yaml" = '''
+- x: 1
+- x: 2
+  z: 5
+'''
+files."a.b.yaml" = '''
+- x: 3
+- $delete:
+    x: 2
+'''
+
+[listMatch]
+description = "Test list matching and modification"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- a: 1
+- b: 10
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+'''
+files."a.b.yaml" = '''
+- $match:
+    b: 2
+  b: 10
+'''
+
+[listMatchValue]
+description = "Test list matching with value replacement"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 1
+- 10
+'''
+files."a.yaml" = '''
+- 1
+- 2
+'''
+files."a.b.yaml" = '''
+- $match: 2
+  $value: 10
+'''
+
+[listReplaceTrue]
+description = "Test list replacement with $replace: true"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 2
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+- $replace: true
+'''
+
+[mapMerge]
+description = "Test simple map merging"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+'''
+
+[matchInvert]
+description = "Test $match with $invert directive"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+---
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  b: 2
+  $invert: true
+c: 3
+'''
+
+[matchListValue]
+description = "Test $match in list with $value replacement"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a:
+  - b: 1
+    d: 4
+  - c: 2
+'''
+files."a.yaml" = '''
+a:
+  - b: 1
+  - c: 2
+'''
+files."a.b.yaml" = '''
+a:
+  - $match:
+      b: 1
+    $value:
+      d: 4
+'''
+
+[matchMultiDoc]
+description = "Test $match applying to multiple documents"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+d: 4
+---
+a: 1
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+a: 1
+c: 3
+'''
+files."a.b.yaml" = '''
+$match:
+  a: 1
+d: 4
+'''
+
+[matchPartial]
+description = "Test $match with partial map matching"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+x:
+  b: 1
+  c: 2
+  d: 3
+'''
+files."a.yaml" = '''
+x:
+  b: 1
+  c: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  x: {}
+x:
+  d: 3
+'''
+
+[mergeChainLayers]
+description = "Test chained merge references across layers"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 1
+c: 1
+d: 1
+'''
+files."a.yaml" = '''
+a: $required
+b: $merge:a
+d: $merge:c
+'''
+files."a.b.yaml" = '''
+a: 1
+c: $merge:b
+'''
+
+[mergeDeleteExisting]
+description = "Test $delete directive behavior in merge"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: $delete
+b: 2
+'''
+files."a.b.yaml" = '''
+a: 1
+c: 3
+'''
+
+[mergeListNil]
+description = "Test null value overriding list"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: null
+'''
+files."a.yaml" = '''
+a:
+  - 1
+  - 2
+'''
+files."a.b.yaml" = '''
+a: null
+'''
+
+[mergeListString]
+description = "Test string value overriding list"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: hello
+'''
+files."a.yaml" = '''
+a:
+  - 1
+  - 2
+'''
+files."a.b.yaml" = '''
+a: "hello"
+'''
+
+[mergeListWithNull]
+description = "Test list merge preserving null values"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+x:
+  - 1
+  - null
+  - 3
+  - 4
+  - null
+'''
+files."a.yaml" = '''
+x:
+  - 1
+  - null
+  - 3
+'''
+files."a.b.yaml" = '''
+x:
+  - 4
+  - null
+'''
+
+[mergeMapNil]
+description = "Test null value overriding map value"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: null
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+a: null
+'''
+
 [replaceList]
 description = "Test $replace directive replacing list contents"
 eval = "a.yaml"

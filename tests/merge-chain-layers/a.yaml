@@ -1,3 +1,0 @@
-a: $required
-b: $merge:a
-d: $merge:c
