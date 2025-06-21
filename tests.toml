@@ -1,0 +1,34 @@
+[map-delete]
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+b: $delete
+c: 3
+'''
+
+[map-delete-nested]
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+x:
+  a: 1
+  c: 3
+'''
+files."a.yaml" = '''
+x:
+  a: 1
+  b: 2
+'''
+files."a.b.yaml" = '''
+x:
+  b: $delete
+  c: 3
+'''

@@ -13,12 +13,21 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Utility features**: `$repeat`, `$delete`, `$replace`, required field validation
 
 ## Testing Framework
-- Tests are in `tests/` directory, each test has its own subdirectory
-- Test structure: `a.yaml` (input), `cmd` (command to run), `expected` (expected output)
-- Use `./test` to run all tests or `./test <test-name>` for specific test
-- For expected failures: use `! bkl` in cmd file and empty expected output
+- **Dual test systems**: 
+  - Integration tests in `tests/` directory (each test has its own subdirectory)
+  - Language tests in `tests.toml` (centralized TOML file with all test cases)
+- **Integration tests** (`tests/` directory):
+  - Test structure: `a.yaml` (input), `cmd` (command to run), `expected` (expected output)
+  - Use `./test` to run all tests or `./test <test-name>` for specific test
+  - For expected failures: use `! bkl` in cmd file and empty expected output
+- **Language tests** (`tests.toml` file):
+  - Centralized test definitions in TOML format
+  - Each test specifies: `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
+  - Run with `go test -run TestLanguage`
+  - Run single test with `go test -run TestLanguage -test.single="test-name"`
+  - Tests run in parallel with in-memory filesystem (fstest.MapFS)
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
-  - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, `map-delete-*`, etc.
+  - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, etc.
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
 - **Expected output files**: Always include trailing newline to avoid test failures
@@ -35,6 +44,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `error.go`: Centralized error definitions with base `Err`
 - `fs.go`: Filesystem abstraction with working directory support
 - `filepath.go`: File path utilities and extension handling
+- `language_test.go`: Go test wrapper for tests.toml-based language tests
 
 ## Error Handling Patterns
 - All errors inherit from base `Err` using `fmt.Errorf("message (%w)", Err)`
