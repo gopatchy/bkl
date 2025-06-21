@@ -678,9 +678,206 @@ zig:
 # Match Operations ($match)
 ###############################################################################
 
+[matchMap]
+description = "Test $match directive for selective document processing"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+{"a":1,"d":4}
+{"b":2,"c":3}
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  b: 2
+c: 3
+---
+$match:
+  a: 1
+d: 4
+'''
+
+[matchEmptyMap]
+description = "Test $match directive with empty map"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: {}
+b: 2
+'''
+files."a.yaml" = '''
+a: {}
+---
+$match:
+  a: {}
+b: 2
+'''
+
+[matchInvert]
+description = "Test $match with $invert directive"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+---
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  b: 2
+  $invert: true
+c: 3
+'''
+
+[matchListValue]
+description = "Test $match in list with $value replacement"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a:
+  - b: 1
+    d: 4
+  - c: 2
+'''
+files."a.yaml" = '''
+a:
+  - b: 1
+  - c: 2
+'''
+files."a.b.yaml" = '''
+a:
+  - $match:
+      b: 1
+    $value:
+      d: 4
+'''
+
+[matchMultiDoc]
+description = "Test $match applying to multiple documents"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+d: 4
+---
+a: 1
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+a: 1
+c: 3
+'''
+files."a.b.yaml" = '''
+$match:
+  a: 1
+d: 4
+'''
+
+[matchPartial]
+description = "Test $match with partial map matching"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+x:
+  b: 1
+  c: 2
+  d: 3
+'''
+files."a.yaml" = '''
+x:
+  b: 1
+  c: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  x: {}
+x:
+  d: 3
+'''
+
 ###############################################################################
 # List Operations
 ###############################################################################
+
+[listMerge]
+description = "Test default list merge behavior (concatenation)"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[1,2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+'''
+
+[listMatch]
+description = "Test list matching and modification"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- a: 1
+- b: 10
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+'''
+files."a.b.yaml" = '''
+- $match:
+    b: 2
+  b: 10
+'''
+
+[listMatchValue]
+description = "Test list matching with value replacement"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 1
+- 10
+'''
+files."a.yaml" = '''
+- 1
+- 2
+'''
+files."a.b.yaml" = '''
+- $match: 2
+  $value: 10
+'''
+
+[listWithNull]
+description = "Test preservation of null values in lists"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+x:
+  - a
+  - null
+  - c
+  - null
+  - e
+'''
+files."a.yaml" = '''
+x: [a, null, c, null, e]
+'''
 
 ###############################################################################
 # Encoding Operations ($encode)
@@ -942,6 +1139,67 @@ a:
 # String Interpolation
 ###############################################################################
 
+[interpSimple]
+description = "Test basic string interpolation"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: foo
+c:
+  d: zig
+e: foo bar zig zag 1 2
+'''
+files."a.yaml" = '''
+a: 1
+b: foo
+c:
+  d: zig
+e: $"{b} bar {c.d} zag {a} 2"
+'''
+
+[interpKey]
+description = "Test interpolation in map keys"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: foo
+foo0: bar
+'''
+files."a.yaml" = '''
+a: foo
+$"{a}0": bar
+'''
+
+[interpInterp]
+description = "Test chained interpolation"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: foo
+b: foo
+c: foo
+'''
+files."a.yaml" = '''
+a: foo
+b: $"{a}"
+c: $"{b}"
+'''
+
+[interpRepeat]
+description = "Test string interpolation with $repeat directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: foo-0
+---
+a: foo-1
+'''
+files."a.yaml" = '''
+a: $"foo-{$repeat}"
+$repeat: 2
+'''
+
 ###############################################################################
 # Repeat Operations ($repeat)
 ###############################################################################
@@ -1054,49 +1312,6 @@ b: 2
 ###############################################################################
 # List Operations
 ###############################################################################
-
-[listMerge]
-description = "Test default list merge behavior (concatenation)"
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-[1,2]
-'''
-files."a.yaml" = '''
-- 1
-'''
-files."a.b.yaml" = '''
-- 2
-'''
-
-
-
-###############################################################################
-# Match Operations
-###############################################################################
-
-[matchMap]
-description = "Test $match directive for selective document processing"
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-{"a":1,"d":4}
-{"b":2,"c":3}
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-'''
-files."a.b.yaml" = '''
-$match:
-  b: 2
-c: 3
----
-$match:
-  a: 1
-d: 4
-'''
 
 ###############################################################################
 # Parent and Inheritance
@@ -1296,60 +1511,6 @@ $value: [a, 24, b]
 $encode: join
 '''
 
-###############################################################################
-# Interpolation
-###############################################################################
-
-[interpSimple]
-description = "Test basic string interpolation"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: foo
-c:
-  d: zig
-e: foo bar zig zag 1 2
-'''
-files."a.yaml" = '''
-a: 1
-b: foo
-c:
-  d: zig
-e: $"{b} bar {c.d} zag {a} 2"
-'''
-
-[interpKey]
-description = "Test interpolation in map keys"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: foo
-foo0: bar
-'''
-files."a.yaml" = '''
-a: foo
-$"{a}0": bar
-'''
-
-[interpInterp]
-description = "Test chained interpolation"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: foo
-b: foo
-c: foo
-'''
-files."a.yaml" = '''
-a: foo
-b: $"{a}"
-c: $"{b}"
-'''
-
-###############################################################################
-# Repeat Operations
-###############################################################################
 
 [repeatDocList]
 description = "Test $repeat directive with list documents"
@@ -1675,20 +1836,6 @@ b: $merge:$repeat
 
 
 
-[interpRepeat]
-description = "Test string interpolation with $repeat directive"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: foo-0
----
-a: foo-1
-'''
-files."a.yaml" = '''
-a: $"foo-{$repeat}"
-$repeat: 2
-'''
-
 [parentNull]
 description = "Test setting $parent to null to prevent inheritance"
 eval = "a.b.yaml"
@@ -1700,59 +1847,6 @@ files."a.b.yaml" = '''
 $parent: null
 a: 1
 '''
-
-[matchEmptyMap]
-description = "Test $match directive with empty map"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: {}
-b: 2
-'''
-files."a.yaml" = '''
-a: {}
----
-$match:
-  a: {}
-b: 2
-'''
-
-
-[listMatch]
-description = "Test list matching and modification"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-- a: 1
-- b: 10
-'''
-files."a.yaml" = '''
-- a: 1
-- b: 2
-'''
-files."a.b.yaml" = '''
-- $match:
-    b: 2
-  b: 10
-'''
-
-[listMatchValue]
-description = "Test list matching with value replacement"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-- 1
-- 10
-'''
-files."a.yaml" = '''
-- 1
-- 2
-'''
-files."a.b.yaml" = '''
-- $match: 2
-  $value: 10
-'''
-
 
 [mapMerge]
 description = "Test simple map merging"
@@ -1768,101 +1862,6 @@ a: 1
 files."a.b.yaml" = '''
 b: 2
 '''
-
-[matchInvert]
-description = "Test $match with $invert directive"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-c: 3
----
-b: 2
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-'''
-files."a.b.yaml" = '''
-$match:
-  b: 2
-  $invert: true
-c: 3
-'''
-
-[matchListValue]
-description = "Test $match in list with $value replacement"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a:
-  - b: 1
-    d: 4
-  - c: 2
-'''
-files."a.yaml" = '''
-a:
-  - b: 1
-  - c: 2
-'''
-files."a.b.yaml" = '''
-a:
-  - $match:
-      b: 1
-    $value:
-      d: 4
-'''
-
-[matchMultiDoc]
-description = "Test $match applying to multiple documents"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-d: 4
----
-a: 1
-c: 3
-d: 4
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
----
-a: 1
-c: 3
-'''
-files."a.b.yaml" = '''
-$match:
-  a: 1
-d: 4
-'''
-
-[matchPartial]
-description = "Test $match with partial map matching"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-x:
-  b: 1
-  c: 2
-  d: 3
-'''
-files."a.yaml" = '''
-x:
-  b: 1
-  c: 2
-'''
-files."a.b.yaml" = '''
-$match:
-  x: {}
-x:
-  d: 3
-'''
-
-
 
 ###############################################################################
 # Type Handling and Format Tests
@@ -2082,22 +2081,6 @@ foo: bar
 ---
 ---
 - 1
-'''
-
-[listWithNull]
-description = "Test preservation of null values in lists"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-x:
-  - a
-  - null
-  - c
-  - null
-  - e
-'''
-files."a.yaml" = '''
-x: [a, null, c, null, e]
 '''
 
 [ordered]
