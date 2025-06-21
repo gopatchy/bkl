@@ -1,4 +1,0 @@
-a: 1
-b: $merge:a
-c: $merge:d
-d: 4

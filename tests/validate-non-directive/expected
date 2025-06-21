@@ -1,3 +1,0 @@
-a: $FOO
-b: ${FOO}
-c: $(FOO)

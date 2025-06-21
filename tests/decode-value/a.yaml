@@ -1,3 +1,0 @@
-a:
-  $decode: json
-  $value: '{"b": 1, "c": 2}'

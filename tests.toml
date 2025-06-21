@@ -558,3 +558,278 @@ b: 2
 c: 3
 d: 4
 '''
+
+###############################################################################
+# More Output Control Tests
+###############################################################################
+
+[outputFalse]
+description = "Test $output: false directive excludes content"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c:
+  d: 1
+'''
+files."a.yaml" = '''
+a:
+  $output: false
+  b: 1
+c:
+  d: 1
+'''
+
+[outputSingle]
+description = "Test $output: true directive for single section"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    $output: true
+    a: 1
+    b: 2
+'''
+
+[outputList]
+description = "Test $output: true directive in list context"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a: 1
+- b: 2
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - $output: true
+    - a: 1
+    - b: 2
+'''
+
+[outputMapInList]
+description = "Test $output: true directive for map within list"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 2
+d: 3
+'''
+files."a.yaml" = '''
+a:
+  - b: 1
+  - $output: true
+    c: 2
+    d: 3
+'''
+
+###############################################################################
+# Merge Directive Tests
+###############################################################################
+
+[mergeChain]
+description = "Test chained $merge operations"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 1
+c: 4
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+b: $merge:a
+c: $merge:d
+d: 4
+'''
+
+[mergeCrossDoc]
+description = "Test $merge across YAML documents with $match"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+a: 1
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+c: 3
+$merge:
+  $match:
+    a: 1
+'''
+
+[mergeList]
+description = "Test $merge with list values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - a: 1
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - $merge: foo.bar
+'''
+
+[mergeString]
+description = "Test $merge with string values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+zig:
+  b: 2
+  zag: bar
+'''
+files."a.yaml" = '''
+foo: bar
+zig:
+  b: 2
+  zag: $merge:foo
+'''
+
+[encodeTolist]
+description = "Test tolist encoding with custom separator"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a=1
+- b=2
+- c
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+c: ""
+$encode: tolist:=
+'''
+
+[encodeValues]
+description = "Test values encoding extracts map values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- 1
+- 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: values
+'''
+
+[encodePrefix]
+description = "Test prefix encoding adds prefix to list items"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- Xa
+- X2
+'''
+files."a.yaml" = '''
+- a
+- 2
+- $encode: prefix:X
+'''
+
+[decodeValue]
+description = "Test decode JSON with $value and $decode directives"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b: 1
+  c: 2
+'''
+files."a.yaml" = '''
+a:
+  $decode: json
+  $value: '{"b": 1, "c": 2}'
+'''
+
+###############################################################################
+# YAML and Miscellaneous Tests
+###############################################################################
+
+[yamlEmptyDoc]
+description = "Test handling of empty YAML documents"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+---
+---
+- 1
+'''
+files."a.yaml" = '''
+foo: bar
+---
+---
+- 1
+'''
+
+[listWithNull]
+description = "Test preservation of null values in lists"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+x:
+  - a
+  - null
+  - c
+  - null
+  - e
+'''
+files."a.yaml" = '''
+x: [a, null, c, null, e]
+'''
+
+[ordered]
+description = "Test preservation of key order in YAML"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+b: 2
+---
+a: 1
+'''
+files."a.yaml" = '''
+b: 2
+---
+a: 1
+'''
+
+[validateNonDirective]
+description = "Test that variable-like strings are not treated as directives"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: $FOO
+b: ${FOO}
+c: $(FOO)
+'''
+files."a.yaml" = '''
+a: $FOO
+b: ${FOO}
+c: $(FOO)
+'''
