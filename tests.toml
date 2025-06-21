@@ -672,6 +672,309 @@ servers:
     $repeat: {env: ["dev", "prod"], id: 2}
 '''
 
+[repeatRangeFirstLast]
+description = "Test $repeat with $first and $last range parameters"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 5
+---
+a: 6
+---
+a: 7
+---
+a: 8
+---
+a: 9
+---
+a: 10
+'''
+files."a.yaml" = '''
+$repeat:
+  $first: 5
+  $last: 10
+a: $repeat
+'''
+
+[repeatRangeInsideMap]
+description = "Test $repeat with range parameters inside map"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+ports:
+  port-8080:
+    number: 8080
+  port-8081:
+    number: 8081
+  port-8082:
+    number: 8082
+'''
+files."a.yaml" = '''
+ports:
+  $"port-{$repeat}":
+    number: $repeat
+    $repeat: {$first: 8080, $count: 3}
+'''
+
+[repeatRangeNested]
+description = "Test nested $repeat with range parameters"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+result: a=0 b=10
+---
+result: a=0 b=12
+---
+result: a=0 b=14
+---
+result: a=1 b=10
+---
+result: a=1 b=12
+---
+result: a=1 b=14
+'''
+files."a.yaml" = '''
+$repeat:
+  a: 2
+  b:
+    $first: 10
+    $step: 2
+    $count: 3
+result: $"a={$repeat:a} b={$repeat:b}"
+'''
+
+[repeatSubstValue]
+description = "Test $repeat with $merge directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 0
+b: 2
+---
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+$repeat: 2
+a: $repeat
+b: $merge:$repeat
+'''
+
+[replaceCrossDoc]
+description = "Test cross-document replacement with $replace"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+c: 3
+$replace:
+  $match:
+    a: 1
+'''
+
+[replaceCrossDocPath]
+description = "Test cross-document replacement with path extraction"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c: 3
+---
+d: 4
+$replace:
+  $match:
+    a: 1
+  $path: b
+'''
+
+[replaceCrossDocString]
+description = "Test cross-document replacement with string output"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo
+'''
+files."a.yaml" = '''
+a: 1
+b: foo
+$output: false
+---
+c: 3
+$replace:
+  $match:
+    a: 1
+  $path: b
+'''
+
+[replaceString]
+description = "Test string replacement using $replace directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+zig:
+  b: 2
+  zag: bar
+'''
+files."a.yaml" = '''
+foo: bar
+zig:
+  b: 2
+  zag: $replace:foo
+'''
+
+[mergeCrossDocShortList]
+description = "Test cross-document merging with lists"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- 2
+- 3
+---
+- 1
+- 2
+- 3
+'''
+files."a.yaml" = '''
+- 2
+- 3
+---
+- 1
+- $merge: [[2]]
+'''
+
+[mergeCrossDocShortScalar]
+description = "Test cross-document merging with scalar values"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b: 3
+---
+c:
+  $merge: [{a: 1}, b]
+d: 4
+'''
+
+[mergePathDot]
+description = "Test merging with dot notation in path"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+d: 4
+e: 3
+'''
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c.d:
+    e: 3
+---
+d: 4
+$merge:
+  $match:
+    a: 1
+  $path: [b, c.d]
+'''
+
+[mergeScalarAsKey]
+description = "Test merging using scalar value as key reference"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo: bar
+zig: bar
+'''
+files."a.yaml" = '''
+foo: bar
+zig:
+  $merge: foo
+'''
+
+[mergeStringDot]
+description = "Test merging values when key contains dot"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+foo:
+  c.d: bar
+zig:
+  b: 2
+  zag: bar
+'''
+files."a.yaml" = '''
+foo:
+  c.d: bar
+zig:
+  b: 2
+  zag: $merge:[foo,c.d]
+'''
+
+[mergeValueReference]
+description = "Test using $merge within $value directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a:
+  b:
+    c: 1
+  d: "1"
+'''
+files."a.yaml" = '''
+a:
+  b:
+    c: 1
+  d:
+    $value: ['$merge:a.b.c']
+    $encode: join
+'''
+
+[interpRepeat]
+description = "Test string interpolation with $repeat directive"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: foo-0
+---
+a: foo-1
+'''
+files."a.yaml" = '''
+a: $"foo-{$repeat}"
+$repeat: 2
+'''
+
+[parentNull]
+description = "Test setting $parent to null to prevent inheritance"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+$parent: null
+a: 1
+'''
+
 [replaceList]
 description = "Test $replace directive replacing list contents"
 eval = "a.yaml"

@@ -1,4 +1,0 @@
-$repeat:
-  $first: 5
-  $last: 10
-a: $repeat

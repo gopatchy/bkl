@@ -1,2 +1,0 @@
-a: $"foo-{$repeat}"
-$repeat: 2

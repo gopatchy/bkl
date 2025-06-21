@@ -1,4 +1,0 @@
-foo: bar
-zig:
-  b: 2
-  zag: $replace:foo

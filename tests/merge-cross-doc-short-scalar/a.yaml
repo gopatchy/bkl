@@ -1,7 +1,0 @@
-$output: false
-a: 1
-b: 3
----
-c:
-  $merge: [{a: 1}, b]
-d: 4

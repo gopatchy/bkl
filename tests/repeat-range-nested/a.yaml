@@ -1,7 +1,0 @@
-$repeat:
-  a: 2
-  b:
-    $first: 10
-    $step: 2
-    $count: 3
-result: $"a={$repeat:a} b={$repeat:b}"
