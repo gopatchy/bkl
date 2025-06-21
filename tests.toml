@@ -47,3 +47,153 @@ a: 1
 files."c.yaml" = '''
 b: 2
 '''
+
+[json-input]
+eval = "a.b.json"
+format = "json-pretty"
+expected = '''
+{
+  "a": 1,
+  "b": 2
+}
+'''
+files."a.json" = '''
+{
+	"a": 1
+}
+'''
+files."a.b.json" = '''
+{
+	"b": 2
+}
+'''
+
+[match-map]
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+{"a":1,"d":4}
+{"b":2,"c":3}
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  b: 2
+c: 3
+---
+$match:
+  a: 1
+d: 4
+'''
+
+[list-delete-partial-list]
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[{"x":[{"a":1}]},{"x":[{"d":4}]}]
+'''
+files."a.yaml" = '''
+- x:
+  - a: 1
+- x:
+  - b: 2
+  - c: 3
+'''
+files."a.b.yaml" = '''
+- x:
+  - d: 4
+- $delete:
+    x:
+      - b: 2
+'''
+
+[map-replace]
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+{"b":2}
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+$replace: true
+'''
+
+[list-merge]
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[1,2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+'''
+
+[list-replace]
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+- $replace
+'''
+
+[list-delete]
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[{"x":1},{"x":3}]
+'''
+files."a.yaml" = '''
+- x: 1
+- x: 2
+'''
+files."a.b.yaml" = '''
+- x: 3
+- $delete:
+    x: 2
+'''
+
+[merge-map]
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $merge: foo.bar
+'''
+
+[replace-map]
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"foo":{"bar":{"a":1}},"zig":{"a":1}}
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $replace: foo.bar
+'''
