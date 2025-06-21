@@ -11,10 +11,11 @@ import (
 )
 
 type TestCase struct {
-	Eval     string
-	Format   string
-	Expected string
-	Files    map[string]string
+	Description string
+	Eval        string
+	Format      string
+	Expected    string
+	Files       map[string]string
 }
 
 type TestSuite map[string]TestCase

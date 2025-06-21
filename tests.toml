@@ -1,4 +1,9 @@
-[map-delete]
+###############################################################################
+# Map Operations
+###############################################################################
+
+[mapDelete]
+description = "Test map deletion with $delete directive"
 eval = "a.b.yaml"
 format = "yaml"
 expected = '''
@@ -14,7 +19,8 @@ b: $delete
 c: 3
 '''
 
-[map-delete-nested]
+[mapDeleteNested]
+description = "Test nested map deletion with $delete directive"
 eval = "a.b.yaml"
 format = "yaml"
 expected = '''
@@ -33,42 +39,131 @@ x:
   c: 3
 '''
 
-[parent-set]
+[mapReplace]
+description = "Test map replacement with $replace directive"
 eval = "a.b.yaml"
-format = "yaml"
+format = "json"
 expected = '''
+{"b":2}
+'''
+files."a.yaml" = '''
 a: 1
-b: 2
 '''
 files."a.b.yaml" = '''
-$parent: c
-a: 1
-'''
-files."c.yaml" = '''
 b: 2
+$replace: true
 '''
 
-[json-input]
-eval = "a.b.json"
-format = "json-pretty"
+[mergeMap]
+description = "Test map merging with $merge directive"
+eval = "a.yaml"
+format = "json"
 expected = '''
-{
-  "a": 1,
-  "b": 2
-}
+{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
 '''
-files."a.json" = '''
-{
-	"a": 1
-}
-'''
-files."a.b.json" = '''
-{
-	"b": 2
-}
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $merge: foo.bar
 '''
 
-[match-map]
+[replaceMap]
+description = "Test map replacement with $replace directive (path reference)"
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"foo":{"bar":{"a":1}},"zig":{"a":1}}
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  $replace: foo.bar
+'''
+
+###############################################################################
+# List Operations
+###############################################################################
+
+[listMerge]
+description = "Test default list merge behavior (concatenation)"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[1,2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+'''
+
+[listReplace]
+description = "Test list replacement with $replace directive"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[2]
+'''
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+- $replace
+'''
+
+[listDelete]
+description = "Test list deletion with $delete directive"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[{"x":1},{"x":3}]
+'''
+files."a.yaml" = '''
+- x: 1
+- x: 2
+'''
+files."a.b.yaml" = '''
+- x: 3
+- $delete:
+    x: 2
+'''
+
+[listDeletePartialList]
+description = "Test partial list deletion with nested structures"
+eval = "a.b.yaml"
+format = "json"
+expected = '''
+[{"x":[{"a":1}]},{"x":[{"d":4}]}]
+'''
+files."a.yaml" = '''
+- x:
+  - a: 1
+- x:
+  - b: 2
+  - c: 3
+'''
+files."a.b.yaml" = '''
+- x:
+  - d: 4
+- $delete:
+    x:
+      - b: 2
+'''
+
+###############################################################################
+# Match Operations
+###############################################################################
+
+[matchMap]
+description = "Test $match directive for selective document processing"
 eval = "a.b.yaml"
 format = "json"
 expected = '''
@@ -90,131 +185,32 @@ $match:
 d: 4
 '''
 
-[list-delete-partial-list]
+###############################################################################
+# Parent and Inheritance
+###############################################################################
+
+[parentSet]
+description = "Test $parent directive for explicit parent file reference"
 eval = "a.b.yaml"
-format = "json"
+format = "yaml"
 expected = '''
-[{"x":[{"a":1}]},{"x":[{"d":4}]}]
-'''
-files."a.yaml" = '''
-- x:
-  - a: 1
-- x:
-  - b: 2
-  - c: 3
+a: 1
+b: 2
 '''
 files."a.b.yaml" = '''
-- x:
-  - d: 4
-- $delete:
-    x:
-      - b: 2
-'''
-
-[map-replace]
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-{"b":2}
-'''
-files."a.yaml" = '''
+$parent: c
 a: 1
 '''
-files."a.b.yaml" = '''
+files."c.yaml" = '''
 b: 2
-$replace: true
 '''
 
-[list-merge]
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-[1,2]
-'''
-files."a.yaml" = '''
-- 1
-'''
-files."a.b.yaml" = '''
-- 2
-'''
+###############################################################################
+# Output Control
+###############################################################################
 
-[list-replace]
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-[2]
-'''
-files."a.yaml" = '''
-- 1
-'''
-files."a.b.yaml" = '''
-- 2
-- $replace
-'''
-
-[list-delete]
-eval = "a.b.yaml"
-format = "json"
-expected = '''
-[{"x":1},{"x":3}]
-'''
-files."a.yaml" = '''
-- x: 1
-- x: 2
-'''
-files."a.b.yaml" = '''
-- x: 3
-- $delete:
-    x: 2
-'''
-
-[merge-map]
-eval = "a.yaml"
-format = "json"
-expected = '''
-{"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    a: 1
-zig:
-  b: 2
-  $merge: foo.bar
-'''
-
-[replace-map]
-eval = "a.yaml"
-format = "json"
-expected = '''
-{"foo":{"bar":{"a":1}},"zig":{"a":1}}
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    a: 1
-zig:
-  b: 2
-  $replace: foo.bar
-'''
-
-[example1]
-eval = "a.b.toml"
-format = "json"
-expected = '''
-{"addr":"127.0.0.1","name":"myService","port":8081}
-'''
-files."a.yaml" = '''
-name: myService
-addr: 127.0.0.1
-port: 8080
-'''
-files."a.b.toml" = '''
-port = 8081
-'''
-
-
-[output-multi]
+[outputMulti]
+description = "Test $output directive for selective output"
 eval = "a.yaml"
 format = "yaml"
 expected = '''
@@ -234,7 +230,12 @@ foo:
     c: 3
 '''
 
-[literal-dollar]
+###############################################################################
+# Special Characters and Escaping
+###############################################################################
+
+[literalDollar]
+description = "Test literal dollar sign escaping ($$)"
 eval = "a.yaml"
 format = "json"
 expected = '''
@@ -246,4 +247,49 @@ listKey:
   - nested:
       $$key: $$value
 mapKey: $$pod
+'''
+
+###############################################################################
+# Format Support
+###############################################################################
+
+[jsonInput]
+description = "Test JSON input format support"
+eval = "a.b.json"
+format = "json-pretty"
+expected = '''
+{
+  "a": 1,
+  "b": 2
+}
+'''
+files."a.json" = '''
+{
+	"a": 1
+}
+'''
+files."a.b.json" = '''
+{
+	"b": 2
+}
+'''
+
+###############################################################################
+# Examples and Documentation
+###############################################################################
+
+[example1]
+description = "Example from documentation showing basic inheritance"
+eval = "a.b.toml"
+format = "json"
+expected = '''
+{"addr":"127.0.0.1","name":"myService","port":8081}
+'''
+files."a.yaml" = '''
+name: myService
+addr: 127.0.0.1
+port: 8080
+'''
+files."a.b.toml" = '''
+port = 8081
 '''
