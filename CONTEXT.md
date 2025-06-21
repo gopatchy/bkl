@@ -98,6 +98,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **IMPORTANT**: Never run `bkl` manually for testing - always use `just` or `./test` commands
 - **IMPORTANT**: Never create one-off test scripts - use inline debugging instead
 - **IMPORTANT**: When debugging, output to stderr not stdout to avoid interfering with test output
+- **IMPORTANT**: Never change directories with `cd` - always use absolute paths instead
 
 ## Merge Behavior
 - Maps merge recursively by default, with special `$replace` directive to override

@@ -59,16 +59,7 @@ func (f *FS) Glob(pattern string) ([]string, error) {
 		}
 		if matched {
 			fullPath := filepath.Join(dir, entry.Name())
-			if filepath.IsAbs(pattern) {
-				matches = append(matches, fullPath)
-			} else {
-				rel, err := f.Rel(fullPath)
-				if err != nil {
-					return nil, fmt.Errorf("rel %s: %w", pattern, err)
-				}
-
-				matches = append(matches, rel)
-			}
+			matches = append(matches, fullPath)
 		}
 	}
 
@@ -88,7 +79,11 @@ func (f *FS) Rel(target string) (string, error) {
 }
 
 func (f *FS) convertToFS(path string) string {
-	return strings.TrimPrefix(f.Abs(path), "/")
+	result := strings.TrimPrefix(f.Abs(path), "/")
+	if result == "" {
+		return "."
+	}
+	return result
 }
 
 func (f *FS) findFile(path string) string {
@@ -124,4 +119,3 @@ func (f *FS) globFiles(path string) ([]string, error) {
 func ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
-

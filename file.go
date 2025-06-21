@@ -183,7 +183,6 @@ func (f *file) parentsFromDirective(fsys *FS) ([]string, error) {
 	return f.toAbsolutePaths(fsys, parents)
 }
 
-
 func (f *file) parentsFromFilename(fsys *FS) ([]string, error) {
 	if isStdin(f.path) {
 		return []string{}, nil

@@ -32,3 +32,18 @@ x:
   b: $delete
   c: 3
 '''
+
+[parent-set]
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+$parent: c
+a: 1
+'''
+files."c.yaml" = '''
+b: 2
+'''
