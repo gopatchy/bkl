@@ -26,6 +26,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Run with `go test -run TestLanguage`
   - Run single test with `go test -run TestLanguage -test.single="test-name"`
   - Tests run in parallel with in-memory filesystem (fstest.MapFS)
+  - Migrated from individual golang test files for better maintainability
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Patterns: `parent-*`, `interp-*`, `merge-*`, `encode-*`, `match-*`, etc.
   - Use "null" not "nil" in test names (language perspective vs implementation)

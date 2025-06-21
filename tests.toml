@@ -197,3 +197,53 @@ zig:
   b: 2
   $replace: foo.bar
 '''
+
+[example1]
+eval = "a.b.toml"
+format = "json"
+expected = '''
+{"addr":"127.0.0.1","name":"myService","port":8081}
+'''
+files."a.yaml" = '''
+name: myService
+addr: 127.0.0.1
+port: 8080
+'''
+files."a.b.toml" = '''
+port = 8081
+'''
+
+
+[output-multi]
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+c: 3
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    $output: true
+    a: 1
+    b: 2
+  zig:
+    $output: true
+    c: 3
+'''
+
+[literal-dollar]
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"listKey":["$instance",{"nested":{"$key":"$value"}}],"mapKey":"$pod"}
+'''
+files."a.yaml" = '''
+listKey:
+  - $$instance
+  - nested:
+      $$key: $$value
+mapKey: $$pod
+'''
