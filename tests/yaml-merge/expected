@@ -1,7 +1,0 @@
-- bar: 2
-  foo: 1
-  name: original
-- bar: 2
-  foo: 1
-  isCopy: true
-  name: copy

@@ -1,3 +1,0 @@
-- $match:
-    name: copy
-  isCopy: true

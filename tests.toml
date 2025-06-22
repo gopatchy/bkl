@@ -735,6 +735,42 @@ z:
   c: 3
 '''
 
+[mergeRace]
+description = "Test merge with required fields resolution order"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 1
+c:
+  a: 1
+'''
+files."a.yaml" = '''
+a: $required
+b: $merge:a
+c:
+  a: 1
+'''
+files."a.b.yaml" = '''
+$merge: c
+'''
+
+[mergeStringIntoMapError]
+description = "Test merging string value replaces map entirely"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: string
+'''
+files."a.yaml" = '''
+a:
+  b: 1
+  c: 2
+'''
+files."a.b.yaml" = '''
+a: "string"
+'''
+
 ###############################################################################
 # Match Operations ($match)
 ###############################################################################
@@ -978,6 +1014,25 @@ x:
 '''
 files."a.yaml" = '''
 x: [a, null, c, null, e]
+'''
+
+[listMatchValueMulti]
+description = "Test list matching and replacement with multiple matches"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 1
+- 10
+- 10
+'''
+files."a.yaml" = '''
+- 1
+- 2
+- 2
+'''
+files."a.b.yaml" = '''
+- $match: 2
+  $value: 10
 '''
 
 ###############################################################################
@@ -2406,4 +2461,117 @@ files."a.yaml" = '''
 a: $FOO
 b: ${FOO}
 c: $(FOO)
+'''
+
+[yamlAnchors]
+description = "Test YAML anchor and alias support"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+c: 1
+'''
+files."a.yaml" = '''
+a: &anchor
+  1
+b: *anchor
+c: *anchor
+'''
+files."a.b.yaml" = '''
+b: 2
+'''
+
+[yamlMerge]
+description = "Test YAML merge key (<<) support"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- bar: 2
+  foo: 1
+  name: original
+- bar: 2
+  foo: 1
+  isCopy: true
+  name: copy
+'''
+files."a.yaml" = '''
+- &anchor
+  bar: 2
+  foo: 1
+  name: original
+- name: copy
+  <<: *anchor
+'''
+files."a.b.yaml" = '''
+- $match:
+    name: copy
+  isCopy: true
+'''
+
+[yamlMergeMultiple]
+description = "Test YAML merge key with multiple sources"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- bar: 2
+  foo: 1
+  name: original
+- baz: 3
+  foo: 4
+- bar: 2
+  baz: 3
+  foo: 4
+  isCopy: true
+  name: copy
+'''
+files."a.yaml" = '''
+- &anchor
+  bar: 2
+  foo: 1
+  name: original
+- &otherAnchor
+  baz: 3
+  foo: 4
+- name: copy
+  <<:
+    - *otherAnchor
+    - *anchor
+'''
+files."a.b.yaml" = '''
+- $match:
+    name: copy
+  isCopy: true
+'''
+
+[requiredSet]
+description = "Test $required field is set by child file"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+b: $required
+'''
+files."a.b.yaml" = '''
+b: 2
+c: 3
+'''
+
+[requiredList]
+description = "Test $required field in list context"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+- 1
+'''
+files."a.yaml" = '''
+- $required
+'''
+files."a.b.yaml" = '''
+- 1
 '''

@@ -1,4 +1,0 @@
-a: $required
-b: $merge:a
-c:
-  a: 1

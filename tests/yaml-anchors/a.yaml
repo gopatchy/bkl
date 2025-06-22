@@ -1,4 +1,0 @@
-a: &anchor
-  1
-b: *anchor
-c: *anchor
