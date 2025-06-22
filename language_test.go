@@ -18,8 +18,8 @@ type TestCase struct {
 	Format      string
 	Expected    string
 	Files       map[string]string
-	ErrorMerge  string // Expected error from MergeFileLayers
-	ErrorOutput string // Expected error from Output
+	Error       string // Expected error from evaluation
+	SkipParent  bool   // Skip loading parent templates
 }
 
 type TestSuite map[string]TestCase
@@ -73,41 +73,20 @@ func TestLanguage(t *testing.T) {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
-			var mergeErr error
-			for _, evalFile := range testCase.Eval {
-				err = p.MergeFileLayers(evalFile)
-				if err != nil {
-					mergeErr = err
-					break
-				}
-			}
+			output, err := p.Evaluate(testCase.Eval, testCase.SkipParent, testCase.Format)
 
-			if testCase.ErrorMerge != "" {
-				if mergeErr == nil {
-					t.Fatalf("Expected merge error containing %q, but got no error", testCase.ErrorMerge)
-				}
-				if !strings.Contains(mergeErr.Error(), testCase.ErrorMerge) {
-					t.Fatalf("Expected merge error containing %q, but got: %v", testCase.ErrorMerge, mergeErr)
-				}
-				return
-			}
-			if mergeErr != nil {
-				t.Fatalf("Unexpected merge error: %v", mergeErr)
-			}
-
-			output, err := p.Output(testCase.Format)
-
-			if testCase.ErrorOutput != "" {
+			if testCase.Error != "" {
 				if err == nil {
-					t.Fatalf("Expected output error containing %q, but got no error", testCase.ErrorOutput)
+					t.Fatalf("Expected error containing %q, but got no error", testCase.Error)
 				}
-				if !strings.Contains(err.Error(), testCase.ErrorOutput) {
-					t.Fatalf("Expected output error containing %q, but got: %v", testCase.ErrorOutput, err)
+				if !strings.Contains(err.Error(), testCase.Error) {
+					t.Fatalf("Expected error containing %q, but got: %v", testCase.Error, err)
 				}
 				return
 			}
+
 			if err != nil {
-				t.Fatalf("Unexpected output error: %v", err)
+				t.Fatalf("Unexpected error: %v", err)
 			}
 
 			if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(testCase.Expected))) {

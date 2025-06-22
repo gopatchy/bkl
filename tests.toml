@@ -6,7 +6,7 @@
 description = "Test error when $delete has extra keys"
 eval = ["a.b.yaml"]
 format = "yaml"
-errorMerge = "extra keys"
+error = "extra keys"
 files."a.yaml" = '''
 - x: 1
 - x: 2
@@ -139,7 +139,7 @@ c: 3
 description = "Test error when $replace has extra keys"
 eval = ["a.b.yaml"]
 format = "yaml"
-errorOutput = "bool as reference: invalid type"
+error = "bool as reference: invalid type"
 files."a.yaml" = '''
 - 1
 '''
@@ -153,7 +153,7 @@ files."a.b.yaml" = '''
 description = "Test error with invalid replace path reference"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "reference not found"
+error = "reference not found"
 files."a.yaml" = '''
 $output: false
 a: 1
@@ -331,7 +331,7 @@ zig:
 description = "Test circular merge reference error"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "circular reference"
+error = "circular reference"
 files."a.yaml" = '''
 a: $merge:b
 b: $merge:a
@@ -341,7 +341,7 @@ b: $merge:a
 description = "Test error with invalid merge path reference"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "reference not found"
+error = "reference not found"
 files."a.yaml" = '''
 $output: false
 a: 1
@@ -357,7 +357,7 @@ $merge: [{a: 1}, b.c]
 description = "Test error when deleting non-existent key"
 eval = ["a.b.yaml"]
 format = "yaml"
-errorMerge = "useless override"
+error = "useless override"
 files."a.yaml" = '''
 a: 1
 '''
@@ -369,7 +369,7 @@ b: $delete
 description = "Test error for useless delete operation"
 eval = ["a.b.yaml"]
 format = "yaml"
-errorMerge = "useless override"
+error = "useless override"
 files."a.yaml" = '''
 a: 1
 '''
@@ -381,7 +381,7 @@ b: $delete
 description = "Test error for redundant merge"
 eval = ["a.b.yaml"]
 format = "yaml"
-errorMerge = "useless override"
+error = "useless override"
 files."a.yaml" = '''
 a: 1
 '''
@@ -887,7 +887,7 @@ a: "string"
 description = "Test error with multiple matches in $replace"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "multiple documents $match"
+error = "multiple documents $match"
 files."a.yaml" = '''
 a: 1
 b: 2
@@ -1171,7 +1171,7 @@ files."a.b.yaml" = '''
 description = "Test error when required field is missing in flags encoding"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "required field not set"
+error = "required field not set"
 files."a.yaml" = '''
 a: $required
 $encode: flags
@@ -2175,7 +2175,7 @@ a:
 description = "Test circular parent reference error"
 eval = ["a.yaml"]
 format = "yaml"
-errorMerge = "circular reference"
+error = "circular reference"
 files."a.yaml" = '''
 # Test that circular parent references are handled gracefully
 # a.yaml → b.yaml → a.yaml (circular)
@@ -2188,6 +2188,23 @@ files."b.yaml" = '''
 # b.yaml → a.yaml → b.yaml (circular)
 $parent: a
 data: "from b.yaml"
+'''
+
+[parentSkip]
+description = "Test skip parent (-P) flag prevents automatic parent loading"
+eval = ["a.b.yaml", "c.yaml"]
+format = "yaml"
+skipParent = true
+expected = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+a: 1
+'''
+files."c.yaml" = '''
+$match: {}
+b: 2
 '''
 
 [parentSet]
@@ -2578,7 +2595,7 @@ mapKey: $$pod
 description = "Test error when required field is not set"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "required field not set"
+error = "required field not set"
 files."a.yaml" = '''
 a: 1
 b: $required
@@ -2588,7 +2605,7 @@ b: $required
 description = "Test error when $value has extra keys"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "extra keys"
+error = "extra keys"
 files."a.yaml" = '''
 a:
   $value: "foo"
@@ -2599,7 +2616,7 @@ a:
 description = "Test required field error with YAML anchors"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "required field not set"
+error = "required field not set"
 files."a.yaml" = '''
 a: &anchor
   $required
@@ -2610,7 +2627,7 @@ b: *anchor
 description = "Test missing environment variable error"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "$env:FOO: variable not found"
+error = "$env:FOO: variable not found"
 files."a.yaml" = '''
 a: $env:FOO
 '''
@@ -2619,7 +2636,7 @@ a: $env:FOO
 description = "Test string interpolation with missing variable"
 eval = ["a.yaml"]
 format = "yaml"
-errorOutput = "missing_variable: variable not found"
+error = "missing_variable: variable not found"
 files."a.yaml" = '''
 # Test for string interpolation with missing variable
 # This should trigger a variable not found error

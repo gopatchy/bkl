@@ -94,9 +94,12 @@ Related tools:
 	format := ""
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
+	} else if opts.OutputPath != nil {
+		format = bkl.Ext(string(*opts.OutputPath))
 	}
 
-	for _, path := range opts.Positional.InputPaths {
+	files := make([]string, len(opts.Positional.InputPaths))
+	for i, path := range opts.Positional.InputPaths {
 		// Convert user-provided path to be relative to root path
 		absPath, err := filepath.Abs(string(path))
 		if err != nil {
@@ -109,32 +112,18 @@ Related tools:
 		}
 
 		// Add leading "/" to make it absolute within the FS
-		relPath = "/" + relPath
+		files[i] = "/" + relPath
+	}
 
-		realPath, f, err := p.FileMatch(relPath)
-		if err != nil {
-			fatal(err)
-		}
-
-		if format == "" && opts.OutputPath == nil {
-			format = f
-		}
-
-		if opts.SkipParent {
-			err = p.MergeFile(realPath)
-		} else {
-			err = p.MergeFileLayers(realPath)
-		}
-
-		if err != nil {
-			fatal(err)
-		}
+	output, err := p.Evaluate(files, opts.SkipParent, format)
+	if err != nil {
+		fatal(err)
 	}
 
 	if opts.OutputPath == nil {
-		err = p.OutputToWriter(os.Stdout, format)
+		_, err = os.Stdout.Write(output)
 	} else {
-		err = p.OutputToFile(string(*opts.OutputPath), format)
+		err = os.WriteFile(string(*opts.OutputPath), output, 0o644)
 	}
 
 	if err != nil {

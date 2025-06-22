@@ -322,7 +322,7 @@ func (p *Parser) Output(format string) ([]byte, error) {
 // If format is "", it is inferred from path's file extension.
 func (p *Parser) OutputToFile(path, format string) error {
 	if format == "" {
-		format = ext(path)
+		format = Ext(path)
 	}
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -362,6 +362,31 @@ func (p *Parser) OutputToWriter(fh io.Writer, format string) error {
 	return nil
 }
 
+func (p *Parser) Evaluate(files []string, skipParent bool, format string) ([]byte, error) {
+	for _, path := range files {
+		realPath, fileFormat, err := p.FileMatch(path)
+		if err != nil {
+			return nil, fmt.Errorf("file %s: %w", path, err)
+		}
+
+		if format == "" {
+			format = fileFormat
+		}
+
+		if skipParent {
+			err = p.MergeFile(realPath)
+		} else {
+			err = p.MergeFileLayers(realPath)
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("merging %s: %w", path, err)
+		}
+	}
+
+	return p.Output(format)
+}
+
 func (p *Parser) log(format string, v ...any) {
 	if !p.debug {
 		return
@@ -378,7 +403,7 @@ func (p *Parser) log(format string, v ...any) {
 // Returns the real filename and the requested output format, or
 // ("", "", error).
 func (p *Parser) FileMatch(path string) (string, string, error) {
-	format := ext(path)
+	format := Ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}
