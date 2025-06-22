@@ -1,3 +1,0 @@
-$repeat:
-  x: 2
-a: $"x={$repeat:x}"

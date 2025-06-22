@@ -1626,6 +1626,116 @@ a: $repeat
 b: $merge:$repeat
 '''
 
+[repeatMapLayer]
+description = "Test $repeat directive overriding in child layer"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: x=0
+---
+a: x=1
+---
+a: x=2
+'''
+files."a.yaml" = '''
+$repeat:
+  x: 2
+a: $"x={$repeat:x}"
+'''
+files."a.b.yaml" = '''
+$repeat:
+  x: 3
+'''
+
+[repeatOverride]
+description = "Test $repeat values propagating through inheritance"
+eval = "a.b.c.yaml"
+format = "yaml"
+expected = '''
+a: x=0 y=0 z=0
+---
+a: x=0 y=0 z=1
+---
+a: x=0 y=0 z=2
+---
+a: x=0 y=1 z=0
+---
+a: x=0 y=1 z=1
+---
+a: x=0 y=1 z=2
+---
+a: x=1 y=0 z=0
+---
+a: x=1 y=0 z=1
+---
+a: x=1 y=0 z=2
+---
+a: x=1 y=1 z=0
+---
+a: x=1 y=1 z=1
+---
+a: x=1 y=1 z=2
+'''
+files."a.yaml" = '''
+$repeat:
+  x: 2
+  y: 2
+  z: 2
+a: $"x={$repeat:x} y={$repeat:y} z={$repeat:z}"
+'''
+files."a.b.yaml" = '''
+$repeat:
+  z: 3
+'''
+files."a.b.c.yaml" = '''
+# No content - relies on inheritance
+'''
+
+[repeatUpperLayer]
+description = "Test $repeat in upper layer file"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: base
+b: x=0
+---
+a: base
+b: x=1
+---
+a: base
+b: x=2
+'''
+files."a.yaml" = '''
+a: base
+'''
+files."a.b.yaml" = '''
+$repeat:
+  x: 3
+b: $"x={$repeat:x}"
+'''
+
+[repeatSubst]
+description = "Test $repeat with $match directive"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+c:
+  d: foo-0
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+$match:
+  a: 1
+$repeat: 1
+c:
+  d: $"foo-{$repeat}"
+'''
+
 ###############################################################################
 # Output Control ($output)
 ###############################################################################
@@ -1997,6 +2107,62 @@ foo: bar
 ---
 ---
 - 1
+'''
+
+[outputYaml]
+description = "Test YAML output with mixed formats"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+addr: 127.0.0.1
+name: myService
+port: 8081
+'''
+files."a.yaml" = '''
+name: myService
+addr: 127.0.0.1
+port: 8080
+'''
+files."a.b.yaml" = '''
+port: 8081
+'''
+
+[outputToml]
+description = "Test TOML output format"
+eval = "a.b.toml"
+format = "toml"
+expected = '''
+addr = '127.0.0.1'
+name = 'myService'
+port = 8081
+'''
+files."a.yaml" = '''
+name: myService
+addr: 127.0.0.1
+port: 8080
+'''
+files."a.b.toml" = '''
+port = 8081
+'''
+
+[outputJsonPretty]
+description = "Test JSON pretty output format"
+eval = "a.b.toml"
+format = "json-pretty"
+expected = '''
+{
+  "addr": "127.0.0.1",
+  "name": "myService",
+  "port": 8081
+}
+'''
+files."a.yaml" = '''
+name: myService
+addr: 127.0.0.1
+port: 8080
+'''
+files."a.b.toml" = '''
+port = 8081
 '''
 
 ###############################################################################

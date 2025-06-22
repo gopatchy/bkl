@@ -1,3 +1,0 @@
-$match: {}
-$repeat:
-  shardCount: 2
