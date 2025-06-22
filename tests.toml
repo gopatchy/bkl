@@ -674,6 +674,21 @@ zig:
   zag: $merge:foo
 '''
 
+[mapMerge]
+description = "Test simple map merging"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+'''
+
 ###############################################################################
 # Match Operations ($match)
 ###############################################################################
@@ -1289,344 +1304,6 @@ $repeat: 2
 # Repeat Operations ($repeat)
 ###############################################################################
 
-###############################################################################
-# Output Control ($output)
-###############################################################################
-
-[outputMulti]
-description = "Test $output directive for selective output"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
----
-c: 3
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    $output: true
-    a: 1
-    b: 2
-  zig:
-    $output: true
-    c: 3
-'''
-
-[outputFalse]
-description = "Test $output: false directive excludes content"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c:
-  d: 1
-'''
-files."a.yaml" = '''
-a:
-  $output: false
-  b: 1
-c:
-  d: 1
-'''
-
-[outputFalseList]
-description = "Test $output: false directive in list context"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c:
-  - d: 1
-'''
-files."a.yaml" = '''
-a:
-  - $output: false
-  - b: 1
-c:
-  - d: 1
-'''
-
-[outputFalseRoot]
-description = "Test $output: false directive at document root"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
----
-c: 3
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-$output: false
----
-c: 3
-'''
-
-[outputSingle]
-description = "Test $output: true directive for single section"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    $output: true
-    a: 1
-    b: 2
-'''
-
-[outputList]
-description = "Test $output: true directive in list context"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-- a: 1
-- b: 2
-'''
-files."a.yaml" = '''
-foo:
-  bar:
-    - $output: true
-    - a: 1
-    - b: 2
-'''
-
-[outputMapInList]
-description = "Test $output: true directive for map within list"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 2
-d: 3
-'''
-files."a.yaml" = '''
-a:
-  - b: 1
-  - $output: true
-    c: 2
-    d: 3
-'''
-
-[outputAfterReplace]
-description = "Test output control after replace operations"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-c: 2
-'''
-files."a.yaml" = '''
-a:
-  b: 2
-  $output: false
-c:
-  $replace: a.b
-'''
-
-[outputTrueWithinFalse]
-description = "Test nested output control (true within false)"
-eval = "a.yaml"
-format = "yaml"
-expected = '''
-b: 2
-'''
-files."a.yaml" = '''
-$output: false
-a:
-  b: 2
-  $output: true
-'''
-
-###############################################################################
-# Parent and Inheritance ($parent)
-###############################################################################
-
-[parentSet]
-description = "Test $parent directive for explicit parent file reference"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-'''
-files."a.b.yaml" = '''
-$parent: c
-a: 1
-'''
-files."c.yaml" = '''
-b: 2
-'''
-
-[parentNull]
-description = "Test setting $parent to null to prevent inheritance"
-eval = "a.b.yaml"
-format = "yaml"
-expected = '''
-a: 1
-'''
-files."a.b.yaml" = '''
-$parent: null
-a: 1
-'''
-
-###############################################################################
-# Input/Output Formats
-###############################################################################
-
-[jsonInputStreamConcat]
-description = "Test handling of concatenated JSON objects without newlines"
-eval = "a.json"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.json" = '''
-{"a": 1}{"b": 2}
-'''
-
-[jsonInputStreamNewline]
-description = "Test handling of JSON objects separated by newlines (JSON Lines)"
-eval = "a.json"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.json" = '''
-{"a": 1}
-{"b": 2}
-'''
-
-[jsonLargeInt]
-description = "Test preservation of large integer values"
-eval = "a.json"
-format = "json"
-expected = '''
-{"a":9223372036854775807,"b":2147483648}
-'''
-files."a.json" = '''
-{"a": 9223372036854775807, "b": 2147483648}
-'''
-
-[tomlInputStream]
-description = "Test TOML input stream with standard delimiter"
-eval = "a.toml"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.toml" = '''
-a = 1
----
-b = 2
-'''
-
-[tomlInputStreamHugo]
-description = "Test TOML input stream with Hugo-style delimiter"
-eval = "a.toml"
-format = "yaml"
-expected = '''
-a: 1
----
-b: 2
-'''
-files."a.toml" = '''
-a = 1
-+++
-b = 2
-'''
-
-[outputTomlStream]
-description = "Test YAML to TOML stream output conversion"
-eval = "a.yaml"
-format = "toml"
-expected = '''
-a = 1
----
-b = 2
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-'''
-
-
-
-###############################################################################
-# Special Characters and Escaping
-###############################################################################
-
-[literalDollar]
-description = "Test literal dollar sign escaping ($$)"
-eval = "a.yaml"
-format = "json"
-expected = '''
-{"listKey":["$instance",{"nested":{"$key":"$value"}}],"mapKey":"$pod"}
-'''
-files."a.yaml" = '''
-listKey:
-  - $$instance
-  - nested:
-      $$key: $$value
-mapKey: $$pod
-'''
-
-###############################################################################
-# Format Support
-###############################################################################
-
-[jsonInput]
-description = "Test JSON input format support"
-eval = "a.b.json"
-format = "json-pretty"
-expected = '''
-{
-  "a": 1,
-  "b": 2
-}
-'''
-files."a.json" = '''
-{
-	"a": 1
-}
-'''
-files."a.b.json" = '''
-{
-	"b": 2
-}
-'''
-
-###############################################################################
-# Examples and Documentation
-###############################################################################
-
-[example1]
-description = "Example from documentation showing basic inheritance"
-eval = "a.b.toml"
-format = "json"
-expected = '''
-{"addr":"127.0.0.1","name":"myService","port":8081}
-'''
-files."a.yaml" = '''
-name: myService
-addr: 127.0.0.1
-port: 8080
-'''
-files."a.b.toml" = '''
-port = 8081
-'''
-
-
 [repeatDocList]
 description = "Test $repeat directive with list documents"
 eval = "a.yaml"
@@ -1949,26 +1626,297 @@ a: $repeat
 b: $merge:$repeat
 '''
 
+###############################################################################
+# Output Control ($output)
+###############################################################################
 
+[outputMulti]
+description = "Test $output directive for selective output"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+c: 3
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    $output: true
+    a: 1
+    b: 2
+  zig:
+    $output: true
+    c: 3
+'''
 
-[mapMerge]
-description = "Test simple map merging"
-eval = "a.b.yaml"
+[outputFalse]
+description = "Test $output: false directive excludes content"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c:
+  d: 1
+'''
+files."a.yaml" = '''
+a:
+  $output: false
+  b: 1
+c:
+  d: 1
+'''
+
+[outputFalseList]
+description = "Test $output: false directive in list context"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c:
+  - d: 1
+'''
+files."a.yaml" = '''
+a:
+  - $output: false
+  - b: 1
+c:
+  - d: 1
+'''
+
+[outputFalseRoot]
+description = "Test $output: false directive at document root"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+a: 1
+---
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+$output: false
+---
+c: 3
+'''
+
+[outputSingle]
+description = "Test $output: true directive for single section"
+eval = "a.yaml"
 format = "yaml"
 expected = '''
 a: 1
 b: 2
 '''
 files."a.yaml" = '''
-a: 1
+foo:
+  bar:
+    $output: true
+    a: 1
+    b: 2
 '''
-files."a.b.yaml" = '''
+
+[outputList]
+description = "Test $output: true directive in list context"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+- a: 1
+- b: 2
+'''
+files."a.yaml" = '''
+foo:
+  bar:
+    - $output: true
+    - a: 1
+    - b: 2
+'''
+
+[outputMapInList]
+description = "Test $output: true directive for map within list"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 2
+d: 3
+'''
+files."a.yaml" = '''
+a:
+  - b: 1
+  - $output: true
+    c: 2
+    d: 3
+'''
+
+[outputAfterReplace]
+description = "Test output control after replace operations"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
+c: 2
+'''
+files."a.yaml" = '''
+a:
+  b: 2
+  $output: false
+c:
+  $replace: a.b
+'''
+
+[outputTrueWithinFalse]
+description = "Test nested output control (true within false)"
+eval = "a.yaml"
+format = "yaml"
+expected = '''
 b: 2
+'''
+files."a.yaml" = '''
+$output: false
+a:
+  b: 2
+  $output: true
 '''
 
 ###############################################################################
-# Type Handling and Format Tests
+# Parent and Inheritance ($parent)
 ###############################################################################
+
+[parentSet]
+description = "Test $parent directive for explicit parent file reference"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+$parent: c
+a: 1
+'''
+files."c.yaml" = '''
+b: 2
+'''
+
+[parentNull]
+description = "Test setting $parent to null to prevent inheritance"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+$parent: null
+a: 1
+'''
+
+###############################################################################
+# Format Support and Type Handling
+###############################################################################
+
+[jsonInputStreamConcat]
+description = "Test handling of concatenated JSON objects without newlines"
+eval = "a.json"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.json" = '''
+{"a": 1}{"b": 2}
+'''
+
+[jsonInputStreamNewline]
+description = "Test handling of JSON objects separated by newlines (JSON Lines)"
+eval = "a.json"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.json" = '''
+{"a": 1}
+{"b": 2}
+'''
+
+[jsonLargeInt]
+description = "Test preservation of large integer values"
+eval = "a.json"
+format = "json"
+expected = '''
+{"a":9223372036854775807,"b":2147483648}
+'''
+files."a.json" = '''
+{"a": 9223372036854775807, "b": 2147483648}
+'''
+
+[tomlInputStream]
+description = "Test TOML input stream with standard delimiter"
+eval = "a.toml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.toml" = '''
+a = 1
+---
+b = 2
+'''
+
+[tomlInputStreamHugo]
+description = "Test TOML input stream with Hugo-style delimiter"
+eval = "a.toml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+'''
+files."a.toml" = '''
+a = 1
++++
+b = 2
+'''
+
+[outputTomlStream]
+description = "Test YAML to TOML stream output conversion"
+eval = "a.yaml"
+format = "toml"
+expected = '''
+a = 1
+---
+b = 2
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+
+[jsonInput]
+description = "Test JSON input format support"
+eval = "a.b.json"
+format = "json-pretty"
+expected = '''
+{
+  "a": 1,
+  "b": 2
+}
+'''
+files."a.json" = '''
+{
+	"a": 1
+}
+'''
+files."a.b.json" = '''
+{
+	"b": 2
+}
+'''
 
 [yamlTypes]
 description = "Test YAML type handling and preservation"
@@ -2034,10 +1982,6 @@ c: 3
 d: 4
 '''
 
-###############################################################################
-# YAML and Miscellaneous Tests
-###############################################################################
-
 [yamlEmptyDoc]
 description = "Test handling of empty YAML documents"
 eval = "a.yaml"
@@ -2053,6 +1997,45 @@ foo: bar
 ---
 ---
 - 1
+'''
+
+###############################################################################
+# Special Characters and Escaping
+###############################################################################
+
+[literalDollar]
+description = "Test literal dollar sign escaping ($$)"
+eval = "a.yaml"
+format = "json"
+expected = '''
+{"listKey":["$instance",{"nested":{"$key":"$value"}}],"mapKey":"$pod"}
+'''
+files."a.yaml" = '''
+listKey:
+  - $$instance
+  - nested:
+      $$key: $$value
+mapKey: $$pod
+'''
+
+###############################################################################
+# Miscellaneous Tests
+###############################################################################
+
+[example1]
+description = "Example from documentation showing basic inheritance"
+eval = "a.b.toml"
+format = "json"
+expected = '''
+{"addr":"127.0.0.1","name":"myService","port":8081}
+'''
+files."a.yaml" = '''
+name: myService
+addr: 127.0.0.1
+port: 8080
+'''
+files."a.b.toml" = '''
+port = 8081
 '''
 
 [ordered]

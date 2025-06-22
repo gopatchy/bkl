@@ -60,12 +60,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
     - Repeat Operations ($repeat)
     - Output Control ($output)
     - Parent and Inheritance ($parent)
-    - Input/Output Formats
+    - Format Support and Type Handling
     - Special Characters and Escaping
-    - Format Support
-    - Examples and Documentation
-    - Type Handling and Format Tests
-    - YAML and Miscellaneous Tests
+    - Miscellaneous Tests
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
