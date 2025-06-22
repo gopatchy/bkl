@@ -135,6 +135,20 @@ c: 3
 # Replace Operations ($replace)
 ###############################################################################
 
+[listReplaceExtra]
+description = "Test error when $replace has extra keys"
+eval = ["a.b.yaml"]
+format = "yaml"
+errorOutput = "bool as reference: invalid type"
+files."a.yaml" = '''
+- 1
+'''
+files."a.b.yaml" = '''
+- 2
+- $replace: true
+  a: 1
+'''
+
 [mapReplace]
 description = "Test map replacement with $replace directive"
 eval = ["a.b.yaml"]
@@ -296,6 +310,16 @@ zig:
 ###############################################################################
 # Merge Operations ($merge)
 ###############################################################################
+
+[mergeLoop]
+description = "Test circular merge reference error"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "circular reference"
+files."a.yaml" = '''
+a: $merge:b
+b: $merge:a
+'''
 
 [mergeMap]
 description = "Test map merging with $merge directive"
@@ -1054,6 +1078,16 @@ files."a.b.yaml" = '''
 ###############################################################################
 # Encoding Operations ($encode)
 ###############################################################################
+
+[encodeFlagsRequired]
+description = "Test error when required field is missing in flags encoding"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "required field not set"
+files."a.yaml" = '''
+a: $required
+$encode: flags
+'''
 
 [encodeTolist]
 description = "Test tolist encoding with custom separator"
@@ -2049,6 +2083,25 @@ a:
 # Parent and Inheritance ($parent)
 ###############################################################################
 
+[parentCircular]
+description = "Test circular parent reference error"
+eval = ["a.yaml"]
+format = "yaml"
+errorMerge = "circular reference"
+files."a.yaml" = '''
+# Test that circular parent references are handled gracefully
+# a.yaml → b.yaml → a.yaml (circular)
+
+$parent: b
+data: "from a.yaml"
+'''
+files."b.yaml" = '''
+# This creates a circular reference back to a.yaml
+# b.yaml → a.yaml → b.yaml (circular)
+$parent: a
+data: "from b.yaml"
+'''
+
 [parentSet]
 description = "Test $parent directive for explicit parent file reference"
 eval = ["a.b.yaml"]
@@ -2432,6 +2485,38 @@ mapKey: $$pod
 ###############################################################################
 # Miscellaneous Tests
 ###############################################################################
+
+[requiredError]
+description = "Test error when required field is not set"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "required field not set"
+files."a.yaml" = '''
+a: 1
+b: $required
+'''
+
+[valueExtra]
+description = "Test error when $value has extra keys"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "extra keys"
+files."a.yaml" = '''
+a:
+  $value: "foo"
+  b: 2
+'''
+
+[yamlAnchorsRequiredError]
+description = "Test required field error with YAML anchors"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "required field not set"
+files."a.yaml" = '''
+a: &anchor
+  $required
+b: *anchor
+'''
 
 [envMissing]
 description = "Test missing environment variable error"

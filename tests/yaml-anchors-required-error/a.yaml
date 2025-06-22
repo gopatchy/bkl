@@ -1,3 +1,0 @@
-a: &anchor
-  $required
-b: *anchor
