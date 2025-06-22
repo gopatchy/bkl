@@ -149,6 +149,22 @@ files."a.b.yaml" = '''
   a: 1
 '''
 
+[replaceCrossDocShortDot]
+description = "Test error with invalid replace path reference"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "reference not found"
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c:
+    d: 4
+---
+e: 5
+$replace: [{a: 1}, b.c]
+'''
+
 [mapReplace]
 description = "Test map replacement with $replace directive"
 eval = ["a.b.yaml"]
@@ -319,6 +335,58 @@ errorOutput = "circular reference"
 files."a.yaml" = '''
 a: $merge:b
 b: $merge:a
+'''
+
+[mergeCrossDocShortDot]
+description = "Test error with invalid merge path reference"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "reference not found"
+files."a.yaml" = '''
+$output: false
+a: 1
+b:
+  c:
+    d: 4
+---
+e: 5
+$merge: [{a: 1}, b.c]
+'''
+
+[mergeDeleteMissingKey]
+description = "Test error when deleting non-existent key"
+eval = ["a.b.yaml"]
+format = "yaml"
+errorMerge = "useless override"
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: $delete
+'''
+
+[mergeMapDeleteUseless]
+description = "Test error for useless delete operation"
+eval = ["a.b.yaml"]
+format = "yaml"
+errorMerge = "useless override"
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: $delete
+'''
+
+[mergeMapUseless]
+description = "Test error for redundant merge"
+eval = ["a.b.yaml"]
+format = "yaml"
+errorMerge = "useless override"
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+a: 1
 '''
 
 [mergeMap]
@@ -814,6 +882,26 @@ a: "string"
 ###############################################################################
 # Match Operations ($match)
 ###############################################################################
+
+[matchMulti]
+description = "Test error with multiple matches in $replace"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "multiple documents $match"
+files."a.yaml" = '''
+a: 1
+b: 2
+$output: false
+---
+a: 1
+b: 3
+$output: false
+---
+$replace:
+  $match:
+    a: 1
+  $path: b
+'''
 
 [matchMap]
 description = "Test $match directive for selective document processing"
