@@ -1,3 +1,0 @@
-kind: Ingress
-metadata:
-  name: $required

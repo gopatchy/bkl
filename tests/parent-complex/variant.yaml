@@ -1,9 +1,0 @@
-$match: {}
-metadata:
-  labels:
-    variant: a
----
-$match:
-  kind: Deployment
-spec:
-  replicas: 3

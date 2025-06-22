@@ -4,7 +4,7 @@
 
 [mapDelete]
 description = "Test map deletion with $delete directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -21,7 +21,7 @@ c: 3
 
 [mapDeleteNested]
 description = "Test nested map deletion with $delete directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 x:
@@ -41,7 +41,7 @@ x:
 
 [listDelete]
 description = "Test list deletion with $delete directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "json"
 expected = '''
 [{"x":1},{"x":3}]
@@ -58,7 +58,7 @@ files."a.b.yaml" = '''
 
 [listDeletePartialList]
 description = "Test partial list deletion with nested structures"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "json"
 expected = '''
 [{"x":[{"a":1}]},{"x":[{"d":4}]}]
@@ -80,7 +80,7 @@ files."a.b.yaml" = '''
 
 [listDeletePartialMap]
 description = "Test list deletion with partial map matching"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - x: 1
@@ -99,7 +99,7 @@ files."a.b.yaml" = '''
 
 [mergeDeleteExisting]
 description = "Test $delete directive behavior in merge"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -121,7 +121,7 @@ c: 3
 
 [mapReplace]
 description = "Test map replacement with $replace directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "json"
 expected = '''
 {"b":2}
@@ -136,7 +136,7 @@ $replace: true
 
 [replaceMap]
 description = "Test map replacement with $replace directive (path reference)"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "json"
 expected = '''
 {"foo":{"bar":{"a":1}},"zig":{"a":1}}
@@ -152,7 +152,7 @@ zig:
 
 [listReplace]
 description = "Test list replacement with $replace directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "json"
 expected = '''
 [2]
@@ -167,7 +167,7 @@ files."a.b.yaml" = '''
 
 [replaceCrossDoc]
 description = "Test cross-document replacement with $replace"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -188,7 +188,7 @@ $replace:
 
 [replaceCrossDocPath]
 description = "Test cross-document replacement with path extraction"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c: 3
@@ -208,7 +208,7 @@ $replace:
 
 [replaceCrossDocString]
 description = "Test cross-document replacement with string output"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo
@@ -227,7 +227,7 @@ $replace:
 
 [replaceString]
 description = "Test string replacement using $replace directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo: bar
@@ -244,7 +244,7 @@ zig:
 
 [listReplaceTrue]
 description = "Test list replacement with $replace: true"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - 2
@@ -259,7 +259,7 @@ files."a.b.yaml" = '''
 
 [replaceList]
 description = "Test $replace directive replacing list contents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo:
@@ -283,7 +283,7 @@ zig:
 
 [mergeMap]
 description = "Test map merging with $merge directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "json"
 expected = '''
 {"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
@@ -299,7 +299,7 @@ zig:
 
 [mergeCrossDocShortList]
 description = "Test cross-document merging with lists"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - 2
@@ -319,7 +319,7 @@ files."a.yaml" = '''
 
 [mergeCrossDocShortScalar]
 description = "Test cross-document merging with scalar values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c: 3
@@ -337,7 +337,7 @@ d: 4
 
 [mergePathDot]
 description = "Test merging with dot notation in path"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 d: 4
@@ -359,7 +359,7 @@ $merge:
 
 [mergeScalarAsKey]
 description = "Test merging using scalar value as key reference"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo: bar
@@ -373,7 +373,7 @@ zig:
 
 [mergeStringDot]
 description = "Test merging values when key contains dot"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo:
@@ -392,7 +392,7 @@ zig:
 
 [mergeValueReference]
 description = "Test using $merge within $value directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -411,7 +411,7 @@ a:
 
 [mergeChainLayers]
 description = "Test chained merge operations across layers"
-eval = "a.b.c.yaml"
+eval = ["a.b.c.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -430,7 +430,7 @@ c: 3
 
 [mergeListNil]
 description = "Test merging list with null value"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - 1
@@ -446,7 +446,7 @@ files."a.b.yaml" = '''
 
 [mergeListString]
 description = "Test merging string into list"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 hello
@@ -461,7 +461,7 @@ hello
 
 [mergeListWithNull]
 description = "Test merging list containing null values"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - 1
@@ -480,7 +480,7 @@ files."a.b.yaml" = '''
 
 [mergeMapNil]
 description = "Test null value overriding map value"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: null
@@ -494,7 +494,7 @@ a: null
 
 [mergeChain]
 description = "Test chained $merge operations"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -511,7 +511,7 @@ d: 4
 
 [mergeCrossDoc]
 description = "Test $merge across YAML documents with $match"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -533,7 +533,7 @@ $merge:
 
 [mergeCrossDocList]
 description = "Test merging lists across documents with matching"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - 2
@@ -555,7 +555,7 @@ files."a.yaml" = '''
 
 [mergeCrossDocPath]
 description = "Test merging with path selection across documents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c: 3
@@ -576,7 +576,7 @@ $merge:
 
 [mergeCrossDocShort]
 description = "Test short syntax for merge across documents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c: 3
@@ -594,7 +594,7 @@ $merge: [{a: 1}, b]
 
 [mergeList]
 description = "Test $merge with list values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo:
@@ -615,7 +615,7 @@ zig:
 
 [mergeListMulti]
 description = "Test multiple merges within a list"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo:
@@ -642,7 +642,7 @@ zig:
 
 [mergeNum]
 description = "Test merging numeric values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo: 1
@@ -659,7 +659,7 @@ zig:
 
 [mergeString]
 description = "Test $merge with string values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo: bar
@@ -676,7 +676,7 @@ zig:
 
 [mapMerge]
 description = "Test simple map merging"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -691,7 +691,7 @@ b: 2
 
 [mergeMapWithNil]
 description = "Test merging null value into map"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 x:
@@ -714,7 +714,7 @@ z:
 
 [mergeMapWithScalar]
 description = "Test merging scalar value into map"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 x:
@@ -737,7 +737,7 @@ z:
 
 [mergeRace]
 description = "Test merge with required fields resolution order"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -757,7 +757,7 @@ $merge: c
 
 [mergeStringIntoMapError]
 description = "Test merging string value replaces map entirely"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: string
@@ -777,7 +777,7 @@ a: "string"
 
 [matchMap]
 description = "Test $match directive for selective document processing"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "json"
 expected = '''
 {"a":1,"d":4}
@@ -800,7 +800,7 @@ d: 4
 
 [matchEmptyMap]
 description = "Test $match directive with empty map"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: {}
@@ -816,7 +816,7 @@ b: 2
 
 [matchInvert]
 description = "Test $match with $invert directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -838,7 +838,7 @@ c: 3
 
 [matchListValue]
 description = "Test $match in list with $value replacement"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -861,7 +861,7 @@ a:
 
 [matchMultiDoc]
 description = "Test $match applying to multiple documents"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -887,7 +887,7 @@ d: 4
 
 [matchPartial]
 description = "Test $match with partial map matching"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 x:
@@ -909,7 +909,7 @@ x:
 
 [streamAdd]
 description = "Test adding new document to stream"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -928,7 +928,7 @@ c: 3
 
 [streamMatchNull]
 description = "Test stream with null matching"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -953,7 +953,7 @@ c: 3
 
 [listMerge]
 description = "Test default list merge behavior (concatenation)"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "json"
 expected = '''
 [1,2]
@@ -967,7 +967,7 @@ files."a.b.yaml" = '''
 
 [listMatch]
 description = "Test list matching and modification"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - a: 1
@@ -985,7 +985,7 @@ files."a.b.yaml" = '''
 
 [listMatchValue]
 description = "Test list matching with value replacement"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - 1
@@ -1002,7 +1002,7 @@ files."a.b.yaml" = '''
 
 [listWithNull]
 description = "Test preservation of null values in lists"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 x:
@@ -1018,7 +1018,7 @@ x: [a, null, c, null, e]
 
 [listMatchValueMulti]
 description = "Test list matching and replacement with multiple matches"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - 1
@@ -1041,7 +1041,7 @@ files."a.b.yaml" = '''
 
 [encodeTolist]
 description = "Test tolist encoding with custom separator"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - a=1
@@ -1057,7 +1057,7 @@ $encode: tolist:=
 
 [encodeValues]
 description = "Test values encoding extracts map values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - 1
@@ -1071,7 +1071,7 @@ $encode: values
 
 [encodePrefix]
 description = "Test prefix encoding adds prefix to list items"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - Xa
@@ -1085,7 +1085,7 @@ files."a.yaml" = '''
 
 [encodeBase64Number]
 description = "Test base64 encoding of numeric values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: NDI=
@@ -1098,7 +1098,7 @@ a:
 
 [encodeList]
 description = "Test JSON encoding of list values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: |
@@ -1113,7 +1113,7 @@ a:
 
 [encodeMap]
 description = "Test JSON encoding of map values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: |
@@ -1128,7 +1128,7 @@ a:
 
 [encodeJsonList]
 description = "Test JSON encoding of list as multiline string"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 |
@@ -1142,7 +1142,7 @@ files."a.yaml" = '''
 
 [encodeFlags]
 description = "Test flags encoding converts map to command-line flags"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - --a=1
@@ -1158,7 +1158,7 @@ $encode: flags
 
 [encodeFlagsFlatten]
 description = "Test flags encoding with flatten for mixed list content"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - a
@@ -1183,7 +1183,7 @@ files."a.yaml" = '''
 
 [encodeFlagsSublist]
 description = "Test flags encoding with list values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - --a=1
@@ -1202,7 +1202,7 @@ $encode: flags
 
 [encodeMulti]
 description = "Test multiple encoding directives (tolist and join)"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a=1,b=2
@@ -1215,7 +1215,7 @@ $encode: [tolist:=, "join:,"]
 
 [encodeSha256Number]
 description = "Test SHA256 encoding of numeric values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049
@@ -1228,7 +1228,7 @@ a:
 
 [encodeTolistLists]
 description = "Test tolist encoding with list of maps"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - a=1
@@ -1244,7 +1244,7 @@ files."a.yaml" = '''
 
 [encodeValue]
 description = "Test JSON encoding of simple value"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: |
@@ -1258,7 +1258,7 @@ a:
 
 [encodeValuesPrefix]
 description = "Test values encoding with prefix field"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - foo
@@ -1274,7 +1274,7 @@ $encode: values
 
 [encodeBase64]
 description = "Test base64 encoding with $encode directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 YQ==
@@ -1286,7 +1286,7 @@ $encode: base64
 
 [encodeJson]
 description = "Test JSON encoding with $encode directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 |
@@ -1300,7 +1300,7 @@ $encode: json
 
 [encodeSha256]
 description = "Test SHA-256 encoding with $encode directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
@@ -1312,7 +1312,7 @@ $encode: sha256
 
 [encodeFlatten]
 description = "Test flatten encoding with $encode directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - a
@@ -1332,7 +1332,7 @@ files."a.yaml" = '''
 
 [encodeJoin]
 description = "Test join encoding with $encode directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a24b
@@ -1348,7 +1348,7 @@ $encode: join
 
 [decodeValue]
 description = "Test decode JSON with $value and $decode directives"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -1363,7 +1363,7 @@ a:
 
 [decodeJson]
 description = "Test JSON decoding with $decode directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -1382,7 +1382,7 @@ a:
 
 [interpSimple]
 description = "Test basic string interpolation"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -1401,7 +1401,7 @@ e: $"{b} bar {c.d} zag {a} 2"
 
 [interpKey]
 description = "Test interpolation in map keys"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: foo
@@ -1414,7 +1414,7 @@ $"{a}0": bar
 
 [interpInterp]
 description = "Test chained interpolation"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: foo
@@ -1429,7 +1429,7 @@ c: $"{b}"
 
 [interpRepeat]
 description = "Test string interpolation with $repeat directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: foo-0
@@ -1447,7 +1447,7 @@ $repeat: 2
 
 [repeatDocList]
 description = "Test $repeat directive with list documents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - b: 2
@@ -1464,7 +1464,7 @@ files."a.yaml" = '''
 
 [repeatDocMap]
 description = "Test $repeat directive with map documents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -1484,7 +1484,7 @@ a:
 
 [repeatListValues]
 description = "Test $repeat directive with list of values"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 fruit: apple
@@ -1500,7 +1500,7 @@ fruit: $repeat
 
 [repeatInsideList]
 description = "Test $repeat directive expanding items within a list"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -1517,7 +1517,7 @@ a:
 
 [repeatInsideMap]
 description = "Test $repeat with dynamic key generation in maps"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -1539,7 +1539,7 @@ a:
 
 [repeatMap]
 description = "Test multi-dimensional repeat with string interpolation"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: x=0 y=0 xc=2 yc=3
@@ -1577,7 +1577,7 @@ c: $merge:$repeat.y
 
 [repeatInsideMapValue]
 description = "Test $repeat with simple values in map"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a:
@@ -1595,7 +1595,7 @@ a:
 
 [repeatListInsideList]
 description = "Test $repeat with list creating multiple list items"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 fruits:
@@ -1611,7 +1611,7 @@ fruits:
 
 [repeatListInsideMap]
 description = "Test $repeat with list creating multiple map entries"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 fruits:
@@ -1631,7 +1631,7 @@ fruits:
 
 [repeatListMixedTypes]
 description = "Test $repeat with mixed data types creating documents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 type: Type is 42
@@ -1654,7 +1654,7 @@ type: $"Type is {$repeat}"
 
 [repeatMapInsideMap]
 description = "Test $repeat with map creating cartesian product"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 servers:
@@ -1681,7 +1681,7 @@ servers:
 
 [repeatRangeFirstLast]
 description = "Test $repeat with $first and $last range parameters"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 5
@@ -1705,7 +1705,7 @@ a: $repeat
 
 [repeatRangeInsideMap]
 description = "Test $repeat with range parameters inside map"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 ports:
@@ -1725,7 +1725,7 @@ ports:
 
 [repeatRangeNested]
 description = "Test nested $repeat with range parameters"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 result: a=0 b=10
@@ -1752,7 +1752,7 @@ result: $"a={$repeat:a} b={$repeat:b}"
 
 [repeatSubstValue]
 description = "Test $repeat with $merge directive"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 0
@@ -1769,7 +1769,7 @@ b: $merge:$repeat
 
 [repeatMapLayer]
 description = "Test $repeat directive overriding in child layer"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: x=0
@@ -1790,7 +1790,7 @@ $repeat:
 
 [repeatOverride]
 description = "Test $repeat values propagating through inheritance"
-eval = "a.b.c.yaml"
+eval = ["a.b.c.yaml"]
 format = "yaml"
 expected = '''
 a: x=0 y=0 z=0
@@ -1834,7 +1834,7 @@ files."a.b.c.yaml" = '''
 
 [repeatUpperLayer]
 description = "Test $repeat in upper layer file"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: base
@@ -1857,7 +1857,7 @@ b: $"x={$repeat:x}"
 
 [repeatSubst]
 description = "Test $repeat with $match directive"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -1883,7 +1883,7 @@ c:
 
 [outputMulti]
 description = "Test $output directive for selective output"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -1904,7 +1904,7 @@ foo:
 
 [outputFalse]
 description = "Test $output: false directive excludes content"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c:
@@ -1920,7 +1920,7 @@ c:
 
 [outputFalseList]
 description = "Test $output: false directive in list context"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c:
@@ -1936,7 +1936,7 @@ c:
 
 [outputFalseRoot]
 description = "Test $output: false directive at document root"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -1954,7 +1954,7 @@ c: 3
 
 [outputSingle]
 description = "Test $output: true directive for single section"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -1970,7 +1970,7 @@ foo:
 
 [outputList]
 description = "Test $output: true directive in list context"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 - a: 1
@@ -1986,7 +1986,7 @@ foo:
 
 [outputMapInList]
 description = "Test $output: true directive for map within list"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c: 2
@@ -2002,7 +2002,7 @@ a:
 
 [outputAfterReplace]
 description = "Test output control after replace operations"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 c: 2
@@ -2017,7 +2017,7 @@ c:
 
 [outputTrueWithinFalse]
 description = "Test nested output control (true within false)"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 b: 2
@@ -2035,7 +2035,7 @@ a:
 
 [parentSet]
 description = "Test $parent directive for explicit parent file reference"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2051,7 +2051,7 @@ b: 2
 
 [parentNull]
 description = "Test setting $parent to null to prevent inheritance"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2063,7 +2063,7 @@ a: 1
 
 [parentFalse]
 description = "Test $parent: false disables inheritance"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2075,7 +2075,7 @@ a: 1
 
 [parentMulti]
 description = "Test multiple documents with different parents"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2105,7 +2105,7 @@ d: 4
 
 [parentMultiList]
 description = "Test parent directive with list of parents"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2135,7 +2135,7 @@ d: 4
 
 [parentFalseToml]
 description = "Test $parent: false in TOML format"
-eval = "a.b.toml"
+eval = ["a.b.toml"]
 format = "toml"
 expected = '''
 a = 1
@@ -2155,7 +2155,7 @@ a = 1
 
 [jsonInputStreamConcat]
 description = "Test handling of concatenated JSON objects without newlines"
-eval = "a.json"
+eval = ["a.json"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2168,7 +2168,7 @@ files."a.json" = '''
 
 [jsonInputStreamNewline]
 description = "Test handling of JSON objects separated by newlines (JSON Lines)"
-eval = "a.json"
+eval = ["a.json"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2182,7 +2182,7 @@ files."a.json" = '''
 
 [jsonLargeInt]
 description = "Test preservation of large integer values"
-eval = "a.json"
+eval = ["a.json"]
 format = "json"
 expected = '''
 {"a":9223372036854775807,"b":2147483648}
@@ -2193,7 +2193,7 @@ files."a.json" = '''
 
 [tomlInputStream]
 description = "Test TOML input stream with standard delimiter"
-eval = "a.toml"
+eval = ["a.toml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2208,7 +2208,7 @@ b = 2
 
 [tomlInputStreamHugo]
 description = "Test TOML input stream with Hugo-style delimiter"
-eval = "a.toml"
+eval = ["a.toml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2223,7 +2223,7 @@ b = 2
 
 [outputTomlStream]
 description = "Test YAML to TOML stream output conversion"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "toml"
 expected = '''
 a = 1
@@ -2238,7 +2238,7 @@ b: 2
 
 [jsonInput]
 description = "Test JSON input format support"
-eval = "a.b.json"
+eval = ["a.b.json"]
 format = "json-pretty"
 expected = '''
 {
@@ -2259,7 +2259,7 @@ files."a.b.json" = '''
 
 [yamlTypes]
 description = "Test YAML type handling and preservation"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 bool: true
@@ -2280,7 +2280,7 @@ timestamp: 2022-02-05T10:30:00.1Z
 
 [jsonFloat]
 description = "Test JSON float number handling"
-eval = "a.json"
+eval = ["a.json"]
 format = "json"
 expected = '''
 {"a":3.14,"b":12300000000}
@@ -2291,7 +2291,7 @@ files."a.json" = '''
 
 [jsonlInput]
 description = "Test JSONL input format"
-eval = "a.jsonl"
+eval = ["a.jsonl"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2307,7 +2307,7 @@ files."a.jsonl" = '''
 
 [jsonlOutput]
 description = "Test JSONL output format"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "jsonl"
 expected = '''
 {"a":1,"b":2}
@@ -2323,7 +2323,7 @@ d: 4
 
 [yamlEmptyDoc]
 description = "Test handling of empty YAML documents"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 foo: bar
@@ -2340,7 +2340,7 @@ foo: bar
 
 [outputYaml]
 description = "Test YAML output with mixed formats"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 addr: 127.0.0.1
@@ -2358,7 +2358,7 @@ port: 8081
 
 [outputToml]
 description = "Test TOML output format"
-eval = "a.b.toml"
+eval = ["a.b.toml"]
 format = "toml"
 expected = '''
 addr = '127.0.0.1'
@@ -2376,7 +2376,7 @@ port = 8081
 
 [outputJsonPretty]
 description = "Test JSON pretty output format"
-eval = "a.b.toml"
+eval = ["a.b.toml"]
 format = "json-pretty"
 expected = '''
 {
@@ -2400,7 +2400,7 @@ port = 8081
 
 [literalDollar]
 description = "Test literal dollar sign escaping ($$)"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "json"
 expected = '''
 {"listKey":["$instance",{"nested":{"$key":"$value"}}],"mapKey":"$pod"}
@@ -2419,7 +2419,7 @@ mapKey: $$pod
 
 [example1]
 description = "Example from documentation showing basic inheritance"
-eval = "a.b.toml"
+eval = ["a.b.toml"]
 format = "json"
 expected = '''
 {"addr":"127.0.0.1","name":"myService","port":8081}
@@ -2435,7 +2435,7 @@ port = 8081
 
 [ordered]
 description = "Test preservation of key order in YAML"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 b: 2
@@ -2450,7 +2450,7 @@ a: 1
 
 [validateNonDirective]
 description = "Test that variable-like strings are not treated as directives"
-eval = "a.yaml"
+eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 a: $FOO
@@ -2465,7 +2465,7 @@ c: $(FOO)
 
 [yamlAnchors]
 description = "Test YAML anchor and alias support"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2484,7 +2484,7 @@ b: 2
 
 [yamlMerge]
 description = "Test YAML merge key (<<) support"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - bar: 2
@@ -2511,7 +2511,7 @@ files."a.b.yaml" = '''
 
 [yamlMergeMultiple]
 description = "Test YAML merge key with multiple sources"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - bar: 2
@@ -2546,7 +2546,7 @@ files."a.b.yaml" = '''
 
 [requiredSet]
 description = "Test $required field is set by child file"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 a: 1
@@ -2564,7 +2564,7 @@ c: 3
 
 [requiredList]
 description = "Test $required field in list context"
-eval = "a.b.yaml"
+eval = ["a.b.yaml"]
 format = "yaml"
 expected = '''
 - 1
@@ -2574,4 +2574,141 @@ files."a.yaml" = '''
 '''
 files."a.b.yaml" = '''
 - 1
+'''
+
+[parentComplex]
+description = "Test complex parent patterns with wildcards"
+eval = ["all.yaml", "variant.yaml"]
+format = "yaml"
+expected = '''
+kind: Deployment
+metadata:
+  labels:
+    variant: a
+  name: user1
+spec:
+  replicas: 3
+---
+kind: Service
+metadata:
+  labels:
+    variant: a
+  name: user1
+---
+kind: Ingress
+metadata:
+  labels:
+    variant: a
+  name: user1
+---
+kind: Deployment
+metadata:
+  labels:
+    variant: a
+  name: user2
+spec:
+  replicas: 3
+---
+kind: Service
+metadata:
+  labels:
+    variant: a
+  name: user2
+---
+kind: Ingress
+metadata:
+  labels:
+    variant: a
+  name: user2
+'''
+files."all.yaml" = '''
+$parent: resources.*
+'''
+files."variant.yaml" = '''
+$match: {}
+metadata:
+  labels:
+    variant: a
+---
+$match:
+  kind: Deployment
+spec:
+  replicas: 3
+'''
+files."deployment.yaml" = '''
+kind: Deployment
+metadata:
+  name: $required
+'''
+files."service.yaml" = '''
+kind: Service
+metadata:
+  name: $required
+'''
+files."ingress.yaml" = '''
+kind: Ingress
+metadata:
+  name: $required
+'''
+files."resources.yaml" = '''
+$parent: [deployment, service, ingress]
+'''
+files."resources.user1.yaml" = '''
+metadata:
+  name: user1
+'''
+files."resources.user2.yaml" = '''
+metadata:
+  name: user2
+'''
+
+[args]
+description = "Test evaluating multiple files with inheritance"
+eval = ["a.b.yaml", "c.d.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+'''
+files."c.yaml" = '''
+$match: {}
+b: 10
+c: 3
+'''
+files."c.d.yaml" = '''
+b: $delete
+d: 4
+'''
+
+[matchArgs]
+description = "Test $match directive across multiple evaluated files"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+d: 4
+---
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."b.yaml" = '''
+$match:
+  b: 2
+c: 3
+---
+$match:
+  a: 1
+d: 4
 '''

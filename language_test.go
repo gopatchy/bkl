@@ -14,7 +14,7 @@ import (
 
 type TestCase struct {
 	Description string
-	Eval        string
+	Eval        []string
 	Format      string
 	Expected    string
 	Files       map[string]string
@@ -71,9 +71,11 @@ func TestLanguage(t *testing.T) {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
-			err = p.MergeFileLayers(testCase.Eval)
-			if err != nil {
-				t.Fatalf("Failed to merge file layers: %v", err)
+			for _, evalFile := range testCase.Eval {
+				err = p.MergeFileLayers(evalFile)
+				if err != nil {
+					t.Fatalf("Failed to merge file layers: %v", err)
+				}
 			}
 
 			output, err := p.Output(testCase.Format)

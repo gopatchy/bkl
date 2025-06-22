@@ -1,3 +1,0 @@
-kind: Service
-metadata:
-  name: $required
