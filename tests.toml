@@ -2,6 +2,22 @@
 # Delete Operations ($delete)
 ###############################################################################
 
+[listDeleteExtra]
+description = "Test error when $delete has extra keys"
+eval = ["a.b.yaml"]
+format = "yaml"
+errorMerge = "extra keys"
+files."a.yaml" = '''
+- x: 1
+- x: 2
+'''
+files."a.b.yaml" = '''
+- x: 3
+- $delete:
+    x: 2
+  x: 4
+'''
+
 [mapDelete]
 description = "Test map deletion with $delete directive"
 eval = ["a.b.yaml"]
@@ -2416,6 +2432,27 @@ mapKey: $$pod
 ###############################################################################
 # Miscellaneous Tests
 ###############################################################################
+
+[envMissing]
+description = "Test missing environment variable error"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "$env:FOO: variable not found"
+files."a.yaml" = '''
+a: $env:FOO
+'''
+
+[interpMissing]
+description = "Test string interpolation with missing variable"
+eval = ["a.yaml"]
+format = "yaml"
+errorOutput = "missing_variable: variable not found"
+files."a.yaml" = '''
+# Test for string interpolation with missing variable
+# This should trigger a variable not found error
+
+result: $"Hello {missing_variable} world"
+'''
 
 [example1]
 description = "Example from documentation showing basic inheritance"

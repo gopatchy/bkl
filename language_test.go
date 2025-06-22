@@ -18,6 +18,8 @@ type TestCase struct {
 	Format      string
 	Expected    string
 	Files       map[string]string
+	ErrorMerge  string // Expected error from MergeFileLayers
+	ErrorOutput string // Expected error from Output
 }
 
 type TestSuite map[string]TestCase
@@ -71,16 +73,41 @@ func TestLanguage(t *testing.T) {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
+			var mergeErr error
 			for _, evalFile := range testCase.Eval {
 				err = p.MergeFileLayers(evalFile)
 				if err != nil {
-					t.Fatalf("Failed to merge file layers: %v", err)
+					mergeErr = err
+					break
 				}
 			}
 
+			if testCase.ErrorMerge != "" {
+				if mergeErr == nil {
+					t.Fatalf("Expected merge error containing %q, but got no error", testCase.ErrorMerge)
+				}
+				if !strings.Contains(mergeErr.Error(), testCase.ErrorMerge) {
+					t.Fatalf("Expected merge error containing %q, but got: %v", testCase.ErrorMerge, mergeErr)
+				}
+				return
+			}
+			if mergeErr != nil {
+				t.Fatalf("Unexpected merge error: %v", mergeErr)
+			}
+
 			output, err := p.Output(testCase.Format)
+
+			if testCase.ErrorOutput != "" {
+				if err == nil {
+					t.Fatalf("Expected output error containing %q, but got no error", testCase.ErrorOutput)
+				}
+				if !strings.Contains(err.Error(), testCase.ErrorOutput) {
+					t.Fatalf("Expected output error containing %q, but got: %v", testCase.ErrorOutput, err)
+				}
+				return
+			}
 			if err != nil {
-				t.Fatalf("Failed to get output: %v", err)
+				t.Fatalf("Unexpected output error: %v", err)
 			}
 
 			if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(testCase.Expected))) {
