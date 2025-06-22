@@ -689,6 +689,52 @@ files."a.b.yaml" = '''
 b: 2
 '''
 
+[mergeMapWithNil]
+description = "Test merging null value into map"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+x:
+  a: 1
+  b: 2
+"y": null
+z: null
+'''
+files."a.yaml" = '''
+x:
+  a: 1
+  b: 2
+y: null
+'''
+files."a.b.yaml" = '''
+z:
+  $merge: y
+  c: 3
+'''
+
+[mergeMapWithScalar]
+description = "Test merging scalar value into map"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+x:
+  a: 1
+  b: 2
+"y": 10
+z: 10
+'''
+files."a.yaml" = '''
+x:
+  a: 1
+  b: 2
+y: 10
+'''
+files."a.b.yaml" = '''
+z:
+  $merge: y
+  c: 3
+'''
+
 ###############################################################################
 # Match Operations ($match)
 ###############################################################################
@@ -823,6 +869,46 @@ $match:
   x: {}
 x:
   d: 3
+'''
+
+[streamAdd]
+description = "Test adding new document to stream"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+---
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."a.b.yaml" = '''
+$match: null
+c: 3
+'''
+
+[streamMatchNull]
+description = "Test stream with null matching"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+---
+b: 2
+---
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$match: null
+c: 3
 '''
 
 ###############################################################################
@@ -1918,6 +2004,94 @@ a: 1
 files."a.b.yaml" = '''
 $parent: null
 a: 1
+'''
+
+[parentFalse]
+description = "Test $parent: false disables inheritance"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+$parent: false
+a: 1
+'''
+
+[parentMulti]
+description = "Test multiple documents with different parents"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+---
+b: 2
+d: 4
+'''
+files."a.b.yaml" = '''
+$parent: c
+$match:
+  c: 3
+a: 1
+---
+$parent: d
+$match:
+  d: 4
+b: 2
+'''
+files."c.yaml" = '''
+c: 3
+'''
+files."d.yaml" = '''
+$match: null
+d: 4
+'''
+
+[parentMultiList]
+description = "Test parent directive with list of parents"
+eval = "a.b.yaml"
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+---
+b: 2
+d: 4
+'''
+files."a.b.yaml" = '''
+$parent:
+  - c
+  - d
+$match:
+  c: 3
+a: 1
+---
+$match:
+  d: 4
+b: 2
+'''
+files."c.yaml" = '''
+c: 3
+'''
+files."d.yaml" = '''
+d: 4
+'''
+
+[parentFalseToml]
+description = "Test $parent: false in TOML format"
+eval = "a.b.toml"
+format = "toml"
+expected = '''
+a = 1
+'''
+files."a.toml" = '''
+a = 2
+b = 3
+'''
+files."a.b.toml" = '''
+"$parent" = false
+a = 1
 '''
 
 ###############################################################################
