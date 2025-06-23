@@ -11,7 +11,6 @@ test:
 	# golangci-lint run ./...
 	{{go}} test -race -coverprofile=cover.out -timeout=60s ./...
 	{{go}} tool cover -html=cover.out -o=cover.html
-	rm ~/.cache/go-build/fuzz/github.com/gopatchy/bkl/FuzzParser/*
 
 todo:
 	-git grep -e TODO --and --not -e ignoretodo

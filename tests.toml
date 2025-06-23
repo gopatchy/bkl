@@ -2700,6 +2700,15 @@ files."a.b.toml" = '''
 port = 8081
 '''
 
+[formatUnknown]
+description = "Test unknown format error"
+eval = ["a.xyz"]
+format = "xyz"
+expected = ""
+error = "unknown format"
+[formatUnknown.files]
+"a.xyz" = "x: 1"
+
 ###############################################################################
 # Special Characters and Escaping
 ###############################################################################
@@ -3225,6 +3234,123 @@ files."b.json" = '''
 }
 '''
 
+# Error handling tests for diff
+[diffMissingSourceFile]
+description = "Test diff with missing source file"
+eval = ["missing.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = ""
+error = "missing file"
+[diffMissingSourceFile.files]
+"b.yaml" = "x: 1"
+
+[diffMissingDestFile]
+description = "Test diff with missing destination file"
+eval = ["a.yaml", "missing.yaml"]
+format = "yaml"
+diff = true
+expected = ""
+error = "missing file"
+[diffMissingDestFile.files]
+"a.yaml" = "x: 1"
+
+[diffMultipleDocsSource]
+description = "Test diff with multiple documents in source file"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = ""
+error = "diff operates on exactly 1 source document per file"
+[diffMultipleDocsSource.files]
+"a.yaml" = '''
+---
+x: 1
+---
+y: 2
+'''
+"b.yaml" = "x: 1"
+
+[diffMultipleDocsDest]
+description = "Test diff with multiple documents in destination file"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = ""
+error = "diff operates on exactly 1 destination document per file"
+[diffMultipleDocsDest.files]
+"a.yaml" = "x: 1"
+"b.yaml" = '''
+---
+x: 1
+---
+y: 2
+'''
+
+[diffDifferentTypes]
+description = "Test diff with different types (string vs number)"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+$match: {}
+x: "1"
+'''
+[diffDifferentTypes.files]
+"a.yaml" = "x: 1"
+"b.yaml" = 'x: "1"'
+
+# Additional diff coverage tests
+[diffIdenticalValues]
+description = "Test diff with identical values returns nil"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = "$match: {}"
+[diffIdenticalValues.files]
+"a.yaml" = "x: 1"
+"b.yaml" = "x: 1"
+
+[diffPrimitiveValues]
+description = "Test diff with primitive values (not maps or lists)"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = "world"
+[diffPrimitiveValues.files]
+"a.yaml" = '"hello"'
+"b.yaml" = '"world"'
+
+[diffListVsMap]
+description = "Test diff with list vs map (different types)"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+$match: {}
+x: 1
+'''
+[diffListVsMap.files]
+"a.yaml" = '''
+- a: 1
+'''
+"b.yaml" = "x: 1"
+
+[diffMapVsList]
+description = "Test diff with map vs list (different types)"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+- $match: {}
+- a: 1
+'''
+[diffMapVsList.files]
+"a.yaml" = "x: 1"
+"b.yaml" = '''
+- a: 1
+'''
+
 ###############################################################################
 # Intersect Operations
 ###############################################################################
@@ -3298,6 +3424,82 @@ files."b.yaml" = '''
 a: null
 '''
 
+# Error handling tests for intersect
+[intersectMissingFile]
+description = "Test intersect with missing file"
+eval = ["a.yaml", "missing.yaml"]
+format = "yaml"
+intersect = true
+expected = ""
+error = "missing file"
+[intersectMissingFile.files]
+"a.yaml" = "x: 1"
+
+[intersectMultipleDocs]
+description = "Test intersect with multiple documents in a file"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = ""
+error = "intersect operates on exactly 1 document per file"
+[intersectMultipleDocs.files]
+"a.yaml" = '''
+---
+x: 1
+---
+y: 2
+'''
+"b.yaml" = "x: 1"
+
+[intersectDifferentTypes]
+description = "Test intersect with different types"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = "$required"
+[intersectDifferentTypes.files]
+"a.yaml" = "x: 1"
+"b.yaml" = '"string value"'
+
+# Additional intersect coverage tests
+[intersectListVsMap]
+description = "Test intersect with list vs map"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = "$required"
+[intersectListVsMap.files]
+"a.yaml" = '''
+- a: 1
+'''
+"b.yaml" = "x: 1"
+
+[intersectPrimitiveVsList]
+description = "Test intersect with primitive vs list"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = "$required"
+[intersectPrimitiveVsList.files]
+"a.yaml" = '"hello"'
+"b.yaml" = '''
+- a: 1
+'''
+
+[intersectPrimitiveVsMap]
+description = "Test intersect with primitive vs map"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = "$required"
+[intersectPrimitiveVsMap.files]
+"a.yaml" = '"hello"'
+"b.yaml" = "x: 1"
+
+###############################################################################
+# Required Operations
+###############################################################################
+
 [requiredToolList]
 description = "Required tool filters list to show only $required items"
 eval = ["a.yaml"]
@@ -3334,3 +3536,47 @@ a:
   d:
     e: 5
 """
+
+# Error handling tests for required
+[requiredMissingFile]
+description = "Test required with missing file"
+eval = ["missing.yaml"]
+format = "yaml"
+required = true
+expected = ""
+error = "missing file"
+[requiredMissingFile.files]
+
+[requiredMultipleDocs]
+description = "Test required with multiple documents"
+eval = ["a.yaml"]
+format = "yaml"
+required = true
+expected = ""
+error = "required operates on exactly 1 document"
+[requiredMultipleDocs.files]
+"a.yaml" = '''
+---
+x: $required
+---
+y: $required
+'''
+
+# Additional required coverage tests
+[requiredInString]
+description = "Test required string value is preserved"
+eval = ["a.yaml"]
+format = "yaml"
+required = true
+expected = "x: $required"
+[requiredInString.files]
+"a.yaml" = "x: $required"
+
+[requiredNonRequiredString]
+description = "Test non-required string value is filtered out"
+eval = ["a.yaml"]
+format = "yaml"
+required = true
+expected = ""
+[requiredNonRequiredString.files]
+"a.yaml" = "x: not-required"
