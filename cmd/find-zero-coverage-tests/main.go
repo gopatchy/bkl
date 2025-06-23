@@ -16,22 +16,37 @@ import (
 )
 
 type TestResult struct {
-	Name        string
-	UniqueLines int
+	Name           string
+	UniqueLines    int
+	UniqueCoverage map[string]bool // Lines covered by this test alone
+	ActualCoverage map[string]bool // All lines covered by this test
+}
+
+type OverlapResult struct {
+	TestName       string
+	OverlapsWith   string
+	SharedLines    int
+	TotalLines     int
+	OverlapPercent float64
 }
 
 type CoverageAnalyzer struct {
 	baselineCoverage map[string]bool
+	testExcluded     map[string]map[string]bool // test name -> coverage when test is excluded
+	testActual       map[string]map[string]bool // test name -> coverage when only this test runs
 	mu               sync.Mutex
 	counter          int64
 }
 
 func main() {
-	analyzer := &CoverageAnalyzer{}
+	analyzer := &CoverageAnalyzer{
+		testExcluded: make(map[string]map[string]bool),
+		testActual:   make(map[string]map[string]bool),
+	}
 
 	// Run baseline coverage
 	fmt.Println("Running baseline coverage with all tests...")
-	baselineCoverage, err := analyzer.runCoverageAndExtractLines("")
+	baselineCoverage, err := analyzer.runCoverageAndExtractLines("", "")
 	if err != nil {
 		log.Fatalf("Failed to get baseline coverage: %v", err)
 	}
@@ -46,15 +61,23 @@ func main() {
 	}
 	fmt.Printf("Found %d tests\n", len(testNames))
 
-	// Analyze tests in parallel
-	fmt.Printf("Analyzing %d tests in parallel...\n", len(testNames))
-	results := analyzer.analyzeTestsInParallel(testNames)
+	// Phase 1: Analyze unique coverage by excluding each test
+	fmt.Printf("\nPhase 1: Analyzing unique coverage for %d tests...\n", len(testNames))
+	results := analyzer.analyzeUniqueCoverage(testNames)
+
+	// Phase 2: For zero-unique tests, get their actual coverage
+	fmt.Printf("\nPhase 2: Analyzing actual coverage for zero-unique tests...\n")
+	analyzer.analyzeActualCoverage(results, testNames)
+
+	// Find overlaps for zero-coverage tests
+	fmt.Println("\nAnalyzing overlaps...")
+	overlaps := analyzer.findOverlaps(results)
 
 	// Print results
-	printResults(results)
+	printResults(results, overlaps)
 }
 
-func (ca *CoverageAnalyzer) runCoverageAndExtractLines(excludeTest string) (map[string]bool, error) {
+func (ca *CoverageAnalyzer) runCoverageAndExtractLines(excludeTest, includeTest string) (map[string]bool, error) {
 	// Generate unique filename
 	id := atomic.AddInt64(&ca.counter, 1)
 	coverFile := fmt.Sprintf("cover_%d.out", id)
@@ -63,6 +86,9 @@ func (ca *CoverageAnalyzer) runCoverageAndExtractLines(excludeTest string) (map[
 	args := []string{"test", "-run", "TestLanguage", fmt.Sprintf("-coverprofile=%s", coverFile)}
 	if excludeTest != "" {
 		args = append(args, fmt.Sprintf("-test.exclude=%s", excludeTest))
+	}
+	if includeTest != "" {
+		args = append(args, fmt.Sprintf("-test.filter=%s", includeTest))
 	}
 
 	// Run go test
@@ -142,7 +168,7 @@ func extractTestNames(filename string) ([]string, error) {
 	return names, nil
 }
 
-func (ca *CoverageAnalyzer) analyzeTestsInParallel(testNames []string) []TestResult {
+func (ca *CoverageAnalyzer) analyzeUniqueCoverage(testNames []string) []TestResult {
 	results := make([]TestResult, len(testNames))
 	var wg sync.WaitGroup
 	var progressCounter int64
@@ -166,22 +192,34 @@ func (ca *CoverageAnalyzer) analyzeTestsInParallel(testNames []string) []TestRes
 			}
 
 			// Run coverage without this test
-			coverageWithout, err := ca.runCoverageAndExtractLines(name)
+			coverageWithout, err := ca.runCoverageAndExtractLines(name, "")
 			if err != nil {
 				log.Printf("Error analyzing test %s: %v", name, err)
 				results[index] = TestResult{Name: name, UniqueLines: 0}
 				return
 			}
 
-			// Count unique lines
+			// Store coverage data when this test is excluded
+			ca.mu.Lock()
+			ca.testExcluded[name] = coverageWithout
+			ca.mu.Unlock()
+
+			// Count unique lines (lines only covered by this test)
 			uniqueLines := 0
+			testUniqueCoverage := make(map[string]bool)
+
 			for line := range ca.baselineCoverage {
 				if !coverageWithout[line] {
 					uniqueLines++
+					testUniqueCoverage[line] = true
 				}
 			}
 
-			results[index] = TestResult{Name: name, UniqueLines: uniqueLines}
+			results[index] = TestResult{
+				Name:           name,
+				UniqueLines:    uniqueLines,
+				UniqueCoverage: testUniqueCoverage,
+			}
 		}(i, testName)
 	}
 
@@ -191,7 +229,142 @@ func (ca *CoverageAnalyzer) analyzeTestsInParallel(testNames []string) []TestRes
 	return results
 }
 
-func printResults(results []TestResult) {
+func (ca *CoverageAnalyzer) analyzeActualCoverage(results []TestResult, testNames []string) {
+	// Count zero-unique tests
+	var zeroUniqueTests []int
+	for i, r := range results {
+		if r.UniqueLines == 0 {
+			zeroUniqueTests = append(zeroUniqueTests, i)
+		}
+	}
+
+	if len(zeroUniqueTests) == 0 {
+		return
+	}
+
+	fmt.Printf("Found %d tests with zero unique coverage, analyzing their actual coverage...\n", len(zeroUniqueTests))
+
+	var wg sync.WaitGroup
+	var progressCounter int64
+	semaphore := make(chan struct{}, 8)
+
+	for _, idx := range zeroUniqueTests {
+		wg.Add(1)
+		go func(index int) {
+			defer wg.Done()
+
+			testName := results[index].Name
+
+			// Acquire semaphore
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			// Show progress
+			count := atomic.AddInt64(&progressCounter, 1)
+			if count%10 == 0 {
+				fmt.Printf("\rProgress: %d/%d zero-unique tests processed...", count, len(zeroUniqueTests))
+			}
+
+			// Run coverage with only this test
+			coverage, err := ca.runCoverageAndExtractLines("", testName)
+			if err != nil {
+				log.Printf("Error getting actual coverage for test %s: %v", testName, err)
+				return
+			}
+
+			// Store actual coverage
+			ca.mu.Lock()
+			ca.testActual[testName] = coverage
+			results[index].ActualCoverage = coverage
+			ca.mu.Unlock()
+		}(idx)
+	}
+
+	wg.Wait()
+	fmt.Printf("\rProgress: %d/%d zero-unique tests processed...Done!\n", len(zeroUniqueTests), len(zeroUniqueTests))
+}
+
+func (ca *CoverageAnalyzer) findOverlaps(results []TestResult) []OverlapResult {
+	var overlaps []OverlapResult
+
+	// For each zero-unique test with actual coverage, find best overlap
+	for _, r := range results {
+		if r.UniqueLines > 0 || len(r.ActualCoverage) == 0 {
+			continue
+		}
+
+		// Find which other test has the most overlap
+		maxShared := 0
+		bestMatch := ""
+		bestMatchTotal := 0
+
+		for _, other := range results {
+			if other.Name == r.Name {
+				continue
+			}
+
+			// Get other test's actual coverage
+			otherCoverage := other.ActualCoverage
+			if len(otherCoverage) == 0 && other.UniqueLines > 0 {
+				// For tests with unique coverage, reconstruct their coverage
+				otherCoverage = make(map[string]bool)
+				// Add unique lines
+				for line := range other.UniqueCoverage {
+					otherCoverage[line] = true
+				}
+				// Add shared lines (baseline - excluded)
+				if excluded, ok := ca.testExcluded[other.Name]; ok {
+					for line := range ca.baselineCoverage {
+						if !excluded[line] {
+							otherCoverage[line] = true
+						}
+					}
+				}
+			}
+
+			if len(otherCoverage) == 0 {
+				continue
+			}
+
+			// Count shared lines
+			shared := 0
+			for line := range r.ActualCoverage {
+				if otherCoverage[line] {
+					shared++
+				}
+			}
+
+			// Use absolute shared count as main criteria
+			if shared > maxShared || (shared == maxShared && len(otherCoverage) < bestMatchTotal) {
+				maxShared = shared
+				bestMatch = other.Name
+				bestMatchTotal = len(otherCoverage)
+			}
+		}
+
+		if bestMatch != "" && maxShared > 0 {
+			overlaps = append(overlaps, OverlapResult{
+				TestName:       r.Name,
+				OverlapsWith:   bestMatch,
+				SharedLines:    maxShared,
+				TotalLines:     len(r.ActualCoverage),
+				OverlapPercent: float64(maxShared) / float64(len(r.ActualCoverage)) * 100,
+			})
+		}
+	}
+
+	// Sort by overlap percentage
+	sort.Slice(overlaps, func(i, j int) bool {
+		if overlaps[i].OverlapPercent == overlaps[j].OverlapPercent {
+			return overlaps[i].SharedLines > overlaps[j].SharedLines
+		}
+		return overlaps[i].OverlapPercent > overlaps[j].OverlapPercent
+	})
+
+	return overlaps
+}
+
+func printResults(results []TestResult, overlaps []OverlapResult) {
 	// Sort by unique lines
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].UniqueLines == results[j].UniqueLines {
@@ -212,21 +385,51 @@ func printResults(results []TestResult) {
 	fmt.Println("SUMMARY")
 	fmt.Println("=========================================")
 	fmt.Printf("Total tests analyzed: %d\n", len(results))
-	fmt.Printf("Tests contributing zero coverage: %d\n", zeroCount)
+	fmt.Printf("Tests contributing zero unique coverage: %d\n", zeroCount)
 	fmt.Println()
 
-	// Show zero coverage tests
+	// Show zero coverage tests with overlaps
 	if zeroCount > 0 {
-		fmt.Println("Tests with ZERO coverage contribution:")
-		zeroCoverageTests := []string{}
-		for _, r := range results {
-			if r.UniqueLines == 0 {
-				zeroCoverageTests = append(zeroCoverageTests, r.Name)
-			}
+		fmt.Println("Tests with ZERO unique coverage and their overlaps:")
+		fmt.Println("(Shows which test covers the most similar lines)")
+		fmt.Println()
+
+		// Create a map for quick lookup
+		overlapMap := make(map[string]OverlapResult)
+		for _, o := range overlaps {
+			overlapMap[o.TestName] = o
 		}
 
-		// Print in columns
-		printInColumns(zeroCoverageTests, 80)
+		// Print zero coverage tests with their overlaps
+		zeroTests := []string{}
+		for _, r := range results {
+			if r.UniqueLines == 0 {
+				zeroTests = append(zeroTests, r.Name)
+			}
+		}
+		sort.Strings(zeroTests)
+
+		for _, testName := range zeroTests {
+			if overlap, ok := overlapMap[testName]; ok {
+				fmt.Printf("  %-40s → %.0f%% overlap with %s (%d/%d lines)\n",
+					testName, overlap.OverlapPercent, overlap.OverlapsWith,
+					overlap.SharedLines, overlap.TotalLines)
+			} else {
+				// Check if test has actual coverage
+				hasActualCoverage := false
+				for _, r := range results {
+					if r.Name == testName && len(r.ActualCoverage) > 0 {
+						hasActualCoverage = true
+						break
+					}
+				}
+				if hasActualCoverage {
+					fmt.Printf("  %-40s → no overlap found\n", testName)
+				} else {
+					fmt.Printf("  %-40s → covers no lines\n", testName)
+				}
+			}
+		}
 		fmt.Println()
 	}
 
@@ -272,38 +475,9 @@ func printResults(results []TestResult) {
 		fmt.Printf("  %4d tests contribute %d lines\n", distribution[line], line)
 	}
 
-	fmt.Println("\nNote: Tests with 0 coverage contribution may still be valuable for:")
+	fmt.Println("\nNote: Tests with 0 unique coverage contribution may still be valuable for:")
 	fmt.Println("  - Ensuring error cases are handled correctly")
 	fmt.Println("  - Testing output formatting")
 	fmt.Println("  - Validating edge cases")
 	fmt.Println("  - Preventing regressions")
-}
-
-func printInColumns(items []string, width int) {
-	// Sort items first
-	sort.Strings(items)
-
-	// Calculate column width based on longest item
-	maxLen := 0
-	for _, item := range items {
-		if len(item) > maxLen {
-			maxLen = len(item)
-		}
-	}
-
-	colWidth := maxLen + 2
-	numCols := width / colWidth
-	if numCols < 1 {
-		numCols = 1
-	}
-
-	for i, item := range items {
-		fmt.Printf("%-*s", colWidth, item)
-		if (i+1)%numCols == 0 {
-			fmt.Println()
-		}
-	}
-	if len(items)%numCols != 0 {
-		fmt.Println()
-	}
 }
