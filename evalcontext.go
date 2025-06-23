@@ -5,29 +5,29 @@ import (
 	"maps"
 )
 
-type EvalContext struct {
+type evalContext struct {
 	Vars map[string]any
 }
 
-func NewEvalContext(env map[string]string) *EvalContext {
+func newEvalContext(env map[string]string) *evalContext {
 	vars := map[string]any{}
 
 	for k, v := range env {
 		vars[fmt.Sprintf("$env:%s", k)] = v
 	}
 
-	return &EvalContext{
+	return &evalContext{
 		Vars: vars,
 	}
 }
 
-func (ec *EvalContext) Clone() *EvalContext {
-	return &EvalContext{
+func (ec *evalContext) Clone() *evalContext {
+	return &evalContext{
 		Vars: maps.Clone(ec.Vars),
 	}
 }
 
-func (ec *EvalContext) GetVar(name string) (any, error) {
+func (ec *evalContext) GetVar(name string) (any, error) {
 	v, found := ec.Vars[name]
 	if found {
 		return v, nil

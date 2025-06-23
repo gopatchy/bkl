@@ -7,7 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func getWithVar(doc *Document, docs []*Document, ec *EvalContext, m any) (any, error) {
+func getWithVar(doc *Document, docs []*Document, ec *evalContext, m any) (any, error) {
 	ret, err := get(doc, docs, m)
 	if err != nil {
 		switch m2 := m.(type) {

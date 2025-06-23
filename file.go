@@ -67,7 +67,7 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[%s]: %w", id, err)
 		}
 
-		docObj := NewDocumentWithData(id, doc)
+		docObj := newDocumentWithData(id, doc)
 		f.docs = append(f.docs, docObj)
 	}
 
@@ -117,11 +117,11 @@ func (f *file) setParents() {
 	}
 
 	for _, doc := range f.child.docs {
-		doc.AddParents(f.docs...)
+		doc.addParents(f.docs...)
 	}
 }
 
-func (f *file) parents(fsys *FS) ([]string, error) {
+func (f *file) parents(fsys *fileSystem) ([]string, error) {
 	parents, err := f.parentsFromDirective(fsys)
 	if err != nil {
 		return nil, err
@@ -134,12 +134,12 @@ func (f *file) parents(fsys *FS) ([]string, error) {
 	return f.parentsFromFilename(fsys)
 }
 
-func (f *file) parentsFromDirective(fsys *FS) ([]string, error) {
+func (f *file) parentsFromDirective(fsys *fileSystem) ([]string, error) {
 	parents := []string{}
 	noParent := false
 
 	for _, doc := range f.docs {
-		found, val := doc.PopMapValue("$parent")
+		found, val := doc.popMapValue("$parent")
 		if !found {
 			continue
 		}
@@ -183,7 +183,7 @@ func (f *file) parentsFromDirective(fsys *FS) ([]string, error) {
 	return f.toAbsolutePaths(fsys, parents)
 }
 
-func (f *file) parentsFromFilename(fsys *FS) ([]string, error) {
+func (f *file) parentsFromFilename(fsys *fileSystem) ([]string, error) {
 	if isStdin(f.path) {
 		return []string{}, nil
 	}
@@ -213,7 +213,7 @@ func (f *file) parentsFromFilename(fsys *FS) ([]string, error) {
 	}
 }
 
-func (f *file) toAbsolutePaths(fsys *FS, paths []string) ([]string, error) {
+func (f *file) toAbsolutePaths(fsys *fileSystem, paths []string) ([]string, error) {
 	ret := []string{}
 
 	for _, path := range paths {

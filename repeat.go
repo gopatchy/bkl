@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func repeatDoc(doc *Document, ec *EvalContext) ([]*Document, []*EvalContext, error) {
+func repeatDoc(doc *Document, ec *evalContext) ([]*Document, []*evalContext, error) {
 	switch obj := doc.Data.(type) {
 	case map[string]any:
 		return repeatDocMap(doc, ec, obj)
@@ -13,20 +13,20 @@ func repeatDoc(doc *Document, ec *EvalContext) ([]*Document, []*EvalContext, err
 		return repeatDocList(doc, ec, obj)
 
 	default:
-		return []*Document{doc}, []*EvalContext{ec}, nil
+		return []*Document{doc}, []*evalContext{ec}, nil
 	}
 }
 
-func repeatDocMap(doc *Document, ec *EvalContext, data map[string]any) ([]*Document, []*EvalContext, error) {
+func repeatDocMap(doc *Document, ec *evalContext, data map[string]any) ([]*Document, []*evalContext, error) {
 	if found, v, data := popMapValue(data, "$repeat"); found {
 		doc.Data = data
 		return repeatDocGen(doc, ec, v)
 	}
 
-	return []*Document{doc}, []*EvalContext{ec}, nil
+	return []*Document{doc}, []*evalContext{ec}, nil
 }
 
-func repeatDocList(doc *Document, ec *EvalContext, data []any) ([]*Document, []*EvalContext, error) {
+func repeatDocList(doc *Document, ec *evalContext, data []any) ([]*Document, []*evalContext, error) {
 	v, data2, err := popListMapValue(data, "$repeat")
 	if err != nil {
 		return nil, nil, err
@@ -37,20 +37,20 @@ func repeatDocList(doc *Document, ec *EvalContext, data []any) ([]*Document, []*
 		return repeatDocGen(doc, ec, v)
 	}
 
-	return []*Document{doc}, []*EvalContext{ec}, nil
+	return []*Document{doc}, []*evalContext{ec}, nil
 }
 
-func repeatDocGen(doc *Document, ec *EvalContext, v any) ([]*Document, []*EvalContext, error) {
+func repeatDocGen(doc *Document, ec *evalContext, v any) ([]*Document, []*evalContext, error) {
 	contexts, err := repeatGenerateContexts(ec, v)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	docs := make([]*Document, len(contexts))
-	ecs := make([]*EvalContext, len(contexts))
+	ecs := make([]*evalContext, len(contexts))
 
 	for i, ctx := range contexts {
-		doc2, err := doc.Clone(fmt.Sprintf("repeat-%d", i))
+		doc2, err := doc.clone(fmt.Sprintf("repeat-%d", i))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -111,10 +111,10 @@ func repeatGetRangeParamValues(rs map[string]any) ([]any, error) {
 	return values, nil
 }
 
-func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
+func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 	switch r2 := r.(type) {
 	case int:
-		contexts := make([]*EvalContext, r2)
+		contexts := make([]*evalContext, r2)
 		for i := 0; i < r2; i++ {
 			ctx := ec.Clone()
 			ctx.Vars["$repeat"] = i
@@ -123,7 +123,7 @@ func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
 		return contexts, nil
 
 	case []any:
-		contexts := make([]*EvalContext, len(r2))
+		contexts := make([]*evalContext, len(r2))
 		for i, value := range r2 {
 			ctx := ec.Clone()
 			ctx.Vars["$repeat"] = value
@@ -137,7 +137,7 @@ func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
 			if err != nil {
 				return nil, err
 			}
-			contexts := make([]*EvalContext, len(values))
+			contexts := make([]*evalContext, len(values))
 			for i, value := range values {
 				ctx := ec.Clone()
 				ctx.Vars["$repeat"] = value
@@ -153,16 +153,16 @@ func repeatGenerateContexts(ec *EvalContext, r any) ([]*EvalContext, error) {
 	}
 }
 
-func repeatGenerateContextsFromMap(ec *EvalContext, rs map[string]any) ([]*EvalContext, error) {
+func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalContext, error) {
 	ec = ec.Clone()
 	for k, v := range rs {
 		ec.Vars[fmt.Sprintf("$repeat.%s", k)] = v
 	}
 
-	contexts := []*EvalContext{ec}
+	contexts := []*evalContext{ec}
 
 	for name, value := range sortedMap(rs) {
-		var newContexts []*EvalContext
+		var newContexts []*evalContext
 		var values []any
 		var err error
 

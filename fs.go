@@ -7,26 +7,26 @@ import (
 	"strings"
 )
 
-type FS struct {
+type fileSystem struct {
 	fsys fs.FS
 }
 
-func NewFS(fsys fs.FS) *FS {
-	return &FS{
+func newFS(fsys fs.FS) *fileSystem {
+	return &fileSystem{
 		fsys: fsys,
 	}
 }
 
-func (f *FS) Open(name string) (fs.File, error) {
+func (f *fileSystem) Open(name string) (fs.File, error) {
 	return f.fsys.Open(f.convertToFS(name))
 }
 
-func (f *FS) ReadDir(name string) ([]fs.DirEntry, error) {
+func (f *fileSystem) ReadDir(name string) ([]fs.DirEntry, error) {
 	rdf := f.fsys.(fs.ReadDirFS)
 	return rdf.ReadDir(f.convertToFS(name))
 }
 
-func (f *FS) Stat(name string) (fs.FileInfo, error) {
+func (f *fileSystem) Stat(name string) (fs.FileInfo, error) {
 	sf, ok := f.fsys.(fs.StatFS)
 	if ok {
 		return sf.Stat(f.convertToFS(name))
@@ -42,7 +42,7 @@ func (f *FS) Stat(name string) (fs.FileInfo, error) {
 	return file.Stat()
 }
 
-func (f *FS) Glob(pattern string) ([]string, error) {
+func (f *fileSystem) Glob(pattern string) ([]string, error) {
 	dir, file := filepath.Split(pattern)
 	dir = strings.TrimSuffix(dir, "/")
 
@@ -66,7 +66,7 @@ func (f *FS) Glob(pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func (f *FS) convertToFS(path string) string {
+func (f *fileSystem) convertToFS(path string) string {
 	result := strings.TrimPrefix(path, "/")
 	if result == "" {
 		return "."
@@ -74,7 +74,7 @@ func (f *FS) convertToFS(path string) string {
 	return result
 }
 
-func (f *FS) findFile(path string) string {
+func (f *fileSystem) findFile(path string) string {
 	for ext := range formatByExtension {
 		extPath := fmt.Sprintf("%s.%s", path, ext)
 		if _, err := f.Stat(extPath); err == nil {
@@ -84,7 +84,7 @@ func (f *FS) findFile(path string) string {
 	return ""
 }
 
-func (f *FS) globFiles(path string) ([]string, error) {
+func (f *fileSystem) globFiles(path string) ([]string, error) {
 	pat := fmt.Sprintf("%s.*", path)
 	matches, err := f.Glob(pat)
 	if err != nil {
