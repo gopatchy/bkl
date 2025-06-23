@@ -79,6 +79,7 @@ func TestLanguage(t *testing.T) {
 			// Create a filesystem view rooted at the rootPath
 			var testFS fs.FS = fsys
 			if rootPath != "/" {
+				var err error
 				testFS, err = fs.Sub(fsys, rootPath)
 				if err != nil {
 					t.Fatalf("Failed to create sub filesystem at %s: %v", rootPath, err)

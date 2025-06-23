@@ -1075,6 +1075,32 @@ $match: null
 c: 3
 '''
 
+[matchArgs]
+description = "Test $match directive across multiple evaluated files"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+d: 4
+---
+b: 2
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."b.yaml" = '''
+$match:
+  b: 2
+c: 3
+---
+$match:
+  a: 1
+d: 4
+'''
+
 ###############################################################################
 # List Operations
 ###############################################################################
@@ -2343,6 +2369,92 @@ files."a.b.toml" = '''
 a = 1
 '''
 
+[parentComplex]
+description = "Test complex parent patterns with wildcards"
+eval = ["all.yaml", "variant.yaml"]
+format = "yaml"
+expected = '''
+kind: Deployment
+metadata:
+  labels:
+    variant: a
+  name: user1
+spec:
+  replicas: 3
+---
+kind: Service
+metadata:
+  labels:
+    variant: a
+  name: user1
+---
+kind: Ingress
+metadata:
+  labels:
+    variant: a
+  name: user1
+---
+kind: Deployment
+metadata:
+  labels:
+    variant: a
+  name: user2
+spec:
+  replicas: 3
+---
+kind: Service
+metadata:
+  labels:
+    variant: a
+  name: user2
+---
+kind: Ingress
+metadata:
+  labels:
+    variant: a
+  name: user2
+'''
+files."all.yaml" = '''
+$parent: resources.*
+'''
+files."variant.yaml" = '''
+$match: {}
+metadata:
+  labels:
+    variant: a
+---
+$match:
+  kind: Deployment
+spec:
+  replicas: 3
+'''
+files."deployment.yaml" = '''
+kind: Deployment
+metadata:
+  name: $required
+'''
+files."service.yaml" = '''
+kind: Service
+metadata:
+  name: $required
+'''
+files."ingress.yaml" = '''
+kind: Ingress
+metadata:
+  name: $required
+'''
+files."resources.yaml" = '''
+$parent: [deployment, service, ingress]
+'''
+files."resources.user1.yaml" = '''
+metadata:
+  name: user1
+'''
+files."resources.user2.yaml" = '''
+metadata:
+  name: user2
+'''
+
 ###############################################################################
 # Format Support and Type Handling
 ###############################################################################
@@ -2608,7 +2720,7 @@ mapKey: $$pod
 '''
 
 ###############################################################################
-# Miscellaneous Tests
+# Required Fields ($required)
 ###############################################################################
 
 [requiredError]
@@ -2619,17 +2731,6 @@ error = "required field not set"
 files."a.yaml" = '''
 a: 1
 b: $required
-'''
-
-[valueExtra]
-description = "Test error when $value has extra keys"
-eval = ["a.yaml"]
-format = "yaml"
-error = "extra keys"
-files."a.yaml" = '''
-a:
-  $value: "foo"
-  b: 2
 '''
 
 [yamlAnchorsRequiredError]
@@ -2643,13 +2744,33 @@ a: &anchor
 b: *anchor
 '''
 
-[envMissing]
-description = "Test missing environment variable error"
+[requiredList]
+description = "Test $required field in list context"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+- 1
+'''
+files."a.yaml" = '''
+- $required
+'''
+files."a.b.yaml" = '''
+- 1
+'''
+
+###############################################################################
+# Error Handling
+###############################################################################
+
+[valueExtra]
+description = "Test error when $value has extra keys"
 eval = ["a.yaml"]
 format = "yaml"
-error = "$env:FOO: variable not found"
+error = "extra keys"
 files."a.yaml" = '''
-a: $env:FOO
+a:
+  $value: "foo"
+  b: 2
 '''
 
 [interpMissing]
@@ -2663,6 +2784,10 @@ files."a.yaml" = '''
 
 result: $"Hello {missing_variable} world"
 '''
+
+###############################################################################
+# Examples and Edge Cases
+###############################################################################
 
 [example1]
 description = "Example from documentation showing basic inheritance"
@@ -2708,6 +2833,31 @@ files."a.yaml" = '''
 a: $FOO
 b: ${FOO}
 c: $(FOO)
+'''
+
+[args]
+description = "Test evaluating multiple files with inheritance"
+eval = ["a.b.yaml", "c.d.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+'''
+files."a.b.yaml" = '''
+b: 2
+'''
+files."c.yaml" = '''
+$match: {}
+b: 10
+c: 3
+'''
+files."c.d.yaml" = '''
+b: $delete
+d: 4
 '''
 
 [yamlAnchors]
@@ -2809,156 +2959,9 @@ b: 2
 c: 3
 '''
 
-[requiredList]
-description = "Test $required field in list context"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
-- 1
-'''
-files."a.yaml" = '''
-- $required
-'''
-files."a.b.yaml" = '''
-- 1
-'''
-
-[parentComplex]
-description = "Test complex parent patterns with wildcards"
-eval = ["all.yaml", "variant.yaml"]
-format = "yaml"
-expected = '''
-kind: Deployment
-metadata:
-  labels:
-    variant: a
-  name: user1
-spec:
-  replicas: 3
----
-kind: Service
-metadata:
-  labels:
-    variant: a
-  name: user1
----
-kind: Ingress
-metadata:
-  labels:
-    variant: a
-  name: user1
----
-kind: Deployment
-metadata:
-  labels:
-    variant: a
-  name: user2
-spec:
-  replicas: 3
----
-kind: Service
-metadata:
-  labels:
-    variant: a
-  name: user2
----
-kind: Ingress
-metadata:
-  labels:
-    variant: a
-  name: user2
-'''
-files."all.yaml" = '''
-$parent: resources.*
-'''
-files."variant.yaml" = '''
-$match: {}
-metadata:
-  labels:
-    variant: a
----
-$match:
-  kind: Deployment
-spec:
-  replicas: 3
-'''
-files."deployment.yaml" = '''
-kind: Deployment
-metadata:
-  name: $required
-'''
-files."service.yaml" = '''
-kind: Service
-metadata:
-  name: $required
-'''
-files."ingress.yaml" = '''
-kind: Ingress
-metadata:
-  name: $required
-'''
-files."resources.yaml" = '''
-$parent: [deployment, service, ingress]
-'''
-files."resources.user1.yaml" = '''
-metadata:
-  name: user1
-'''
-files."resources.user2.yaml" = '''
-metadata:
-  name: user2
-'''
-
-[args]
-description = "Test evaluating multiple files with inheritance"
-eval = ["a.b.yaml", "c.d.yaml"]
-format = "yaml"
-expected = '''
-a: 1
-c: 3
-d: 4
-'''
-files."a.yaml" = '''
-a: 1
-'''
-files."a.b.yaml" = '''
-b: 2
-'''
-files."c.yaml" = '''
-$match: {}
-b: 10
-c: 3
-'''
-files."c.d.yaml" = '''
-b: $delete
-d: 4
-'''
-
-[matchArgs]
-description = "Test $match directive across multiple evaluated files"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-expected = '''
-a: 1
-d: 4
----
-b: 2
-c: 3
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-'''
-files."b.yaml" = '''
-$match:
-  b: 2
-c: 3
----
-$match:
-  a: 1
-d: 4
-'''
+###############################################################################
+# Root Path Restrictions
+###############################################################################
 
 [rootPathCur]
 description = "Test root path restriction with current directory"
@@ -3014,6 +3017,10 @@ a: 1
 b: $merge:a
 '''
 
+###############################################################################
+# Environment Variables ($env)
+###############################################################################
+
 [envMapValue]
 description = "Test environment variable in map value"
 eval = ["a.yaml"]
@@ -3064,4 +3071,13 @@ files."a.yaml" = '''
 a:
   $value: [a-, $env:FOO, -b]
   $encode: join
+'''
+
+[envMissing]
+description = "Test missing environment variable error"
+eval = ["a.yaml"]
+format = "yaml"
+error = "$env:FOO: variable not found"
+files."a.yaml" = '''
+a: $env:FOO
 '''
