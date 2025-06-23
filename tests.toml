@@ -3949,3 +3949,397 @@ result: 'Value: '
 empty: ""
 result: '$"Value: {empty}"'
 '''
+
+###############################################################################
+# Additional Coverage Tests - Round 2
+###############################################################################
+
+# Get operations with complex paths
+
+[getPathYAMLList]
+description = "Test get path from YAML-encoded list"
+eval = ["a.yaml"]
+expected = '''
+data:
+  nested:
+    field: value
+'''
+[getPathYAMLList.files]
+"a.yaml" = '''
+data:
+  nested:
+    field: value
+'''
+
+[getPathInvalidType]
+description = "Test get path with invalid type"
+eval = ["a.yaml"]
+expected = '''
+result: 123
+'''
+[getPathInvalidType.files]
+"a.yaml" = '''
+result: 123
+'''
+
+[getVarNotFound]
+description = "Test get variable not found"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[getVarNotFound.files]
+"a.yaml" = '''
+result: $nonexistent
+'''
+
+[getCrossDocError]
+description = "Test get cross document error"
+eval = ["a.yaml", "b.yaml"]
+expected = ""
+error = "invalid directive"
+[getCrossDocError.files]
+"a.yaml" = '''
+result:
+  $get: [{id: missing}, field]
+'''
+"b.yaml" = '''
+id: other
+field: value
+'''
+
+[getPathFromStringError]
+description = "Test get path from string with YAML parse error"
+eval = ["a.yaml"]
+expected = ""
+error = "yaml:"
+[getPathFromStringError.files]
+"a.yaml" = '''
+result: $"[invalid: yaml: ["
+'''
+
+# Output operations
+[outputFilterMapFalse]
+description = "Test output filter on map with $output: false"
+eval = ["a.yaml"]
+expected = '''
+visible: data
+'''
+[outputFilterMapFalse.files]
+"a.yaml" = '''
+visible: data
+hidden:
+  $output: false
+  secret: value
+'''
+
+[outputFilterListFalse]
+description = "Test output filter on list with $output: false"
+eval = ["a.yaml"]
+expected = '''
+- visible
+- another
+'''
+[outputFilterListFalse.files]
+"a.yaml" = '''
+- visible
+- $output: false
+  hidden: value
+- another
+'''
+
+[outputFilterNestedError]
+description = "Test output filter with nested error"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid"
+[outputFilterNestedError.files]
+"a.yaml" = '''
+data:
+  field:
+    $output: "not a boolean"
+'''
+
+[findOutputsError]
+description = "Test find outputs with error"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid"
+[findOutputsError.files]
+"a.yaml" = '''
+data:
+  - $output: "not a boolean"
+'''
+
+# Normalize edge cases
+[normalizeMapKeyNonString]
+description = "Test normalize with non-string map key"
+eval = ["a.yaml"]
+expected = '''
+"123": value
+'''
+[normalizeMapKeyNonString.files]
+"a.yaml" = '''
+123: value
+'''
+
+# Match operations
+[matchListNonList]
+description = "Test match list with non-list"
+eval = ["a.yaml"]
+expected = '''
+data: not a list
+'''
+[matchListNonList.files]
+"a.yaml" = '''
+data: not a list
+'''
+
+# JSON edge cases
+[jsonMarshalError]
+description = "Test JSON marshal with function type"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[jsonMarshalError.files]
+"a.yaml" = '''
+func: $env
+result:
+  $encode: json
+  $value: $func
+'''
+
+# YAML marshal edge cases
+[yamlMarshalMapIntKey]
+description = "Test YAML marshal with integer map key"
+eval = ["a.yaml"]
+expected = '''
+"123": value
+'''
+[yamlMarshalMapIntKey.files]
+"a.yaml" = '''
+123: value
+'''
+
+# Process decode type errors
+[decodeNonMap]
+description = "Test decode on non-map"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[decodeNonMap.files]
+"a.yaml" = '''
+- item
+- $decode: yaml
+'''
+
+# Tostring conversion errors
+
+
+# More coverage tests
+[getPathDeepNested]
+description = "Test get path with deep nesting"
+eval = ["a.yaml"]
+expected = '''
+data:
+  level1:
+    level2:
+      level3:
+        value: found
+result: found
+'''
+[getPathDeepNested.files]
+"a.yaml" = '''
+data:
+  level1:
+    level2:
+      level3:
+        value: found
+result: found
+'''
+
+[normalizeListWithNonStringKey]
+description = "Test normalize list containing map with non-string key"
+eval = ["a.yaml"]
+expected = '''
+- "123": value
+- normal: key
+'''
+[normalizeListWithNonStringKey.files]
+"a.yaml" = '''
+- 123: value
+- normal: key
+'''
+
+[outputControlComplex]
+description = "Test complex output control"
+eval = ["a.yaml"]
+expected = '''
+list:
+  - item1
+  - item3
+visible:
+  data: shown
+'''
+[outputControlComplex.files]
+"a.yaml" = '''
+visible:
+  data: shown
+  hidden:
+    $output: false
+    secret: hidden
+list:
+  - item1
+  - $output: false
+    value: item2
+  - item3
+'''
+
+[toStringListMixed]
+description = "Test toStringList with mixed types"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[toStringListMixed.files]
+"a.yaml" = '''
+data:
+  $get: [field1, {complex: object}, field2]
+'''
+
+[yamlUnmarshalStreamError]
+description = "Test YAML unmarshal stream with invalid input"
+eval = ["a.yaml"]
+expected = ""
+error = "yaml:"
+[yamlUnmarshalStreamError.files]
+"a.yaml" = '''
+{invalid yaml & here
+'''
+
+[jsonUnmarshalStreamEmpty]
+description = "Test JSON unmarshal with empty document"
+eval = ["a.json"]
+expected = ""
+[jsonUnmarshalStreamEmpty.files]
+"a.json" = ""
+
+[encodeUnknownCommand]
+description = "Test encode with unknown command"
+eval = ["a.yaml"]
+expected = ""
+error = "unknown format"
+[encodeUnknownCommand.files]
+"a.yaml" = '''
+$encode: unknowncommand
+$value: data
+'''
+
+[process2CircularRef]
+description = "Test process2 circular reference detection"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[process2CircularRef.files]
+"a.yaml" = '''
+a: $b
+b: $c
+c: $a
+result: $a
+'''
+
+# Document and clone tests
+[documentCloneError]
+description = "Test document clone with marshal error"
+eval = ["a.yaml"]
+expected = '''
+data:
+  func: {}
+func: {}
+'''
+[documentCloneError.files]
+"a.yaml" = '''
+data:
+  func: {}
+$merge: data
+'''
+
+# Process1 tests
+[process1MergeError]
+description = "Test process1 merge with error"
+eval = ["a.yaml"]
+expected = ""
+error = "reference not found"
+[process1MergeError.files]
+"a.yaml" = '''
+$merge: nonexistent
+'''
+
+[process1ParentError]
+description = "Test process1 parent directive error"
+eval = ["a.yaml"]
+expected = ""
+error = "missing file"
+[process1ParentError.files]
+"a.yaml" = '''
+$parent: [nonexistent]
+data: value
+'''
+
+[process1InvalidMerge]
+description = "Test process1 with invalid merge type"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[process1InvalidMerge.files]
+"a.yaml" = '''
+$merge: 123
+'''
+
+
+# Deep clone edge cases
+[deepCloneFuncError]
+description = "Test deep clone with function type"
+eval = ["a.yaml"]
+expected = ""
+error = "not found"
+[deepCloneFuncError.files]
+"a.yaml" = '''
+base:
+  field: value
+  func: $env:PATH
+copy:
+  $merge: base
+'''
+
+# GetFormat tests
+[getFormatError]
+description = "Test GetFormat with unknown format"
+eval = ["unknown.xyz"]
+expected = ""
+error = "unknown format"
+[getFormatError.files]
+"unknown.xyz" = "data: value"
+
+# Parent filename tests
+[parentFilenameTilde]
+description = "Test parent from filename with tilde"
+eval = ["service.base.yaml"]
+expected = '''
+base: value
+service: value
+'''
+[parentFilenameTilde.files]
+"service.yaml" = "base: value"
+"service.base.yaml" = "service: value"
+
+# Process encode any tests
+[encodeAnyInvalidType]
+description = "Test encode any with invalid command type"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[encodeAnyInvalidType.files]
+"a.yaml" = '''
+$encode: {not: string}
+$value: data
+'''
+
