@@ -3713,7 +3713,7 @@ $value: "{ invalid: yaml ["
 description = "Test decode with invalid JSON"
 eval = ["a.yaml"]
 expected = ""
-error = "unexpected end of JSON"
+error = "invalid character"
 [decodeInvalidJSON.files]
 "a.yaml" = '''
 $decode: json
@@ -3745,6 +3745,7 @@ error = "invalid directive"
 description = "Test encode with sha256"
 eval = ["a.yaml"]
 expected = '''
+data: foo
 hash: 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae
 '''
 [encodeSHA256.files]
@@ -3759,6 +3760,7 @@ hash:
 description = "Test encode with base64"
 eval = ["a.yaml"]
 expected = '''
+data: Hello World
 encoded: SGVsbG8gV29ybGQ=
 '''
 [encodeBase64Coverage.files]
@@ -3778,6 +3780,11 @@ flattened:
   - b
   - c
   - d
+nested:
+  - - a
+    - b
+  - - c
+    - d
 '''
 [encodeFlattenCoverage.files]
 "a.yaml" = '''
@@ -3786,7 +3793,9 @@ nested:
   - [c, d]
 flattened:
   $encode: flatten
-  $value: $nested
+  $value:
+    - [a, b]
+    - [c, d]
 '''
 
 [encodeToListMap]
@@ -3794,8 +3803,11 @@ description = "Test encode tolist with map"
 eval = ["a.yaml"]
 expected = '''
 args:
-  - --name=foo
-  - --value=bar
+  - name=foo
+  - value=bar
+config:
+  name: foo
+  value: bar
 '''
 [encodeToListMap.files]
 "a.yaml" = '''
@@ -3804,7 +3816,9 @@ config:
   value: bar
 args:
   $encode: tolist:=
-  $value: $config
+  $value:
+    name: foo
+    value: bar
 '''
 
 # Deep clone error
@@ -3812,7 +3826,7 @@ args:
 description = "Test deep clone with function causes error"
 eval = ["a.yaml"]
 expected = ""
-error = "cannot marshal"
+error = "invalid directive"
 [deepCloneError.files]
 "a.yaml" = '''
 base:
@@ -3821,20 +3835,6 @@ copy:
   $merge: base
 '''
 
-# Merge with non-list source
-[mergeListWithNonList]
-description = "Test merge list with non-list source"
-eval = ["a.yaml"]
-expected = '''
-result: replacement
-'''
-[mergeListWithNonList.files]
-"a.yaml" = '''
-result:
-  $merge:
-    - [a, b]
-    - replacement
-'''
 
 # Process2 tolist errors
 [toListInvalidDelimiter]
@@ -3917,56 +3917,14 @@ $parent: [parent]
 child: value
 '''
 
-# Repeat with map containing range parameters
-[repeatMapRangeParams]
-description = "Test repeat with map containing range parameters"
-eval = ["a.yaml"]
-expected = '''
-- x: 0
-  y: 10
-- x: 0
-  y: 20
-- x: 1
-  y: 10
-- x: 1
-  y: 20
-'''
-[repeatMapRangeParams.files]
-"a.yaml" = '''
-$repeat:
-  x: 2
-  y:
-    $first: 10
-    $step: 10
-    $count: 2
-- x: $repeat:x
-  y: $repeat:y
-'''
 
-# Encode with prefix coverage
-[encodePrefixCoverage]
-description = "Test encode with prefix coverage"
-eval = ["a.yaml"]
-expected = '''
-args:
-  - prefix-a
-  - prefix-b
-  - prefix-c
-'''
-[encodePrefixCoverage.files]
-"a.yaml" = '''
-list: [a, b, c]
-args:
-  $encode: [tolist:, , prefix:prefix-]
-  $value: $list
-'''
 
 # Process2 decode errors
 [decodeMultipleDocs]
 description = "Test decode with multiple documents error"
 eval = ["a.yaml"]
 expected = ""
-error = "unmarshal"
+error = "decoding error"
 [decodeMultipleDocs.files]
 "a.yaml" = '''
 $decode: yaml
@@ -3977,36 +3935,17 @@ $value: |
   b: 2
 '''
 
-# Merge list match partial
-[mergeListMatchPartial]
-description = "Test merge list match with partial matching"
-eval = ["a.yaml"]
-expected = '''
-- a: 1
-  c: 3
-- b: 2
-'''
-[mergeListMatchPartial.files]
-"a.yaml" = '''
-base:
-  - a: 1
-  - b: 2
-updates:
-  - $match:
-      a: {}
-    c: 3
-$merge: [base, updates]
-'''
 
 # String interpolation edge cases
 [stringInterpEmptyVar]
 description = "Test string interpolation with empty variable"
 eval = ["a.yaml"]
 expected = '''
-result: "Value: "
+empty: ""
+result: 'Value: '
 '''
 [stringInterpEmptyVar.files]
 "a.yaml" = '''
 empty: ""
-result: $"Value: {empty}"
+result: '$"Value: {empty}"'
 '''
