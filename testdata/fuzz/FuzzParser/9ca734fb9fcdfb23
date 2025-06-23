@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.yaml")
-[]byte("---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\n---\nA:")
-string("0.yaml")
-[]byte("$match:\n A:\n---\n$match:\n A:")

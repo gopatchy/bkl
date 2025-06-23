@@ -24,6 +24,7 @@ type TestCase struct {
 	RootPath    string            // Root path for restricting file access
 	Env         map[string]string // Environment variables for the test
 	Diff        bool              // Run diff operation instead of eval
+	Intersect   bool              // Run intersect operation instead of eval
 }
 
 type TestSuite map[string]TestCase
@@ -93,7 +94,41 @@ func TestLanguage(t *testing.T) {
 			}
 
 			var output []byte
-			if testCase.Diff {
+
+			switch {
+			case testCase.Intersect:
+				// For intersect tests, we need at least 2 files
+				if len(testCase.Eval) < 2 {
+					t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
+				}
+
+				// Use the IntersectFiles helper which matches bkli behavior
+				intersectResult, err := p.IntersectFiles(testFS, testCase.Eval)
+				if err != nil {
+					if testCase.Error != "" {
+						if !strings.Contains(err.Error(), testCase.Error) {
+							t.Fatalf("Expected error containing %q, but got: %v", testCase.Error, err)
+						}
+						return
+					}
+					t.Fatalf("Intersect failed: %v", err)
+				}
+
+				// Marshal the intersect result
+				format := testCase.Format
+				if format == "" {
+					format = "yaml"
+				}
+				f, err := p.GetFormat(format)
+				if err != nil {
+					t.Fatalf("Failed to get format: %v", err)
+				}
+				output, err = f.MarshalStream([]any{intersectResult})
+				if err != nil {
+					t.Fatalf("Failed to marshal intersect result: %v", err)
+				}
+
+			case testCase.Diff:
 				// For diff tests, we expect exactly 2 eval files
 				if len(testCase.Eval) != 2 {
 					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
@@ -124,7 +159,8 @@ func TestLanguage(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Failed to marshal diff result: %v", err)
 				}
-			} else {
+
+			default:
 				output, err = p.Evaluate(testFS, testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
 			}
 

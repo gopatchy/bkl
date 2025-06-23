@@ -1,5 +1,0 @@
-go test fuzz v1
-string("Y.yaml")
-[]byte("$o$t0ut: 1")
-string("a.yaml")
-[]byte("\"$envY")

@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.json")
-[]byte("1E-310 1E-310 1E-310 1E-310")
-string("0.json")
-[]byte("1E-310 1E-310 1E-310 1E-310 1e-310 1E-310 1E-310")

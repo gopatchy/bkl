@@ -60,16 +60,23 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
+	// Prepare paths from current working directory
+	paths := []string{string(opts.Positional.BasePath), string(opts.Positional.TargetPath)}
+	preparedPaths, err := p.PreparePathsFromCwd(paths, "/")
+	if err != nil {
+		fatal(err)
+	}
+
 	// Use DiffFiles helper which handles loading and validation
 	fsys := os.DirFS("/")
-	doc, err := p.DiffFiles(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath))
+	doc, err := p.DiffFiles(fsys, preparedPaths[0], preparedPaths[1])
 	if err != nil {
 		fatal(err)
 	}
 
 	// Get format from first file if not specified
 	if format == "" {
-		_, f, err := p.FileMatch(fsys, string(opts.Positional.BasePath))
+		_, f, err := p.FileMatch(fsys, preparedPaths[0])
 		if err != nil {
 			fatal(err)
 		}

@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.yaml")
-[]byte("-\n- A:")
-string("0.yaml")
-[]byte("- A:\n- $patch: delete\n- $patch: delete")

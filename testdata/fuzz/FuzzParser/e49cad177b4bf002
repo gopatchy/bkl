@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.json")
-[]byte(" ")
-string("0.toml")
-[]byte("0=00\n[1. ]")

@@ -1,5 +1,0 @@
-go test fuzz v1
-string("\x01")
-[]byte("\xfb0")
-string("0.json")
-[]byte("\"\xc30000\"")

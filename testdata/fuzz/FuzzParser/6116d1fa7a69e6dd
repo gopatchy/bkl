@@ -1,5 +1,0 @@
-go test fuzz v1
-string("b.yaml")
-[]byte("$XCtch: 1")
-string("a.yaml")
-[]byte("\xf01r.:21")

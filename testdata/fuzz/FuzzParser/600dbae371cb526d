@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.yaml")
-[]byte("A0 0\n---\n- 1")
-string("0.json")
-[]byte("[0]\n---\n\"\"")

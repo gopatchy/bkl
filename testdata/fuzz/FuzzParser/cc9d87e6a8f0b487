@@ -1,5 +1,0 @@
-go test fuzz v1
-string("2.toml")
-[]byte("Za2 ")
-string("a.yaml")
-[]byte("a! --\n!")

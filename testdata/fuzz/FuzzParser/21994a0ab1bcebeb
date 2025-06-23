@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.toml")
-[]byte("\"\\u000X\"")
-string("0.toml")
-[]byte("\"\\u000X\"")

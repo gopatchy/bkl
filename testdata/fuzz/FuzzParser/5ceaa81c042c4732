@@ -1,5 +1,0 @@
-go test fuzz v1
-string("a.json")
-[]byte("{\"z\":1}\n91Zc5")
-string("a.toml")
-[]byte("a = 1\n---\n[.Y]")

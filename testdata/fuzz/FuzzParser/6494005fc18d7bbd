@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.yml/")
-[]byte("0.yml//\r\r\r\r\r\r\r\r\r")
-string("\xa6")
-[]byte("0")

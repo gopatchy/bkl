@@ -1,5 +1,0 @@
-go test fuzz v1
-string("X8.yml")
-[]byte("?\n 119:\r 20:\n 9A:\n 0:\r 2:\r 1:\r 10:\r ?\n 12:")
-string("b*")
-[]byte("Q")

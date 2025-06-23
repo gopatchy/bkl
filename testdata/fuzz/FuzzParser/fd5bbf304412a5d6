@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.yaml")
-[]byte("?\r .1: .1\r .01: .1\r .8:\r .02: .1\r 0: .1")
-string("0")
-[]byte("0")

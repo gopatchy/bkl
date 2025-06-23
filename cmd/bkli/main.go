@@ -54,58 +54,40 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
 
-	// Create parser for use after the loop
-	parser, err := bkl.New()
+	p, err := bkl.New()
 	if err != nil {
 		fatal(err)
 	}
 
-	var doc any
-
-	for p, path := range opts.Positional.InputPaths {
-		b, err := bkl.New()
-		if err != nil {
-			fatal(err)
-		}
-
-		rebasedPaths, err := b.PreparePathsFromCwd([]string{string(path)}, "/")
-		if err != nil {
-			fatal(err)
-		}
-
-		fsys := os.DirFS("/")
-		realPath, f, err := b.FileMatch(fsys, rebasedPaths[0])
-		if err != nil {
-			fatal(err)
-		}
-
-		if format == "" {
-			format = f
-		}
-
-		err = b.MergeFileLayers(fsys, realPath)
-		if err != nil {
-			fatal(err)
-		}
-
-		docs := b.Documents()
-
-		if len(docs) != 1 {
-			fatal(fmt.Errorf("bklr operates on exactly 1 source document"))
-		}
-
-		if p == 0 {
-			doc = docs[0].Data
-			continue
-		}
-
-		doc, err = intersect(docs[0].Data, doc)
-		if err != nil {
-			fatal(err)
-		}
+	// Convert paths to strings
+	paths := make([]string, len(opts.Positional.InputPaths))
+	for i, path := range opts.Positional.InputPaths {
+		paths[i] = string(path)
 	}
 
-	f, err := parser.GetFormat(format)
+	// Prepare paths from current working directory
+	preparedPaths, err := p.PreparePathsFromCwd(paths, "/")
+	if err != nil {
+		fatal(err)
+	}
+
+	// Use IntersectFiles helper which handles loading and validation
+	fsys := os.DirFS("/")
+	doc, err := p.IntersectFiles(fsys, preparedPaths)
+	if err != nil {
+		fatal(err)
+	}
+
+	// Get format from first file if not specified
+	if format == "" {
+		_, f, err := p.FileMatch(fsys, preparedPaths[0])
+		if err != nil {
+			fatal(err)
+		}
+		format = f
+	}
+
+	f, err := p.GetFormat(format)
 	if err != nil {
 		fatal(err)
 	}

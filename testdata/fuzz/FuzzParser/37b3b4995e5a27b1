@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.toml")
-[]byte("a =[0,0]\n---\na \"000\"aa")
-string("0.yaml")
-[]byte("")

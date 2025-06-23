@@ -3224,3 +3224,76 @@ files."b.json" = '''
   "c": 3
 }
 '''
+
+###############################################################################
+# Intersect Operations
+###############################################################################
+
+[intersectList]
+description = "Test intersect of two lists"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+- a: 1
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+- c: 3
+'''
+files."b.yaml" = '''
+- a: 1
+- b: 10
+- d: 4
+'''
+
+[intersectListRequired]
+description = "Test intersect of lists with no common elements"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+- $required
+'''
+files."a.yaml" = '''
+- a: 1
+'''
+files."b.yaml" = '''
+- b: 2
+'''
+
+[intersectMap]
+description = "Test intersect of two maps"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+a: 1
+b: $required
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+c: 3
+'''
+files."b.yaml" = '''
+a: 1
+b: 10
+d: 4
+'''
+
+[intersectMapNull]
+description = "Test intersect of maps with null values"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+a: null
+'''
+files."a.yaml" = '''
+a: null
+'''
+files."b.yaml" = '''
+a: null
+'''

@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.\n\xfdQz\xf9\x1a-toml")
-[]byte("\n-\x8e-\n\n---\n\n---\n\n---\n\n---\n\n---\n\n---\n\n---\n\n---\n\n---\n\n---\n\n---\n\n----\n\n---\n0")
-string("0")
-[]byte("\n-\x8e")

@@ -1,5 +1,0 @@
-go test fuzz v1
-string("1.yml/")
-[]byte("?\n ?\n 1:\r B:\r 0:")
-string("B")
-[]byte("Y")

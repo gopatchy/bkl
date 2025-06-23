@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0")
-[]byte("0")
-string("0.json")
-[]byte("1.0000000000000000 700000.0000000000")

@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.toml")
-[]byte("[[0]\U00039e79\U00039e79\U00039e79\U0001e79e\U000397b9\U00039e79\U0001e79e\U00039e79]")
-string("0")
-[]byte("0")

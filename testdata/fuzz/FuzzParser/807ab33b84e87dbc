@@ -1,5 +1,0 @@
-go test fuzz v1
-string("to0ml")
-[]byte("0=0.0+")
-string("0..om0ttl")
-[]byte("0..om0ttl.0.0+")

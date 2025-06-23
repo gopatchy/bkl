@@ -1,5 +1,0 @@
-go test fuzz v1
-string("0.yml")
-[]byte("0000000000000000\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\n\n0\xff")
-string("0")
-[]byte("0")
