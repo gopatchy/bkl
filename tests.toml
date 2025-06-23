@@ -1319,6 +1319,26 @@ files."a.yaml" = '''
 - $encode: flatten
 '''
 
+[encodeFlagsFlattenLayer]
+description = "Test flags and flatten encoding across file inheritance layers"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+- a
+- --b=2
+- --c=3
+'''
+files."a.yaml" = '''
+- - a
+- b: 2
+  $encode: flags
+- $encode: flatten
+'''
+files."a.b.yaml" = '''
+- $match: {}
+  c: 3
+'''
+
 [encodeFlagsSublist]
 description = "Test flags encoding with list values"
 eval = ["a.yaml"]
