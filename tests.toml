@@ -3580,3 +3580,433 @@ required = true
 expected = ""
 [requiredNonRequiredString.files]
 "a.yaml" = "x: not-required"
+
+###############################################################################
+# Error Handling - Additional Coverage
+###############################################################################
+
+# File loading errors
+[fileLoadInvalidFormat]
+description = "Test loading file with invalid format"
+eval = ["test.invalid"]
+expected = ""
+error = "unknown format"
+[fileLoadInvalidFormat.files]
+"test.invalid" = "x: 1"
+
+
+[unmarshalError]
+description = "Test unmarshal error with invalid YAML"
+eval = ["bad.yaml"]
+expected = ""
+error = "did not find expected node content"
+[unmarshalError.files]
+"bad.yaml" = "{ invalid yaml: ["
+
+# Merge errors
+[mergeListDeleteExtraKeys]
+description = "Test merge list delete with extra keys error"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[mergeListDeleteExtraKeys.files]
+"a.yaml" = '''
+- $delete:
+    x: 1
+  extra: key
+'''
+
+[mergeListReplaceError]
+description = "Test merge list replace with invalid boolean"
+eval = ["a.yaml"]
+expected = ""
+error = "reference not found"
+[mergeListReplaceError.files]
+"a.yaml" = '''
+- $replace: "not a boolean"
+'''
+
+[mergeListMatchNotFound]
+description = "Test merge list match not found"
+eval = ["a.yaml"]
+expected = ""
+error = "not found"
+[mergeListMatchNotFound.files]
+"a.yaml" = '''
+base:
+  - a: 1
+updates:
+  - $match:
+      b: 2
+    c: 3
+result:
+  $merge: [base, updates]
+'''
+
+# Decode errors
+[decodeInvalidType]
+description = "Test decode with invalid type"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[decodeInvalidType.files]
+"a.yaml" = '''
+$decode: 123
+'''
+
+[decodeNotString]
+description = "Test decode on non-map type"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[decodeNotString.files]
+"a.yaml" = '''
+- $decode: base64
+'''
+
+[decodeMissingValue]
+description = "Test decode missing $value"
+eval = ["a.yaml"]
+expected = ""
+error = "missing $value"
+[decodeMissingValue.files]
+"a.yaml" = '''
+$decode: base64
+other: field
+'''
+
+[decodeValueNotString]
+description = "Test decode with non-string $value"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[decodeValueNotString.files]
+"a.yaml" = '''
+$decode: base64
+$value: 123
+'''
+
+[decodeExtraKeys]
+description = "Test decode with extra keys"
+eval = ["a.yaml"]
+expected = ""
+error = "extra keys"
+[decodeExtraKeys.files]
+"a.yaml" = '''
+$decode: base64
+$value: SGVsbG8=
+extra: key
+'''
+
+[decodeInvalidYAML]
+description = "Test decode with invalid YAML"
+eval = ["a.yaml"]
+expected = ""
+error = "yaml:"
+[decodeInvalidYAML.files]
+"a.yaml" = '''
+$decode: yaml
+$value: "{ invalid: yaml ["
+'''
+
+[decodeInvalidJSON]
+description = "Test decode with invalid JSON"
+eval = ["a.yaml"]
+expected = ""
+error = "unexpected end of JSON"
+[decodeInvalidJSON.files]
+"a.yaml" = '''
+$decode: json
+$value: "{ invalid json"
+'''
+
+[decodeUnknownFormat]
+description = "Test decode with unknown format"
+eval = ["a.yaml"]
+expected = ""
+error = "unknown format"
+[decodeUnknownFormat.files]
+"a.yaml" = '''
+$decode: unknownformat
+$value: data
+'''
+
+# Normalize errors
+[normalizeError]
+description = "Test normalize error with function value"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[normalizeError.files]
+"a.yaml" = "func: $env"
+
+# Encode coverage tests
+[encodeSHA256]
+description = "Test encode with sha256"
+eval = ["a.yaml"]
+expected = '''
+hash: 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae
+'''
+[encodeSHA256.files]
+"a.yaml" = '''
+data: foo
+hash:
+  $encode: sha256
+  $value: foo
+'''
+
+[encodeBase64Coverage]
+description = "Test encode with base64"
+eval = ["a.yaml"]
+expected = '''
+encoded: SGVsbG8gV29ybGQ=
+'''
+[encodeBase64Coverage.files]
+"a.yaml" = '''
+data: Hello World
+encoded:
+  $encode: base64
+  $value: Hello World
+'''
+
+[encodeFlattenCoverage]
+description = "Test encode flatten"
+eval = ["a.yaml"]
+expected = '''
+flattened:
+  - a
+  - b
+  - c
+  - d
+'''
+[encodeFlattenCoverage.files]
+"a.yaml" = '''
+nested:
+  - [a, b]
+  - [c, d]
+flattened:
+  $encode: flatten
+  $value: $nested
+'''
+
+[encodeToListMap]
+description = "Test encode tolist with map"
+eval = ["a.yaml"]
+expected = '''
+args:
+  - --name=foo
+  - --value=bar
+'''
+[encodeToListMap.files]
+"a.yaml" = '''
+config:
+  name: foo
+  value: bar
+args:
+  $encode: tolist:=
+  $value: $config
+'''
+
+# Deep clone error
+[deepCloneError]
+description = "Test deep clone with function causes error"
+eval = ["a.yaml"]
+expected = ""
+error = "cannot marshal"
+[deepCloneError.files]
+"a.yaml" = '''
+base:
+  func: $env
+copy:
+  $merge: base
+'''
+
+# Merge with non-list source
+[mergeListWithNonList]
+description = "Test merge list with non-list source"
+eval = ["a.yaml"]
+expected = '''
+result: replacement
+'''
+[mergeListWithNonList.files]
+"a.yaml" = '''
+result:
+  $merge:
+    - [a, b]
+    - replacement
+'''
+
+# Process2 tolist errors
+[toListInvalidDelimiter]
+description = "Test tolist with invalid delimiter argument"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid arguments"
+[toListInvalidDelimiter.files]
+"a.yaml" = '''
+$encode: tolist
+$value:
+  a: 1
+'''
+
+[toListNonMap]
+description = "Test tolist with non-map value"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[toListNonMap.files]
+"a.yaml" = '''
+$encode: tolist:=
+$value: "not a map"
+'''
+
+# Encode errors
+[encodeInvalidArguments]
+description = "Test encode with invalid arguments"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid arguments"
+[encodeInvalidArguments.files]
+"a.yaml" = '''
+$encode: base64:extra
+$value: data
+'''
+
+[encodeFlattenNonList]
+description = "Test encode flatten with non-list"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[encodeFlattenNonList.files]
+"a.yaml" = '''
+$encode: flatten
+$value: "not a list"
+'''
+
+[encodeSHA256InvalidArgs]
+description = "Test encode sha256 with invalid arguments"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid arguments"
+[encodeSHA256InvalidArgs.files]
+"a.yaml" = '''
+$encode: sha256:extra
+$value: data
+'''
+
+# Parser logging coverage
+[parserDebugLog]
+description = "Test parser with debug logging enabled"
+eval = ["a.yaml"]
+expected = "x: 1"
+[parserDebugLog.files]
+"a.yaml" = "x: 1"
+
+# File loading - parent from directive
+[parentFromDirectiveList]
+description = "Test parent from directive as list"
+eval = ["child.yaml"]
+expected = '''
+base: value
+child: value
+'''
+[parentFromDirectiveList.files]
+"parent.yaml" = "base: value"
+"child.yaml" = '''
+$parent: [parent]
+child: value
+'''
+
+# Repeat with map containing range parameters
+[repeatMapRangeParams]
+description = "Test repeat with map containing range parameters"
+eval = ["a.yaml"]
+expected = '''
+- x: 0
+  y: 10
+- x: 0
+  y: 20
+- x: 1
+  y: 10
+- x: 1
+  y: 20
+'''
+[repeatMapRangeParams.files]
+"a.yaml" = '''
+$repeat:
+  x: 2
+  y:
+    $first: 10
+    $step: 10
+    $count: 2
+- x: $repeat:x
+  y: $repeat:y
+'''
+
+# Encode with prefix coverage
+[encodePrefixCoverage]
+description = "Test encode with prefix coverage"
+eval = ["a.yaml"]
+expected = '''
+args:
+  - prefix-a
+  - prefix-b
+  - prefix-c
+'''
+[encodePrefixCoverage.files]
+"a.yaml" = '''
+list: [a, b, c]
+args:
+  $encode: [tolist:, , prefix:prefix-]
+  $value: $list
+'''
+
+# Process2 decode errors
+[decodeMultipleDocs]
+description = "Test decode with multiple documents error"
+eval = ["a.yaml"]
+expected = ""
+error = "unmarshal"
+[decodeMultipleDocs.files]
+"a.yaml" = '''
+$decode: yaml
+$value: |
+  ---
+  a: 1
+  ---
+  b: 2
+'''
+
+# Merge list match partial
+[mergeListMatchPartial]
+description = "Test merge list match with partial matching"
+eval = ["a.yaml"]
+expected = '''
+- a: 1
+  c: 3
+- b: 2
+'''
+[mergeListMatchPartial.files]
+"a.yaml" = '''
+base:
+  - a: 1
+  - b: 2
+updates:
+  - $match:
+      a: {}
+    c: 3
+$merge: [base, updates]
+'''
+
+# String interpolation edge cases
+[stringInterpEmptyVar]
+description = "Test string interpolation with empty variable"
+eval = ["a.yaml"]
+expected = '''
+result: "Value: "
+'''
+[stringInterpEmptyVar.files]
+"a.yaml" = '''
+empty: ""
+result: $"Value: {empty}"
+'''
