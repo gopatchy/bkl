@@ -2939,3 +2939,57 @@ $match:
   a: 1
 d: 4
 '''
+
+[rootPathCur]
+description = "Test root path restriction with current directory"
+eval = ["a.yaml"]
+format = "yaml"
+rootPath = "."
+expected = '''
+a: 1
+b: 1
+'''
+files."a.yaml" = '''
+a: 1
+b: $merge:a
+'''
+
+[rootPathRoot]
+description = "Test root path with root directory (no restriction)"
+eval = ["a.yaml"]
+format = "yaml"
+rootPath = "/"
+expected = '''
+a: 1
+b: 1
+'''
+files."a.yaml" = '''
+a: 1
+b: $merge:a
+'''
+
+
+[rootPathSub]
+description = "Test root path with subdirectory"
+eval = ["sub/a.yaml"]
+format = "yaml"
+rootPath = "sub"
+expected = '''
+a: 1
+b: 1
+'''
+files."sub/a.yaml" = '''
+a: 1
+b: $merge:a
+'''
+
+[rootPathBreak]
+description = "Test root path restriction prevents access outside root"
+eval = ["a.yaml"]
+format = "yaml"
+rootPath = "sub"
+error = "outside root path"
+files."a.yaml" = '''
+a: 1
+b: $merge:a
+'''

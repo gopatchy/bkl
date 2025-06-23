@@ -9,23 +9,12 @@ import (
 
 type FS struct {
 	fsys fs.FS
-	wd   string
 }
 
-func NewFS(fsys fs.FS, wd string) *FS {
-	f := &FS{
+func NewFS(fsys fs.FS) *FS {
+	return &FS{
 		fsys: fsys,
-		wd:   "/",
 	}
-	f.Chdir(wd)
-	return f
-}
-
-func (f *FS) Abs(name string) string {
-	if filepath.IsAbs(name) {
-		return name
-	}
-	return filepath.Clean(filepath.Join(f.wd, name))
 }
 
 func (f *FS) Open(name string) (fs.File, error) {
@@ -38,8 +27,19 @@ func (f *FS) ReadDir(name string) ([]fs.DirEntry, error) {
 }
 
 func (f *FS) Stat(name string) (fs.FileInfo, error) {
-	sf := f.fsys.(fs.StatFS)
-	return sf.Stat(f.convertToFS(name))
+	sf, ok := f.fsys.(fs.StatFS)
+	if ok {
+		return sf.Stat(f.convertToFS(name))
+	}
+
+	// Fallback: use Open and get FileInfo from the file
+	file, err := f.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	return file.Stat()
 }
 
 func (f *FS) Glob(pattern string) ([]string, error) {
@@ -66,20 +66,8 @@ func (f *FS) Glob(pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func (f *FS) Chdir(dir string) {
-	f.wd = f.Abs(dir)
-}
-
-func (f *FS) Getwd() string {
-	return f.wd
-}
-
-func (f *FS) Rel(target string) (string, error) {
-	return filepath.Rel(f.wd, target)
-}
-
 func (f *FS) convertToFS(path string) string {
-	result := strings.TrimPrefix(f.Abs(path), "/")
+	result := strings.TrimPrefix(path, "/")
 	if result == "" {
 		return "."
 	}

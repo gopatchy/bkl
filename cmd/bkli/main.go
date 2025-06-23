@@ -62,7 +62,12 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 			fatal(err)
 		}
 
-		realPath, f, err := b.FileMatch(string(path))
+		rebasedPaths, err := bkl.PreparePathsForParserFromCwd([]string{string(path)}, "/")
+		if err != nil {
+			fatal(err)
+		}
+
+		realPath, f, err := b.FileMatch(rebasedPaths[0])
 		if err != nil {
 			fatal(err)
 		}

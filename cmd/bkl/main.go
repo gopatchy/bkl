@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"runtime/debug"
 	"runtime/pprof"
 	"strings"
@@ -72,17 +71,7 @@ Related tools:
 		fatal(err)
 	}
 
-	absRootPath, err := filepath.Abs(opts.RootPath)
-	if err != nil {
-		fatal(err)
-	}
-
-	relWd, err := filepath.Rel(absRootPath, wd)
-	if err != nil {
-		fatal(err)
-	}
-
-	p, err := bkl.NewWithPath(absRootPath, relWd)
+	p, err := bkl.NewWithPath(opts.RootPath)
 	if err != nil {
 		fatal(err)
 	}
@@ -100,22 +89,10 @@ Related tools:
 
 	files := make([]string, len(opts.Positional.InputPaths))
 	for i, path := range opts.Positional.InputPaths {
-		// Convert user-provided path to be relative to root path
-		absPath, err := filepath.Abs(string(path))
-		if err != nil {
-			fatal(err)
-		}
-
-		relPath, err := filepath.Rel(absRootPath, absPath)
-		if err != nil {
-			fatal(err)
-		}
-
-		// Add leading "/" to make it absolute within the FS
-		files[i] = "/" + relPath
+		files[i] = string(path)
 	}
 
-	output, err := p.Evaluate(files, opts.SkipParent, format)
+	output, err := p.Evaluate(files, opts.SkipParent, format, opts.RootPath, wd)
 	if err != nil {
 		fatal(err)
 	}

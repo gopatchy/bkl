@@ -3,6 +3,7 @@ package bkl_test
 import (
 	"bytes"
 	"flag"
+	"io/fs"
 	"os"
 	"strings"
 	"testing"
@@ -20,6 +21,7 @@ type TestCase struct {
 	Files       map[string]string
 	Error       string // Expected error from evaluation
 	SkipParent  bool   // Skip loading parent templates
+	RootPath    string // Root path for restricting file access
 }
 
 type TestSuite map[string]TestCase
@@ -68,12 +70,26 @@ func TestLanguage(t *testing.T) {
 				}
 			}
 
-			p, err := bkl.NewWithFS(fsys, "/")
+			rootPath := testCase.RootPath
+			if rootPath == "" {
+				rootPath = "/"
+			}
+
+			// Create a filesystem view rooted at the rootPath
+			var testFS fs.FS = fsys
+			if rootPath != "/" {
+				testFS, err = fs.Sub(fsys, rootPath)
+				if err != nil {
+					t.Fatalf("Failed to create sub filesystem at %s: %v", rootPath, err)
+				}
+			}
+
+			p, err := bkl.NewWithFS(testFS)
 			if err != nil {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
-			output, err := p.Evaluate(testCase.Eval, testCase.SkipParent, testCase.Format)
+			output, err := p.Evaluate(testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/")
 
 			if testCase.Error != "" {
 				if err == nil {

@@ -132,7 +132,12 @@ func getOnlyDocument(path string) (*bkl.Document, string, error) {
 		return nil, "", err
 	}
 
-	realPath, f, err := b.FileMatch(path)
+	rebasedPaths, err := bkl.PreparePathsForParserFromCwd([]string{path}, "/")
+	if err != nil {
+		return nil, "", err
+	}
+
+	realPath, f, err := b.FileMatch(rebasedPaths[0])
 	if err != nil {
 		return nil, "", err
 	}

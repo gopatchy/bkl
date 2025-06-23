@@ -49,7 +49,12 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	realPath, format, err := b.FileMatch(string(opts.Positional.InputPath))
+	rebasedPaths, err := bkl.PreparePathsForParserFromCwd([]string{string(opts.Positional.InputPath)}, "/")
+	if err != nil {
+		fatal(err)
+	}
+
+	realPath, format, err := b.FileMatch(rebasedPaths[0])
 	if err != nil {
 		fatal(err)
 	}

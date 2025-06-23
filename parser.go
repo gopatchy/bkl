@@ -74,20 +74,16 @@ type Parser struct {
 }
 
 func New() (*Parser, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	return NewWithPath("/", wd)
+	return NewWithPath("/")
 }
 
-func NewWithPath(path string, wd string) (*Parser, error) {
-	return NewWithFS(os.DirFS(path), wd)
+func NewWithPath(path string) (*Parser, error) {
+	return NewWithFS(os.DirFS(path))
 }
 
-func NewWithFS(fsys fs.FS, wd string) (*Parser, error) {
+func NewWithFS(fsys fs.FS) (*Parser, error) {
 	return &Parser{
-		fsys:  NewFS(fsys, wd),
+		fsys:  NewFS(fsys),
 		debug: os.Getenv("BKL_DEBUG") != "",
 	}, nil
 }
@@ -362,8 +358,66 @@ func (p *Parser) OutputToWriter(fh io.Writer, format string) error {
 	return nil
 }
 
-func (p *Parser) Evaluate(files []string, skipParent bool, format string) ([]byte, error) {
-	for _, path := range files {
+func MakePathsAbsolute(paths []string, workingDir string) ([]string, error) {
+	result := make([]string, len(paths))
+	for i, path := range paths {
+		if filepath.IsAbs(path) {
+			result[i] = path
+		} else {
+			result[i] = filepath.Join(workingDir, path)
+		}
+	}
+	return result, nil
+}
+
+func RebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
+	absRootPath := rootPath
+	if !filepath.IsAbs(rootPath) {
+		absRootPath = filepath.Join(workingDir, rootPath)
+	}
+
+	result := make([]string, len(absPaths))
+	for i, path := range absPaths {
+		relPath, err := filepath.Rel(absRootPath, path)
+		if err != nil {
+			return nil, fmt.Errorf("file %s outside root path: %w", path, err)
+		}
+
+		if strings.HasPrefix(relPath, "..") {
+			return nil, fmt.Errorf("file %s outside root path", path)
+		}
+
+		result[i] = "/" + relPath
+	}
+
+	return result, nil
+}
+
+func PreparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
+	absPaths, err := MakePathsAbsolute(paths, workingDir)
+	if err != nil {
+		return nil, err
+	}
+
+	return RebasePathsToRoot(absPaths, rootPath, workingDir)
+}
+
+func PreparePathsForParserFromCwd(paths []string, rootPath string) ([]string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	return PreparePathsForParser(paths, rootPath, wd)
+}
+
+func (p *Parser) Evaluate(files []string, skipParent bool, format string, rootPath string, workingDir string) ([]byte, error) {
+	evalFiles, err := PreparePathsForParser(files, rootPath, workingDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, path := range evalFiles {
 		realPath, fileFormat, err := p.FileMatch(path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
