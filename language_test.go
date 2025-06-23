@@ -30,7 +30,10 @@ type TestCase struct {
 
 type TestSuite map[string]TestCase
 
-var testFilter = flag.String("test.filter", "", "Run only specified tests from tests.toml (comma-separated list)")
+var (
+	testFilter  = flag.String("test.filter", "", "Run only specified tests from tests.toml (comma-separated list)")
+	testExclude = flag.String("test.exclude", "", "Exclude specified tests from tests.toml (comma-separated list)")
+)
 
 func TestLanguage(t *testing.T) {
 	data, err := os.ReadFile("tests.toml")
@@ -58,8 +61,26 @@ func TestLanguage(t *testing.T) {
 		}
 	}
 
+	// Parse exclude list
+	excludeTests := map[string]bool{}
+	if *testExclude != "" {
+		for _, name := range strings.Split(*testExclude, ",") {
+			name = strings.TrimSpace(name)
+			if name != "" {
+				if _, ok := suite[name]; !ok {
+					t.Fatalf("Test %q not found in tests.toml", name)
+				}
+				excludeTests[name] = true
+			}
+		}
+	}
+
 	for testName, testCase := range suite {
 		if len(filterTests) > 0 && !filterTests[testName] {
+			continue
+		}
+
+		if excludeTests[testName] {
 			continue
 		}
 
