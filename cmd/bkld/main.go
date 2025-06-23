@@ -60,7 +60,9 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	baseDocs, err := baseDoc.Process([]*bkl.Document{baseDoc})
+	env := bkl.GetOSEnv()
+
+	baseDocs, err := baseDoc.Process([]*bkl.Document{baseDoc}, env)
 	if err != nil {
 		fatal(err)
 	}
@@ -80,7 +82,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	targetDocs, err := targetDoc.Process([]*bkl.Document{targetDoc})
+	targetDocs, err := targetDoc.Process([]*bkl.Document{targetDoc}, env)
 	if err != nil {
 		fatal(err)
 	}

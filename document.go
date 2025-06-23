@@ -81,10 +81,10 @@ func (d *Document) PopMapValue(key string) (bool, any) {
 	return found, val
 }
 
-func (d *Document) Process(mergeFromDocs []*Document) ([]*Document, error) {
+func (d *Document) Process(mergeFromDocs []*Document, env map[string]string) ([]*Document, error) {
 	var err error
 
-	ec := NewEvalContext()
+	ec := NewEvalContext(env)
 
 	d.Data, err = process1(d.Data, d, mergeFromDocs, 0)
 	if err != nil {

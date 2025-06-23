@@ -19,9 +19,10 @@ type TestCase struct {
 	Format      string
 	Expected    string
 	Files       map[string]string
-	Error       string // Expected error from evaluation
-	SkipParent  bool   // Skip loading parent templates
-	RootPath    string // Root path for restricting file access
+	Error       string            // Expected error from evaluation
+	SkipParent  bool              // Skip loading parent templates
+	RootPath    string            // Root path for restricting file access
+	Env         map[string]string // Environment variables for the test
 }
 
 type TestSuite map[string]TestCase
@@ -89,7 +90,7 @@ func TestLanguage(t *testing.T) {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
-			output, err := p.Evaluate(testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/")
+			output, err := p.Evaluate(testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
 
 			if testCase.Error != "" {
 				if err == nil {

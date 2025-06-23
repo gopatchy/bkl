@@ -92,7 +92,7 @@ Related tools:
 		files[i] = string(path)
 	}
 
-	output, err := p.Evaluate(files, opts.SkipParent, format, opts.RootPath, wd)
+	output, err := p.Evaluate(files, opts.SkipParent, format, opts.RootPath, wd, bkl.GetOSEnv())
 	if err != nil {
 		fatal(err)
 	}

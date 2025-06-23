@@ -3013,3 +3013,15 @@ files."a.yaml" = '''
 a: 1
 b: $merge:a
 '''
+
+[envMapValue]
+description = "Test environment variable in map value"
+eval = ["a.yaml"]
+format = "yaml"
+env = { FOO = "test" }
+expected = '''
+a: test
+'''
+files."a.yaml" = '''
+a: $env:FOO
+'''
