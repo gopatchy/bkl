@@ -365,7 +365,7 @@ func (p *Parser) outputToWriter(fh io.Writer, format string) error {
 	return nil
 }
 
-func makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
+func (p *Parser) makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
 	result := make([]string, len(paths))
 	for i, path := range paths {
 		if filepath.IsAbs(path) {
@@ -377,7 +377,7 @@ func makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
 	return result, nil
 }
 
-func rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
+func (p *Parser) rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
 	absRootPath := rootPath
 	if !filepath.IsAbs(rootPath) {
 		absRootPath = filepath.Join(workingDir, rootPath)
@@ -400,13 +400,13 @@ func rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([
 	return result, nil
 }
 
-func preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
-	absPaths, err := makePathsAbsolute(paths, workingDir)
+func (p *Parser) preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
+	absPaths, err := p.makePathsAbsolute(paths, workingDir)
 	if err != nil {
 		return nil, err
 	}
 
-	return rebasePathsToRoot(absPaths, rootPath, workingDir)
+	return p.rebasePathsToRoot(absPaths, rootPath, workingDir)
 }
 
 // PreparePathsFromCwd prepares file paths relative to the current working directory
@@ -417,7 +417,7 @@ func (p *Parser) PreparePathsFromCwd(paths []string, rootPath string) ([]string,
 		return nil, err
 	}
 
-	return preparePathsForParser(paths, rootPath, wd)
+	return p.preparePathsForParser(paths, rootPath, wd)
 }
 
 // GetOSEnv returns the current OS environment as a map.
@@ -448,7 +448,7 @@ func (p *Parser) GetFormat(name string) (*Format, error) {
 }
 
 func (p *Parser) Evaluate(files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
-	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
+	evalFiles, err := p.preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
