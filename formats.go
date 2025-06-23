@@ -36,7 +36,7 @@ var formatByExtension = map[string]Format{
 	},
 }
 
-func GetFormat(name string) (*Format, error) {
+func getFormat(name string) (*Format, error) {
 	f, found := formatByExtension[name]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)

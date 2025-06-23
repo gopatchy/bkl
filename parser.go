@@ -311,7 +311,7 @@ func (p *Parser) output(format string) ([]byte, error) {
 		return nil, err
 	}
 
-	f, err := GetFormat(format)
+	f, err := getFormat(format)
 	if err != nil {
 		return nil, err
 	}
@@ -325,7 +325,7 @@ func (p *Parser) output(format string) ([]byte, error) {
 // If format is "", it is inferred from path's file extension.
 func (p *Parser) OutputToFile(path, format string) error {
 	if format == "" {
-		format = Ext(path)
+		format = p.Ext(path)
 	}
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -409,7 +409,9 @@ func preparePathsForParser(paths []string, rootPath string, workingDir string) (
 	return rebasePathsToRoot(absPaths, rootPath, workingDir)
 }
 
-func PreparePathsForParserFromCwd(paths []string, rootPath string) ([]string, error) {
+// PreparePathsFromCwd prepares file paths relative to the current working directory
+// and rebases them to the given root path.
+func (p *Parser) PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err
@@ -418,7 +420,8 @@ func PreparePathsForParserFromCwd(paths []string, rootPath string) ([]string, er
 	return preparePathsForParser(paths, rootPath, wd)
 }
 
-func GetOSEnv() map[string]string {
+// GetOSEnv returns the current OS environment as a map.
+func (p *Parser) GetOSEnv() map[string]string {
 	env := make(map[string]string)
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
@@ -427,6 +430,21 @@ func GetOSEnv() map[string]string {
 		}
 	}
 	return env
+}
+
+// Ext returns the file extension without the leading dot.
+func (p *Parser) Ext(path string) string {
+	return strings.TrimPrefix(filepath.Ext(path), ".")
+}
+
+// GetFormat returns the Format for the given format name.
+func (p *Parser) GetFormat(name string) (*Format, error) {
+	f, found := formatByExtension[name]
+	if !found {
+		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)
+	}
+
+	return &f, nil
 }
 
 func (p *Parser) Evaluate(files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
@@ -480,7 +498,7 @@ func (p *Parser) log(format string, v ...any) {
 // Returns the real filename and the requested output format, or
 // ("", "", error).
 func (p *Parser) FileMatch(path string) (string, string, error) {
-	format := Ext(path)
+	format := p.Ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}

@@ -233,7 +233,7 @@ func process2EncodeString(obj any, mergeFrom *Document, mergeFromDocs []*Documen
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
 
-		f, err := GetFormat(cmd)
+		f, err := getFormat(cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -282,7 +282,7 @@ func process2DecodeStringMap(obj map[string]any, mergeFrom *Document, mergeFromD
 		return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
 	}
 
-	f, err := GetFormat(v)
+	f, err := getFormat(v)
 	if err != nil {
 		return nil, err
 	}

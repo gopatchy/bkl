@@ -60,7 +60,11 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	env := bkl.GetOSEnv()
+	p, err := bkl.New()
+	if err != nil {
+		fatal(err)
+	}
+	env := p.GetOSEnv()
 
 	baseDocs, err := baseDoc.Process([]*bkl.Document{baseDoc}, env)
 	if err != nil {
@@ -98,7 +102,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	outF, err := bkl.GetFormat(format)
+	outF, err := p.GetFormat(format)
 	if err != nil {
 		fatal(err)
 	}
@@ -134,7 +138,7 @@ func getOnlyDocument(path string) (*bkl.Document, string, error) {
 		return nil, "", err
 	}
 
-	rebasedPaths, err := bkl.PreparePathsForParserFromCwd([]string{path}, "/")
+	rebasedPaths, err := b.PreparePathsFromCwd([]string{path}, "/")
 	if err != nil {
 		return nil, "", err
 	}

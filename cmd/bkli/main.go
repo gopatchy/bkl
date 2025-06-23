@@ -54,6 +54,12 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
 
+	// Create parser for use after the loop
+	parser, err := bkl.New()
+	if err != nil {
+		fatal(err)
+	}
+
 	var doc any
 
 	for p, path := range opts.Positional.InputPaths {
@@ -62,7 +68,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 			fatal(err)
 		}
 
-		rebasedPaths, err := bkl.PreparePathsForParserFromCwd([]string{string(path)}, "/")
+		rebasedPaths, err := b.PreparePathsFromCwd([]string{string(path)}, "/")
 		if err != nil {
 			fatal(err)
 		}
@@ -98,7 +104,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		}
 	}
 
-	f, err := bkl.GetFormat(format)
+	f, err := parser.GetFormat(format)
 	if err != nil {
 		fatal(err)
 	}

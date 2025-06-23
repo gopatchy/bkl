@@ -49,7 +49,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	rebasedPaths, err := bkl.PreparePathsForParserFromCwd([]string{string(opts.Positional.InputPath)}, "/")
+	rebasedPaths, err := b.PreparePathsFromCwd([]string{string(opts.Positional.InputPath)}, "/")
 	if err != nil {
 		fatal(err)
 	}
@@ -83,7 +83,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	f, err := bkl.GetFormat(format)
+	f, err := b.GetFormat(format)
 	if err != nil {
 		fatal(err)
 	}

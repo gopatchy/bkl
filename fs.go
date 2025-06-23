@@ -94,7 +94,7 @@ func (f *fileSystem) globFiles(path string) ([]string, error) {
 	ret := []string{}
 
 	for _, match := range matches {
-		if _, found := formatByExtension[Ext(match)]; !found {
+		if _, found := formatByExtension[ext(match)]; !found {
 			continue
 		}
 
@@ -104,6 +104,6 @@ func (f *fileSystem) globFiles(path string) ([]string, error) {
 	return ret, nil
 }
 
-func Ext(path string) string {
+func ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }

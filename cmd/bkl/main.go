@@ -84,7 +84,7 @@ Related tools:
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
 	} else if opts.OutputPath != nil {
-		format = bkl.Ext(string(*opts.OutputPath))
+		format = p.Ext(string(*opts.OutputPath))
 	}
 
 	files := make([]string, len(opts.Positional.InputPaths))
@@ -92,7 +92,7 @@ Related tools:
 		files[i] = string(path)
 	}
 
-	output, err := p.Evaluate(files, opts.SkipParent, format, opts.RootPath, wd, bkl.GetOSEnv())
+	output, err := p.Evaluate(files, opts.SkipParent, format, opts.RootPath, wd, p.GetOSEnv())
 	if err != nil {
 		fatal(err)
 	}
