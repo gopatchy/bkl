@@ -36,20 +36,16 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Utility features**: `$repeat`, `$delete`, `$replace`, required field validation
 
 ## Testing Framework
-- **Dual test systems**: 
-  - Integration tests in `tests/` directory (each test has its own subdirectory)
-  - Language tests in `tests.toml` (centralized TOML file with all test cases)
-- **Integration tests** (`tests/` directory):
-  - Test structure: `a.yaml` (input), `cmd` (command to run), `expected` (expected output)
-  - Use `./test` to run all tests or `./test <test-name>` for specific test
-  - For expected failures: use `! bkl` in cmd file and empty expected output
 - **Language tests** (`tests.toml` file):
-  - Centralized test definitions in TOML format (119 tests)
+  - All tests now use the centralized language test framework
+  - Test definitions in TOML format (130+ tests)
   - Each test specifies: `description`, `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
+  - Special test modes: `diff = true` (bkld), `intersect = true` (bkli), `required = true` (bklr)
   - Run with `go test -run TestLanguage`
   - Run specific tests with `go test -run TestLanguage -test.filter=test1,test2,test3`
   - Tests run in parallel with in-memory filesystem (fstest.MapFS)
   - Test names use camelCase convention
+  - Test execution uses switch statement for different modes (evaluate, diff, intersect, required)
   - Organized into well-defined sections:
     - Delete Operations ($delete)
     - Replace Operations ($replace) 
@@ -64,7 +60,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
     - Parent and Inheritance ($parent)
     - Format Support and Type Handling
     - Special Characters and Escaping
-    - Miscellaneous Tests
+    - Diff Operations (bkld)
+    - Intersect Operations (bkli)
+    - Required Field Extraction (bklr)
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
@@ -75,6 +73,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `parser.go`: Main parser logic and document merging (uses fs.FS with working directory support)
 - `process1.go`/`process2.go`: Document processing phases
 - `merge.go`: Merge logic for combining documents and handling type conflicts
+- `diff.go`: Diff functionality for bkld (comparing two documents)
+- `intersect.go`: Intersect functionality for bkli (finding common elements)
+- `required.go`: Required field extraction for bklr (filtering to $required markers)
 - `yaml.go`: YAML parsing using standard library decoder
 - `error.go`: Centralized error definitions with base `Err`
 - `fs.go`: Filesystem abstraction with working directory support and glob fixes
@@ -109,16 +110,12 @@ bkl is a flexible configuration templating language that simplifies configuratio
 ## Commands for Development
 - `just` - Run complete build and test pipeline (preferred)
   - Includes Go unit tests with race detection and coverage reporting
-  - Runs integration tests via `./test`
   - Performs linting with `go vet` and formatting with `gofumpt`
   - Generates coverage report at `cover.html`
-- `./test` - Run integration tests only
-- `./test <test-name>` - Run specific integration test
-- `COVERAGE=1 ./test` - Run integration tests with coverage profiling
-  - Generates `integration-coverage.html` and `integration-coverage.out`
-- `just test-coverage` - Run all integration tests with coverage
+- `go test -run TestLanguage` - Run all language tests
+- `go test -run TestLanguage -test.filter=test1,test2,test3` - Run specific language tests
 - `go build ./cmd/bkl` - Build main binary
-- Tests are comprehensive with many integration tests plus Go unit tests
+- All tests now use the centralized language test framework in `tests.toml`
 
 ## Merge Behavior
 - Maps merge recursively by default, with special `$replace` directive to override

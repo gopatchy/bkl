@@ -3297,3 +3297,40 @@ a: null
 files."b.yaml" = '''
 a: null
 '''
+
+[requiredToolList]
+description = "Required tool filters list to show only $required items"
+eval = ["a.yaml"]
+format = "yaml"
+expected = """
+a:
+  - $required
+"""
+required = true
+
+[requiredToolList.files]
+"a.yaml" = """
+a:
+  - $required
+b:
+  - 2
+"""
+
+[requiredToolMap]
+description = "Required tool filters map to show only $required items"
+eval = ["a.yaml"]
+format = "yaml"
+expected = """
+a:
+  b: $required
+"""
+required = true
+
+[requiredToolMap.files]
+"a.yaml" = """
+a:
+  b: $required
+  c: 3
+  d:
+    e: 5
+"""

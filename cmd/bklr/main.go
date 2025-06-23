@@ -44,27 +44,26 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	b, err := bkl.New()
+	p, err := bkl.New()
 	if err != nil {
 		fatal(err)
 	}
 
-	rebasedPaths, err := b.PreparePathsFromCwd([]string{string(opts.Positional.InputPath)}, "/")
+	// Prepare path from current working directory
+	preparedPaths, err := p.PreparePathsFromCwd([]string{string(opts.Positional.InputPath)}, "/")
 	if err != nil {
 		fatal(err)
 	}
 
+	// Use RequiredFile helper which handles loading and validation
 	fsys := os.DirFS("/")
-	realPath, format, err := b.FileMatch(fsys, rebasedPaths[0])
+	out, err := p.RequiredFile(fsys, preparedPaths[0])
 	if err != nil {
 		fatal(err)
 	}
 
-	err = b.MergeFileLayers(fsys, realPath)
-	if err != nil {
-		fatal(err)
-	}
-
+	// Get format from file if not specified
+	format := ""
 	if opts.OutputPath != nil {
 		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
@@ -73,18 +72,15 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		format = *opts.OutputFormat
 	}
 
-	docs := b.Documents()
-
-	if len(docs) != 1 {
-		fatal(fmt.Errorf("bklr operates on exactly 1 source document"))
+	if format == "" {
+		_, f, err := p.FileMatch(fsys, preparedPaths[0])
+		if err != nil {
+			fatal(err)
+		}
+		format = f
 	}
 
-	out, err := required(docs[0].Data)
-	if err != nil {
-		fatal(err)
-	}
-
-	f, err := b.GetFormat(format)
+	f, err := p.GetFormat(format)
 	if err != nil {
 		fatal(err)
 	}

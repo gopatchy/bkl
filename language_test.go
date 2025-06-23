@@ -25,6 +25,7 @@ type TestCase struct {
 	Env         map[string]string // Environment variables for the test
 	Diff        bool              // Run diff operation instead of eval
 	Intersect   bool              // Run intersect operation instead of eval
+	Required    bool              // Run required operation instead of eval
 }
 
 type TestSuite map[string]TestCase
@@ -96,6 +97,38 @@ func TestLanguage(t *testing.T) {
 			var output []byte
 
 			switch {
+			case testCase.Required:
+				// For required tests, we expect exactly 1 eval file
+				if len(testCase.Eval) != 1 {
+					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
+				}
+
+				// Use the RequiredFile helper which matches bklr behavior
+				requiredResult, err := p.RequiredFile(testFS, testCase.Eval[0])
+				if err != nil {
+					if testCase.Error != "" {
+						if !strings.Contains(err.Error(), testCase.Error) {
+							t.Fatalf("Expected error containing %q, but got: %v", testCase.Error, err)
+						}
+						return
+					}
+					t.Fatalf("Required failed: %v", err)
+				}
+
+				// Marshal the required result
+				format := testCase.Format
+				if format == "" {
+					format = "yaml"
+				}
+				f, err := p.GetFormat(format)
+				if err != nil {
+					t.Fatalf("Failed to get format: %v", err)
+				}
+				output, err = f.MarshalStream([]any{requiredResult})
+				if err != nil {
+					t.Fatalf("Failed to marshal required result: %v", err)
+				}
+
 			case testCase.Intersect:
 				// For intersect tests, we need at least 2 files
 				if len(testCase.Eval) < 2 {
