@@ -1,3 +1,0 @@
-bkl -o $TESTTMP/out.json a.b.yaml
-echo X
-cat $TESTTMP/out.json

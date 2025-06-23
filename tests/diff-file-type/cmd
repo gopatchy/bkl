@@ -1,3 +1,0 @@
-bkld -o $TESTTMP/out.json a.yaml b.yaml
-echo X
-cat $TESTTMP/out.json

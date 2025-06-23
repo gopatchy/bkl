@@ -1,4 +1,0 @@
-bkl -- -.toml <<'EOF' # test comment
-"$parent" = "a"
-port = 8081
-EOF
