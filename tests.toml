@@ -3025,3 +3025,43 @@ a: test
 files."a.yaml" = '''
 a: $env:FOO
 '''
+
+[envMapKey]
+description = "Test environment variable in map key"
+eval = ["a.yaml"]
+format = "yaml"
+env = { FOO = "test" }
+expected = '''
+test: 1
+'''
+files."a.yaml" = '''
+$env:FOO: 1
+'''
+
+[encodeBase64Env]
+description = "Test base64 encoding with environment variable"
+eval = ["a.yaml"]
+format = "yaml"
+env = { FOO = "test" }
+expected = '''
+a: dGVzdA==
+'''
+files."a.yaml" = '''
+a:
+  $value: $env:FOO
+  $encode: base64
+'''
+
+[encodeJoinEnv]
+description = "Test join encoding with environment variable in array"
+eval = ["a.yaml"]
+format = "yaml"
+env = { FOO = "test" }
+expected = '''
+a: a-test-b
+'''
+files."a.yaml" = '''
+a:
+  $value: [a-, $env:FOO, -b]
+  $encode: join
+'''
