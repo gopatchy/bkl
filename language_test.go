@@ -86,12 +86,12 @@ func TestLanguage(t *testing.T) {
 				}
 			}
 
-			p, err := bkl.NewWithFS(testFS)
+			p, err := bkl.New()
 			if err != nil {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
-			output, err := p.Evaluate(testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
+			output, err := p.Evaluate(testFS, testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
 
 			if testCase.Error != "" {
 				if err == nil {

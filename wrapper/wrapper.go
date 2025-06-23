@@ -36,12 +36,13 @@ func WrapOrDie(cmd string) {
 			fatal(err)
 		}
 
-		realPath, f, err := b.FileMatch(arg)
+		fsys := os.DirFS("/")
+		realPath, f, err := b.FileMatch(fsys, arg)
 		if err != nil {
 			continue
 		}
 
-		err = b.MergeFileLayers(realPath)
+		err = b.MergeFileLayers(fsys, realPath)
 		if err != nil {
 			fatal(err)
 		}
@@ -57,7 +58,7 @@ func WrapOrDie(cmd string) {
 			fatal(err)
 		}
 
-		err = b.OutputToFile(tmp.Name(), f)
+		err = b.OutputToFile(tmp.Name(), f, b.GetOSEnv())
 		if err != nil {
 			fatal(err)
 		}

@@ -71,7 +71,7 @@ Related tools:
 		fatal(err)
 	}
 
-	p, err := bkl.NewWithPath(opts.RootPath)
+	p, err := bkl.New()
 	if err != nil {
 		fatal(err)
 	}
@@ -92,7 +92,8 @@ Related tools:
 		files[i] = string(path)
 	}
 
-	output, err := p.Evaluate(files, opts.SkipParent, format, opts.RootPath, wd, p.GetOSEnv())
+	fsys := os.DirFS(opts.RootPath)
+	output, err := p.Evaluate(fsys, files, opts.SkipParent, format, opts.RootPath, wd, p.GetOSEnv())
 	if err != nil {
 		fatal(err)
 	}

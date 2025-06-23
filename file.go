@@ -16,7 +16,7 @@ type file struct {
 	docs  []*Document
 }
 
-func (p *Parser) loadFile(path string, child *file) (*file, error) {
+func (p *Parser) loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 	f := &file{
 		id:    path,
 		child: child,
@@ -41,7 +41,7 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	}
 
 	if fh == nil {
-		fh, err = p.fsys.Open(path)
+		fh, err = fsys.Open(path)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}
@@ -76,23 +76,23 @@ func (p *Parser) loadFile(path string, child *file) (*file, error) {
 	return f, nil
 }
 
-func (p *Parser) loadFileAndParents(path string, child *file) ([]*file, error) {
-	return p.loadFileAndParentsInt(path, child, []string{})
+func (p *Parser) loadFileAndParents(fsys *fileSystem, path string, child *file) ([]*file, error) {
+	return p.loadFileAndParentsInt(fsys, path, child, []string{})
 }
 
-func (p *Parser) loadFileAndParentsInt(path string, child *file, stack []string) ([]*file, error) {
+func (p *Parser) loadFileAndParentsInt(fsys *fileSystem, path string, child *file, stack []string) ([]*file, error) {
 	if slices.Contains(stack, path) {
 		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), ErrCircularRef)
 	}
 
-	f, err := p.loadFile(path, child)
+	f, err := p.loadFile(fsys, path, child)
 	if err != nil {
 		return nil, err
 	}
 
 	stack = append(stack, path)
 
-	parents, err := f.parents(p.fsys)
+	parents, err := f.parents(fsys)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (p *Parser) loadFileAndParentsInt(path string, child *file, stack []string)
 	files := []*file{}
 
 	for _, parent := range parents {
-		parentFiles, err := p.loadFileAndParentsInt(parent, f, stack)
+		parentFiles, err := p.loadFileAndParentsInt(fsys, parent, f, stack)
 		if err != nil {
 			return nil, err
 		}

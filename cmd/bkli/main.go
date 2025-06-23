@@ -73,7 +73,8 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 			fatal(err)
 		}
 
-		realPath, f, err := b.FileMatch(rebasedPaths[0])
+		fsys := os.DirFS("/")
+		realPath, f, err := b.FileMatch(fsys, rebasedPaths[0])
 		if err != nil {
 			fatal(err)
 		}
@@ -82,7 +83,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 			format = f
 		}
 
-		err = b.MergeFileLayers(realPath)
+		err = b.MergeFileLayers(fsys, realPath)
 		if err != nil {
 			fatal(err)
 		}

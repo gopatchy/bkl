@@ -54,12 +54,13 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		fatal(err)
 	}
 
-	realPath, format, err := b.FileMatch(rebasedPaths[0])
+	fsys := os.DirFS("/")
+	realPath, format, err := b.FileMatch(fsys, rebasedPaths[0])
 	if err != nil {
 		fatal(err)
 	}
 
-	err = b.MergeFileLayers(realPath)
+	err = b.MergeFileLayers(fsys, realPath)
 	if err != nil {
 		fatal(err)
 	}
