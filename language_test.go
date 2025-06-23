@@ -23,6 +23,7 @@ type TestCase struct {
 	SkipParent  bool              // Skip loading parent templates
 	RootPath    string            // Root path for restricting file access
 	Env         map[string]string // Environment variables for the test
+	Diff        bool              // Run diff operation instead of eval
 }
 
 type TestSuite map[string]TestCase
@@ -91,7 +92,41 @@ func TestLanguage(t *testing.T) {
 				t.Fatalf("Failed to create parser: %v", err)
 			}
 
-			output, err := p.Evaluate(testFS, testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
+			var output []byte
+			if testCase.Diff {
+				// For diff tests, we expect exactly 2 eval files
+				if len(testCase.Eval) != 2 {
+					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
+				}
+
+				// Use the DiffFiles helper which matches bkld behavior
+				diffResult, err := p.DiffFiles(testFS, testCase.Eval[0], testCase.Eval[1])
+				if err != nil {
+					if testCase.Error != "" {
+						if !strings.Contains(err.Error(), testCase.Error) {
+							t.Fatalf("Expected error containing %q, but got: %v", testCase.Error, err)
+						}
+						return
+					}
+					t.Fatalf("Diff failed: %v", err)
+				}
+
+				// Marshal the diff result
+				format := testCase.Format
+				if format == "" {
+					format = "yaml"
+				}
+				f, err := p.GetFormat(format)
+				if err != nil {
+					t.Fatalf("Failed to get format: %v", err)
+				}
+				output, err = f.MarshalStream([]any{diffResult})
+				if err != nil {
+					t.Fatalf("Failed to marshal diff result: %v", err)
+				}
+			} else {
+				output, err = p.Evaluate(testFS, testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
+			}
 
 			if testCase.Error != "" {
 				if err == nil {

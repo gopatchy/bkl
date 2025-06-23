@@ -15,6 +15,7 @@ var (
 	ErrInvalidDirective  = fmt.Errorf("invalid directive (%w)", Err)
 	ErrInvalidIndex      = fmt.Errorf("invalid index (%w)", Err)
 	ErrInvalidFilename   = fmt.Errorf("invalid filename (%w)", Err)
+	ErrInvalidInput      = fmt.Errorf("invalid input (%w)", Err)
 	ErrInvalidType       = fmt.Errorf("invalid type (%w)", Err)
 	ErrInvalidParent     = fmt.Errorf("invalid $parent (%w)", Err)
 	ErrInvalidRepeat     = fmt.Errorf("invalid $repeat (%w)", Err)

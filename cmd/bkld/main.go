@@ -55,51 +55,25 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
 	}
 
-	baseDoc, f, err := getOnlyDocument(string(opts.Positional.BasePath))
-	if err != nil {
-		fatal(err)
-	}
-
 	p, err := bkl.New()
 	if err != nil {
 		fatal(err)
 	}
-	env := p.GetOSEnv()
 
-	baseDocs, err := baseDoc.Process([]*bkl.Document{baseDoc}, env)
+	// Use DiffFiles helper which handles loading and validation
+	fsys := os.DirFS("/")
+	doc, err := p.DiffFiles(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath))
 	if err != nil {
 		fatal(err)
 	}
 
-	if len(baseDocs) != 1 {
-		fatal(fmt.Errorf("bkld operates on exactly 1 source document per file"))
-	}
-
-	baseDoc = baseDocs[0]
-
+	// Get format from first file if not specified
 	if format == "" {
+		_, f, err := p.FileMatch(fsys, string(opts.Positional.BasePath))
+		if err != nil {
+			fatal(err)
+		}
 		format = f
-	}
-
-	targetDoc, _, err := getOnlyDocument(string(opts.Positional.TargetPath))
-	if err != nil {
-		fatal(err)
-	}
-
-	targetDocs, err := targetDoc.Process([]*bkl.Document{targetDoc}, env)
-	if err != nil {
-		fatal(err)
-	}
-
-	if len(targetDocs) != 1 {
-		fatal(fmt.Errorf("bkld operates on exactly 1 source document per file"))
-	}
-
-	targetDoc = targetDocs[0]
-
-	doc, err := diffDoc(targetDoc, baseDoc)
-	if err != nil {
-		fatal(err)
 	}
 
 	outF, err := p.GetFormat(format)
@@ -130,35 +104,4 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 func fatal(err error) {
 	_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 	os.Exit(1)
-}
-
-func getOnlyDocument(path string) (*bkl.Document, string, error) {
-	b, err := bkl.New()
-	if err != nil {
-		return nil, "", err
-	}
-
-	rebasedPaths, err := b.PreparePathsFromCwd([]string{path}, "/")
-	if err != nil {
-		return nil, "", err
-	}
-
-	fsys := os.DirFS("/")
-	realPath, f, err := b.FileMatch(fsys, rebasedPaths[0])
-	if err != nil {
-		return nil, "", err
-	}
-
-	err = b.MergeFileLayers(fsys, realPath)
-	if err != nil {
-		return nil, "", err
-	}
-
-	docs := b.Documents()
-
-	if len(docs) != 1 {
-		return nil, "", fmt.Errorf("bkld operates on exactly 1 source document per file")
-	}
-
-	return docs[0], f, nil
 }

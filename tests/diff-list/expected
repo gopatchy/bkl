@@ -1,4 +1,0 @@
-- $match: {}
-- c: 3
-- $delete:
-    b: 2

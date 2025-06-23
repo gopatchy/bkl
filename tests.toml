@@ -3081,3 +3081,146 @@ error = "$env:FOO: variable not found"
 files."a.yaml" = '''
 a: $env:FOO
 '''
+###############################################################################
+# Diff Operations
+###############################################################################
+
+[diffList]
+description = "Test diff of two lists"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+- $match: {}
+- c: 3
+- $delete:
+    b: 2
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+'''
+files."b.yaml" = '''
+- a: 1
+- c: 3
+'''
+
+[diffListReplace]
+description = "Test diff of lists that requires $replace"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+- $match: {}
+- a: 1
+- c: 3
+- $replace: true
+'''
+files."a.yaml" = '''
+- a
+- b
+'''
+files."b.yaml" = '''
+- a: 1
+- c: 3
+'''
+
+[diffListSame]
+description = "Test diff of identical lists"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+$match: {}
+'''
+files."a.yaml" = '''
+- a: 1
+- b: 2
+'''
+files."b.yaml" = '''
+- a: 1
+- b: 2
+'''
+
+[diffMap]
+description = "Test diff of two maps"
+eval = ["a.yaml", "b.yaml"]
+format = "json-pretty"
+diff = true
+expected = '''
+{
+  "$match": {},
+  "a": 2,
+  "b": "$delete",
+  "c": 3
+}
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."b.yaml" = '''
+a: 2
+c: 3
+'''
+
+[diffMapSame]
+description = "Test diff of identical maps"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+$match: {}
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."b.yaml" = '''
+a: 1
+b: 2
+'''
+
+[diffMerge]
+description = "Test diff with merge operation"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+expected = '''
+$match: {}
+$merge: c.yaml
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."b.yaml" = '''
+a: 1
+b: 2
+c: 3
+d: 4
+$merge: c.yaml
+'''
+
+[diffYamlJson]
+description = "Test diff between YAML and JSON files"
+eval = ["a.yaml", "b.json"]
+format = "yaml"
+diff = true
+expected = '''
+$match: {}
+c: 3
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+'''
+files."b.json" = '''
+{
+  "a": 1,
+  "b": 2,
+  "c": 3
+}
+'''

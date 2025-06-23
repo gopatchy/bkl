@@ -1,4 +1,0 @@
-- $match: {}
-- 1
-- 3
-- $replace: true

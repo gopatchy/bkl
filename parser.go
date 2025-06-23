@@ -295,7 +295,7 @@ func (p *Parser) output(format string, env map[string]string) ([]byte, error) {
 		return nil, err
 	}
 
-	f, err := getFormat(format)
+	f, err := GetFormat(format)
 	if err != nil {
 		return nil, err
 	}
@@ -462,6 +462,52 @@ func (p *Parser) Evaluate(fsys fs.FS, files []string, skipParent bool, format st
 	}
 
 	return p.output(format, env)
+}
+
+// EvaluateToData is like Evaluate but returns the raw data instead of marshaled output
+func (p *Parser) EvaluateToData(fsys fs.FS, files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) (any, error) {
+	evalFiles, err := p.preparePathsForParser(files, rootPath, workingDir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, path := range evalFiles {
+		realPath, fileFormat, err := p.FileMatch(fsys, path)
+		if err != nil {
+			return nil, fmt.Errorf("file %s: %w", path, err)
+		}
+
+		if format == "" {
+			format = fileFormat
+		}
+
+		if skipParent {
+			fileSystem := newFS(fsys)
+			err = p.mergeFile(fileSystem, realPath)
+		} else {
+			err = p.MergeFileLayers(fsys, realPath)
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("merging %s: %w", path, err)
+		}
+	}
+
+	// Get the raw output data
+	outs, err := p.outputDocuments(env)
+	if err != nil {
+		return nil, err
+	}
+
+	// Merge all outputs into a single value
+	if len(outs) == 0 {
+		return nil, nil
+	} else if len(outs) == 1 {
+		return outs[0], nil
+	} else {
+		// Multiple documents - return as list
+		return outs, nil
+	}
 }
 
 func (p *Parser) log(format string, v ...any) {

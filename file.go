@@ -29,7 +29,7 @@ func (p *Parser) loadFile(fsys *fileSystem, path string, child *file) (*file, er
 
 	p.log("[%s] loading", f)
 
-	format, err := getFormat(p.Ext(path))
+	format, err := GetFormat(p.Ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
