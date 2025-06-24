@@ -129,9 +129,11 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Includes Go unit tests with race detection and coverage reporting
   - Performs linting with `go vet` and formatting with `gofumpt`
   - Generates coverage report at `cover.html`
+- `just bench` - Run performance benchmarks
 - `go test -run TestLanguage` - Run all language tests
 - `go test -run TestLanguage -test.filter=test1,test2,test3` - Run specific language tests
 - `go test -test.exclude=test1,test2` - Run tests excluding specific ones
+- `go test -bench=BenchmarkLanguage` - Run performance benchmarks
 - `go run ./cmd/bkl` - Run main binary directly
 - `go run ./cmd/mcp-test-server` - Run MCP test server with coverage analysis
 - All tests now use the centralized language test framework in `tests.toml`
