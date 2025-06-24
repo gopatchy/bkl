@@ -208,7 +208,8 @@ label.invisible {
 	color: transparent;
 }
 
-code {
+code,
+bkl-code {
 	color: var(--neutral7);
 	background: var(--neutral0);
 	border-radius: 5px;
@@ -229,13 +230,16 @@ code {
 	word-wrap: normal;
 }
 
-doc-grid code {
+doc-grid code,
+doc-grid bkl-code {
 	height: 100%;
 }
 
 code + p,
+bkl-code + p,
 doc-grid + p,
-div:has(> code) + p {
+div:has(> code) + p,
+div:has(> bkl-code) + p {
 	margin-top: 10px;
 }
 
@@ -358,23 +362,23 @@ BKL</h1>
 <row>
 <div>
 <label>service.yaml</label>
-<code><key>addr</key>: <string>127.0.0.1</string>
-<key>name</key>: <string>myService</string>
-<key>port</key>: <number>8080</number></code>
+<bkl-code>addr: 127.0.0.1
+name: myService
+port: 8080</bkl-code>
 </div>
 
 <div>
 <label>service.test.toml</label>
-<code><key>port</key> = <focus><number>8081</number></focus></code>
+<bkl-code>port = <focus>8081</focus></bkl-code>
 </div>
 </row>
 
 <div>
 <label>Run it!</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.toml</string>
-<key>addr</key> = '<string>127.0.0.1</string>'
-<key>name</key> = '<string>myService</string>'
-<key>port</key> = <focus><number>8081</number></focus></code>
+<bkl-code>$ bkl service.test.toml
+addr = '127.0.0.1'
+name = 'myService'
+port = <focus>8081</focus></bkl-code>
 </div>
 </doc-grid>
 
@@ -388,15 +392,15 @@ BKL</h1>
 <doc-grid>
 <div>
 <label>Using go</label>
-<code># Install go from <a href="https://go.dev/dl/">go.dev</a>
-<prompt>$ </prompt><cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/...@latest</string>
-# Verify that ~/go/bin is in your $PATH</code>
+<bkl-code># Install go from <a href="https://go.dev/dl/">go.dev</a>
+$ go install github.com/gopatchy/bkl/...@latest
+# Verify that ~/go/bin is in your $PATH</bkl-code>
 </div>
 
 <div>
 <label>macOS using brew</label>
-<code># Install brew from <a href="https://brew.sh/">brew.sh</a>
-<prompt>$ </prompt><cmd>brew</cmd> <string>install</string> <string>gopatchy/bkl/bkl</string></code>
+<bkl-code># Install brew from <a href="https://brew.sh/">brew.sh</a>
+$ brew install gopatchy/bkl/bkl</bkl-code>
 </div>
 </doc-grid>
 
@@ -412,34 +416,34 @@ BKL</h1>
 <doc-grid>
 <div>
 <label>YAML</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f yaml</flag></focus> <string>service.test.toml</string>
-<key>addr</key>: <string>127.0.0.1</string>
-<key>name</key>: <string>myService</string>
-<key>port</key>: <number>8081</number></code>
+<bkl-code>$ bkl <focus>-f yaml</focus> service.test.toml
+addr: 127.0.0.1
+name: myService
+port: 8081</bkl-code>
 </div>
 
 <div>
 <label>TOML</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f toml</flag></focus> <string>service.test.toml</string>
-<key>addr</key> = '<string>127.0.0.1</string>'
-<key>name</key> = '<string>myService</string>'
-<key>port</key> = <number>8081</number></code>
+<bkl-code>$ bkl <focus>-f toml</focus> service.test.toml
+addr = '127.0.0.1'
+name = 'myService'
+port = 8081</bkl-code>
 </div>
 
 <div>
 <label>JSON</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
-{"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+<bkl-code>$ bkl <focus>-f json</focus> service.test.toml
+{"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
 </div>
 
 <div>
 <label>JSON (pretty)</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
+<bkl-code>$ bkl <focus>-f json-pretty</focus> service.test.toml
 {
-  "<key>addr</key>": "<string>127.0.0.1</string>",
-  "<key>name</key>": "<string>myService</string>",
-  "<key>port</key>": <number>8081</number>
-}</code>
+  "addr": "127.0.0.1",
+  "name": "myService",
+  "port": 8081
+}</bkl-code>
 </div>
 </doc-grid>
 
@@ -449,10 +453,10 @@ BKL</h1>
 <p>You can also set the output format implicitly by using a different file extension.</p>
 
 <doc-grid>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.<focus>yaml</focus></string>   # real file is service.test.<focus>toml</focus>
-<key>addr</key>: <string>127.0.0.1</string>
-<key>name</key>: <string>myService</string>
-<key>port</key>: <number>8081</number></code>
+<bkl-code>$ bkl service.test.<focus>yaml</focus>   # real file is service.test.<focus>toml</focus>
+addr: 127.0.0.1
+name: myService
+port: 8081</bkl-code>
 </doc-grid>
 
 
@@ -465,7 +469,7 @@ BKL</h1>
 <doc-grid>
 <div>
 <label>File Output</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-o out.yaml</flag></focus> <string>service.test.toml</string></code>
+<bkl-code>$ bkl <focus>-o out.yaml</focus> service.test.toml</bkl-code>
 </div>
 </doc-grid>
 
@@ -479,7 +483,7 @@ BKL</h1>
 <doc-grid>
 <div>
 <label>Commandline Layering</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</code>
+<bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
 </div>
 </doc-grid>
 
@@ -490,9 +494,9 @@ BKL</h1>
 <doc-grid>
 <div>
 <label>stdin</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus>-- <string>-.yaml</string></focus> &lt;&lt;'EOF'
-<key>a</key>: <number>1</number>
-EOF</code>
+<bkl-code>$ bkl <focus>-- -.yaml</focus> &lt;&lt;'EOF'
+a: 1
+EOF</bkl-code>
 </div>
 </doc-grid>
 
@@ -508,7 +512,7 @@ EOF</code>
 <doc-grid>
 <div>
 <label>Set Parent In File</label>
-<code><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
+<bkl-code><focus>$parent: a.b</focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</bkl-code>
 </div>
 </doc-grid>
 
@@ -519,14 +523,14 @@ EOF</code>
 <row>
 <div>
 <label>Parent List</label>
-<code><focus><key>$parent</key>:
-- <string>a</string>
-- <string>b</string></focus></code>
+<bkl-code><focus>$parent:
+- a
+- b</focus></bkl-code>
 </div>
 
 <div>
 <label>Parent Wildcard</label>
-<code><focus><key>$parent</key>: <string>a.*</string></focus></code>
+<bkl-code><focus>$parent: a.*</focus></bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -539,8 +543,8 @@ EOF</code>
 <doc-grid>
 <div>
 <label>Set Parent In CLI</label>
-<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
-<prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
+<bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+$ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml</bkl-code>
 </div>
 </doc-grid>
 
@@ -550,7 +554,7 @@ EOF</code>
 <doc-grid>
 <div>
 <label>No Parent</label>
-<code><focus><key>$parent</key>: false</focus>   # no further inheritance</code>
+<bkl-code><focus>$parent: false</focus>   # no further inheritance</bkl-code>
 </div>
 </doc-grid>
 
@@ -567,40 +571,40 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<key>b</key>: <number>2</number></code>
+b: 2</bkl-code>
 
 <op>+</op>
 
-<code><key>c</key>: <number>3</number></code>
+<bkl-code>c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<focus><key>c</key>: <number>3</number></focus>
+<bkl-code>a: 1
+<focus>c: 3</focus>
 ---
-<key>b</key>: <number>2</number>
-<focus><key>c</key>: <number>3</number></focus></code>
+b: 2
+<focus>c: 3</focus></bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<key>b</key>: <number>2</number></code>
+b: 2</bkl-code>
 
 <op>+</op>
 
-<code><focus><key>$match</key>:
-  <key>b</key>: <number>2</number></focus>
-<key>c</key>: <number>3</number></code>
+<bkl-code><focus>$match:
+  b: 2</focus>
+c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<key>b</key>: <number>2</number>
-<focus><key>c</key>: <number>3</number></focus></code>
+b: 2
+<focus>c: 3</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -609,27 +613,27 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<key>b</key>: <number>2</number>
+b: 2
 ---
-<key>a</key>: <number>1</number></code>
+a: 1</bkl-code>
 
 <op>+</op>
 
-<code><focus><key>$match</key>:
-  <key>a</key>: <number>1</number></focus>
-<key>c</key>: <number>3</number></code>
+<bkl-code><focus>$match:
+  a: 1</focus>
+c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<focus><key>c</key>: <number>3</number></focus>
+<bkl-code>a: 1
+<focus>c: 3</focus>
 ---
-<key>b</key>: <number>2</number>
+b: 2
 ---
-<key>a</key>: <number>1</number>
-<focus><key>c</key>: <number>3</number></focus></code>
+a: 1
+<focus>c: 3</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -638,23 +642,23 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<key>b</key>: <number>2</number></code>
+b: 2</bkl-code>
 
 <op>+</op>
 
-<code><key>$match</key>:
-  <key>a</key>: <number>1</number>
-  <focus><key>$invert</key>: <bool>true</bool></focus>
-<key>c</key>: <number>3</number></code>
+<bkl-code>$match:
+  a: 1
+  <focus>$invert: true</focus>
+c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<key>b</key>: <number>2</number>
-<focus><key>c</key>: <number>3</number></focus></code>
+b: 2
+<focus>c: 3</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -663,18 +667,18 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number></code>
+<bkl-code>a: 1</bkl-code>
 
 <op>+</op>
 
-<code><focus><key>$match</key>: null</focus>
-<key>b</key>: <number>2</number></code>
+<bkl-code><focus>$match: null</focus>
+b: 2</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
+<bkl-code>a: 1
 ---
-<focus><key>b</key>: <number>2</number></focus></code>
+<focus>b: 2</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -687,44 +691,44 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number></code>
+<bkl-code>a: 1</bkl-code>
 
 <op>+</op>
 
-<code><key>b</key>: <number>2</number></code>
+<bkl-code>b: 2</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number></code>
+<bkl-code>a: 1
+b: 2</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number></code>
+<bkl-code>a: 1</bkl-code>
 
 <op>+</op>
 
-<code><key>b</key>: <number>2</number>
-<focus><key>$replace</key>: <bool>true</bool></focus></code>
+<bkl-code>b: 2
+<focus>$replace: true</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>b</key>: <number>2</number></code>
+<bkl-code>b: 2</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number></code>
+<bkl-code>a: 1
+b: 2</bkl-code>
 
 <op>+</op>
 
-<code><key>c</key>: <number>3</number>
-<focus><key>b</key>: <string>$delete</string></focus></code>
+<bkl-code>c: 3
+<focus>b: $delete</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>c</key>: <number>3</number></code>
+<bkl-code>a: 1
+c: 3</bkl-code>
 </row>
 </doc-grid>
 
@@ -739,45 +743,45 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code>- <number>1</number></code>
+<bkl-code>- 1</bkl-code>
 
 <op>+</op>
 
-<code>- <number>2</number></code>
+<bkl-code>- 2</bkl-code>
 
 <op>=</op>
 
-<code>- <number>1</number>
-- <number>2</number></code>
+<bkl-code>- 1
+- 2</bkl-code>
 </row>
 
 <row>
-<code>- <number>1</number></code>
+<bkl-code>- 1</bkl-code>
 
 <op>+</op>
 
-<code>- <number>2</number>
-- <focus><key>$replace</key>: <bool>true</bool></focus></code>
+<bkl-code>- 2
+- <focus>$replace: true</focus></bkl-code>
 
 <op>=</op>
 
-<code>- <number>2</number></code>
+<bkl-code>- 2</bkl-code>
 </row>
 
 <row>
-<code>- <key>x</key>: <number>1</number>
-- <key>x</key>: <number>2</number></code>
+<bkl-code>- x: 1
+- x: 2</bkl-code>
 
 <op>+</op>
 
-<code>- <key>x</key>: <number>3</number>
-- <focus><key>$delete</key>:
-    <key>x</key>: <number>2</number></focus></code>
+<bkl-code>- x: 3
+- <focus>$delete:
+    x: 2</focus></bkl-code>
 
 <op>=</op>
 
-<code>- <key>x</key>: <number>1</number>
-- <key>x</key>: <number>3</number></code>
+<bkl-code>- x: 1
+- x: 3</bkl-code>
 </row>
 </doc-grid>
 
@@ -788,34 +792,34 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <number>2</number></code>
+<bkl-code>- a: 1
+- b: 2</bkl-code>
 
 <op>+</op>
 
-<code>- <focus><key>$match</key>:
-    <key>b</key>: <number>2</number></focus>
-  <key>b</key>: <number>10</number></code>
+<bkl-code>- <focus>$match:
+    b: 2</focus>
+  b: 10</bkl-code>
 
 <op>=</op>
 
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <number>10</number></code>
+<bkl-code>- a: 1
+- b: 10</bkl-code>
 </row>
 
 <row>
-<code>- <number>1</number>
-- <number>2</number></code>
+<bkl-code>- 1
+- 2</bkl-code>
 
 <op>+</op>
 
-<code>- <focus><key>$match</key>: <number>2</number>
-  <key>$value</key>: <number>10</number></focus></code>
+<bkl-code>- <focus>$match: 2
+  $value: 10</focus></bkl-code>
 
 <op>=</op>
 
-<code>- <number>1</number>
-- <number>10</number></code>
+<bkl-code>- 1
+- 10</bkl-code>
 </row>
 </doc-grid>
 
@@ -828,17 +832,17 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <string>foo</string>
-<key>d</key>: <focus><string>$"{b.c} bar {a} 2"</string></focus></code>
+<bkl-code>a: 1
+b:
+  c: foo
+d: <focus>$"{b.c} bar {a} 2"</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <string>foo</string>
-<key>d</key>: <focus><string>foo bar 1 2</string></focus></code>
+<bkl-code>a: 1
+b:
+  c: foo
+d: <focus>foo bar 1 2</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -851,13 +855,13 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>$value</key>: |
-  <focus><string>{"a":1}</string></focus>
-<focus><key>$decode</key>: <string>json</string></focus></code>
+<bkl-code>$value: |
+  <focus>{"a":1}</focus>
+<focus>$decode: json</focus></bkl-code>
 
 <op>=</op>
 
-<code><focus><key>a</key>: <number>1</number></focus></code>
+<bkl-code><focus>a: 1</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -869,21 +873,21 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code># export FOO=test
-<focus><key>"$env:FOO"</key></focus>: <number>1</number></code>
+<bkl-code># export FOO=test
+<focus>"$env:FOO"</focus>: 1</bkl-code>
 
 <op>=</op>
 
-<code><focus><key>test</key></focus>: <number>1</number></code>
+<bkl-code><focus>test</focus>: 1</bkl-code>
 </row>
 
 <row>
-<code># export FOO=test
-<key>a</key>: <focus><string>$env:FOO</string></focus></code>
+<bkl-code># export FOO=test
+a: <focus>$env:FOO</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>test</string></focus></code>
+<bkl-code>a: <focus>test</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -901,33 +905,33 @@ EOF</code>
 <row>
 <div>
 <label>base64</label>
-<code><key>$value</key>: <number>a</number>
-<focus><key>$encode</key>: <string>base64</string></focus></code>
+<bkl-code>$value: a
+<focus>$encode: base64</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code><string>YQ==</string></code>
+<bkl-code>YQ==</bkl-code>
 </div>
 </row>
 
 <row>
 <div>
 <label>flags</label>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
-<focus><key>$encode</key>: <string>flags</string></focus>
-# [tolist:=, prefix:--]</code>
+<bkl-code>a: 1
+b: 2
+<focus>$encode: flags</focus>
+# [tolist:=, prefix:--]</bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code>- <string>--a=1</string>
-- <string>--b=2</string></code>
+<bkl-code>- --a=1
+- --b=2</bkl-code>
 </div>
 </row>
 
@@ -935,55 +939,55 @@ EOF</code>
 <row>
 <div>
 <label>flatten</label>
-<code>- - <string>a</string>
-  - <string>b</string>
-- - <string>c</string>
-  - <number>4</number>
-- <string>e</string>
-- <focus><key>$encode</key>: <string>flatten</string></focus></code>
+<bkl-code>- - a
+  - b
+- - c
+  - 4
+- e
+- <focus>$encode: flatten</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code>- <string>a</string>
-- <string>b</string>
-- <string>c</string>
-- <number>4</number>
-- <string>e</string></code>
+<bkl-code>- a
+- b
+- c
+- 4
+- e</bkl-code>
 </div>
 </row>
 
 <row>
 <div>
 <label>join</label>
-<code><key>$value</key>: [<string>a</string>, <string>b</string>]
-<focus><key>$encode</key>: <string>join:/</string></focus></code>
+<bkl-code>$value: [a, b]
+<focus>$encode: join:/</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code><string>a/b</string></code>
+<bkl-code>a/b</bkl-code>
 </div>
 </row>
 
 <row>
 <div>
 <label>json</label>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
-<focus><key>$encode</key>: <string>json</string></focus></code>
+<bkl-code>a: 1
+b: 2
+<focus>$encode: json</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code>|<string>
-  {"a":1,"b":2}</string></code>
+<bkl-code>|
+  {"a":1,"b":2}</bkl-code>
 </div>
 </row>
 
@@ -991,17 +995,17 @@ EOF</code>
 <row>
 <div>
 <label>json (list)</label>
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <number>2</number>
-- <focus><key>$encode</key>: <string>json</string></focus></code>
+<bkl-code>- a: 1
+- b: 2
+- <focus>$encode: json</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code>|<string>
-  [{"a":1},{"b":2}]</string></code>
+<bkl-code>|
+  [{"a":1},{"b":2}]</bkl-code>
 </div>
 </row>
 
@@ -1009,50 +1013,50 @@ EOF</code>
 <row>
 <div>
 <label>prefix</label>
-<code>- <string>a</string>
-- <number>2</number>
-- <focus><key>$encode</key>: <string>prefix:X</string></focus></code>
+<bkl-code>- a
+- 2
+- <focus>$encode: prefix:X</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code>- <string>Xa</string>
-- <string>X2</string></code>
+<bkl-code>- Xa
+- X2</bkl-code>
 </div>
 </row>
 
 <row>
 <div>
 <label>tolist</label>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
-<focus><key>$encode</key>: <string>tolist:=</string></focus></code>
+<bkl-code>a: 1
+b: 2
+<focus>$encode: tolist:=</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code>- <string>a=1</string>
-- <string>b=2</string></code>
+<bkl-code>- a=1
+- b=2</bkl-code>
 </div>
 </row>
 
 <row>
 <div>
 <label>Stacking</label>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
-<focus><key>$encode</key>: [<string>tolist:=</string>, "<string>join:,</string>"]</focus></code>
+<bkl-code>a: 1
+b: 2
+<focus>$encode: [tolist:=, "join:,"]</focus></bkl-code>
 </div>
 
 <op>=</op>
 
 <div>
 <label class="invisible">invisible</label>
-<code><string>a=1,b=2</string></code>
+<bkl-code>a=1,b=2</bkl-code>
 </div>
 </row>
 
@@ -1067,65 +1071,65 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<focus><key>b</key>: <string>$required</string></focus></code>
+<bkl-code>a: 1
+<focus>b: $required</focus></bkl-code>
 
 <op>+</op>
 
-<code><key>c</key>: <number>3</number></code>
+<bkl-code>c: 3</bkl-code>
 
 <op>=</op>
 
-<op>Error</op>
+Error
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<focus><key>b</key>: <string>$required</string></focus></code>
+<bkl-code>a: 1
+<focus>b: $required</focus></bkl-code>
 
 <op>+</op>
 
-<code><focus><key>b</key>: <number>2</number></focus>
-<key>c</key>: <number>3</number></code>
+<bkl-code><focus>b: 2</focus>
+c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
-<key>c</key>: <number>3</number></code>
+<bkl-code>a: 1
+b: 2
+c: 3</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<focus><key>b</key>:
-  - <string>$required</string></focus></code>
+<bkl-code>a: 1
+<focus>b:
+  - $required</focus></bkl-code>
 
 <op>+</op>
 
-<code><key>c</key>: <number>3</number></code>
+<bkl-code>c: 3</bkl-code>
 
 <op>=</op>
 
-<op>Error</op>
+Error
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<focus><key>b</key>:
-  - <string>$required</string></focus></code>
+<bkl-code>a: 1
+<focus>b:
+  - $required</focus></bkl-code>
 
 <op>+</op>
 
-<code><focus><key>b</key>:
-  - <number>2</number></focus>
-<key>c</key>: <number>3</number></code>
+<bkl-code><focus>b:
+  - 2</focus>
+c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  - <number>2</number>
-<key>c</key>: <number>3</number></code>
+<bkl-code>a: 1
+b:
+  - 2
+c: 3</bkl-code>
 </row>
 </doc-grid>
 
@@ -1138,57 +1142,57 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <key>b</key>: <number>2</number>
-  <focus><key>$merge</key>: <string>foo.bar</string></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  <focus>$merge: foo.bar</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <focus><key>a</key>: <number>1</number></focus>
-  <key>b</key>: <number>2</number></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  <focus>a: 1</focus>
+  b: 2</bkl-code>
 </row>
 
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    - <key>a</key>: <number>1</number>
-<key>zig</key>:
-  - <key>b</key>: <number>2</number>
-  - <focus><key>$merge</key>: <string>foo.bar</string></focus></code>
+<bkl-code>foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - <focus>$merge: foo.bar</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>foo</key>:
-  <key>bar</key>:
-    - <key>a</key>: <number>1</number>
-<key>zig</key>:
-  - <key>b</key>: <number>2</number>
-  - <focus><key>a</key>: <number>1</number></focus></code>
+<bkl-code>foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - <focus>a: 1</focus></bkl-code>
 </row>
 
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <key>b</key>: <number>2</number>
-  <key>c</key>: <focus><string>$merge:foo.bar.a</string></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  c: <focus>$merge:foo.bar.a</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <key>b</key>: <number>2</number>
-  <key>c</key>: <focus><number>1</number></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  c: <focus>1</focus></bkl-code>
 </row>
 </doc-grid>
 
@@ -1197,43 +1201,43 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<key>c</key>: <number>3</number>
-<focus><key>$merge</key>:
-  <key>$match</key>:
-    <key>a</key>: <number>1</number></focus></code>
+c: 3
+<focus>$merge:
+  $match:
+    a: 1</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<focus><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number></focus>
-<key>c</key>: <number>3</number></code>
+<focus>a: 1
+b: 2</focus>
+c: 3</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<key>d</key>: <number>4</number>
-<focus><key>$merge</key>:
-  <key>$match</key>:
-    <key>a</key>: <number>1</number>
-  <key>$path</key>: <string>b</string></focus></code>
+d: 4
+<focus>$merge:
+  $match:
+    a: 1
+  $path: b</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<focus><key>c</key>: <number>3</number></focus>
-<key>d</key>: <number>4</number></code>
+<focus>c: 3</focus>
+d: 4</bkl-code>
 </row>
 </doc-grid>
 
@@ -1242,38 +1246,38 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<key>c</key>: <number>3</number>
-<focus><key>$merge</key>: <value>[{a: 1}]</value></focus></code>
+c: 3
+<focus>$merge: <value>[{a: 1}]</value></focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<focus><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number></focus>
-<key>c</key>: <number>3</number></code>
+<focus>a: 1
+b: 2</focus>
+c: 3</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<key>d</key>: <number>4</number>
-<focus><key>$merge</key>: <value>[{a: 1}, b]</value></focus></code>
+d: 4
+<focus>$merge: <value>[{a: 1}, b]</value></focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<focus><key>c</key>: <number>3</number></focus>
-<key>d</key>: <number>4</number></code>
+<focus>c: 3</focus>
+d: 4</bkl-code>
 </row>
 
 </doc-grid>
@@ -1287,55 +1291,55 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <key>b</key>: <number>2</number>
-  <focus><key>$replace</key>: <string>foo.bar</string></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  <focus>$replace: foo.bar</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <focus><key>a</key>: <number>1</number></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  <focus>a: 1</focus></bkl-code>
 </row>
 
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    - <key>a</key>: <number>1</number>
-<key>zig</key>:
-  - <key>b</key>: <number>2</number>
-  - <focus><key>$replace</key>: <string>foo.bar</string></focus></code>
+<bkl-code>foo:
+  bar:
+    - a: 1
+zig:
+  - b: 2
+  - <focus>$replace: foo.bar</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>foo</key>:
-  <key>bar</key>:
-    - <key>a</key>: <number>1</number>
-<key>zig</key>:
-  - <focus><key>a</key>: <number>1</number></focus></code>
+<bkl-code>foo:
+  bar:
+    - a: 1
+zig:
+  - <focus>a: 1</focus></bkl-code>
 </row>
 
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <key>b</key>: <number>2</number>
-  <key>c</key>: <focus><string>$replace:foo.bar.a</string></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  c: <focus>$replace:foo.bar.a</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>foo</key>:
-  <key>bar</key>:
-    <key>a</key>: <number>1</number>
-<key>zig</key>:
-  <key>b</key>: <number>2</number>
-  <key>c</key>: <focus><number>1</number></focus></code>
+<bkl-code>foo:
+  bar:
+    a: 1
+zig:
+  b: 2
+  c: <focus>1</focus></bkl-code>
 </row>
 
 </doc-grid>
@@ -1347,42 +1351,42 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<key>c</key>: <number>3</number>
-<focus><key>$replace</key>:
-  <key>$match</key>:
-    <key>a</key>: <number>1</number></focus></code>
+c: 3
+<focus>$replace:
+  $match:
+    a: 1</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<focus><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number></focus></code>
+<focus>a: 1
+b: 2</focus></bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<key>d</key>: <number>4</number>
-<focus><key>$replace</key>:
-  <key>$match</key>:
-    <key>a</key>: <number>1</number>
-  <key>$path</key>: <string>b</string></focus></code>
+d: 4
+<focus>$replace:
+  $match:
+    a: 1
+  $path: b</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<focus><key>c</key>: <number>3</number></focus>
-<key>d</key>: <number>4</number></code>
+<focus>c: 3</focus>
+d: 4</bkl-code>
 </row>
 
 </doc-grid>
@@ -1392,37 +1396,37 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<key>c</key>: <number>3</number>
-<focus><key>$replace</key>: <value>[{a: 1}]</value></focus></code>
+c: 3
+<focus>$replace: <value>[{a: 1}]</value></focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
+<bkl-code>a: 1
+b: 2
 ---
-<focus><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number></focus></code>
+<focus>a: 1
+b: 2</focus></bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<key>d</key>: <number>4</number>
-<focus><key>$replace</key>: <value>[{a: 1}, b]</value></focus></code>
+d: 4
+<focus>$replace: <value>[{a: 1}, b]</value></focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>:
-  <key>c</key>: <number>3</number>
+<bkl-code>a: 1
+b:
+  c: 3
 ---
-<focus><key>c</key>: <number>3</number></focus>
-<key>d</key>: <number>4</number></code>
+<focus>c: 3</focus>
+d: 4</bkl-code>
 </row>
 
 </doc-grid>
@@ -1436,29 +1440,29 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-  	<focus><key>$output</key>: <bool>true</bool></focus>
-    <key>a</key>: <number>1</number>
-	<key>b</key>: <number>2</number></code>
+<bkl-code>foo:
+  bar:
+  	<focus>$output: true</focus>
+    a: 1
+	b: 2</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>1</number></code>
+<bkl-code>a: 1
+b: 1</bkl-code>
 </row>
 
 <row>
-<code><key>foo</key>:
-  <key>bar</key>:
-    - <focus><key>$output</key>: <bool>true</bool></focus>
-    - <key>a</key>: <number>1</number>
-    - <key>b</key>: <number>2</number></code>
+<bkl-code>foo:
+  bar:
+    - <focus>$output: true</focus>
+    - a: 1
+    - b: 2</bkl-code>
 
 <op>=</op>
 
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <number>1</number></code>
+<bkl-code>- a: 1
+- b: 1</bkl-code>
 </row>
 
 </doc-grid>
@@ -1470,40 +1474,40 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>:
-  <key>b</key>: <number>1</number>
-  <focus><key>$output</key>: <bool>false</bool></focus>
-<key>c</key>:
-  <key>d</key>: <number>2</number></code>
+<bkl-code>a:
+  b: 1
+  <focus>$output: false</focus>
+c:
+  d: 2</bkl-code>
 
 <op>=</op>
 
-<code><key>c</key>:
-  <key>d</key>: <number>2</number></code>
+<bkl-code>c:
+  d: 2</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>:
-  - <key>b</key>: <number>1</number>
-  - <focus><key>$output</key>: <bool>false</bool></focus>
-<key>c</key>:
-  - <key>d</key>: <number>2</number></code>
+<bkl-code>a:
+  - b: 1
+  - <focus>$output: false</focus>
+c:
+  - d: 2</bkl-code>
 
 <op>=</op>
 
-<code><key>c</key>:
-  - <key>d</key>: <number>2</number></code>
+<bkl-code>c:
+  - d: 2</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>: <number>1</number>
-<focus><key>$output</key>: <bool>false</bool></focus>
+<bkl-code>a: 1
+<focus>$output: false</focus>
 ---
-<key>b</key>: <number>2</number></code>
+b: 2</bkl-code>
 
 <op>=</op>
 
-<code><key>b</key>: <number>2</number></code>
+<bkl-code>b: 2</bkl-code>
 </row>
 
 </doc-grid>
@@ -1519,17 +1523,17 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <string>foo</string>
-<key>b</key>: <focus><string>$repeat</string</focus>
-<focus><key>$repeat</key>: <number>2</number></focus></code>
+<bkl-code>a: foo
+b: <focus>$repeat</string</focus>
+<focus>$repeat: 2</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <string>foo</string>
-<key>b</key>: <number>0</number>
+<bkl-code>a: foo
+b: 0
 ---
-<key>a</key>: <string>foo</string>
-<key>b</key>: <number>1</number></code>
+a: foo
+b: 1</bkl-code>
 </row>
 
 </doc-grid>
@@ -1539,24 +1543,24 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><focus><key>$repeat</key>:
-  <key>a</key>: <number>2</number>
-  <key>b</key>: <number>3</number></focus>
-<key>$value</key>: <string>$"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</string></code>
+<bkl-code><focus>$repeat:
+  a: 2
+  b: 3</focus>
+$value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</bkl-code>
 
 <op>=</op>
 
-<code><string>0,0</string>
+<bkl-code>0,0
 ---
-<string>0,1</string>
+0,1
 ---
-<string>0,2</string>
+0,2
 ---
-<string>1,0</string>
+1,0
 ---
-<string>1,1</string>
+1,1
 ---
-<string>1,2</string></code>
+1,2</bkl-code>
 </row>
 
 </doc-grid>
@@ -1566,16 +1570,16 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><focus><key>$repeat</key>: [<string>x</string>, <string>y</string>, <string>z</string>]</focus>
-<key>a</key>: <focus><string>$repeat</string></focus></code>
+<bkl-code><focus>$repeat: [x, y, z]</focus>
+a: <focus>$repeat</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <string>x</string>
+<bkl-code>a: x
 ---
-<key>a</key>: <string>y</string>
+a: y
 ---
-<key>a</key>: <string>z</string></code>
+a: z</bkl-code>
 </row>
 
 </doc-grid>
@@ -1585,18 +1589,18 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><focus><key>$repeat</key>:
-  <key>$first</key>: <number>10</number>
-  <key>$count</key>: <number>3</number></focus>
-<key>a</key>: <focus><string>$repeat</string></focus></code>
+<bkl-code><focus>$repeat:
+  $first: 10
+  $count: 3</focus>
+a: <focus>$repeat</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>10</number>
+<bkl-code>a: 10
 ---
-<key>a</key>: <number>11</number>
+a: 11
 ---
-<key>a</key>: <number>12</number></code>
+a: 12</bkl-code>
 </row>
 
 </doc-grid>
@@ -1609,20 +1613,20 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>:
-  <key>$"b{$repeat}"</key>:
-    <key>c</key>: <focus><string>$repeat</string></focus>
-    <focus><key>$repeat</key>: <number>3</number></focus></code>
+<bkl-code>a:
+  $"b{$repeat}":
+    c: <focus>$repeat</focus>
+    <focus>$repeat: 3</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>:
-  <key>b0</key>:
-    <key>c</key>: <number>0</number>
-  <key>b1</key>:
-    <key>c</key>: <number>1</number>
-  <key>b2</key>:
-    <key>c</key>: <number>2</number></code>
+<bkl-code>a:
+  b0:
+    c: 0
+  b1:
+    c: 1
+  b2:
+    c: 2</bkl-code>
 </row>
 
 </doc-grid>
@@ -1632,16 +1636,16 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>:
-  - <key>b</key>: <focus><string>$repeat</string></focus>
-    <focus><key>$repeat</key>: [<string>x</string>, <string>y</string>, <string>z</string>]</focus></code>
+<bkl-code>a:
+  - b: <focus>$repeat</focus>
+    <focus>$repeat: [x, y, z]</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>:
-  - <key>b</key>: <string>x</string>
-  - <key>b</key>: <string>y</string>
-  - <key>b</key>: <string>z</string></code>
+<bkl-code>a:
+  - b: x
+  - b: y
+  - b: z</bkl-code>
 </row>
 
 </doc-grid>
@@ -1655,11 +1659,11 @@ EOF</code>
 
 <doc-grid>
 <row>
-<code><key>a</key>: <focus><string>$$env:foo</string></focus></code>
+<bkl-code>a: <focus>$$env:foo</focus></bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <focus><string>$env:foo</string></focus></code>
+<bkl-code>a: <focus>$env:foo</focus></bkl-code>
 </row>
 
 </doc-grid>
@@ -1672,7 +1676,7 @@ EOF</code>
 <p>TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:</p>
 
 <doc-grid>
-<code><focus>"<key>$parent</key>"</focus> = <bool>false</bool></code>
+<bkl-code><focus>"$parent"</focus> = false</bkl-code>
 </doc-grid>
 
 
@@ -1683,32 +1687,32 @@ EOF</code>
 <p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.</p>
 
 <doc-grid>
-<code><prompt>$ </prompt><focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
+<bkl-code>$ <focus>ln -s ~/go/bin/bklb ~/go/bin/catb</focus>   # catb could be, e.g. kubectlb
 
-<prompt>$ </prompt><cmd>cat</cmd> <string>service.yaml</string>
-<key>addr</key>: <string>127.0.0.1</string>
-<key>name</key>: <string>myService</string>
-<key>port</key>: <number>8080</number>
+$ cat service.yaml
+addr: 127.0.0.1
+name: myService
+port: 8080
 
-<prompt>$ </prompt><cmd>cat</cmd> <string>service.test.toml</string>
-<key>port</key> = <number>8081</number>
+$ cat service.test.toml
+port = 8081
 
-<prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.toml</string></focus>
-<key>addr</key> = "<string>127.0.0.1</string>"
-<key>name</key> = "<string>myService</string>"
-<key>port</key> = <number>8081</number>
+$ <focus>catb service.test.toml</focus>
+addr = "127.0.0.1"
+name = "myService"
+port = 8081
 
-<prompt>$ </prompt><cmd>cat</cmd> <string>service.test.yaml</string> <string>service.test.json</string>
+$ cat service.test.yaml service.test.json
 cat: service.test.yaml: No such file or directory
 cat: service.test.json: No such file or directory
 
-<prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.yaml</string></focus>
-<key>addr</key>: <string>127.0.0.1</string>
-<key>name</key>: <string>myService</string>
-<key>port</key>: <number>8081</number>
+$ <focus>catb service.test.yaml</focus>
+addr: 127.0.0.1
+name: myService
+port: 8081
 
-<prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.json</string></focus>
-{"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+$ <focus>catb service.test.json</focus>
+{"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
 </doc-grid>
 
 
@@ -1721,7 +1725,7 @@ cat: service.test.json: No such file or directory
 <h2><a name="bkld">bkld</a></h2>
 
 <doc-grid>
-<code><prompt>$ </key><cmd>bkld</cmd> <string>&lt;base_layer_path&gt; &lt;target_output_path&gt;</string></code>
+<bkl-code>$ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;</bkl-code>
 </doc-grid>
 
 
@@ -1729,56 +1733,56 @@ cat: service.test.json: No such file or directory
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <string>$required</string>
-<key>c</key>: <number>3</number></code>
+<bkl-code>a: 1
+b: $required
+c: 3</bkl-code>
 
-<op>?
-→</op>
+?
+→
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>2</number>
-<key>d</key>: <number>4</number></code>
+<bkl-code>a: 1
+b: 2
+d: 4</bkl-code>
 
 <op>=</op>
 
-<code><key>b</key>: <number>2</number>
-<key>c</key>: null
-<key>d</key>: <number>4</number></code>
+<bkl-code>b: 2
+c: null
+d: 4</bkl-code>
 </row>
 
 <row>
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <number>2</number></code>
+<bkl-code>- a: 1
+- b: 2</bkl-code>
 
-<op>?
-→</op>
+?
+→
 
-<code>- <key>a</key>: <number>1</number>
-- <key>c</key>: <number>3</number></code>
+<bkl-code>- a: 1
+- c: 3</bkl-code>
 
 <op>=</op>
 
-<code>- <key>c</key>: <number>3</number>
-- <key>$delete</key>:
-    <key>b</key>: <number>2</number></code>
+<bkl-code>- c: 3
+- $delete:
+    b: 2</bkl-code>
 </row>
 
 <row>
-<code>- <number>1</number>
-- <number>2</number></code>
+<bkl-code>- 1
+- 2</bkl-code>
 
-<op>?
-→</op>
+?
+→
 
-<code>- <number>1</number>
-- <number>3</number></code>
+<bkl-code>- 1
+- 3</bkl-code>
 
 <op>=</op>
 
-<code>- <number>1</number>
-- <number>3</number>
-- <key>$replace</key>: <bool>true</bool></code>
+<bkl-code>- 1
+- 3
+- $replace: true</bkl-code>
 </row>
 </doc-grid>
 
@@ -1788,7 +1792,7 @@ cat: service.test.json: No such file or directory
 <h2><a name="bkli">bkli</a></h2>
 
 <doc-grid>
-<code><prompt>$ </key><cmd>bkli</cmd> <string>&lt;target_output_path&gt; &lt;target_output_path&gt; ...</string></code>
+<bkl-code>$ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...</bkl-code>
 </doc-grid>
 
 
@@ -1798,36 +1802,36 @@ cat: service.test.json: No such file or directory
 
 <doc-grid>
 <row>
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <string>2</string>
-<key>c</key>: <number>3</number></code>
+<bkl-code>a: 1
+b: 2
+c: 3</bkl-code>
 
-<op>∩</op>
+∩
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <number>10</number>
-<key>d</key>: <number>4</number></code>
+<bkl-code>a: 1
+b: 10
+d: 4</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>: <number>1</number>
-<key>b</key>: <string>$required</string></code>
+<bkl-code>a: 1
+b: $required</bkl-code>
 </row>
 
 <row>
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <string>2</string>
-- <key>c</key>: <number>3</number></code>
+<bkl-code>- a: 1
+- b: 2
+- c: 3</bkl-code>
 
-<op>∩</op>
+∩
 
-<code>- <key>a</key>: <number>1</number>
-- <key>b</key>: <number>10</number>
-- <key>d</key>: <number>4</number></code>
+<bkl-code>- a: 1
+- b: 10
+- d: 4</bkl-code>
 
 <op>=</op>
 
-<code>- <key>a</key>: <number>1</number></code>
+<bkl-code>- a: 1</bkl-code>
 </row>
 </doc-grid>
 
@@ -1837,7 +1841,7 @@ cat: service.test.json: No such file or directory
 <h2><a name="bklr">bklr</a></h2>
 
 <doc-grid>
-<code><prompt>$ </key><cmd>bklr</cmd> <string>&lt;lower_layer_path&gt;</string></code>
+<bkl-code>$ bklr &lt;lower_layer_path&gt;</bkl-code>
 </doc-grid>
 
 
@@ -1845,26 +1849,26 @@ cat: service.test.json: No such file or directory
 
 <doc-grid>
 <row>
-<code><key>a</key>:
-  <key>b</key>: <string>$required</string>
-  <key>c</key>: <number>3</number></code>
+<bkl-code>a:
+  b: $required
+  c: 3</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>:
-  <key>b</key>: <string>$required</string></code>
+<bkl-code>a:
+  b: $required</bkl-code>
 </row>
 
 <row>
-<code><key>a</key>:
-  - <string>$required</string>
-<key>b</key>:
-  - <number>2</number></code>
+<bkl-code>a:
+  - $required
+b:
+  - 2</bkl-code>
 
 <op>=</op>
 
-<code><key>a</key>:
-  - <string>$required</string></code>
+<bkl-code>a:
+  - $required</bkl-code>
 </row>
 
 </doc-grid>
@@ -1875,16 +1879,16 @@ cat: service.test.json: No such file or directory
 <h2><a name="kubectl-bkl">kubectl bkl</a></h2>
 
 <doc-grid>
-<code><prompt>$ </prompt></key><cmd>kubectl</cmd> <focus><string>bkl</string></focus> <string>&lt;kubectl_commands&gt;</string></code>
+<bkl-code>$ kubectl <focus>bkl</focus> &lt;kubectl_commands&gt;</bkl-code>
 </doc-grid>
 
 
 <p><ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.</p>
 
 <doc-grid>
-<code># deploy.dev.yaml and deploy.yaml are bkl layer files
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl apply</string> <flag>-f deploy.dev.yaml</flag>
-deployment.apps/deploy-dev unchanged</code>
+<bkl-code># deploy.dev.yaml and deploy.yaml are bkl layer files
+$ kubectl bkl apply -f deploy.dev.yaml
+deployment.apps/deploy-dev unchanged</bkl-code>
 </doc-grid>
 
 
@@ -1897,10 +1901,10 @@ deployment.apps/deploy-dev unchanged</code>
 <doc-grid>
 <div>
 <label>Dockerfile</label>
-<code><cmd>FROM</cmd> <string>ghcr.io/gopatchy/bkl:latest</string> <flag>AS</flag> <key>bkl</key>
+<bkl-code>FROM ghcr.io/gopatchy/bkl:latest AS bkl
 
-<cmd>FROM</cmd> <string>debian:latest</string> <flag>AS</flag> <key>build</key>
-<cmd>COPY</cmd> <flag>--from=bkl</flag> <string>/bin /bin</string></code>
+FROM debian:latest AS build
+COPY --from=bkl /bin /bin</bkl-code>
 </div>
 </doc-grid>
 
@@ -1912,7 +1916,7 @@ deployment.apps/deploy-dev unchanged</code>
 <p>It's easy to see differences between processed bkl files using shell syntax.</p>
 
 <doc-grid>
-<code><prompt>$ </prompt><focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+<bkl-code>$ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
 @@ -1,3 +1,2 @@
@@ -1920,11 +1924,11 @@ deployment.apps/deploy-dev unchanged</code>
 <focus>-b: 2</focus>
  c: 3
 
-<prompt>$ </prompt><focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+$ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
 a: 1                              a: 1
 b: 2                            <focus>&lt;</focus>
 c: 3                              c: 3
-</code>
+</bkl-code>
 </doc-grid>
 
 
@@ -1950,34 +1954,34 @@ c: 3                              c: 3
 <doc-grid>
 <div>
 <label>Export Existing Config</label>
-<code># "kubectl neat" removes status and default value fields
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> -- <string>deploy deploy-dev</string> &gt; <string>deploy-dev-orig.yaml</string>
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> -- <string>deploy deploy-prod</string> &gt; <string>deploy-prod-orig.yaml</string></code>
+<bkl-code># "kubectl neat" removes status and default value fields
+$ kubectl neat get -- deploy deploy-dev &gt; deploy-dev-orig.yaml
+$ kubectl neat get -- deploy deploy-prod &gt; deploy-prod-orig.yaml</bkl-code>
 </div>
 
 <div>
 <label>Generate Base Layer</label>
-<code># See bkli details <a href="#bkli">here</a>
-<prompt>$ </prompt><cmd>bkli</cmd> <flag>-o deploy.yaml</flag> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+<bkl-code># See bkli details <a href="#bkli">here</a>
+$ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
 </div>
 
 <div>
 <label>Generate Service Layers</label>
-<code># See bkld details <a href="#bkld">here</a>
-<prompt>$ </prompt><cmd>bkld</cmd> <flag>-o deploy.dev.yaml</flag> <string>deploy.yaml deploy-dev-orig.yaml</string>
-<prompt>$ </prompt><cmd>bkld</cmd> <flag>-o deploy.prod.yaml</flag> <string>deploy.yaml deploy-prod-orig.yaml</string></code>
+<bkl-code># See bkld details <a href="#bkld">here</a>
+$ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
+$ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml</bkl-code>
 </div>
 
 <div>
 <label>Check Results</label>
-<code># Should show no diff
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl diff</string> <flag>-f deploy.dev.yaml</flag>
-<prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl diff</string> <flag>-f deploy.prod.yaml</flag></code>
+<bkl-code># Should show no diff
+$ kubectl bkl diff -f deploy.dev.yaml
+$ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
 </div>
 
 <div>
 <label>Clean Up</label>
-<code><prompt>$ </prompt><cmd>rm</cmd> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+<bkl-code>$ rm deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
 </div>
 </doc-grid>
 
@@ -2089,7 +2093,7 @@ class DocGrid extends HTMLElement {
       element.style.flexDirection = 'column';
       
       const label = element.querySelector('label');
-      const code = element.querySelector('code');
+      const code = element.querySelector('code, bkl-code');
       
       if (label && code) {
         label.style.marginBottom = '0';
@@ -2110,6 +2114,169 @@ class DocGrid extends HTMLElement {
 }
 
 customElements.define('doc-grid', DocGrid);
+
+// Syntax highlighting web component for bkl
+class BklCode extends HTMLElement {
+  connectedCallback() {
+    // Apply highlighting
+    this.highlight();
+  }
+  
+  highlight() {
+    let html = this.innerHTML;
+    
+    // Preserve existing HTML tags (like <a> links and manual highlights)
+    const placeholder = '___PLACEHOLDER___';
+    const preserved = [];
+    // Preserve links
+    html = html.replace(/<a\b[^>]*>[\s\S]*?<\/a>/g, (match) => {
+      preserved.push(match);
+      return placeholder + (preserved.length - 1) + placeholder;
+    });
+    // Preserve manual highlight tags like <focus>
+    html = html.replace(/<(focus|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
+      preserved.push(match);
+      return placeholder + (preserved.length - 1) + placeholder;
+    });
+    
+    // Split into lines for mixed content handling
+    const lines = html.split('\n');
+    const highlightedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      
+      // Shell command line
+      if (line.match(/^\s*\$/)) {
+        // Prompt
+        line = line.replace(/^(\s*)\$\s/, '$1<prompt>$ </prompt>');
+        
+        // Commands (bkl, bkld, bkli, bklr, etc.)
+        line = line.replace(/(<prompt>\$ <\/prompt>)(\w+)/, '$1<cmd>$2</cmd>');
+        
+        // Flags (words starting with - or --)
+        line = line.replace(/\s(--?\w[\w-]*)/g, ' <flag>$1</flag>');
+        
+        // File paths and arguments after commands
+        line = line.replace(/(<cmd>\w+<\/cmd>|<flag>[\w-]+<\/flag>)(\s+)([^\s<>]+)/g, (match, prev, space, arg) => {
+          if (arg.match(/^--?/)) return match; // Already a flag
+          return prev + space + '<string>' + arg + '</string>';
+        });
+        
+        highlightedLines.push(line);
+      }
+      // TOML format (key = value)
+      else if (line.match(/^\s*(\w+|\[[\w.]+\])\s*=/)) {
+        // TOML section headers
+        line = line.replace(/^(\s*)(\[[\w.]+\])(\s*)$/, '$1<key>$2</key>$3');
+        
+        // TOML key = value
+        line = line.replace(/^(\s*)(\w+)\s*=/, '$1<key>$2</key> =');
+        
+        // Quoted strings
+        line = line.replace(/=\s*"([^"]+)"/g, '= "<string>$1</string>"');
+        line = line.replace(/=\s*'([^']+)'/g, '= \'<string>$1</string>\'');
+        
+        // Booleans and null
+        line = line.replace(/=\s*(true|false|null)\b/g, '= <bool>$1</bool>');
+        
+        // Numbers
+        line = line.replace(/=\s*(-?\d+(?:\.\d+)?)\s*$/g, '= <number>$1</number>');
+        
+        // Unquoted strings (anything else after =)
+        line = line.replace(/=\s*([^"'\s<>][^<>]*)$/g, (match, value) => {
+          if (value.match(/^<(string|number|bool)/)) return match; // Already highlighted
+          return '= <string>' + value.trim() + '</string>';
+        });
+        
+        highlightedLines.push(line);
+      }
+      // YAML format (key: value)
+      else if (line.match(/^\s*\w+:/) || line.match(/^\s*-\s/)) {
+        // YAML keys
+        line = line.replace(/^(\s*)(\w+):/, '$1<key>$2</key>:');
+        
+        // Quoted strings
+        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
+        line = line.replace(/:\s*'([^']+)'/g, ': \'<string>$1</string>\'');
+        
+        // Booleans and null
+        line = line.replace(/:\s*(true|false|null)\b/g, ': <bool>$1</bool>');
+        
+        // Numbers (pure numbers only)
+        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)\s*$/g, ': <number>$1</number>');
+        
+        // Unquoted strings (anything else after :)
+        line = line.replace(/:\s*([^\s<>][^<>]*)$/g, (match, value) => {
+          if (value.match(/^<(string|number|bool)/)) return match; // Already highlighted
+          return ': <string>' + value.trim() + '</string>';
+        });
+        
+        // List items
+        line = line.replace(/^(\s*)-\s+(.+)$/, (match, indent, value) => {
+          // Check if value is already highlighted
+          if (value.match(/^<(string|number|bool)/)) {
+            return indent + '- ' + value;
+          }
+          // Check for numbers
+          if (value.match(/^-?\d+(?:\.\d+)?$/)) {
+            return indent + '- <number>' + value + '</number>';
+          }
+          // Check for booleans
+          if (value.match(/^(true|false|null)$/)) {
+            return indent + '- <bool>' + value + '</bool>';
+          }
+          // Everything else is a string
+          return indent + '- <string>' + value + '</string>';
+        });
+        
+        highlightedLines.push(line);
+      }
+      // JSON format
+      else if (line.match(/^\s*"?\w+"?\s*:/) || line.match(/^\s*[{}[\],]?\s*$/)) {
+        // JSON keys (quoted or unquoted)
+        line = line.replace(/^(\s*)"(\w+)"(\s*):/, '$1"<key>$2</key>"$3:');
+        line = line.replace(/^(\s*)(\w+)(\s*):/, '$1<key>$2</key>$3:');
+        
+        // Quoted strings
+        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
+        
+        // Booleans and null
+        line = line.replace(/:\s*(true|false|null)([,\s}]|$)/g, ': <bool>$1</bool>$2');
+        
+        // Numbers
+        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)([,\s}]|$)/g, ': <number>$1</number>$2');
+        
+        highlightedLines.push(line);
+      }
+      else {
+        // Default: leave as is
+        highlightedLines.push(line);
+      }
+    }
+    
+    html = highlightedLines.join('\n');
+    
+    // Apply bkl-specific directive highlighting across all formats
+    html = html.replace(/\$(env|merge|replace|match|output|repeat|decode|encode|delete|required|parent|value|path|invert|first|last|count|step)(?::[\w.]+)?/g, (match) => {
+      return '<focus>' + match + '</focus>';
+    });
+    
+    // String interpolation
+    html = html.replace(/\$"[^"]+"/g, (match) => {
+      return '<focus>' + match + '</focus>';
+    });
+    
+    // Restore preserved content
+    html = html.replace(new RegExp(placeholder + '(\\d+)' + placeholder, 'g'), (match, index) => {
+      return preserved[parseInt(index)];
+    });
+    
+    this.innerHTML = html;
+  }
+}
+
+customElements.define('bkl-code', BklCode);
 </script>
 
 </body>
