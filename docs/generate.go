@@ -129,11 +129,11 @@ func main() {
 	}
 
 	// Write output
-	if err := os.WriteFile("index-new.html", buf.Bytes(), 0o644); err != nil {
+	if err := os.WriteFile("index.html", buf.Bytes(), 0o644); err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Generated index-new.html")
+	fmt.Println("Generated index.html")
 }
 
 func formatContent(content string) template.HTML {
