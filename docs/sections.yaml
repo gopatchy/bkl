@@ -1,0 +1,113 @@
+# bkl Documentation Sections
+# Ordered list of documentation sections
+
+- id: example
+  title: Example
+  items:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: service.yaml
+                code: |
+                  addr: 127.0.0.1
+                  name: myService
+                  port: 8080
+              - label: service.test.toml
+                code: |
+                  port = 8081
+                highlights: ["8081"]
+          - items:
+              - label: "Run it!"
+                code: |
+                  $ bkl service.test.toml
+                  addr = '127.0.0.1'
+                  name = 'myService'
+                  port = 8081
+                highlights: ["8081"]
+    - type: text
+      content: |
+        bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>) and uses filename extensions to determine formats.
+
+- id: install
+  title: Install
+  items:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: Using go
+                code: |
+                  # Install go from <a href="https://go.dev/dl/">go.dev</a>
+                  $ go install github.com/gopatchy/bkl/...@latest
+                  # Verify that ~/go/bin is in your $PATH
+          - items:
+              - label: macOS using brew
+                code: |
+                  # Install brew from <a href="https://brew.sh/">brew.sh</a>
+                  $ brew install gopatchy/bkl/bkl
+    - type: text
+      content: |
+        You can also download binaries directly <a href="https://github.com/gopatchy/bkl/releases">here</a>.
+
+- id: formats
+  title: Formats
+  items:
+    - type: text
+      content: |
+        Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: YAML
+                code: |
+                  $ bkl -f yaml service.test.toml
+                  addr: 127.0.0.1
+                  name: myService
+                  port: 8081
+                highlights: ["-f yaml"]
+          - items:
+              - label: TOML
+                code: |
+                  $ bkl -f toml service.test.toml
+                  addr = '127.0.0.1'
+                  name = 'myService'
+                  port = 8081
+                highlights: ["-f toml"]
+          - items:
+              - label: JSON
+                code: |
+                  $ bkl -f json service.test.toml
+                  {"addr":"127.0.0.1","name":"myService","port":8081}
+                highlights: ["-f json"]
+          - items:
+              - label: JSON (pretty)
+                code: |
+                  $ bkl -f json-pretty service.test.toml
+                  {
+                    "addr": "127.0.0.1",
+                    "name": "myService",
+                    "port": 8081
+                  }
+                highlights: ["-f json-pretty"]
+    - type: text
+      content: |
+        <ifocus>jsonl</ifocus> is an alias for <ifocus>json</ifocus> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
+    - type: text
+      content: |
+        You can also set the output format implicitly by using a different file extension.
+    - type: example
+      example:
+        type: single
+        label: ""
+        code: |
+          $ bkl service.test.<focus>yaml</focus>   # real file is service.test.<focus>toml</focus>
+          addr: 127.0.0.1
+          name: myService
+          port: 8081
+
+# ... Add more sections following the same pattern ...

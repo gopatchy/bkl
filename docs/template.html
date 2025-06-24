@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{.Title}}</title>
+<link rel="icon" href="data:image/png;base64,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">
+<style>
+:root {
+	--vivid0: hsl(6deg 96% 26%);
+	--vivid1: hsl(8deg 92% 35%);
+	--vivid2: hsl(10deg 93% 40%);
+	--vivid3: hsl(12deg 86% 47%);
+	--vivid4: hsl(14deg 89% 55%);
+	--vivid5: hsl(16deg 94% 61%);
+	--vivid6: hsl(18deg 100% 70%);
+	--vivid7: hsl(20deg 100% 77%);
+	--vivid8: hsl(22deg 100% 85%);
+	--vivid9: hsl(24deg 100% 93%);
+	--neutral0: hsl(210deg 24% 16%);
+	--neutral1: hsl(209deg 20% 25%);
+	--neutral2: hsl(209deg 18% 30%);
+	--neutral3: hsl(209deg 14% 37%);
+	--neutral4: hsl(211deg 12% 43%);
+	--neutral5: hsl(211deg 10% 53%);
+	--neutral6: hsl(211deg 13% 65%);
+	--neutral7: hsl(210deg 16% 82%);
+	--neutral8: hsl(214deg 15% 91%);
+	--neutral9: hsl(216deg 33% 97%);
+	--blue0: hsl(234deg 62% 26%);
+	--blue1: hsl(232deg 51% 36%);
+	--blue2: hsl(230deg 49% 41%);
+	--blue3: hsl(228deg 45% 45%);
+	--blue4: hsl(227deg 42% 51%);
+	--blue5: hsl(227deg 50% 59%);
+	--blue6: hsl(225deg 57% 67%);
+	--blue7: hsl(224deg 67% 76%);
+	--blue8: hsl(221deg 78% 86%);
+	--blue9: hsl(221deg 68% 93%);
+	--red0: hsl(360deg 92% 20%);
+	--red1: hsl(360deg 85% 25%);
+	--red2: hsl(360deg 79% 32%);
+	--red3: hsl(360deg 72% 38%);
+	--red4: hsl(360deg 67% 44%);
+	--red5: hsl(360deg 64% 55%);
+	--red6: hsl(360deg 71% 66%);
+	--red7: hsl(360deg 77% 78%);
+	--red8: hsl(360deg 82% 89%);
+	--red9: hsl(360deg 100% 97%);
+	--yellow0: hsl(43deg 86% 17%);
+	--yellow1: hsl(43deg 77% 27%);
+	--yellow2: hsl(43deg 72% 37%);
+	--yellow3: hsl(42deg 63% 48%);
+	--yellow4: hsl(42deg 78% 60%);
+	--yellow5: hsl(43deg 89% 70%);
+	--yellow6: hsl(43deg 90% 76%);
+	--yellow7: hsl(45deg 86% 81%);
+	--yellow8: hsl(45deg 90% 88%);
+	--yellow9: hsl(45deg 100% 96%);
+	--green0: hsl(125deg 86% 14%);
+	--green1: hsl(125deg 73% 20%);
+	--green2: hsl(125deg 56% 29%);
+	--green3: hsl(122deg 47% 35%);
+	--green4: hsl(122deg 39% 41%);
+	--green5: hsl(123deg 35% 51%);
+	--green6: hsl(123deg 38% 63%);
+	--green7: hsl(122deg 42% 75%);
+	--green8: hsl(126deg 49% 84%);
+	--green9: hsl(125deg 65% 93%);
+}
+
+@font-face {
+	font-family: "komet";
+	src: url({{.KometFontData | safeURL}});
+}
+
+@font-face {
+	font-family: "source-code-pro";
+	src: url({{.SourceCodeProFontData | safeURL}});
+}
+
+body {
+	align-items: stretch;
+	background-color: var(--neutral9);
+	color: var(--neutral1);
+	display: flex;
+	font-family: "komet";
+	font-size: 17px;
+	gap: 50px;
+	justify-content: center;
+	line-height: 1.4;
+	margin: 0;
+	min-height: 100vh;
+	padding: 20px;
+}
+
+nav {
+	overflow-y: auto;
+	position: sticky;
+	top: 20px;
+	height: calc(100vh - 40px);
+}
+
+nav ol {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+li {
+	padding-bottom: 10px;
+}
+
+nav a {
+	color: var(--neutral5);
+	text-decoration: none;
+}
+
+main {
+	max-width: min(750px, 100vw - 20px);
+}
+
+h1, h2 {
+	margin-bottom: 5px;
+	margin-top: 30px;
+}
+
+h1 {
+	align-items: center;
+	color: var(--vivid4);
+	display: flex;
+	font-size: 30px;
+	gap: 10px;
+	margin: 0;
+	padding: 10px 0 10px 0;
+	position: relative;
+}
+
+h1 img.logo {
+	height: 50px;
+	margin-right: 10px;
+}
+
+h2 {
+	color: var(--vivid2);
+	font-family: source-code-pro;
+	font-size: 25px;
+}
+
+h2 a {
+	color: inherit;
+	text-decoration: none;
+}
+
+p {
+	hyphens: auto;
+	margin: 0 0 10px 0;
+}
+
+a {
+	color: var(--blue5);
+}
+
+label {
+	background: var(--neutral2);
+	border-radius: 5px 5px 0 0;
+	color: var(--neutral8);
+	font-family: source-code-pro;
+	display: block;
+	padding: 6px 15px 4px 15px;
+	width: fit-content;
+}
+
+label.invisible {
+	background: transparent;
+	color: transparent;
+}
+
+code,
+bkl-code {
+	color: var(--neutral7);
+	background: var(--neutral0);
+	border-radius: 5px;
+	display: block;
+	font-family: source-code-pro;
+	font-size: 16px;
+	height: fit-content;
+	hyphens: none;
+	line-height: 1.5;
+	overflow: auto;
+	padding: 15px;
+	tab-size: 4;
+	text-align: left;
+	white-space: pre;
+	width: 100%;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	box-sizing: border-box;
+}
+
+doc-grid code,
+doc-grid bkl-code {
+	height: 100%;
+}
+
+/* Fix top-left corner when label is present */
+label + code,
+label + bkl-code {
+	border-top-left-radius: 0 !important;
+}
+
+code + p,
+bkl-code + p,
+doc-grid + p,
+div:has(> code) + p,
+div:has(> bkl-code) + p {
+	margin-top: 10px;
+}
+
+/* Ensure doc-grid doesn't exceed text width */
+doc-grid {
+	max-width: 100%;
+	overflow: hidden;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+/* Row is styled by JavaScript, but ensure it's a block element */
+row {
+	display: block;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+/* Ensure grid items don't overflow */
+doc-grid row > div {
+	min-width: 0;
+	overflow: hidden;
+}
+
+op {
+	align-items: center;
+	display: flex;
+	font-size: 30px;
+	justify-content: center;
+	line-height: 0.5;
+	text-align: center;
+	white-space: pre;
+}
+
+key {
+	color: var(--yellow4);
+}
+
+prompt {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+cmd {
+	color: var(--blue5);
+}
+
+string {
+	color: var(--green6);
+}
+
+number {
+	color: var(--green6);
+}
+
+bool {
+	color: var(--green6);
+}
+
+flag {
+	color: var(--blue5);
+}
+
+focus, focus > * {
+	color: var(--red6);
+}
+
+ifocus {
+	background: var(--neutral8);
+	color: var(--red6);
+	display: inline-block;
+	font-family: source-code-pro;
+	font-size: 15px;
+	padding: 0 3px 0 3px;
+	white-space: nowrap;
+}
+
+ifocus * {
+	color: var(--red6) !important;
+}
+</style>
+<script>
+// Web components from original HTML
+class DocGrid extends HTMLElement {
+  connectedCallback() {
+    this.style.display = 'flex';
+    this.style.flexDirection = 'column';
+    this.style.gap = '15px';
+    
+    // Force initialization after a delay as well
+    setTimeout(() => this.initializeGrid(), 0);
+    this.initializeGrid();
+  }
+  
+  initializeGrid() {
+    Array.from(this.children).forEach(child => {
+      if (child.tagName === 'ROW') {
+        child.style.display = 'grid';
+        child.style.alignItems = 'stretch';
+        child.style.columnGap = '15px';
+        
+        const numChildren = child.children.length;
+        if (numChildren === 1) {
+          child.style.gridTemplateColumns = '1fr';
+        } else if (numChildren === 2) {
+          child.style.gridTemplateColumns = '1fr 1fr';
+        } else if (numChildren === 3) {
+          const middleChild = child.children[1];
+          if (middleChild && middleChild.tagName === 'OP') {
+            child.style.gridTemplateColumns = '1fr auto 1fr';
+          } else {
+            child.style.gridTemplateColumns = '1fr 1fr 1fr';
+          }
+        } else if (numChildren === 5) {
+          child.style.gridTemplateColumns = '1fr auto 1fr auto 1fr';
+        }
+        
+        Array.from(child.children).forEach((grandchild, index) => {
+          this.processElement(grandchild);
+          
+          const hasLabels = Array.from(child.children).some(c => 
+            c.tagName === 'DIV' && 
+            c.querySelector('label') && 
+            !c.querySelector('label').classList.contains('invisible')
+          );
+          
+          if (hasLabels && grandchild.tagName === 'OP') {
+            grandchild.style.paddingTop = '27px';
+          }
+        });
+      } else {
+        this.processElement(child);
+        child.style.flexShrink = '0';
+      }
+    });
+  }
+  
+  processElement(element) {
+    if (element.tagName === 'DIV') {
+      element.style.display = 'flex';
+      element.style.flexDirection = 'column';
+      
+      const label = element.querySelector('label');
+      const code = element.querySelector('code, bkl-code');
+      
+      if (label && code) {
+        label.style.marginBottom = '0';
+        code.style.marginTop = '0';
+        code.style.flexGrow = '1';
+        
+        if (!label.classList.contains('invisible')) {
+          code.style.borderRadius = '0 5px 5px 5px';
+          code.style.borderTopLeftRadius = '0';
+        }
+      } else if (code && !label) {
+        code.style.flexGrow = '1';
+        code.style.height = '100%';
+      }
+    }
+  }
+}
+
+class BklCode extends HTMLElement {
+  connectedCallback() {
+    this.highlight();
+  }
+  
+  constructor() {
+    super();
+    // Try highlighting after a small delay as well
+    setTimeout(() => this.highlight(), 100);
+  }
+  
+  highlight() {
+    // Get the raw text content, handling both escaped and unescaped content
+    let html = this.innerHTML;
+    
+    // Preserve existing HTML tags first (like focus tags)
+    const placeholder = '___PLACEHOLDER___';
+    const preserved = [];
+    html = html.replace(/<(focus|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
+      preserved.push(match);
+      return placeholder + (preserved.length - 1) + placeholder;
+    });
+    
+    // Now get the text content to handle any remaining HTML entities
+    if (html.includes('&')) {
+      const temp = document.createElement('div');
+      temp.innerHTML = html;
+      html = temp.textContent || temp.innerText || '';
+      
+      // Restore preserved tags
+      for (let i = 0; i < preserved.length; i++) {
+        html = html.replace(placeholder + i + placeholder, preserved[i]);
+      }
+      preserved.length = 0;  // Clear for reuse below
+    }
+    
+    // Re-preserve focus and other highlighting tags
+    html = html.replace(/<(focus|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
+      preserved.push(match);
+      return placeholder + (preserved.length - 1) + placeholder;
+    });
+    
+    const lines = html.split('\n');
+    const highlightedLines = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      
+      if (line.match(/^\s*\$/)) {
+        line = line.replace(/^(\s*)\$\s/, '$1<prompt>$ </prompt>');
+        line = line.replace(/(<prompt>\$ <\/prompt>)(\w+)/, '$1<cmd>$2</cmd>');
+        line = line.replace(/\s(--?\w[\w-]*)/g, ' <flag>$1</flag>');
+        line = line.replace(/(<cmd>\w+<\/cmd>|<flag>[\w-]+<\/flag>)(\s+)([^\s<>]+)/g, (match, prev, space, arg) => {
+          if (arg.match(/^--?/)) return match;
+          return prev + space + '<string>' + arg + '</string>';
+        });
+        highlightedLines.push(line);
+      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s*=/)) {
+        line = line.replace(/^(\s*)(\[[\w.]+\])(\s*)$/, '$1<key>$2</key>$3');
+        line = line.replace(/^(\s*)(\w+)\s*=/, '$1<key>$2</key> =');
+        line = line.replace(/=\s*"([^"]+)"/g, '= "<string>$1</string>"');
+        line = line.replace(/=\s*'([^']+)'/g, '= \'<string>$1</string>\'');
+        line = line.replace(/=\s*(true|false|null)\b/g, '= <bool>$1</bool>');
+        line = line.replace(/=\s*(-?\d+(?:\.\d+)?)\s*$/g, '= <number>$1</number>');
+        line = line.replace(/=\s*([^"'\s<>][^<>]*)$/g, (match, value) => {
+          if (value.match(/^<(string|number|bool)/)) return match;
+          return '= <string>' + value.trim() + '</string>';
+        });
+        highlightedLines.push(line);
+      } else if (line.match(/^\s*\w+:/) || line.match(/^\s*-\s/)) {
+        line = line.replace(/^(\s*)(\w+):/, '$1<key>$2</key>:');
+        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
+        line = line.replace(/:\s*'([^']+)'/g, ': \'<string>$1</string>\'');
+        line = line.replace(/:\s*(true|false|null)\b/g, ': <bool>$1</bool>');
+        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)\s*$/g, ': <number>$1</number>');
+        line = line.replace(/:\s*([^\s<>][^<>]*)$/g, (match, value) => {
+          if (value.match(/^<(string|number|bool)/)) return match;
+          return ': <string>' + value.trim() + '</string>';
+        });
+        line = line.replace(/^(\s*)-\s+(.+)$/, (match, indent, value) => {
+          if (value.match(/^<(string|number|bool)/)) {
+            return indent + '- ' + value;
+          }
+          if (value.match(/^-?\d+(?:\.\d+)?$/)) {
+            return indent + '- <number>' + value + '</number>';
+          }
+          if (value.match(/^(true|false|null)$/)) {
+            return indent + '- <bool>' + value + '</bool>';
+          }
+          return indent + '- <string>' + value + '</string>';
+        });
+        highlightedLines.push(line);
+      } else if (line.match(/^\s*"?\w+"?\s*:/) || line.match(/^\s*[{}[\],]?\s*$/)) {
+        line = line.replace(/^(\s*)"(\w+)"(\s*):/, '$1"<key>$2</key>"$3:');
+        line = line.replace(/^(\s*)(\w+)(\s*):/, '$1<key>$2</key>$3:');
+        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
+        line = line.replace(/:\s*(true|false|null)([,\s}]|$)/g, ': <bool>$1</bool>$2');
+        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)([,\s}]|$)/g, ': <number>$1</number>$2');
+        highlightedLines.push(line);
+      } else {
+        highlightedLines.push(line);
+      }
+    }
+    
+    html = highlightedLines.join('\n');
+    
+    html = html.replace(/\$(env|merge|replace|match|output|repeat|decode|encode|delete|required|parent|value|path|invert|first|last|count|step)(?::[\w.]+)?/g, (match) => {
+      return '<focus>' + match + '</focus>';
+    });
+    
+    html = html.replace(/\$"[^"]+"/g, (match) => {
+      return '<focus>' + match + '</focus>';
+    });
+    
+    html = html.replace(new RegExp(placeholder + '(\\d+)' + placeholder, 'g'), (match, index) => {
+      return preserved[parseInt(index)];
+    });
+    
+    this.innerHTML = html;
+  }
+}
+
+customElements.define('doc-grid', DocGrid);
+customElements.define('bkl-code', BklCode);
+
+// Also try to highlight any bkl-code elements after page load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    document.querySelectorAll('bkl-code').forEach(el => {
+      if (el.highlight) el.highlight();
+    });
+    // Also reinitialize doc-grid elements
+    document.querySelectorAll('doc-grid').forEach(el => {
+      if (el.initializeGrid) el.initializeGrid();
+    });
+  }, 100);
+});
+</script>
+</head>
+<body>
+
+<nav>
+<ol>
+{{range .Sections}}
+	<li><a href="#{{.ID}}">{{.Title}}</a></li>
+{{end}}
+</ol>
+</nav>
+
+<main>
+
+	<h1><img class="logo" src="{{.LogoData | safeURL}}" alt="bkl">
+BKL</h1>
+
+<p>{{.IntroText1 | formatContent}}</p>
+
+<p>{{.IntroText2 | formatContent}}</p>
+
+<p>
+{{.Badges | formatContent}}
+</p>
+
+{{range .Sections}}
+<section id="{{.ID}}">
+<h2><a name="{{.ID}}">{{.Title}}</a></h2>
+
+{{range $item := .Items}}
+{{if eq $item.Type "text"}}
+<p>{{$item.Content | formatContent}}</p>
+{{else if eq $item.Type "example"}}
+{{$example := $item.Example}}
+{{if eq $example.Type "grid"}}
+<doc-grid>
+{{range $rowIndex, $row := $example.Rows}}
+{{if gt $rowIndex 0}}{{if $row.Operator}}<op>{{$row.Operator}}</op>{{end}}{{end}}
+<row>
+{{range $item := $row.Items}}
+<div>
+<label>{{$item.Label}}</label>
+<bkl-code>{{$item | formatCode}}</bkl-code>
+</div>
+{{end}}
+</row>
+{{end}}
+</doc-grid>
+{{else if eq $example.Type "single"}}
+<doc-grid>
+{{if $example.Label}}
+<div>
+<label>{{$example.Label}}</label>
+<bkl-code>{{$example | formatExample}}</bkl-code>
+</div>
+{{else}}
+<bkl-code>{{$example | formatExample}}</bkl-code>
+{{end}}
+</doc-grid>
+{{end}}
+{{end}}
+{{end}}
+
+</section>
+{{end}}
+
+</main>
+
+</body>
+</html>
