@@ -2058,8 +2058,21 @@ class DocGrid extends HTMLElement {
         }
         
         // Process row's children
-        Array.from(child.children).forEach(grandchild => {
+        Array.from(child.children).forEach((grandchild, index) => {
           this.processElement(grandchild);
+          
+          // Check if this row has any labeled code blocks
+          const hasLabels = Array.from(child.children).some(c => 
+            c.tagName === 'DIV' && 
+            c.querySelector('label') && 
+            !c.querySelector('label').classList.contains('invisible')
+          );
+          
+          // If there are labels and this is an operator, add padding
+          if (hasLabels && grandchild.tagName === 'OP') {
+            // Add padding to align with code blocks that have labels
+            grandchild.style.paddingTop = '27px'; // Height of label + margins
+          }
         });
       } else {
         // Non-row elements are processed directly
