@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>bkl - Configuration Templating Language</title>
+<title>bkl - Layered Configuration Language</title>
 <link rel="icon" href="data:image/png;base64,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">
 <style>
 :root {
@@ -401,25 +401,6 @@ class BklCode extends HTMLElement {
       return placeholder + (preserved.length - 1) + placeholder;
     });
     
-    
-    if (html.includes('&')) {
-      const temp = document.createElement('div');
-      temp.innerHTML = html;
-      html = temp.textContent || temp.innerText || '';
-      
-      
-      for (let i = 0; i < preserved.length; i++) {
-        html = html.replace(placeholder + i + placeholder, preserved[i]);
-      }
-      preserved.length = 0;  
-    }
-    
-    
-    html = html.replace(/<(focus|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
-      preserved.push(match);
-      return placeholder + (preserved.length - 1) + placeholder;
-    });
-    
     const lines = html.split('\n');
     const highlightedLines = [];
     
@@ -555,6 +536,30 @@ document.addEventListener('DOMContentLoaded', () => {
 	<li><a href="#replace">$replace</a></li>
 
 	<li><a href="#output">$output</a></li>
+
+	<li><a href="#repeat">$repeat</a></li>
+
+	<li><a href="#escape">$$</a></li>
+
+	<li><a href="#toml">TOML</a></li>
+
+	<li><a href="#bklb">bklb</a></li>
+
+	<li><a href="#bkld">bkld</a></li>
+
+	<li><a href="#bkli">bkli</a></li>
+
+	<li><a href="#bklr">bklr</a></li>
+
+	<li><a href="#kubectl-bkl">kubectl bkl</a></li>
+
+	<li><a href="#docker">Docker</a></li>
+
+	<li><a href="#diff">diff</a></li>
+
+	<li><a href="#migrate">Migrate</a></li>
+
+	<li><a href="#comparison">Comparison</a></li>
 
 </ol>
 </nav>
@@ -3121,6 +3126,1022 @@ b: 2</bkl-code>
 
 
 <p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
+</p>
+
+
+
+</section>
+
+<section id="repeat">
+<h2><a name="repeat">$repeat</a></h2>
+
+
+
+<p><ifocus>$repeat:</ifocus> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <ifocus>$repeat</ifocus> can be used to reference the zero-based repeat index.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: foo
+b: <focus>$repeat</focus>
+<focus>$repeat: 2</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a: foo
+b: 0
+---
+a: foo
+b: 1</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>$repeat:</ifocus> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code><focus>$repeat:
+  a: 2
+  b: 3</focus>
+$value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>0,0
+---
+0,1
+---
+0,2
+---
+1,0
+---
+1,1
+---
+1,2</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>$repeat:</ifocus> can contain a list of values to iterate over:
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code><focus>$repeat: [x, y, z]</focus>
+a: <focus>$repeat</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a: x
+---
+a: y
+---
+a: z</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>$repeat:</ifocus> supports range parameters for numeric sequences:
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code><focus>$repeat:
+  $first: 10
+  $count: 3</focus>
+a: <focus>$repeat</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a: 10
+---
+a: 11
+---
+a: 12</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Range parameters require exactly 2 of <ifocus>$first</ifocus>, <ifocus>$last</ifocus>, and <ifocus>$count</ifocus>. Optional <ifocus>$step</ifocus> defaults to 1.
+</p>
+
+
+
+<p><ifocus>$repeat:</ifocus> also works at the object level within maps and lists:
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a:
+  $"b{$repeat}":
+    c: <focus>$repeat</focus>
+    <focus>$repeat: 3</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a:
+  b0:
+    c: 0
+  b1:
+    c: 1
+  b2:
+    c: 2</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Object-level repeat in lists:
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a:
+  - b: <focus>$repeat</focus>
+    <focus>$repeat: [x, y, z]</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a:
+  - b: x
+  - b: y
+  - b: z</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="escape">
+<h2><a name="escape">$$</a></h2>
+
+
+
+<p><ifocus>$$</ifocus> translates to a literal <ifocus>$</ifocus> in cases where it would otherwise trigger special handling.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: <focus>$$env:foo</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a: <focus>$env:foo</focus></bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="toml">
+<h2><a name="toml">TOML</a></h2>
+
+
+
+<p>TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:
+</p>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code><focus>"$parent"</focus> = false</bkl-code>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="bklb">
+<h2><a name="bklb">bklb</a></h2>
+
+
+
+<p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code>$ <focus>ln -s ~/go/bin/bklb ~/go/bin/catb</focus>   # catb could be, e.g. kubectlb
+
+$ cat service.yaml
+addr: 127.0.0.1
+name: myService
+port: 8080
+
+$ cat service.test.toml
+port = 8081
+
+$ <focus>catb service.test.toml</focus>
+addr = "127.0.0.1"
+name = "myService"
+port = 8081
+
+$ cat service.test.yaml service.test.json
+cat: service.test.yaml: No such file or directory
+cat: service.test.json: No such file or directory
+
+$ <focus>catb service.test.yaml</focus>
+addr: 127.0.0.1
+name: myService
+port: 8081
+
+$ <focus>catb service.test.json</focus>
+{"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
+
+</doc-grid>
+
+
+
+
+<p>Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
+</p>
+
+
+
+<p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program so they can coexist in your PATH.
+</p>
+
+
+
+</section>
+
+<section id="bkld">
+<h2><a name="bkld">bkld</a></h2>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code>$ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;</bkl-code>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>bkld</ifocus> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+b: $required
+c: 3</bkl-code>
+
+</div>
+
+<op>?</op>
+
+<div>
+
+
+<bkl-code>a: 1
+b: 2
+d: 4</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>b: 2
+c: null
+d: 4</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- a: 1
+- b: 2</bkl-code>
+
+</div>
+
+<op>?</op>
+
+<div>
+
+
+<bkl-code>- a: 1
+- c: 3</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- c: 3
+- $delete:
+    b: 2</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- 1
+- 2</bkl-code>
+
+</div>
+
+<op>?</op>
+
+<div>
+
+
+<bkl-code>- 1
+- 3</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- 1
+- 3
+- $replace: true</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="bkli">
+<h2><a name="bkli">bkli</a></h2>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code>$ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...</bkl-code>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>bkli</ifocus> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.
+</p>
+
+
+
+<p>Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+b: 2
+c: 3</bkl-code>
+
+</div>
+
+<op>∩</op>
+
+<div>
+
+
+<bkl-code>a: 1
+b: 10
+d: 4</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>a: 1
+b: $required</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- a: 1
+- b: 2
+- c: 3</bkl-code>
+
+</div>
+
+<op>∩</op>
+
+<div>
+
+
+<bkl-code>- a: 1
+- b: 10
+- d: 4</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- a: 1</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="bklr">
+<h2><a name="bklr">bklr</a></h2>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code>$ bklr &lt;lower_layer_path&gt;</bkl-code>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>bklr</ifocus> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a:
+  b: $required
+  c: 3</bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a:
+  b: $required</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a:
+  - $required
+b:
+  - 2</bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a:
+  - $required</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="kubectl-bkl">
+<h2><a name="kubectl-bkl">kubectl bkl</a></h2>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code>$ kubectl <focus>bkl</focus> &lt;kubectl_commands&gt;</bkl-code>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code># deploy.dev.yaml and deploy.yaml are bkl layer files
+$ kubectl bkl apply -f deploy.dev.yaml
+deployment.apps/deploy-dev unchanged</bkl-code>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="docker">
+<h2><a name="docker">Docker</a></h2>
+
+
+
+<p>bkl docker images are available at <ifocus>ghcr.io/gopatchy/bkl:latest</ifocus> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<div>
+<label>Dockerfile</label>
+<bkl-code>FROM ghcr.io/gopatchy/bkl:latest AS bkl
+
+FROM debian:latest AS build
+COPY --from=bkl /bin /bin</bkl-code>
+</div>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="diff">
+<h2><a name="diff">diff</a></h2>
+
+
+
+<p>It's easy to see differences between processed bkl files using shell syntax.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<bkl-code>$ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+--- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
++++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
+@@ -1,3 +1,2 @@
+ a: 1
+<focus>-b: 2</focus>
+ c: 3
+
+$ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+a: 1                              a: 1
+b: 2                            <focus>&lt;</focus>
+c: 3                              c: 3</bkl-code>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="migrate">
+<h2><a name="migrate">Migrate</a></h2>
+
+
+
+<p>Below is an example process for migrating an existing set of configurations to <ifocus>bkl</ifocus>. It contains some Kubernetes-specific items but the use of the <ifocus>bkl*</ifocus> tools applies to any configuration source.
+</p>
+
+
+
+<p>We assume you start with two K8s deployments called <ifocus>deploy-dev</ifocus> and <ifocus>deploy-prod</ifocus> which are similar but not identical.
+</p>
+
+
+
+<p>First, install tools:
+
+<ul>
+<li><a href="#install">bkl</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a></li>
+<li><a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/">krew</a></li>
+<li><a href="https://github.com/itaysk/kubectl-neat#installation">neat</a></li>
+</ul>
+</p>
+
+
+
+<p>It's possible to export configuration directly from existing templating systems (e.g. <ifocus>kustomize build</ifocus>, <ifocus>helm install --dry-run --debug</ifocus>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<div>
+<label>Export Existing Config</label>
+<bkl-code># "kubectl neat" removes status and default value fields
+$ kubectl neat get -- deploy deploy-dev > deploy-dev-orig.yaml
+$ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml</bkl-code>
+</div>
+
+</doc-grid>
+
+
+
+
+
+
+<doc-grid>
+
+<div>
+<label>Generate Base Layer</label>
+<bkl-code># See bkli details <a href="#bkli">here</a>
+$ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
+</div>
+
+</doc-grid>
+
+
+
+
+
+
+<doc-grid>
+
+<div>
+<label>Generate Service Layers</label>
+<bkl-code># See bkld details <a href="#bkld">here</a>
+$ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
+$ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml</bkl-code>
+</div>
+
+</doc-grid>
+
+
+
+
+
+
+<doc-grid>
+
+<div>
+<label>Check Results</label>
+<bkl-code># Should show no diff
+$ kubectl bkl diff -f deploy.dev.yaml
+$ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
+</div>
+
+</doc-grid>
+
+
+
+
+
+
+<doc-grid>
+
+<div>
+<label>Clean Up</label>
+<bkl-code>$ rm deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
+</div>
+
+</doc-grid>
+
+
+
+
+<p>You now have 3 bkl files:
+
+<ul>
+<li><ifocus>deploy.yaml</ifocus> is the base layer containing values common to both deployments</li>
+<li><ifocus>deploy.dev.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-dev</ifocus></li>
+<li><ifocus>deploy.prod.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-prod</ifocus></li>
+</ul>
+</p>
+
+
+
+<p>The migration process isn't deterministic; there are design and aesthetic considerations. Here are some general tips:
+
+<ul>
+<li>Start with the most similar examples to maximize base layer size</li>
+<li>Consider intermediate layers that make sense (e.g. <ifocus>deploy.yaml</ifocus> → <ifocus>deploy.frontend.yaml</ifocus> → <ifocus>deploy.frontend.prod.yaml</ifocus>)</li>
+<li>Split large configurations into logical subfiles; bkl can merge across file boundaries</li>
+<li>Iterate by diffing your evaluated layers against production (e.g. <ifocus>kubectl bkl diff -f</ifocus>), making small changes, then diffing again.</li>
+<li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
+<li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
+<li>Remove duplication with <ifocus>$merge:</ifocus> but avoid chained merge paths.</li>
+<li>Avoid using hidden <ifocus>$output: false</ifocus> trees as template variables; prefer overriding values in-place.</li>
+<li><ifocus>bkld</ifocus> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <ifocus>containers</ifocus>) that could be trivially patched. Use <ifocus>$match:</ifocus> to select the container and override values within it.</li>
+</ul>
+</p>
+
+
+
+</section>
+
+<section id="comparison">
+<h2><a name="comparison">Comparison</a></h2>
+
+
+
+<p>bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:
+
+<ul>
+<li>Configuration and templating/layering should be generic, not service-specific.</li>
+<li>Configuration and templating/layering should be separate from deployment tooling.</li>
+<li>Configuration files should be written in standard formats (JSON, YAML, TOML) and parseable by their standard parsers.</li>
+<li>Basic functionality should be available without learning custom syntax.</li>
+<li>Non-templatized configuration (e.g. StackOverflow answers) should be usable without modification.</li>
+<li>File composition should be accomplished without meta configuration (e.g. manifest files).</li>
+<li>Templating/layering behavior should be intuitive and produce expected results.</li>
+<li>Documentation and examples should be excellent.</li>
+</ul>
 </p>
 
 

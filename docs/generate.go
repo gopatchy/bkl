@@ -50,7 +50,6 @@ type GridItem struct {
 
 // TemplateData holds all data for the template
 type TemplateData struct {
-	Title                 string
 	Description           string
 	IntroText1            string
 	IntroText2            string
@@ -111,7 +110,6 @@ func main() {
 
 	// Prepare data
 	templateData := TemplateData{
-		Title:       "bkl - Configuration Templating Language",
 		Description: "A flexible configuration templating language that simplifies configuration management across environments.",
 		IntroText1:  "bkl is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.",
 		IntroText2:  `Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts or automate with the <a href="https://pkg.go.dev/github.com/gopatchy/bkl">library</a>.`,

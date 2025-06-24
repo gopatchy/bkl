@@ -1029,3 +1029,498 @@
     - type: text
       content: |
         Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
+
+- id: repeat
+  title: $repeat
+  items:
+    - type: text
+      content: |
+        <ifocus>$repeat:</ifocus> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <ifocus>$repeat</ifocus> can be used to reference the zero-based repeat index.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: foo
+                  b: <focus>$repeat</focus>
+                  <focus>$repeat: 2</focus>
+              - code: |
+                  a: foo
+                  b: 0
+                  ---
+                  a: foo
+                  b: 1
+            operator: "="
+    - type: text
+      content: |
+        <ifocus>$repeat:</ifocus> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  <focus>$repeat:
+                    a: 2
+                    b: 3</focus>
+                  $value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"
+              - code: |
+                  0,0
+                  ---
+                  0,1
+                  ---
+                  0,2
+                  ---
+                  1,0
+                  ---
+                  1,1
+                  ---
+                  1,2
+            operator: "="
+    - type: text
+      content: |
+        <ifocus>$repeat:</ifocus> can contain a list of values to iterate over:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  <focus>$repeat: [x, y, z]</focus>
+                  a: <focus>$repeat</focus>
+              - code: |
+                  a: x
+                  ---
+                  a: y
+                  ---
+                  a: z
+            operator: "="
+    - type: text
+      content: |
+        <ifocus>$repeat:</ifocus> supports range parameters for numeric sequences:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  <focus>$repeat:
+                    $first: 10
+                    $count: 3</focus>
+                  a: <focus>$repeat</focus>
+              - code: |
+                  a: 10
+                  ---
+                  a: 11
+                  ---
+                  a: 12
+            operator: "="
+    - type: text
+      content: |
+        Range parameters require exactly 2 of <ifocus>$first</ifocus>, <ifocus>$last</ifocus>, and <ifocus>$count</ifocus>. Optional <ifocus>$step</ifocus> defaults to 1.
+    - type: text
+      content: |
+        <ifocus>$repeat:</ifocus> also works at the object level within maps and lists:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a:
+                    $"b{$repeat}":
+                      c: <focus>$repeat</focus>
+                      <focus>$repeat: 3</focus>
+              - code: |
+                  a:
+                    b0:
+                      c: 0
+                    b1:
+                      c: 1
+                    b2:
+                      c: 2
+            operator: "="
+    - type: text
+      content: |
+        Object-level repeat in lists:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a:
+                    - b: <focus>$repeat</focus>
+                      <focus>$repeat: [x, y, z]</focus>
+              - code: |
+                  a:
+                    - b: x
+                    - b: y
+                    - b: z
+            operator: "="
+
+- id: escape
+  title: $$
+  items:
+    - type: text
+      content: |
+        <ifocus>$$</ifocus> translates to a literal <ifocus>$</ifocus> in cases where it would otherwise trigger special handling.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: <focus>$$env:foo</focus>
+              - code: |
+                  a: <focus>$env:foo</focus>
+            operator: "="
+
+- id: toml
+  title: TOML
+  items:
+    - type: text
+      content: |
+        TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:
+    - type: example
+      example:
+        type: single
+        code: |
+          <focus>"$parent"</focus> = false
+
+- id: bklb
+  title: bklb
+  items:
+    - type: text
+      content: |
+        <ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.
+    - type: example
+      example:
+        type: single
+        code: |
+          $ <focus>ln -s ~/go/bin/bklb ~/go/bin/catb</focus>   # catb could be, e.g. kubectlb
+          
+          $ cat service.yaml
+          addr: 127.0.0.1
+          name: myService
+          port: 8080
+          
+          $ cat service.test.toml
+          port = 8081
+          
+          $ <focus>catb service.test.toml</focus>
+          addr = "127.0.0.1"
+          name = "myService"
+          port = 8081
+          
+          $ cat service.test.yaml service.test.json
+          cat: service.test.yaml: No such file or directory
+          cat: service.test.json: No such file or directory
+          
+          $ <focus>catb service.test.yaml</focus>
+          addr: 127.0.0.1
+          name: myService
+          port: 8081
+          
+          $ <focus>catb service.test.json</focus>
+          {"addr":"127.0.0.1","name":"myService","port":8081}
+    - type: text
+      content: |
+        Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
+    - type: text
+      content: |
+        <ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program so they can coexist in your PATH.
+
+- id: bkld
+  title: bkld
+  items:
+    - type: example
+      example:
+        type: single
+        code: |
+          $ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;
+    - type: text
+      content: |
+        <ifocus>bkld</ifocus> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  b: $required
+                  c: 3
+              - code: |
+                  a: 1
+                  b: 2
+                  d: 4
+              - code: |
+                  b: 2
+                  c: null
+                  d: 4
+            operator: "?"
+          - items:
+              - code: |
+                  - a: 1
+                  - b: 2
+              - code: |
+                  - a: 1
+                  - c: 3
+              - code: |
+                  - c: 3
+                  - $delete:
+                      b: 2
+            operator: "?"
+          - items:
+              - code: |
+                  - 1
+                  - 2
+              - code: |
+                  - 1
+                  - 3
+              - code: |
+                  - 1
+                  - 3
+                  - $replace: true
+            operator: "?"
+
+- id: bkli
+  title: bkli
+  items:
+    - type: example
+      example:
+        type: single
+        code: |
+          $ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...
+    - type: text
+      content: |
+        <ifocus>bkli</ifocus> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.
+    - type: text
+      content: |
+        Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  b: 2
+                  c: 3
+              - code: |
+                  a: 1
+                  b: 10
+                  d: 4
+              - code: |
+                  a: 1
+                  b: $required
+            operator: "∩"
+          - items:
+              - code: |
+                  - a: 1
+                  - b: 2
+                  - c: 3
+              - code: |
+                  - a: 1
+                  - b: 10
+                  - d: 4
+              - code: |
+                  - a: 1
+            operator: "∩"
+
+- id: bklr
+  title: bklr
+  items:
+    - type: example
+      example:
+        type: single
+        code: |
+          $ bklr &lt;lower_layer_path&gt;
+    - type: text
+      content: |
+        <ifocus>bklr</ifocus> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a:
+                    b: $required
+                    c: 3
+              - code: |
+                  a:
+                    b: $required
+            operator: "="
+          - items:
+              - code: |
+                  a:
+                    - $required
+                  b:
+                    - 2
+              - code: |
+                  a:
+                    - $required
+            operator: "="
+
+- id: kubectl-bkl
+  title: kubectl bkl
+  items:
+    - type: example
+      example:
+        type: single
+        code: |
+          $ kubectl <focus>bkl</focus> &lt;kubectl_commands&gt;
+    - type: text
+      content: |
+        <ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
+    - type: example
+      example:
+        type: single
+        code: |
+          # deploy.dev.yaml and deploy.yaml are bkl layer files
+          $ kubectl bkl apply -f deploy.dev.yaml
+          deployment.apps/deploy-dev unchanged
+
+- id: docker
+  title: Docker
+  items:
+    - type: text
+      content: |
+        bkl docker images are available at <ifocus>ghcr.io/gopatchy/bkl:latest</ifocus> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
+    - type: example
+      example:
+        type: single
+        label: Dockerfile
+        code: |
+          FROM ghcr.io/gopatchy/bkl:latest AS bkl
+          
+          FROM debian:latest AS build
+          COPY --from=bkl /bin /bin
+
+- id: diff
+  title: diff
+  items:
+    - type: text
+      content: |
+        It's easy to see differences between processed bkl files using shell syntax.
+    - type: example
+      example:
+        type: single
+        code: |
+          $ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+          --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
+          +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
+          @@ -1,3 +1,2 @@
+           a: 1
+          <focus>-b: 2</focus>
+           c: 3
+          
+          $ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+          a: 1                              a: 1
+          b: 2                            <focus>&lt;</focus>
+          c: 3                              c: 3
+
+- id: migrate
+  title: Migrate
+  items:
+    - type: text
+      content: |
+        Below is an example process for migrating an existing set of configurations to <ifocus>bkl</ifocus>. It contains some Kubernetes-specific items but the use of the <ifocus>bkl*</ifocus> tools applies to any configuration source.
+    - type: text
+      content: |
+        We assume you start with two K8s deployments called <ifocus>deploy-dev</ifocus> and <ifocus>deploy-prod</ifocus> which are similar but not identical.
+    - type: text
+      content: |
+        First, install tools:
+        
+        <ul>
+        <li><a href="#install">bkl</a></li>
+        <li><a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a></li>
+        <li><a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/">krew</a></li>
+        <li><a href="https://github.com/itaysk/kubectl-neat#installation">neat</a></li>
+        </ul>
+    - type: text
+      content: |
+        It's possible to export configuration directly from existing templating systems (e.g. <ifocus>kustomize build</ifocus>, <ifocus>helm install --dry-run --debug</ifocus>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
+    - type: example
+      example:
+        type: single
+        label: Export Existing Config
+        code: |
+          # "kubectl neat" removes status and default value fields
+          $ kubectl neat get -- deploy deploy-dev > deploy-dev-orig.yaml
+          $ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml
+    - type: example
+      example:
+        type: single
+        label: Generate Base Layer
+        code: |
+          # See bkli details <a href="#bkli">here</a>
+          $ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml
+    - type: example
+      example:
+        type: single
+        label: Generate Service Layers
+        code: |
+          # See bkld details <a href="#bkld">here</a>
+          $ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
+          $ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml
+    - type: example
+      example:
+        type: single
+        label: Check Results
+        code: |
+          # Should show no diff
+          $ kubectl bkl diff -f deploy.dev.yaml
+          $ kubectl bkl diff -f deploy.prod.yaml
+    - type: example
+      example:
+        type: single
+        label: Clean Up
+        code: |
+          $ rm deploy-dev-orig.yaml deploy-prod-orig.yaml
+    - type: text
+      content: |
+        You now have 3 bkl files:
+        
+        <ul>
+        <li><ifocus>deploy.yaml</ifocus> is the base layer containing values common to both deployments</li>
+        <li><ifocus>deploy.dev.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-dev</ifocus></li>
+        <li><ifocus>deploy.prod.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-prod</ifocus></li>
+        </ul>
+    - type: text
+      content: |
+        The migration process isn't deterministic; there are design and aesthetic considerations. Here are some general tips:
+        
+        <ul>
+        <li>Start with the most similar examples to maximize base layer size</li>
+        <li>Consider intermediate layers that make sense (e.g. <ifocus>deploy.yaml</ifocus> → <ifocus>deploy.frontend.yaml</ifocus> → <ifocus>deploy.frontend.prod.yaml</ifocus>)</li>
+        <li>Split large configurations into logical subfiles; bkl can merge across file boundaries</li>
+        <li>Iterate by diffing your evaluated layers against production (e.g. <ifocus>kubectl bkl diff -f</ifocus>), making small changes, then diffing again.</li>
+        <li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
+        <li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
+        <li>Remove duplication with <ifocus>$merge:</ifocus> but avoid chained merge paths.</li>
+        <li>Avoid using hidden <ifocus>$output: false</ifocus> trees as template variables; prefer overriding values in-place.</li>
+        <li><ifocus>bkld</ifocus> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <ifocus>containers</ifocus>) that could be trivially patched. Use <ifocus>$match:</ifocus> to select the container and override values within it.</li>
+        </ul>
+
+- id: comparison
+  title: Comparison
+  items:
+    - type: text
+      content: |
+        bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:
+        
+        <ul>
+        <li>Configuration and templating/layering should be generic, not service-specific.</li>
+        <li>Configuration and templating/layering should be separate from deployment tooling.</li>
+        <li>Configuration files should be written in standard formats (JSON, YAML, TOML) and parseable by their standard parsers.</li>
+        <li>Basic functionality should be available without learning custom syntax.</li>
+        <li>Non-templatized configuration (e.g. StackOverflow answers) should be usable without modification.</li>
+        <li>File composition should be accomplished without meta configuration (e.g. manifest files).</li>
+        <li>Templating/layering behavior should be intuitive and produce expected results.</li>
+        <li>Documentation and examples should be excellent.</li>
+        </ul>
