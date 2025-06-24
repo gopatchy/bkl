@@ -45,7 +45,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 ## Testing Framework
 - **Language tests** (`tests.toml` file):
   - All tests now use the centralized language test framework
-  - Test definitions in TOML format (264 tests as of latest count)
+  - Test definitions in TOML format (291 tests as of latest count)
   - Each test specifies: `description`, `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
   - Special test modes: `diff = true` (bkld), `intersect = true` (bkli), `required = true` (bklr)
   - Run with `go test -run TestLanguage`
@@ -79,6 +79,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Supports finding tests with zero coverage contribution
   - Can analyze overlap between tests to find redundancy
   - Available through MCP methods: analyze_coverage, find_zero_coverage_tests, get_coverage_summary
+  - Current test coverage: 87.7% (up from 87.3%)
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
@@ -182,7 +183,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 
 ## MCP Servers Available
 - **bkl-test-server** (Model Context Protocol server for test management):
-  - `mcp__bkl-test-server__list_tests` - List all 264 test names with optional filtering
+  - `mcp__bkl-test-server__list_tests` - List all 291 test names with optional filtering
   - `mcp__bkl-test-server__get_test` - Get specific test details (description, eval files, expected output, file contents)
   - `mcp__bkl-test-server__find_similar_tests` - Search tests by pattern in names/descriptions
   - `mcp__bkl-test-server__compare_tests` - Compare two tests to identify differences

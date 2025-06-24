@@ -4419,3 +4419,355 @@ $encode: {not: string}
 $value: data
 '''
 
+# YAML parsing edge cases for coverage
+[yamlUnknownTag]
+description = "Test YAML with unknown scalar tag"
+eval = ["a.yaml"]
+expected = ""
+error = "unknown yaml short tag"
+[yamlUnknownTag.files]
+"a.yaml" = '''
+value: !!unknown "test"
+'''
+
+
+[process2DecodeNonMap]
+description = "Test decode on non-map value"
+eval = ["a.yaml"]
+expected = ""
+error = "$decode: missing $value"
+[process2DecodeNonMap.files]
+"a.yaml" = '''
+- $decode: json
+'''
+
+[yamlFloat64]
+description = "Test YAML float64 large number handling"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+value: 1.7976931348623157e+308
+'''
+[yamlFloat64.files]
+"a.yaml" = '''
+value: 1.7976931348623157e+308
+'''
+
+[yamlInt32]
+description = "Test YAML int32 handling"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+value: 2147483647
+'''
+[yamlInt32.files]
+"a.yaml" = '''
+value: 2147483647
+'''
+
+[toStringListNonString]
+description = "Test toStringList with non-string convertible value"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+helloworldmap[complex:object]
+'''
+[toStringListNonString.files]
+"a.yaml" = '''
+$encode: join
+$value:
+  - hello
+  - world
+  - {complex: object}
+'''
+
+[popListStringEmpty]
+description = "Test popListString with empty list"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+empty: []
+items: []
+'''
+[popListStringEmpty.files]
+"a.yaml" = '''
+items:
+  $merge: empty
+empty: []
+'''
+
+[popListMapValueEmpty]
+description = "Test popListMapValue with empty list"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+result: []
+'''
+[popListMapValueEmpty.files]
+"a.yaml" = '''
+result: []
+'''
+
+[popListMapBoolValueNotFound]
+description = "Test popListMapBoolValue when value not found"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+list:
+  - a: 1
+  - b: 2
+'''
+[popListMapBoolValueNotFound.files]
+"a.yaml" = '''
+list:
+- a: 1
+- b: 2
+'''
+
+[process2RepeatObjMapInvalid]
+description = "Test repeat object map with invalid context"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid directive"
+[process2RepeatObjMapInvalid.files]
+"a.yaml" = '''
+item:
+  $repeat: 3
+  value: "$repeat is not a map here"
+'''
+
+[process2RepeatObjListInvalid]
+description = "Test repeat object list with invalid context"
+eval = ["a.yaml"]
+expected = ""
+error = "reference not found"
+[process2RepeatObjListInvalid.files]
+"a.yaml" = '''
+- $repeat: 2
+  $merge: "invalid"
+'''
+
+[yamlMergeNonMap]
+description = "Test YAML merge with non-map value"
+eval = ["a.yaml"]
+expected = ""
+error = "unknown type for merge target"
+[yamlMergeNonMap.files]
+"a.yaml" = '''
+<<: [1, 2, 3]
+value: test
+'''
+
+[yamlMergeList]
+description = "Test YAML merge with list of maps"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+base1:
+  a: 1
+  b: 2
+base2:
+  b: 20
+  c: 3
+result:
+  a: 1
+  b: 2
+  c: 3
+'''
+[yamlMergeList.files]
+"a.yaml" = '''
+base1: &base1
+  a: 1
+  b: 2
+base2: &base2
+  b: 20
+  c: 3
+result:
+  <<: [*base1, *base2]
+'''
+
+[process1StringMergeInvalid]
+description = "Test process1 string merge with invalid reference"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[process1StringMergeInvalid.files]
+"a.yaml" = '''
+value:
+  $merge: 123
+'''
+
+[process1StringReplaceInvalid]
+description = "Test process1 string replace with invalid reference"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[process1StringReplaceInvalid.files]
+"a.yaml" = '''
+value:
+  $replace: 123
+'''
+
+[mergeListMatchInvalid]
+description = "Test merge list match with invalid match value"
+eval = ["a.yaml"]
+expected = ""
+error = "match"
+[mergeListMatchInvalid.files]
+"a.yaml" = '''
+- a: 1
+- $match: "invalid string match"
+  a: 2
+'''
+
+[diffFileMissing]
+description = "Test diff with missing source file"
+diff = true
+eval = ["missing.yaml", "b.yaml"]
+expected = ""
+error = "missing file"
+[diffFileMissing.files]
+"b.yaml" = "value: 2"
+
+[intersectFileMissing]
+description = "Test intersect with missing file"
+intersect = true
+eval = ["missing.yaml", "b.yaml"]
+expected = ""
+error = "missing file"
+[intersectFileMissing.files]
+"b.yaml" = "value: 2"
+
+[requiredFileMissing]
+description = "Test required with missing file"
+required = true
+eval = ["missing.yaml"]
+expected = ""
+error = "missing file"
+[requiredFileMissing.files]
+# No files - testing missing file scenario
+
+[mergeFileNoDocuments]
+description = "Test merge file with no documents"
+eval = ["empty.yaml"]
+format = "yaml"
+expected = ""
+[mergeFileNoDocuments.files]
+"empty.yaml" = ""
+
+# More tests for additional coverage
+
+[toStringListError]
+description = "Test toStringList with nil in list"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+items:
+  - a
+  - null
+  - c
+'''
+[toStringListError.files]
+"a.yaml" = '''
+items:
+- a
+- null
+- c
+'''
+
+[process2ToListListError]
+description = "Test toList on list with non-map"
+eval = ["a.yaml"]
+expected = ""
+error = "unknown format"
+[process2ToListListError.files]
+"a.yaml" = '''
+$encode: toList
+$value:
+- not a map
+'''
+
+[yamlMergeScalar]
+description = "Test YAML merge with scalar value"
+eval = ["a.yaml"]
+expected = ""
+error = "unknown type for merge target"
+[yamlMergeScalar.files]
+"a.yaml" = '''
+base: &base 123
+result:
+  <<: *base
+  value: test
+'''
+
+[yamlAlias]
+description = "Test YAML alias handling"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+base:
+  x: 1
+  "y": 2
+copy:
+  x: 1
+  "y": 2
+'''
+[yamlAlias.files]
+"a.yaml" = '''
+base: &base
+  x: 1
+  y: 2
+copy: *base
+'''
+
+[yamlTimestamp]
+description = "Test YAML timestamp handling"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+ts: "2021-01-01T00:00:00Z"
+'''
+[yamlTimestamp.files]
+"a.yaml" = '''
+ts: 2021-01-01T00:00:00Z
+'''
+
+
+[encodeAnyNonString]
+description = "Test encode any with non-string command"
+eval = ["a.yaml"]
+expected = ""
+error = "invalid type"
+[encodeAnyNonString.files]
+"a.yaml" = '''
+$encode: 123
+$value: data
+'''
+
+[mergeDocumentError]
+description = "Test merge document with nil document"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+value: test
+'''
+[mergeDocumentError.files]
+"a.yaml" = '''
+value: test
+'''
+
+
+[deepCloneFunc]
+description = "Test deep clone with function value"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+[deepCloneFunc.files]
+"a.yaml" = '''
+a: 1
+b: 2
+'''
+
