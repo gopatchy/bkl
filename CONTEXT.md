@@ -38,11 +38,12 @@ bkl is a flexible configuration templating language that simplifies configuratio
 ## Testing Framework
 - **Language tests** (`tests.toml` file):
   - All tests now use the centralized language test framework
-  - Test definitions in TOML format (130+ tests)
+  - Test definitions in TOML format (264 tests as of latest count)
   - Each test specifies: `description`, `eval` (file to evaluate), `format` (output format), `expected` (expected output), `files` (map of filename to content)
   - Special test modes: `diff = true` (bkld), `intersect = true` (bkli), `required = true` (bklr)
   - Run with `go test -run TestLanguage`
   - Run specific tests with `go test -run TestLanguage -test.filter=test1,test2,test3`
+  - Exclude specific tests with `go test -test.exclude=test1,test2` 
   - Tests run in parallel with in-memory filesystem (fstest.MapFS)
   - Test names use camelCase convention
   - Test execution uses switch statement for different modes (evaluate, diff, intersect, required)
@@ -66,6 +67,10 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
+- **Coverage analysis**: 
+  - Coverage analyzer tool in `cmd/coverage-analyzer/` helps identify test redundancy
+  - Supports finding tests with zero coverage contribution
+  - Can analyze overlap between tests to find redundancy
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
@@ -114,7 +119,9 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Generates coverage report at `cover.html`
 - `go test -run TestLanguage` - Run all language tests
 - `go test -run TestLanguage -test.filter=test1,test2,test3` - Run specific language tests
+- `go test -test.exclude=test1,test2` - Run tests excluding specific ones
 - `go build ./cmd/bkl` - Build main binary
+- `go build ./cmd/coverage-analyzer` - Build coverage analyzer tool
 - All tests now use the centralized language test framework in `tests.toml`
 
 ## Merge Behavior
@@ -164,3 +171,18 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - All repeat modes (integer, list, key-value map, range parameters) work in both document-level and object-level contexts
 - When using `$repeat` in map keys, use string interpolation: `$"item-{$repeat}"`
 - Variables created by key-value repeat can be accessed as `$repeat:keyname` in strings and interpolations
+
+## MCP Servers Available
+- **bkl-test-server** (Model Context Protocol server for test management):
+  - `mcp__bkl-test-server__list_tests` - List all 264 test names with optional filtering
+  - `mcp__bkl-test-server__get_test` - Get specific test details (description, eval files, expected output, file contents)
+  - `mcp__bkl-test-server__find_similar_tests` - Search tests by pattern in names/descriptions
+  - `mcp__bkl-test-server__compare_tests` - Compare two tests to identify differences
+  - `mcp__bkl-test-server__analyze_redundancy` - Analyze test redundancy based on coverage overlap data
+- **language-server** (Model Context Protocol server for code analysis):
+  - `mcp__language-server__definition` - Read source code definition of symbols (functions, types, methods)
+  - `mcp__language-server__references` - Find all usages/references of a symbol throughout codebase
+  - `mcp__language-server__hover` - Get type info and documentation for symbols
+  - `mcp__language-server__diagnostics` - Get linting hints and diagnostics for files
+  - `mcp__language-server__edit_file` - Apply text edits to files by line numbers
+  - `mcp__language-server__rename_symbol` - Rename symbols and update all references

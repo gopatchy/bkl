@@ -110,10 +110,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to extract test names: %v", err)
 	}
-	
+
 	// Apply filters
 	testNames = filterTests(testNames, *testsFlag, *excludeFlag)
-	
+
 	fmt.Printf("Found %d tests to analyze\n", len(testNames))
 
 	// Phase 1: Analyze unique coverage by excluding each test
@@ -270,7 +270,7 @@ func filterTests(testNames []string, includeFilter, excludeFilter string) []stri
 		for _, inc := range includes {
 			includeMap[strings.TrimSpace(inc)] = true
 		}
-		
+
 		var filtered []string
 		for _, name := range testNames {
 			if includeMap[name] {
@@ -279,7 +279,7 @@ func filterTests(testNames []string, includeFilter, excludeFilter string) []stri
 		}
 		testNames = filtered
 	}
-	
+
 	// Apply exclude filter if specified
 	if excludeFilter != "" {
 		excludes := strings.Split(excludeFilter, ",")
@@ -287,7 +287,7 @@ func filterTests(testNames []string, includeFilter, excludeFilter string) []stri
 		for _, exc := range excludes {
 			excludeMap[strings.TrimSpace(exc)] = true
 		}
-		
+
 		var filtered []string
 		for _, name := range testNames {
 			if !excludeMap[name] {
@@ -296,7 +296,7 @@ func filterTests(testNames []string, includeFilter, excludeFilter string) []stri
 		}
 		testNames = filtered
 	}
-	
+
 	return testNames
 }
 
@@ -617,9 +617,9 @@ func printResults(results []TestResult, overlaps []OverlapResult) {
 func printJSONResults(results []TestResult, overlaps []OverlapResult) {
 	type JSONOutput struct {
 		Summary struct {
-			TotalTests           int `json:"total_tests"`
-			ZeroCoverageTests    int `json:"zero_coverage_tests"`
-			TotalUniqueLines     int `json:"total_unique_lines"`
+			TotalTests        int `json:"total_tests"`
+			ZeroCoverageTests int `json:"zero_coverage_tests"`
+			TotalUniqueLines  int `json:"total_unique_lines"`
 		} `json:"summary"`
 		Tests []struct {
 			Name           string  `json:"name"`
@@ -632,20 +632,20 @@ func printJSONResults(results []TestResult, overlaps []OverlapResult) {
 
 	var output JSONOutput
 	output.Summary.TotalTests = len(results)
-	
+
 	// Create overlap map
 	overlapMap := make(map[string]OverlapResult)
 	for _, o := range overlaps {
 		overlapMap[o.TestName] = o
 	}
-	
+
 	// Count zero coverage tests and total unique lines
 	for _, r := range results {
 		if r.UniqueLines == 0 {
 			output.Summary.ZeroCoverageTests++
 		}
 		output.Summary.TotalUniqueLines += r.UniqueLines
-		
+
 		test := struct {
 			Name           string  `json:"name"`
 			UniqueLines    int     `json:"unique_lines"`
@@ -656,19 +656,19 @@ func printJSONResults(results []TestResult, overlaps []OverlapResult) {
 			Name:        r.Name,
 			UniqueLines: r.UniqueLines,
 		}
-		
+
 		if len(r.ActualCoverage) > 0 {
 			test.ActualLines = len(r.ActualCoverage)
 		}
-		
+
 		if overlap, ok := overlapMap[r.Name]; ok {
 			test.OverlapsWith = overlap.OverlapsWith
 			test.OverlapPercent = overlap.OverlapPercent
 		}
-		
+
 		output.Tests = append(output.Tests, test)
 	}
-	
+
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
 	encoder.Encode(output)
@@ -680,7 +680,7 @@ func printGroupedResults(results []TestResult) {
 		Label    string
 		Tests    []TestResult
 	}
-	
+
 	ranges := []CoverageRange{
 		{Min: 0, Max: 0, Label: "0 lines"},
 		{Min: 1, Max: 5, Label: "1-5 lines"},
@@ -689,12 +689,12 @@ func printGroupedResults(results []TestResult) {
 		{Min: 51, Max: 100, Label: "51-100 lines"},
 		{Min: 101, Max: 999999, Label: "100+ lines"},
 	}
-	
+
 	// Initialize ranges
 	for i := range ranges {
 		ranges[i].Tests = []TestResult{}
 	}
-	
+
 	// Group tests into ranges
 	for _, r := range results {
 		for i, rng := range ranges {
@@ -704,17 +704,17 @@ func printGroupedResults(results []TestResult) {
 			}
 		}
 	}
-	
+
 	fmt.Println("\n=========================================")
 	fmt.Println("COVERAGE CONTRIBUTION GROUPS")
 	fmt.Println("=========================================")
 	fmt.Printf("Total tests analyzed: %d\n\n", len(results))
-	
+
 	for _, rng := range ranges {
 		if len(rng.Tests) > 0 {
 			percentage := float64(len(rng.Tests)) / float64(len(results)) * 100
 			fmt.Printf("%-15s %4d tests (%5.1f%%)\n", rng.Label+":", len(rng.Tests), percentage)
-			
+
 			// Sort tests in this range
 			sort.Slice(rng.Tests, func(i, j int) bool {
 				if rng.Tests[i].UniqueLines == rng.Tests[j].UniqueLines {
@@ -722,7 +722,7 @@ func printGroupedResults(results []TestResult) {
 				}
 				return rng.Tests[i].UniqueLines > rng.Tests[j].UniqueLines
 			})
-			
+
 			// Show up to 5 examples
 			shown := 0
 			for _, test := range rng.Tests {
