@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" href="data:image/png;base64,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">
 <title>bkl</title>
@@ -191,37 +192,6 @@ nav li {
 	padding-bottom: 8px;
 }
 
-split3 {
-	display: grid;
-	grid: auto-flow / 1fr 10px 1fr;
-}
-
-split5 {
-	display: grid;
-	grid: auto-flow / 1fr 10px 1fr 10px 1fr;
-}
-
-split3a {
-	display: grid;
-	grid: auto-flow / 1fr 30px 1fr;
-}
-
-split5a {
-	display: grid;
-	grid: auto-flow / 1fr 30px 1fr 30px 1fr;
-}
-
-.span3 {
-	grid-column-end: span 3;
-}
-
-.span5 {
-	grid-column-end: span 5;
-}
-
-vSpace {
-	padding: 5px;
-}
 
 label {
 	background: var(--neutral2);
@@ -259,8 +229,14 @@ code {
 	word-wrap: normal;
 }
 
-split3 code, split5 code, split3a code, split5a code {
+doc-grid code {
 	height: 100%;
+}
+
+code + p,
+doc-grid + p,
+div:has(> code) + p {
+	margin-top: 10px;
 }
 
 op {
@@ -273,9 +249,6 @@ op {
 	white-space: pre;
 }
 
-code.labeled {
-	border-radius: 0 5px 5px 5px;
-}
 
 key {
 	color: var(--yellow4);
@@ -381,30 +354,30 @@ BKL</h1>
 
 <h2><a name="example">Example</a></h2>
 
-<split3>
-
+<doc-grid>
+<row>
+<div>
 <label>service.yaml</label>
-<noop></noop>
-<label>service.test.toml</label>
-
-<code class="labeled"><key>addr</key>: <string>127.0.0.1</string>
+<code><key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number></code>
-<noop></noop>
-<code class="labeled"><key>port</key> = <focus><number>8081</number></focus></code>
+</div>
 
-<vSpace class="span3"></vSpace>
+<div>
+<label>service.test.toml</label>
+<code><key>port</key> = <focus><number>8081</number></focus></code>
+</div>
+</row>
 
-<label class="span3">Run it!</label>
-
-<code class="span3 labeled"><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.toml</string>
+<div>
+<label>Run it!</label>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.toml</string>
 <key>addr</key> = '<string>127.0.0.1</string>'
 <key>name</key> = '<string>myService</string>'
 <key>port</key> = <focus><number>8081</number></focus></code>
+</div>
+</doc-grid>
 
-</split3>
-
-<vSpace></vSpace>
 
 <p>bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>) and uses filename extensions to determine formats.</p>
 
@@ -412,18 +385,21 @@ BKL</h1>
 
 <h2><a name="install">Install</a></h2>
 
+<doc-grid>
+<div>
 <label>Using go</label>
-<code class="labeled"># Install go from <a href="https://go.dev/dl/">go.dev</a>
+<code># Install go from <a href="https://go.dev/dl/">go.dev</a>
 <prompt>$ </prompt><cmd>go</cmd> <string>install</string> <string>github.com/gopatchy/bkl/...@latest</string>
 # Verify that ~/go/bin is in your $PATH</code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>macOS using brew</label>
-<code class="labeled"># Install brew from <a href="https://brew.sh/">brew.sh</a>
+<code># Install brew from <a href="https://brew.sh/">brew.sh</a>
 <prompt>$ </prompt><cmd>brew</cmd> <string>install</string> <string>gopatchy/bkl/bkl</string></code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>You can also download binaries directly <a href="https://github.com/gopatchy/bkl/releases">here</a>.</p>
 
@@ -433,49 +409,52 @@ BKL</h1>
 
 <p>Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.</p>
 
+<doc-grid>
+<div>
 <label>YAML</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f yaml</flag></focus> <string>service.test.toml</string>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f yaml</flag></focus> <string>service.test.toml</string>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>TOML</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f toml</flag></focus> <string>service.test.toml</string>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f toml</flag></focus> <string>service.test.toml</string>
 <key>addr</key> = '<string>127.0.0.1</string>'
 <key>name</key> = '<string>myService</string>'
 <key>port</key> = <number>8081</number></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>JSON</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json</flag></focus> <string>service.test.toml</string>
 {"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>JSON (pretty)</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-f json-pretty</flag></focus> <string>service.test.toml</string>
 {
   "<key>addr</key>": "<string>127.0.0.1</string>",
   "<key>name</key>": "<string>myService</string>",
   "<key>port</key>": <number>8081</number>
 }</code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>jsonl</ifocus> is an alias for <ifocus>json</ifocus> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.</p>
 
 <p>You can also set the output format implicitly by using a different file extension.</p>
 
+<doc-grid>
 <code><prompt>$ </prompt><cmd>bkl</cmd> <string>service.test.<focus>yaml</focus></string>   # real file is service.test.<focus>toml</focus>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></code>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -483,12 +462,13 @@ BKL</h1>
 
 <p>Output goes to stdout by default. Errors always go to stderr.</p>
 
-<vSpace></vSpace>
-
+<doc-grid>
+<div>
 <label>File Output</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-o out.yaml</flag></focus> <string>service.test.toml</string></code>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><flag>-o out.yaml</flag></focus> <string>service.test.toml</string></code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Output format is autodetected from output filename (unless specified with <ifocus>-f</ifocus>).</p>
 
@@ -496,67 +476,84 @@ BKL</h1>
 
 <h2><a name="inputs">Inputs</a></h2>
 
+<doc-grid>
+<div>
 <label>Commandline Layering</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</code>
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Specifying multiple input files merges all layers in order.</p>
 
-<vSpace></vSpace>
 
+<doc-grid>
+<div>
 <label>stdin</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus>-- <string>-.yaml</string></focus> &lt;&lt;'EOF'
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus>-- <string>-.yaml</string></focus> &lt;&lt;'EOF'
 <key>a</key>: <number>1</number>
 EOF</code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Specifying an input file with the base name <ifocus>-</ifocus> and a valid format extension causes bkl to read that format from standard input. Use <ifocus>--</ifocus> before the filename to avoid it being treated as a flag.</p>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 <h2><a name="inheritance">Inheritance</a></h2>
 
 <p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent layers may have any supported file extension.</p>
 
+<doc-grid>
+<div>
 <label>Set Parent In File</label>
-<code class="labeled"><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
+<code><focus><key>$parent</key>: <string>a.b</string></focus>   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.</p>
 
+<doc-grid>
+<row>
+<div>
 <label>Parent List</label>
-<code class="labeled"><focus><key>$parent</key>:
+<code><focus><key>$parent</key>:
 - <string>a</string>
 - <string>b</string></focus></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>Parent Wildcard</label>
-<code class="labeled"><focus><key>$parent</key>: <string>a.*</string></focus></code>
+<code><focus><key>$parent</key>: <string>a.*</string></focus></code>
+</div>
+</row>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.</p>
 
 <p><ifocus>*</ifocus> does not match <ifocus>.</ifocus>. <ifocus>a.*</ifocus> matches <ifocus>a.b.yaml</ifocus> but not <ifocus>a.b.c.yaml</ifocus>.</p>
 
+<doc-grid>
+<div>
 <label>Set Parent In CLI</label>
-<code class="labeled"><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+<code><prompt>$ </prompt><cmd>bkl</cmd> <focus><string>a.b.yaml</string> <string>c.d.yaml</string></focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
 <prompt>$ </prompt><cmd>bkl</cmd> <focus>-P <string>a.b.yaml</string> <string>c.d.yaml</string></focus>   # a.b.yaml + c.d.yaml</code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Layer order can be specified with commandline argument order. The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>.</p>
 
+<doc-grid>
+<div>
 <label>No Parent</label>
-<code class="labeled"><focus><key>$parent</key>: false</focus>   # no further inheritance</code>
+<code><focus><key>$parent</key>: false</focus>   # no further inheritance</code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Setting <ifocus>$parent</ifocus> to <ifocus>false</ifocus> or <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.</p>
 
@@ -568,8 +565,8 @@ EOF</code>
 
 <p>To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <ifocus>$match</ifocus> allows applying to specific parent documents.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 ---
 <key>b</key>: <number>2</number></code>
@@ -585,9 +582,9 @@ EOF</code>
 ---
 <key>b</key>: <number>2</number>
 <focus><key>c</key>: <number>3</number></focus></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 ---
 <key>b</key>: <number>2</number></code>
@@ -604,15 +601,14 @@ EOF</code>
 ---
 <key>b</key>: <number>2</number>
 <focus><key>c</key>: <number>3</number></focus></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
 
 <p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 ---
 <key>b</key>: <number>2</number>
@@ -634,15 +630,14 @@ EOF</code>
 ---
 <key>a</key>: <number>1</number>
 <focus><key>c</key>: <number>3</number></focus></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
 
 <p><ifocus>$invert: true</ifocus> inside a <ifocus>$match</ifocus> block inverts the match, causing it to apply to any documents that do not contain the match criteria.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 ---
 <key>b</key>: <number>2</number></code>
@@ -660,16 +655,14 @@ EOF</code>
 ---
 <key>b</key>: <number>2</number>
 <focus><key>c</key>: <number>3</number></focus></code>
+</row>
+</doc-grid>
 
-
-</split5a>
-
-<vSpace></vSpace>
 
 <p><ifocus>$match: null</ifocus> forces the updates to apply to a new document.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number></code>
 
 <op>+</op>
@@ -682,11 +675,9 @@ EOF</code>
 <code><key>a</key>: <number>1</number>
 ---
 <focus><key>b</key>: <number>2</number></focus></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -694,8 +685,8 @@ EOF</code>
 
 <p>Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number></code>
 
 <op>+</op>
@@ -706,9 +697,9 @@ EOF</code>
 
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number></code>
 
 <op>+</op>
@@ -719,9 +710,9 @@ EOF</code>
 <op>=</op>
 
 <code><key>b</key>: <number>2</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></code>
 
@@ -734,10 +725,9 @@ EOF</code>
 
 <code><key>a</key>: <number>1</number>
 <key>c</key>: <number>3</number></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
 
 <p>bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
@@ -747,8 +737,8 @@ EOF</code>
 
 <p>Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code>- <number>1</number></code>
 
 <op>+</op>
@@ -759,9 +749,9 @@ EOF</code>
 
 <code>- <number>1</number>
 - <number>2</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code>- <number>1</number></code>
 
 <op>+</op>
@@ -772,9 +762,9 @@ EOF</code>
 <op>=</op>
 
 <code>- <number>2</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code>- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>2</number></code>
 
@@ -788,17 +778,16 @@ EOF</code>
 
 <code>- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>3</number></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
 
 <p>bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.</p>
 
 <p>To update a specific list item from a parent layer, use <ifocus>$match</ifocus>. Combine it with <ifocus>$value</ifocus> for scalars.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></code>
 
@@ -812,9 +801,9 @@ EOF</code>
 
 <code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>10</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code>- <number>1</number>
 - <number>2</number></code>
 
@@ -827,10 +816,9 @@ EOF</code>
 
 <code>- <number>1</number>
 - <number>10</number></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace class="span5"></vSpace>
 
 
 
@@ -838,8 +826,8 @@ EOF</code>
 
 <p>Use <ifocus>$""</ifocus> to interpolate format strings with <a href="#merge"><ifocus>$merge</ifocus></a>-style references.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <string>foo</string>
@@ -851,11 +839,9 @@ EOF</code>
 <key>b</key>:
   <key>c</key>: <string>foo</string>
 <key>d</key>: <focus><string>foo bar 1 2</string></focus></code>
+</row>
+</doc-grid>
 
-</split3a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -863,8 +849,8 @@ EOF</code>
 
 <p><ifocus>$decode</ifocus> transforms a string into a tree by parsing standard formats.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>$value</key>: |
   <focus><string>{"a":1}</string></focus>
 <focus><key>$decode</key>: <string>json</string></focus></code>
@@ -872,38 +858,35 @@ EOF</code>
 <op>=</op>
 
 <code><focus><key>a</key>: <number>1</number></focus></code>
+</row>
+</doc-grid>
 
-</split3a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 <h2><a name="env">$env</a></h2>
 
 <p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys and values.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code># export FOO=test
 <focus><key>"$env:FOO"</key></focus>: <number>1</number></code>
 
 <op>=</op>
 
 <code><focus><key>test</key></focus>: <number>1</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code># export FOO=test
 <key>a</key>: <focus><string>$env:FOO</string></focus></code>
 
 <op>=</op>
 
 <code><key>a</key>: <focus><string>test</string></focus></code>
+</row>
+</doc-grid>
 
-</split3a>
-
-<vSpace></vSpace>
 
 <p>Note that all <ifocus>$env:</ifocus> substitutions result in string values even if the substituted value is <ifocus>true</ifocus>, <ifocus>false</ifocus>, <ifocus>null</ifocus>, or all digits.</p>
 
@@ -913,147 +896,168 @@ EOF</code>
 
 <p><ifocus>$encode</ifocus> transforms the subtree into the specified format.</p>
 
-<split3a>
+<doc-grid>
 
+<row>
+<div>
 <label>base64</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>$value</key>: <number>a</number>
+<code><key>$value</key>: <number>a</number>
 <focus><key>$encode</key>: <string>base64</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code><string>YQ==</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
+<div>
 <label>flags</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>: <number>1</number>
+<code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <focus><key>$encode</key>: <string>flags</string></focus>
 # [tolist:=, prefix:--]</code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code>- <string>--a=1</string>
 - <string>--b=2</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
 
+<row>
+<div>
 <label>flatten</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled">- - <string>a</string>
+<code>- - <string>a</string>
   - <string>b</string>
 - - <string>c</string>
   - <number>4</number>
 - <string>e</string>
 - <focus><key>$encode</key>: <string>flatten</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code>- <string>a</string>
 - <string>b</string>
 - <string>c</string>
 - <number>4</number>
 - <string>e</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
+<div>
 <label>join</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>$value</key>: [<string>a</string>, <string>b</string>]
+<code><key>$value</key>: [<string>a</string>, <string>b</string>]
 <focus><key>$encode</key>: <string>join:/</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code><string>a/b</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
+<div>
 <label>json</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>: <number>1</number>
+<code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <focus><key>$encode</key>: <string>json</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code>|<string>
   {"a":1,"b":2}</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
 
+<row>
+<div>
 <label>json (list)</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled">- <key>a</key>: <number>1</number>
+<code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number>
 - <focus><key>$encode</key>: <string>json</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code>|<string>
   [{"a":1},{"b":2}]</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
 
+<row>
+<div>
 <label>prefix</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled">- <string>a</string>
+<code>- <string>a</string>
 - <number>2</number>
 - <focus><key>$encode</key>: <string>prefix:X</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code>- <string>Xa</string>
 - <string>X2</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
+<div>
 <label>tolist</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>: <number>1</number>
+<code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <focus><key>$encode</key>: <string>tolist:=</string></focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code>- <string>a=1</string>
 - <string>b=2</string></code>
+</div>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
+<div>
 <label>Stacking</label>
-<noop></noop>
-<label class="invisible"></label>
-
-<code class="labeled"><key>a</key>: <number>1</number>
+<code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <focus><key>$encode</key>: [<string>tolist:=</string>, "<string>join:,</string>"]</focus></code>
+</div>
 
 <op>=</op>
 
+<div>
+<label class="invisible">invisible</label>
 <code><string>a=1,b=2</string></code>
+</div>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1061,8 +1065,8 @@ EOF</code>
 
 <p>Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <focus><key>b</key>: <string>$required</string></focus></code>
 
@@ -1073,9 +1077,9 @@ EOF</code>
 <op>=</op>
 
 <op>Error</op>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <focus><key>b</key>: <string>$required</string></focus></code>
 
@@ -1089,9 +1093,9 @@ EOF</code>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>c</key>: <number>3</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <focus><key>b</key>:
   - <string>$required</string></focus></code>
@@ -1103,9 +1107,9 @@ EOF</code>
 <op>=</op>
 
 <op>Error</op>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <focus><key>b</key>:
   - <string>$required</string></focus></code>
@@ -1122,11 +1126,9 @@ EOF</code>
 <key>b</key>:
   - <number>2</number>
 <key>c</key>: <number>3</number></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1134,8 +1136,8 @@ EOF</code>
 
 <p>Use <ifocus>$merge</ifocus> to merge the contents one subtree or scalar value into another.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
@@ -1151,9 +1153,9 @@ EOF</code>
 <key>zig</key>:
   <focus><key>a</key>: <number>1</number></focus>
   <key>b</key>: <number>2</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     - <key>a</key>: <number>1</number>
@@ -1169,9 +1171,9 @@ EOF</code>
 <key>zig</key>:
   - <key>b</key>: <number>2</number>
   - <focus><key>a</key>: <number>1</number></focus></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
@@ -1187,16 +1189,14 @@ EOF</code>
 <key>zig</key>:
   <key>b</key>: <number>2</number>
   <key>c</key>: <focus><number>1</number></focus></code>
+</row>
+</doc-grid>
 
-</split3a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 <p>You can also merge across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 ---
@@ -1213,9 +1213,9 @@ EOF</code>
 <focus><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></focus>
 <key>c</key>: <number>3</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
@@ -1234,16 +1234,14 @@ EOF</code>
 ---
 <focus><key>c</key>: <number>3</number></focus>
 <key>d</key>: <number>4</number></code>
+</row>
+</doc-grid>
 
-</split3a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 <p><ifocus>$merge</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 ---
@@ -1258,9 +1256,9 @@ EOF</code>
 <focus><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></focus>
 <key>c</key>: <number>3</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
@@ -1276,11 +1274,10 @@ EOF</code>
 ---
 <focus><key>c</key>: <number>3</number></focus>
 <key>d</key>: <number>4</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1288,8 +1285,8 @@ EOF</code>
 
 <p>Use <ifocus>$replace</ifocus> to merge the contents of one subtree or scalar value with another.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
@@ -1304,9 +1301,9 @@ EOF</code>
     <key>a</key>: <number>1</number>
 <key>zig</key>:
   <focus><key>a</key>: <number>1</number></focus></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     - <key>a</key>: <number>1</number>
@@ -1321,9 +1318,9 @@ EOF</code>
     - <key>a</key>: <number>1</number>
 <key>zig</key>:
   - <focus><key>a</key>: <number>1</number></focus></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
@@ -1339,18 +1336,17 @@ EOF</code>
 <key>zig</key>:
   <key>b</key>: <number>2</number>
   <key>c</key>: <focus><number>1</number></focus></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 <p>Note that <ifocus>$merge</ifocus> and <ifocus>$replace</ifocus> are equivalent for scalar values.</p>
 
 <p>You can also replace across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 ---
@@ -1366,9 +1362,9 @@ EOF</code>
 ---
 <focus><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></focus></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
@@ -1385,17 +1381,17 @@ EOF</code>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 ---
-<focus><key>c</key>: <number>3</number></focus></code>
+<focus><key>c</key>: <number>3</number></focus>
+<key>d</key>: <number>4</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 <p><ifocus>$replace</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 ---
@@ -1409,9 +1405,9 @@ EOF</code>
 ---
 <focus><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></focus></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
@@ -1425,12 +1421,12 @@ EOF</code>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 ---
-<focus><key>c</key>: <number>3</number></focus></code>
+<focus><key>c</key>: <number>3</number></focus>
+<key>d</key>: <number>4</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1438,8 +1434,8 @@ EOF</code>
 
 <p>Use <ifocus>$output: true</ifocus> to select a subtree for output instead of the document root.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
   	<focus><key>$output</key>: <bool>true</bool></focus>
@@ -1450,9 +1446,9 @@ EOF</code>
 
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <number>1</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>foo</key>:
   <key>bar</key>:
     - <focus><key>$output</key>: <bool>true</bool></focus>
@@ -1463,17 +1459,17 @@ EOF</code>
 
 <code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>1</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Multiple instances of <ifocus>$output: true</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
 
 <p>Use <ifocus>$output: false</ifocus> to omit a subtree or entire document from the output.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>:
   <key>b</key>: <number>1</number>
   <focus><key>$output</key>: <bool>false</bool></focus>
@@ -1484,9 +1480,9 @@ EOF</code>
 
 <code><key>c</key>:
   <key>d</key>: <number>2</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>:
   - <key>b</key>: <number>1</number>
   - <focus><key>$output</key>: <bool>false</bool></focus>
@@ -1497,9 +1493,9 @@ EOF</code>
 
 <code><key>c</key>:
   - <key>d</key>: <number>2</number></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>: <number>1</number>
 <focus><key>$output</key>: <bool>false</bool></focus>
 ---
@@ -1508,10 +1504,10 @@ EOF</code>
 <op>=</op>
 
 <code><key>b</key>: <number>2</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.</p>
 
@@ -1521,8 +1517,8 @@ EOF</code>
 
 <p><ifocus>$repeat:</ifocus> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <ifocus>$repeat</ifocus> can be used to reference the zero-based repeat index.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <string>foo</string>
 <key>b</key>: <focus><string>$repeat</string</focus>
 <focus><key>$repeat</key>: <number>2</number></focus></code>
@@ -1534,15 +1530,15 @@ EOF</code>
 ---
 <key>a</key>: <string>foo</string>
 <key>b</key>: <number>1</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>$repeat:</ifocus> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><focus><key>$repeat</key>:
   <key>a</key>: <number>2</number>
   <key>b</key>: <number>3</number></focus>
@@ -1561,15 +1557,15 @@ EOF</code>
 <string>1,1</string>
 ---
 <string>1,2</string></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>$repeat:</ifocus> can contain a list of values to iterate over:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><focus><key>$repeat</key>: [<string>x</string>, <string>y</string>, <string>z</string>]</focus>
 <key>a</key>: <focus><string>$repeat</string></focus></code>
 
@@ -1580,15 +1576,15 @@ EOF</code>
 <key>a</key>: <string>y</string>
 ---
 <key>a</key>: <string>z</string></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>$repeat:</ifocus> supports range parameters for numeric sequences:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><focus><key>$repeat</key>:
   <key>$first</key>: <number>10</number>
   <key>$count</key>: <number>3</number></focus>
@@ -1601,19 +1597,18 @@ EOF</code>
 <key>a</key>: <number>11</number>
 ---
 <key>a</key>: <number>12</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Range parameters require exactly 2 of <ifocus>$first</ifocus>, <ifocus>$last</ifocus>, and <ifocus>$count</ifocus>. Optional <ifocus>$step</ifocus> defaults to 1.</p>
 
-<vSpace></vSpace>
 
 <p><ifocus>$repeat:</ifocus> also works at the object level within maps and lists:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>:
   <key>$"b{$repeat}"</key>:
     <key>c</key>: <focus><string>$repeat</string></focus>
@@ -1628,15 +1623,15 @@ EOF</code>
     <key>c</key>: <number>1</number>
   <key>b2</key>:
     <key>c</key>: <number>2</number></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Object-level repeat in lists:</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>:
   - <key>b</key>: <focus><string>$repeat</string></focus>
     <focus><key>$repeat</key>: [<string>x</string>, <string>y</string>, <string>z</string>]</focus></code>
@@ -1647,11 +1642,10 @@ EOF</code>
   - <key>b</key>: <string>x</string>
   - <key>b</key>: <string>y</string>
   - <key>b</key>: <string>z</string></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1659,18 +1653,17 @@ EOF</code>
 
 <p><ifocus>$$</ifocus> translates to a literal <ifocus>$</ifocus> in cases where it would otherwise trigger special handling.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <focus><string>$$env:foo</string></focus></code>
 
 <op>=</op>
 
 <code><key>a</key>: <focus><string>$env:foo</string></focus></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1678,10 +1671,10 @@ EOF</code>
 
 <p>TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:</p>
 
+<doc-grid>
 <code><focus>"<key>$parent</key>"</focus> = <bool>false</bool></code>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1689,6 +1682,7 @@ EOF</code>
 
 <p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.</p>
 
+<doc-grid>
 <code><prompt>$ </prompt><focus><cmd>ln</cmd> <string>-s</string> <string>~/go/bin/bklb</string> <string>~/go/bin/catb</string></focus>   # catb could be, e.g. kubectlb
 
 <prompt>$ </prompt><cmd>cat</cmd> <string>service.yaml</string>
@@ -1715,8 +1709,8 @@ cat: service.test.json: No such file or directory
 
 <prompt>$ </prompt><focus><cmd>catb</cmd> <string>service.test.json</string></focus>
 {"<key>addr</key>":"<string>127.0.0.1</string>","<key>name</key>":"<string>myService</string>","<key>port</key>":<number>8081</number>}</code>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.</p>
 
@@ -1726,14 +1720,15 @@ cat: service.test.json: No such file or directory
 
 <h2><a name="bkld">bkld</a></h2>
 
+<doc-grid>
 <code><prompt>$ </key><cmd>bkld</cmd> <string>&lt;base_layer_path&gt; &lt;target_output_path&gt;</string></code>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>bkld</ifocus> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <string>$required</string>
 <key>c</key>: <number>3</number></code>
@@ -1750,9 +1745,9 @@ cat: service.test.json: No such file or directory
 <code><key>b</key>: <number>2</number>
 <key>c</key>: null
 <key>d</key>: <number>4</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></code>
 
@@ -1767,9 +1762,9 @@ cat: service.test.json: No such file or directory
 <code>- <key>c</key>: <number>3</number>
 - <key>$delete</key>:
     <key>b</key>: <number>2</number></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code>- <number>1</number>
 - <number>2</number></code>
 
@@ -1784,26 +1779,25 @@ cat: service.test.json: No such file or directory
 <code>- <number>1</number>
 - <number>3</number>
 - <key>$replace</key>: <bool>true</bool></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
 <h2><a name="bkli">bkli</a></h2>
 
+<doc-grid>
 <code><prompt>$ </key><cmd>bkli</cmd> <string>&lt;target_output_path&gt; &lt;target_output_path&gt; ...</string></code>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>bkli</ifocus> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.</p>
 
 <p>Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.</p>
 
-<split5a>
-
+<doc-grid>
+<row>
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <string>2</string>
 <key>c</key>: <number>3</number></code>
@@ -1818,9 +1812,9 @@ cat: service.test.json: No such file or directory
 
 <code><key>a</key>: <number>1</number>
 <key>b</key>: <string>$required</string></code>
+</row>
 
-<vSpace class="span5"></vSpace>
-
+<row>
 <code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <string>2</string>
 - <key>c</key>: <number>3</number></code>
@@ -1834,24 +1828,23 @@ cat: service.test.json: No such file or directory
 <op>=</op>
 
 <code>- <key>a</key>: <number>1</number></code>
+</row>
+</doc-grid>
 
-</split5a>
-
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
 <h2><a name="bklr">bklr</a></h2>
 
+<doc-grid>
 <code><prompt>$ </key><cmd>bklr</cmd> <string>&lt;lower_layer_path&gt;</string></code>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>bklr</ifocus> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.</p>
 
-<split3a>
-
+<doc-grid>
+<row>
 <code><key>a</key>:
   <key>b</key>: <string>$required</string>
   <key>c</key>: <number>3</number></code>
@@ -1860,9 +1853,9 @@ cat: service.test.json: No such file or directory
 
 <code><key>a</key>:
   <key>b</key>: <string>$required</string></code>
+</row>
 
-<vSpace class="span3"></vSpace>
-
+<row>
 <code><key>a</key>:
   - <string>$required</string>
 <key>b</key>:
@@ -1872,28 +1865,28 @@ cat: service.test.json: No such file or directory
 
 <code><key>a</key>:
   - <string>$required</string></code>
+</row>
 
-</split3a>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
 <h2><a name="kubectl-bkl">kubectl bkl</a></h2>
 
+<doc-grid>
 <code><prompt>$ </prompt></key><cmd>kubectl</cmd> <focus><string>bkl</string></focus> <string>&lt;kubectl_commands&gt;</string></code>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p><ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.</p>
 
+<doc-grid>
 <code># deploy.dev.yaml and deploy.yaml are bkl layer files
 <prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl apply</string> <flag>-f deploy.dev.yaml</flag>
 deployment.apps/deploy-dev unchanged</code>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1901,14 +1894,16 @@ deployment.apps/deploy-dev unchanged</code>
 
 <p>bkl docker images are available at <ifocus>ghcr.io/gopatchy/bkl:latest</ifocus> for amd64 and arm64. Compose these images for your development and CI/CD workflows.</p>
 
+<doc-grid>
+<div>
 <label>Dockerfile</label>
-<code class="labeled"><cmd>FROM</cmd> <string>ghcr.io/gopatchy/bkl:latest</string> <flag>AS</flag> <key>bkl</key>
+<code><cmd>FROM</cmd> <string>ghcr.io/gopatchy/bkl:latest</string> <flag>AS</flag> <key>bkl</key>
 
 <cmd>FROM</cmd> <string>debian:latest</string> <flag>AS</flag> <key>build</key>
 <cmd>COPY</cmd> <flag>--from=bkl</flag> <string>/bin /bin</string></code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1916,6 +1911,7 @@ deployment.apps/deploy-dev unchanged</code>
 
 <p>It's easy to see differences between processed bkl files using shell syntax.</p>
 
+<doc-grid>
 <code><prompt>$ </prompt><focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
@@ -1929,9 +1925,8 @@ a: 1                              a: 1
 b: 2                            <focus>&lt;</focus>
 c: 3                              c: 3
 </code>
+</doc-grid>
 
-<vSpace></vSpace>
-<vSpace></vSpace>
 
 
 
@@ -1952,37 +1947,40 @@ c: 3                              c: 3
 
 <p>It's possible to export configuration directly from existing templating systems (e.g. <ifocus>kustomize build</ifocus>, <ifocus>helm install --dry-run --debug</ifocus>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.</p>
 
+<doc-grid>
+<div>
 <label>Export Existing Config</label>
-<code class="labeled"># "kubectl neat" removes status and default value fields
+<code># "kubectl neat" removes status and default value fields
 <prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> -- <string>deploy deploy-dev</string> &gt; <string>deploy-dev-orig.yaml</string>
 <prompt>$ </prompt><cmd>kubectl</cmd> <string>neat get</string> -- <string>deploy deploy-prod</string> &gt; <string>deploy-prod-orig.yaml</string></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>Generate Base Layer</label>
-<code class="labeled"># See bkli details <a href="#bkli">here</a>
+<code># See bkli details <a href="#bkli">here</a>
 <prompt>$ </prompt><cmd>bkli</cmd> <flag>-o deploy.yaml</flag> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>Generate Service Layers</label>
-<code class="labeled"># See bkld details <a href="#bkld">here</a>
+<code># See bkld details <a href="#bkld">here</a>
 <prompt>$ </prompt><cmd>bkld</cmd> <flag>-o deploy.dev.yaml</flag> <string>deploy.yaml deploy-dev-orig.yaml</string>
 <prompt>$ </prompt><cmd>bkld</cmd> <flag>-o deploy.prod.yaml</flag> <string>deploy.yaml deploy-prod-orig.yaml</string></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>Check Results</label>
-<code class="labeled"># Should show no diff
+<code># Should show no diff
 <prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl diff</string> <flag>-f deploy.dev.yaml</flag>
 <prompt>$ </prompt><cmd>kubectl</cmd> <string>bkl diff</string> <flag>-f deploy.prod.yaml</flag></code>
+</div>
 
-<vSpace></vSpace>
-
+<div>
 <label>Clean Up</label>
-<code class="labeled"><prompt>$ </prompt><cmd>rm</cmd> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+<code><prompt>$ </prompt><cmd>rm</cmd> <string>deploy-dev-orig.yaml deploy-prod-orig.yaml</string></code>
+</div>
+</doc-grid>
 
-<vSpace></vSpace>
 
 <p>You now have 3 bkl files:</p>
 
@@ -2003,7 +2001,6 @@ c: 3                              c: 3
 	<li><ifocus>bkld</ifocus> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <ifocus>containers</ifocus>) that could be trivially patched. Use <ifocus>$match:</ifocus> to select the container and override values within it.</li>
 </ul>
 
-<vSpace></vSpace>
 
 
 
@@ -2022,6 +2019,86 @@ c: 3                              c: 3
 	<li>Documentation and examples should be excellent.</li>
 </ul>
 
-</main></body>
+</main>
+
+<script>
+class DocGrid extends HTMLElement {
+  connectedCallback() {
+    // Set up the main container
+    this.style.display = 'flex';
+    this.style.flexDirection = 'column';
+    this.style.gap = '15px';
+    
+    // Process each child
+    Array.from(this.children).forEach(child => {
+      if (child.tagName === 'ROW') {
+        // Set up row as a grid
+        child.style.display = 'grid';
+        child.style.alignItems = 'stretch';
+        child.style.gap = '15px';
+        
+        // Determine number of columns based on children count
+        const numChildren = child.children.length;
+        if (numChildren === 1) {
+          child.style.gridTemplateColumns = '1fr';
+        } else if (numChildren === 2) {
+          child.style.gridTemplateColumns = '1fr 1fr';
+        } else if (numChildren === 3) {
+          // For 3 columns, check if middle child is an operator
+          const middleChild = child.children[1];
+          if (middleChild && middleChild.tagName === 'OP') {
+            // code + op + code layout
+            child.style.gridTemplateColumns = '1fr auto 1fr';
+          } else {
+            child.style.gridTemplateColumns = '1fr 1fr 1fr';
+          }
+        } else if (numChildren === 5) {
+          // For 5 columns: code + op + code + op + code
+          child.style.gridTemplateColumns = '1fr auto 1fr auto 1fr';
+        }
+        
+        // Process row's children
+        Array.from(child.children).forEach(grandchild => {
+          this.processElement(grandchild);
+        });
+      } else {
+        // Non-row elements are processed directly
+        this.processElement(child);
+        // Ensure non-row elements participate in flexbox layout
+        child.style.flexShrink = '0';
+      }
+    });
+  }
+  
+  processElement(element) {
+    if (element.tagName === 'DIV') {
+      element.style.display = 'flex';
+      element.style.flexDirection = 'column';
+      
+      const label = element.querySelector('label');
+      const code = element.querySelector('code');
+      
+      if (label && code) {
+        label.style.marginBottom = '0';
+        code.style.marginTop = '0';
+        code.style.flexGrow = '1';
+        
+        // Apply special border-radius for code blocks with labels
+        if (!label.classList.contains('invisible')) {
+          code.style.borderRadius = '0 5px 5px 5px';
+        }
+      } else if (code && !label) {
+        // For divs with only code (no label), also make them stretch
+        code.style.flexGrow = '1';
+        code.style.height = '100%';
+      }
+    }
+  }
+}
+
+customElements.define('doc-grid', DocGrid);
+</script>
+
+</body>
 
 </html>
