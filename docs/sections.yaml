@@ -110,4 +110,264 @@
           name: myService
           port: 8081
 
+- id: write
+  title: Write
+  items:
+    - type: text
+      content: |
+        Output goes to stdout by default. Errors always go to stderr.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: File Output
+                code: |
+                  $ bkl <focus>-o out.yaml</focus> service.test.toml
+    - type: text
+      content: |
+        Output format is autodetected from output filename (unless specified with <ifocus>-f</ifocus>).
+
+- id: inputs
+  title: Inputs
+  items:
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: Commandline Layering
+                code: |
+                  $ bkl <focus>a.b.yaml c.d.yaml</focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+    - type: text
+      content: |
+        Specifying multiple input files merges all layers in order.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: stdin
+                code: |
+                  $ bkl <focus>-- -.yaml</focus> <<'EOF'
+                  a: 1
+                  EOF
+    - type: text
+      content: |
+        Specifying an input file with the base name <ifocus>-</ifocus> and a valid format extension causes bkl to read that format from standard input. Use <ifocus>--</ifocus> before the filename to avoid it being treated as a flag.
+
+- id: inheritance
+  title: Inheritance
+  items:
+    - type: text
+      content: |
+        Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent layers may have any supported file extension.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: Set Parent In File
+                code: |
+                  <focus>$parent: a.b</focus>   # inherits from a.b.<ext>, from a.<ext>
+    - type: text
+      content: |
+        bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: Parent List
+                code: |
+                  <focus>$parent:
+                  - a
+                  - b</focus>
+              - label: Parent Wildcard
+                code: |
+                  <focus>$parent: a.*</focus>
+    - type: text
+      content: |
+        Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
+    - type: text
+      content: |
+        <ifocus>*</ifocus> does not match <ifocus>.</ifocus>. <ifocus>a.*</ifocus> matches <ifocus>a.b.yaml</ifocus> but not <ifocus>a.b.c.yaml</ifocus>.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: Set Parent In CLI
+                code: |
+                  $ bkl <focus>a.b.yaml c.d.yaml</focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+                  $ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml
+    - type: text
+      content: |
+        Layer order can be specified with commandline argument order. The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: No Parent
+                code: |
+                  <focus>$parent: false</focus>   # no further inheritance
+    - type: text
+      content: |
+        Setting <ifocus>$parent</ifocus> to <ifocus>false</ifocus> or <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.
+
+- id: streams
+  title: Streams
+  items:
+    - type: text
+      content: |
+        Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
+    - type: text
+      content: |
+        To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <ifocus>$match</ifocus> allows applying to specific parent documents.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  ---
+                  b: 2
+              - code: |
+                  c: 3
+              - code: |
+                  a: 1
+                  <focus>c: 3</focus>
+                  ---
+                  b: 2
+                  <focus>c: 3</focus>
+            operator: "+"
+          - items:
+              - code: |
+                  a: 1
+                  ---
+                  b: 2
+              - code: |
+                  <focus>$match:
+                    b: 2</focus>
+                  c: 3
+              - code: |
+                  a: 1
+                  ---
+                  b: 2
+                  <focus>c: 3</focus>
+            operator: "+"
+    - type: text
+      content: |
+        The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  ---
+                  b: 2
+                  ---
+                  a: 1
+              - code: |
+                  <focus>$match:
+                    a: 1</focus>
+                  c: 3
+              - code: |
+                  a: 1
+                  <focus>c: 3</focus>
+                  ---
+                  b: 2
+                  ---
+                  a: 1
+                  <focus>c: 3</focus>
+            operator: "+"
+    - type: text
+      content: |
+        <ifocus>$invert: true</ifocus> inside a <ifocus>$match</ifocus> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  ---
+                  b: 2
+              - code: |
+                  $match:
+                    a: 1
+                    <focus>$invert: true</focus>
+                  c: 3
+              - code: |
+                  a: 1
+                  ---
+                  b: 2
+                  <focus>c: 3</focus>
+            operator: "+"
+    - type: text
+      content: |
+        <ifocus>$match: null</ifocus> forces the updates to apply to a new document.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+              - code: |
+                  <focus>$match: null</focus>
+                  b: 2
+              - code: |
+                  a: 1
+                  ---
+                  <focus>b: 2</focus>
+            operator: "+"
+
+- id: maps
+  title: Maps
+  items:
+    - type: text
+      content: |
+        Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+              - code: |
+                  b: 2
+              - code: |
+                  a: 1
+                  b: 2
+            operator: "+"
+          - items:
+              - code: |
+                  a: 1
+              - code: |
+                  b: 2
+                  <focus>$replace: true</focus>
+              - code: |
+                  b: 2
+            operator: "+"
+          - items:
+              - code: |
+                  a: 1
+                  b: 2
+              - code: |
+                  c: 3
+                  <focus>b: $delete</focus>
+              - code: |
+                  a: 1
+                  c: 3
+            operator: "+"
+    - type: text
+      content: |
+        bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
+
 # ... Add more sections following the same pattern ...

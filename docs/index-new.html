@@ -157,7 +157,7 @@ p {
 }
 
 a {
-	color: var(--blue5);
+	color: var(--blue3);
 }
 
 label {
@@ -526,6 +526,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	<li><a href="#formats">Formats</a></li>
 
+	<li><a href="#write">Write</a></li>
+
+	<li><a href="#inputs">Inputs</a></li>
+
+	<li><a href="#inheritance">Inheritance</a></li>
+
+	<li><a href="#streams">Streams</a></li>
+
+	<li><a href="#maps">Maps</a></li>
+
 </ol>
 </nav>
 
@@ -554,8 +564,9 @@ BKL</h1>
 
 <doc-grid>
 
-
 <row>
+
+
 
 <div>
 <label>service.yaml</label>
@@ -564,6 +575,8 @@ name: myService
 port: 8080</bkl-code>
 </div>
 
+
+
 <div>
 <label>service.test.toml</label>
 <bkl-code>port = <focus>8081</focus></bkl-code>
@@ -571,8 +584,9 @@ port: 8080</bkl-code>
 
 </row>
 
-
 <row>
+
+
 
 <div>
 <label>Run it!</label>
@@ -605,8 +619,9 @@ port = <focus>8081</focus></bkl-code>
 
 <doc-grid>
 
-
 <row>
+
+
 
 <div>
 <label>Using go</label>
@@ -617,8 +632,9 @@ $ go install github.com/gopatchy/bkl/...@latest
 
 </row>
 
-
 <row>
+
+
 
 <div>
 <label>macOS using brew</label>
@@ -654,8 +670,9 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <doc-grid>
 
-
 <row>
+
+
 
 <div>
 <label>YAML</label>
@@ -667,8 +684,9 @@ port: 8081</bkl-code>
 
 </row>
 
-
 <row>
+
+
 
 <div>
 <label>TOML</label>
@@ -680,8 +698,9 @@ port = 8081</bkl-code>
 
 </row>
 
-
 <row>
+
+
 
 <div>
 <label>JSON</label>
@@ -691,8 +710,9 @@ port = 8081</bkl-code>
 
 </row>
 
-
 <row>
+
+
 
 <div>
 <label>JSON (pretty)</label>
@@ -732,6 +752,564 @@ port: 8081</bkl-code>
 
 </doc-grid>
 
+
+
+
+</section>
+
+<section id="write">
+<h2><a name="write">Write</a></h2>
+
+
+
+<p>Output goes to stdout by default. Errors always go to stderr.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>File Output</label>
+<bkl-code>$ bkl &lt;focus&gt;-o out.yaml&lt;/focus&gt; service.test.toml</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Output format is autodetected from output filename (unless specified with <ifocus>-f</ifocus>).
+</p>
+
+
+
+</section>
+
+<section id="inputs">
+<h2><a name="inputs">Inputs</a></h2>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>Commandline Layering</label>
+<bkl-code>$ bkl &lt;focus&gt;a.b.yaml c.d.yaml&lt;/focus&gt;   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Specifying multiple input files merges all layers in order.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>stdin</label>
+<bkl-code>$ bkl &lt;focus&gt;-- -.yaml&lt;/focus&gt; &lt;&lt;&#39;EOF&#39;
+a: 1
+EOF</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Specifying an input file with the base name <ifocus>-</ifocus> and a valid format extension causes bkl to read that format from standard input. Use <ifocus>--</ifocus> before the filename to avoid it being treated as a flag.
+</p>
+
+
+
+</section>
+
+<section id="inheritance">
+<h2><a name="inheritance">Inheritance</a></h2>
+
+
+
+<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent layers may have any supported file extension.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>Set Parent In File</label>
+<bkl-code>&lt;focus&gt;$parent: a.b&lt;/focus&gt;   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>Parent List</label>
+<bkl-code>&lt;focus&gt;$parent:
+- a
+- b&lt;/focus&gt;</bkl-code>
+</div>
+
+
+
+<div>
+<label>Parent Wildcard</label>
+<bkl-code>&lt;focus&gt;$parent: a.*&lt;/focus&gt;</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
+</p>
+
+
+
+<p><ifocus>*</ifocus> does not match <ifocus>.</ifocus>. <ifocus>a.*</ifocus> matches <ifocus>a.b.yaml</ifocus> but not <ifocus>a.b.c.yaml</ifocus>.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>Set Parent In CLI</label>
+<bkl-code>$ bkl &lt;focus&gt;a.b.yaml c.d.yaml&lt;/focus&gt;      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+$ bkl &lt;focus&gt;-P a.b.yaml c.d.yaml&lt;/focus&gt;   # a.b.yaml + c.d.yaml</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Layer order can be specified with commandline argument order. The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+<label>No Parent</label>
+<bkl-code>&lt;focus&gt;$parent: false&lt;/focus&gt;   # no further inheritance</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Setting <ifocus>$parent</ifocus> to <ifocus>false</ifocus> or <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.
+</p>
+
+
+
+</section>
+
+<section id="streams">
+<h2><a name="streams">Streams</a></h2>
+
+
+
+<p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
+</p>
+
+
+
+<p>To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <ifocus>$match</ifocus> allows applying to specific parent documents.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1
+---
+b: 2</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>c: 3</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+&lt;focus&gt;c: 3&lt;/focus&gt;
+---
+b: 2
+&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+</div>
+
+</row>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1
+---
+b: 2</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>&lt;focus&gt;$match:
+  b: 2&lt;/focus&gt;
+c: 3</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+---
+b: 2
+&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1
+---
+b: 2
+---
+a: 1</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>&lt;focus&gt;$match:
+  a: 1&lt;/focus&gt;
+c: 3</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+&lt;focus&gt;c: 3&lt;/focus&gt;
+---
+b: 2
+---
+a: 1
+&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>$invert: true</ifocus> inside a <ifocus>$match</ifocus> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1
+---
+b: 2</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>$match:
+  a: 1
+  &lt;focus&gt;$invert: true&lt;/focus&gt;
+c: 3</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+---
+b: 2
+&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p><ifocus>$match: null</ifocus> forces the updates to apply to a new document.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>&lt;focus&gt;$match: null&lt;/focus&gt;
+b: 2</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+---
+&lt;focus&gt;b: 2&lt;/focus&gt;</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="maps">
+<h2><a name="maps">Maps</a></h2>
+
+
+
+<p>Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
+</p>
+
+
+
+
+
+<doc-grid>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>b: 2</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+b: 2</bkl-code>
+</div>
+
+</row>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>b: 2
+&lt;focus&gt;$replace: true&lt;/focus&gt;</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>b: 2</bkl-code>
+</div>
+
+</row>
+
+<row>
+
+
+
+<div>
+
+<bkl-code>a: 1
+b: 2</bkl-code>
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+<bkl-code>c: 3
+&lt;focus&gt;b: $delete&lt;/focus&gt;</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<bkl-code>a: 1
+c: 3</bkl-code>
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
+</p>
 
 
 

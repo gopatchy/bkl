@@ -157,7 +157,7 @@ p {
 }
 
 a {
-	color: var(--blue5);
+	color: var(--blue3);
 }
 
 label {
@@ -550,11 +550,12 @@ BKL</h1>
 {{if eq $example.Type "grid"}}
 <doc-grid>
 {{range $rowIndex, $row := $example.Rows}}
-{{if gt $rowIndex 0}}{{if $row.Operator}}<op>{{$row.Operator}}</op>{{end}}{{end}}
 <row>
-{{range $item := $row.Items}}
+{{range $itemIndex, $item := $row.Items}}
+{{if eq $itemIndex 1}}{{if $row.Operator}}<op>{{$row.Operator}}</op>{{end}}{{end}}
+{{if eq $itemIndex 2}}<op>=</op>{{end}}
 <div>
-<label>{{$item.Label}}</label>
+{{if $item.Label}}<label>{{$item.Label}}</label>{{end}}
 <bkl-code>{{$item | formatCode}}</bkl-code>
 </div>
 {{end}}
