@@ -10,18 +10,25 @@
 
 4. **Commit**: When asked to "commit", do: 1) update CONTEXT.md if needed, 2) run all tests with `just`, 3) stage changes with `git add -A`, 4) commit with simple message, 5) push with `git push`
 
-5. **Test management**: 
+5. **Never use `go build`**: Always use `go run` instead of `go build` for testing Go programs
+
+6. **Use MCP servers for Go development**: 
+   - Use language-server MCP methods to read/write Go files and find symbols
+   - Use bkl-test-server MCP methods to search through tests
+   - Never use direct file operations when MCP servers provide the functionality
+
+7. **Test management**: 
    - MUST run all tests before moving on to add any new tests
    - MUST check with the user before moving on to add any new tests
    - MUST check with the user before deleting any tests
 
-6. **Error handling**: Always propagate errors with proper messages, never silently handle errors
+8. **Error handling**: Always propagate errors with proper messages, never silently handle errors
 
-7. **No one-off scripts**: Never create temporary test scripts, always use inline debugging
+9. **No one-off scripts**: Never create temporary test scripts, always use inline debugging
 
-8. **Never run bkl manually**: Never run `bkl` manually for testing - always use `just` or test commands
+10. **Never run bkl manually**: Never run `bkl` manually for testing - always use `just` or test commands
 
-9. **Never change directories**: Never change directories with `cd` - always use absolute paths instead
+11. **Never change directories**: Never change directories with `cd` - always use absolute paths instead
 
 ## Project Overview
 bkl is a flexible configuration templating language that simplifies configuration management across environments. Key capabilities:
@@ -68,9 +75,10 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
 - **Coverage analysis**: 
-  - Coverage analyzer tool in `cmd/coverage-analyzer/` helps identify test redundancy
+  - Coverage analysis integrated into MCP test server
   - Supports finding tests with zero coverage contribution
   - Can analyze overlap between tests to find redundancy
+  - Available through MCP methods: analyze_coverage, find_zero_coverage_tests, get_coverage_summary
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
@@ -120,8 +128,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `go test -run TestLanguage` - Run all language tests
 - `go test -run TestLanguage -test.filter=test1,test2,test3` - Run specific language tests
 - `go test -test.exclude=test1,test2` - Run tests excluding specific ones
-- `go build ./cmd/bkl` - Build main binary
-- `go build ./cmd/coverage-analyzer` - Build coverage analyzer tool
+- `go run ./cmd/bkl` - Run main binary directly
+- `go run ./cmd/mcp-test-server` - Run MCP test server with coverage analysis
 - All tests now use the centralized language test framework in `tests.toml`
 
 ## Merge Behavior
@@ -186,3 +194,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - `mcp__language-server__diagnostics` - Get linting hints and diagnostics for files
   - `mcp__language-server__edit_file` - Apply text edits to files by line numbers
   - `mcp__language-server__rename_symbol` - Rename symbols and update all references
+  - Additional coverage analysis methods:
+    - `mcp__bkl-test-server__analyze_coverage` - Analyze test coverage contributions with optional test filter
+    - `mcp__bkl-test-server__find_zero_coverage_tests` - Find tests with zero unique coverage
+    - `mcp__bkl-test-server__get_coverage_summary` - Get overall coverage statistics
