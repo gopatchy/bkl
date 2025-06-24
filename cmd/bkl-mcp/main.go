@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"sort"
 	"strings"
+	"testing/fstest"
 
 	"github.com/gopatchy/bkl"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -71,6 +73,43 @@ func main() {
 		),
 	)
 	mcpServer.AddTool(getTool, getHandler)
+
+	evaluateTool := mcp.NewTool("evaluate",
+		mcp.WithDescription("Evaluate bkl files with given environment and return results"),
+		mcp.WithString("files",
+			mcp.Required(),
+			mcp.Description("Comma-separated list of files to evaluate (relative paths)"),
+		),
+		mcp.WithString("format",
+			mcp.Description("Output format (yaml, json, toml) - will auto-detect if not specified"),
+		),
+		mcp.WithObject("environment",
+			mcp.Description("Environment variables as key-value pairs"),
+		),
+		mcp.WithObject("fileSystem",
+			mcp.Required(),
+			mcp.Description("Map of filename to file content for the evaluation"),
+		),
+		mcp.WithBoolean("skipParent",
+			mcp.Description("Skip loading parent templates (default: false)"),
+		),
+		mcp.WithString("rootPath",
+			mcp.Description("Root path for restricting file access (default: /)"),
+		),
+		mcp.WithString("workingDir",
+			mcp.Description("Working directory for evaluation (default: /)"),
+		),
+		mcp.WithBoolean("diff",
+			mcp.Description("Run diff operation instead of eval (requires exactly 2 files)"),
+		),
+		mcp.WithBoolean("intersect",
+			mcp.Description("Run intersect operation instead of eval (requires at least 2 files)"),
+		),
+		mcp.WithBoolean("required",
+			mcp.Description("Run required operation instead of eval (requires exactly 1 file)"),
+		),
+	)
+	mcpServer.AddTool(evaluateTool, evaluateHandler)
 
 	// Start the stdio transport
 	if err := server.ServeStdio(mcpServer); err != nil {
@@ -432,4 +471,271 @@ func findFirstKeyword(text string, keywords []string) string {
 	}
 
 	return firstKeyword
+}
+
+func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	// Parse required parameters
+	filesStr, err := request.RequireString("files")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	// Split files by comma
+	fileFields := strings.Split(filesStr, ",")
+	var files []string
+	for _, f := range fileFields {
+		trimmed := strings.TrimSpace(f)
+		if trimmed != "" {
+			files = append(files, trimmed)
+		}
+	}
+
+	if len(files) == 0 {
+		return mcp.NewToolResultError("No files provided"), nil
+	}
+
+	// Get fileSystem parameter (required)
+	args, ok := request.Params.Arguments.(map[string]interface{})
+	if !ok {
+		return mcp.NewToolResultError("Invalid arguments format"), nil
+	}
+
+	fileSystemRaw := args["fileSystem"]
+	if fileSystemRaw == nil {
+		return mcp.NewToolResultError("fileSystem parameter is required"), nil
+	}
+
+	fileSystemMap, ok := fileSystemRaw.(map[string]interface{})
+	if !ok {
+		return mcp.NewToolResultError("fileSystem must be an object"), nil
+	}
+
+	// Convert fileSystem object to map[string]string
+	fileSystem := make(map[string]string)
+	for k, v := range fileSystemMap {
+		if str, ok := v.(string); ok {
+			fileSystem[k] = str
+		} else {
+			return mcp.NewToolResultError(fmt.Sprintf("fileSystem[%s] must be a string, got %T", k, v)), nil
+		}
+	}
+
+	// Parse optional parameters
+	format := ""
+	if f := args["format"]; f != nil {
+		if str, ok := f.(string); ok {
+			format = str
+		}
+	}
+
+	skipParent := false
+	if sp := args["skipParent"]; sp != nil {
+		if b, ok := sp.(bool); ok {
+			skipParent = b
+		}
+	}
+
+	rootPath := "/"
+	if rp := args["rootPath"]; rp != nil {
+		if str, ok := rp.(string); ok && str != "" {
+			rootPath = str
+		}
+	}
+
+	workingDir := "/"
+	if wd := args["workingDir"]; wd != nil {
+		if str, ok := wd.(string); ok && str != "" {
+			workingDir = str
+		}
+	}
+
+	// Parse environment variables
+	var env map[string]string
+	if envRaw := args["environment"]; envRaw != nil {
+		if envMap, ok := envRaw.(map[string]interface{}); ok {
+			env = make(map[string]string)
+			for k, v := range envMap {
+				if str, ok := v.(string); ok {
+					env[k] = str
+				} else {
+					return mcp.NewToolResultError(fmt.Sprintf("environment[%s] must be a string, got %T", k, v)), nil
+				}
+			}
+		}
+	}
+
+	// Parse operation mode flags
+	diff := false
+	if d := args["diff"]; d != nil {
+		if b, ok := d.(bool); ok {
+			diff = b
+		}
+	}
+
+	intersect := false
+	if i := args["intersect"]; i != nil {
+		if b, ok := i.(bool); ok {
+			intersect = b
+		}
+	}
+
+	required := false
+	if r := args["required"]; r != nil {
+		if b, ok := r.(bool); ok {
+			required = b
+		}
+	}
+
+	// Validate operation mode
+	operationCount := 0
+	if diff {
+		operationCount++
+	}
+	if intersect {
+		operationCount++
+	}
+	if required {
+		operationCount++
+	}
+	if operationCount > 1 {
+		return mcp.NewToolResultError("Only one operation mode can be specified (diff, intersect, or required)"), nil
+	}
+
+	// Validate file count for specific operations
+	if diff && len(files) != 2 {
+		return mcp.NewToolResultError("Diff operation requires exactly 2 files"), nil
+	}
+	if intersect && len(files) < 2 {
+		return mcp.NewToolResultError("Intersect operation requires at least 2 files"), nil
+	}
+	if required && len(files) != 1 {
+		return mcp.NewToolResultError("Required operation requires exactly 1 file"), nil
+	}
+
+	// Create filesystem from provided files
+	fsys := fstest.MapFS{}
+	for filename, content := range fileSystem {
+		fsys[filename] = &fstest.MapFile{
+			Data: []byte(content),
+		}
+	}
+
+	// Create filesystem view rooted at rootPath
+	var testFS fs.FS = fsys
+	if rootPath != "/" {
+		var err error
+		testFS, err = fs.Sub(fsys, rootPath)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to create sub-filesystem: %v", err)), nil
+		}
+	}
+
+	// Create parser
+	p, err := bkl.New()
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to create parser: %v", err)), nil
+	}
+
+	var output []byte
+
+	// Execute the appropriate operation
+	switch {
+	case required:
+		// Use RequiredFile helper
+		requiredResult, err := p.RequiredFile(testFS, files[0])
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
+		}
+
+		// Marshal the result
+		if format == "" {
+			format = "yaml"
+		}
+		f, err := p.GetFormat(format)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Invalid format: %v", err)), nil
+		}
+		output, err = f.MarshalStream([]any{requiredResult})
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal required result: %v", err)), nil
+		}
+
+	case intersect:
+		// Use IntersectFiles helper
+		intersectResult, err := p.IntersectFiles(testFS, files)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
+		}
+
+		// Marshal the result
+		if format == "" {
+			format = "yaml"
+		}
+		f, err := p.GetFormat(format)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Invalid format: %v", err)), nil
+		}
+		output, err = f.MarshalStream([]any{intersectResult})
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal intersect result: %v", err)), nil
+		}
+
+	case diff:
+		// Use DiffFiles helper
+		diffResult, err := p.DiffFiles(testFS, files[0], files[1])
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
+		}
+
+		// Marshal the result
+		if format == "" {
+			format = "yaml"
+		}
+		f, err := p.GetFormat(format)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Invalid format: %v", err)), nil
+		}
+		output, err = f.MarshalStream([]any{diffResult})
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal diff result: %v", err)), nil
+		}
+
+	default:
+		// Regular evaluation
+		output, err = p.Evaluate(testFS, files, skipParent, format, rootPath, workingDir, env)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
+		}
+	}
+
+	// Create response with inline operation type
+	operationType := "evaluate"
+	if diff {
+		operationType = "diff"
+	} else if intersect {
+		operationType = "intersect"
+	} else if required {
+		operationType = "required"
+	}
+
+	response := map[string]interface{}{
+		"files":      files,
+		"format":     format,
+		"output":     string(output),
+		"operation":  operationType,
+		"rootPath":   rootPath,
+		"workingDir": workingDir,
+		"skipParent": skipParent,
+	}
+
+	if len(env) > 0 {
+		response["environment"] = env
+	}
+
+	resultJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	return mcp.NewToolResultText(string(resultJSON)), nil
 }
