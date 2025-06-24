@@ -2039,6 +2039,74 @@ $repeat:
 b: $"x={$repeat:x}"
 '''
 
+# Repeat range parameter error cases
+[repeatStepZero]
+description = "Test $repeat with $step=0 error"
+eval = ["a.yaml"]
+format = "yaml"
+expected = ""
+error = "$step cannot be 0"
+files."a.yaml" = '''
+$repeat:
+  $first: 1
+  $last: 5
+  $step: 0
+x: $repeat
+'''
+
+[repeatCountNegative]
+description = "Test $repeat with negative $count error"
+eval = ["a.yaml"]
+format = "yaml"
+expected = ""
+error = "must be positive"
+files."a.yaml" = '''
+$repeat:
+  $first: 1
+  $count: -1
+x: $repeat
+'''
+
+[repeatAllThreeParams]
+description = "Test $repeat with all three params error"
+eval = ["a.yaml"]
+format = "yaml"
+expected = ""
+error = "cannot specify all of"
+files."a.yaml" = '''
+$repeat:
+  $first: 1
+  $last: 5
+  $count: 3
+x: $repeat
+'''
+
+[repeatNotDivisible]
+description = "Test $repeat with non-divisible range error"
+eval = ["a.yaml"]
+format = "yaml"
+expected = ""
+error = "must be divisible by"
+files."a.yaml" = '''
+$repeat:
+  $first: 1
+  $last: 11
+  $step: 3
+x: $repeat
+'''
+
+[repeatMissingParams]
+description = "Test $repeat with only one parameter error"
+eval = ["a.yaml"]
+format = "yaml"
+expected = ""
+error = "must specify exactly 2"
+files."a.yaml" = '''
+$repeat:
+  $first: 1
+x: $repeat
+'''
+
 [repeatSubst]
 description = "Test $repeat with $match directive"
 eval = ["a.b.yaml"]
@@ -4330,6 +4398,14 @@ service: value
 [parentFilenameTilde.files]
 "service.yaml" = "base: value"
 "service.base.yaml" = "service: value"
+
+[missingParentFile]
+description = "Test missing parent file from filename"
+eval = ["service.missing.base.yaml"]
+expected = ""
+error = "missing file"
+[missingParentFile.files]
+"service.missing.base.yaml" = "content: value"
 
 # Process encode any tests
 [encodeAnyInvalidType]

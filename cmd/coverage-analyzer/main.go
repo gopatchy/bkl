@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -38,14 +41,60 @@ type CoverageAnalyzer struct {
 	counter          int64
 }
 
+const usage = `coverage-analyzer - Analyze test coverage contributions
+
+Usage:
+  coverage-analyzer [flags]
+
+Examples:
+  # Analyze all tests
+  coverage-analyzer
+
+  # Analyze specific tests
+  coverage-analyzer -tests=testFoo,testBar
+
+  # Show only zero-coverage tests
+  coverage-analyzer -zero-only
+
+  # Show grouped output
+  coverage-analyzer -grouped
+
+  # Export to JSON
+  coverage-analyzer -format=json > coverage-report.json
+
+  # Analyze tests with low coverage contribution
+  coverage-analyzer -threshold=5
+
+Flags:
+`
+
+var (
+	testsFlag     = flag.String("tests", "", "Comma-separated list of specific tests to analyze")
+	zeroOnlyFlag  = flag.Bool("zero-only", false, "Show only tests with zero coverage")
+	groupedFlag   = flag.Bool("grouped", false, "Show tests grouped by coverage ranges")
+	formatFlag    = flag.String("format", "text", "Output format: text, json")
+	excludeFlag   = flag.String("exclude", "", "Comma-separated list of tests to exclude")
+	verboseFlag   = flag.Bool("verbose", false, "Show detailed progress")
+	thresholdFlag = flag.Int("threshold", -1, "Only show tests at or below this coverage threshold")
+	concurrency   = flag.Int("concurrency", runtime.NumCPU(), "Number of parallel test runs")
+)
+
 func main() {
+	flag.Usage = func() {
+		fmt.Fprint(os.Stderr, usage)
+		flag.PrintDefaults()
+	}
+	flag.Parse()
+
 	analyzer := &CoverageAnalyzer{
 		testExcluded: make(map[string]map[string]bool),
 		testActual:   make(map[string]map[string]bool),
 	}
 
 	// Run baseline coverage
-	fmt.Println("Running baseline coverage with all tests...")
+	if *verboseFlag {
+		fmt.Println("Running baseline coverage with all tests...")
+	}
 	baselineCoverage, err := analyzer.runCoverageAndExtractLines("", "")
 	if err != nil {
 		log.Fatalf("Failed to get baseline coverage: %v", err)
@@ -54,27 +103,72 @@ func main() {
 	fmt.Printf("Baseline: %d lines covered\n", len(baselineCoverage))
 
 	// Extract test names
-	fmt.Println("Extracting test names...")
+	if *verboseFlag {
+		fmt.Println("Extracting test names...")
+	}
 	testNames, err := extractTestNames("tests.toml")
 	if err != nil {
 		log.Fatalf("Failed to extract test names: %v", err)
 	}
-	fmt.Printf("Found %d tests\n", len(testNames))
+	
+	// Apply filters
+	testNames = filterTests(testNames, *testsFlag, *excludeFlag)
+	
+	fmt.Printf("Found %d tests to analyze\n", len(testNames))
 
 	// Phase 1: Analyze unique coverage by excluding each test
-	fmt.Printf("\nPhase 1: Analyzing unique coverage for %d tests...\n", len(testNames))
-	results := analyzer.analyzeUniqueCoverage(testNames)
+	if *verboseFlag {
+		fmt.Printf("\nPhase 1: Analyzing unique coverage for %d tests...\n", len(testNames))
+	}
+	results := analyzer.analyzeUniqueCoverage(testNames, *concurrency)
 
 	// Phase 2: For zero-unique tests, get their actual coverage
-	fmt.Printf("\nPhase 2: Analyzing actual coverage for zero-unique tests...\n")
-	analyzer.analyzeActualCoverage(results, testNames)
+	if *verboseFlag {
+		fmt.Printf("\nPhase 2: Analyzing actual coverage for zero-unique tests...\n")
+	}
+	analyzer.analyzeActualCoverage(results, testNames, *concurrency)
 
 	// Find overlaps for zero-coverage tests
-	fmt.Println("\nAnalyzing overlaps...")
+	if *verboseFlag {
+		fmt.Println("\nAnalyzing overlaps...")
+	}
 	overlaps := analyzer.findOverlaps(results)
 
-	// Print results
-	printResults(results, overlaps)
+	// Apply threshold filter if specified
+	if *thresholdFlag >= 0 {
+		var filtered []TestResult
+		for _, r := range results {
+			if r.UniqueLines <= *thresholdFlag {
+				filtered = append(filtered, r)
+			}
+		}
+		results = filtered
+	}
+
+	// Apply zero-only filter if specified
+	if *zeroOnlyFlag {
+		var filtered []TestResult
+		for _, r := range results {
+			if r.UniqueLines == 0 {
+				filtered = append(filtered, r)
+			}
+		}
+		results = filtered
+	}
+
+	// Print results based on format
+	switch *formatFlag {
+	case "json":
+		printJSONResults(results, overlaps)
+	case "text":
+		if *groupedFlag {
+			printGroupedResults(results)
+		} else {
+			printResults(results, overlaps)
+		}
+	default:
+		log.Fatalf("Unknown format: %s", *formatFlag)
+	}
 }
 
 func (ca *CoverageAnalyzer) runCoverageAndExtractLines(excludeTest, includeTest string) (map[string]bool, error) {
@@ -168,13 +262,51 @@ func extractTestNames(filename string) ([]string, error) {
 	return names, nil
 }
 
-func (ca *CoverageAnalyzer) analyzeUniqueCoverage(testNames []string) []TestResult {
+func filterTests(testNames []string, includeFilter, excludeFilter string) []string {
+	// Apply include filter if specified
+	if includeFilter != "" {
+		includes := strings.Split(includeFilter, ",")
+		includeMap := make(map[string]bool)
+		for _, inc := range includes {
+			includeMap[strings.TrimSpace(inc)] = true
+		}
+		
+		var filtered []string
+		for _, name := range testNames {
+			if includeMap[name] {
+				filtered = append(filtered, name)
+			}
+		}
+		testNames = filtered
+	}
+	
+	// Apply exclude filter if specified
+	if excludeFilter != "" {
+		excludes := strings.Split(excludeFilter, ",")
+		excludeMap := make(map[string]bool)
+		for _, exc := range excludes {
+			excludeMap[strings.TrimSpace(exc)] = true
+		}
+		
+		var filtered []string
+		for _, name := range testNames {
+			if !excludeMap[name] {
+				filtered = append(filtered, name)
+			}
+		}
+		testNames = filtered
+	}
+	
+	return testNames
+}
+
+func (ca *CoverageAnalyzer) analyzeUniqueCoverage(testNames []string, concurrencyLimit int) []TestResult {
 	results := make([]TestResult, len(testNames))
 	var wg sync.WaitGroup
 	var progressCounter int64
 
 	// Use a semaphore to limit concurrency
-	semaphore := make(chan struct{}, 8)
+	semaphore := make(chan struct{}, concurrencyLimit)
 
 	for i, testName := range testNames {
 		wg.Add(1)
@@ -229,7 +361,7 @@ func (ca *CoverageAnalyzer) analyzeUniqueCoverage(testNames []string) []TestResu
 	return results
 }
 
-func (ca *CoverageAnalyzer) analyzeActualCoverage(results []TestResult, testNames []string) {
+func (ca *CoverageAnalyzer) analyzeActualCoverage(results []TestResult, testNames []string, concurrencyLimit int) {
 	// Count zero-unique tests
 	var zeroUniqueTests []int
 	for i, r := range results {
@@ -246,7 +378,7 @@ func (ca *CoverageAnalyzer) analyzeActualCoverage(results []TestResult, testName
 
 	var wg sync.WaitGroup
 	var progressCounter int64
-	semaphore := make(chan struct{}, 8)
+	semaphore := make(chan struct{}, concurrencyLimit)
 
 	for _, idx := range zeroUniqueTests {
 		wg.Add(1)
@@ -480,4 +612,128 @@ func printResults(results []TestResult, overlaps []OverlapResult) {
 	fmt.Println("  - Testing output formatting")
 	fmt.Println("  - Validating edge cases")
 	fmt.Println("  - Preventing regressions")
+}
+
+func printJSONResults(results []TestResult, overlaps []OverlapResult) {
+	type JSONOutput struct {
+		Summary struct {
+			TotalTests           int `json:"total_tests"`
+			ZeroCoverageTests    int `json:"zero_coverage_tests"`
+			TotalUniqueLines     int `json:"total_unique_lines"`
+		} `json:"summary"`
+		Tests []struct {
+			Name           string  `json:"name"`
+			UniqueLines    int     `json:"unique_lines"`
+			ActualLines    int     `json:"actual_lines,omitempty"`
+			OverlapsWith   string  `json:"overlaps_with,omitempty"`
+			OverlapPercent float64 `json:"overlap_percent,omitempty"`
+		} `json:"tests"`
+	}
+
+	var output JSONOutput
+	output.Summary.TotalTests = len(results)
+	
+	// Create overlap map
+	overlapMap := make(map[string]OverlapResult)
+	for _, o := range overlaps {
+		overlapMap[o.TestName] = o
+	}
+	
+	// Count zero coverage tests and total unique lines
+	for _, r := range results {
+		if r.UniqueLines == 0 {
+			output.Summary.ZeroCoverageTests++
+		}
+		output.Summary.TotalUniqueLines += r.UniqueLines
+		
+		test := struct {
+			Name           string  `json:"name"`
+			UniqueLines    int     `json:"unique_lines"`
+			ActualLines    int     `json:"actual_lines,omitempty"`
+			OverlapsWith   string  `json:"overlaps_with,omitempty"`
+			OverlapPercent float64 `json:"overlap_percent,omitempty"`
+		}{
+			Name:        r.Name,
+			UniqueLines: r.UniqueLines,
+		}
+		
+		if len(r.ActualCoverage) > 0 {
+			test.ActualLines = len(r.ActualCoverage)
+		}
+		
+		if overlap, ok := overlapMap[r.Name]; ok {
+			test.OverlapsWith = overlap.OverlapsWith
+			test.OverlapPercent = overlap.OverlapPercent
+		}
+		
+		output.Tests = append(output.Tests, test)
+	}
+	
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(output)
+}
+
+func printGroupedResults(results []TestResult) {
+	type CoverageRange struct {
+		Min, Max int
+		Label    string
+		Tests    []TestResult
+	}
+	
+	ranges := []CoverageRange{
+		{Min: 0, Max: 0, Label: "0 lines"},
+		{Min: 1, Max: 5, Label: "1-5 lines"},
+		{Min: 6, Max: 10, Label: "6-10 lines"},
+		{Min: 11, Max: 50, Label: "11-50 lines"},
+		{Min: 51, Max: 100, Label: "51-100 lines"},
+		{Min: 101, Max: 999999, Label: "100+ lines"},
+	}
+	
+	// Initialize ranges
+	for i := range ranges {
+		ranges[i].Tests = []TestResult{}
+	}
+	
+	// Group tests into ranges
+	for _, r := range results {
+		for i, rng := range ranges {
+			if r.UniqueLines >= rng.Min && r.UniqueLines <= rng.Max {
+				ranges[i].Tests = append(ranges[i].Tests, r)
+				break
+			}
+		}
+	}
+	
+	fmt.Println("\n=========================================")
+	fmt.Println("COVERAGE CONTRIBUTION GROUPS")
+	fmt.Println("=========================================")
+	fmt.Printf("Total tests analyzed: %d\n\n", len(results))
+	
+	for _, rng := range ranges {
+		if len(rng.Tests) > 0 {
+			percentage := float64(len(rng.Tests)) / float64(len(results)) * 100
+			fmt.Printf("%-15s %4d tests (%5.1f%%)\n", rng.Label+":", len(rng.Tests), percentage)
+			
+			// Sort tests in this range
+			sort.Slice(rng.Tests, func(i, j int) bool {
+				if rng.Tests[i].UniqueLines == rng.Tests[j].UniqueLines {
+					return rng.Tests[i].Name < rng.Tests[j].Name
+				}
+				return rng.Tests[i].UniqueLines > rng.Tests[j].UniqueLines
+			})
+			
+			// Show up to 5 examples
+			shown := 0
+			for _, test := range rng.Tests {
+				fmt.Printf("  %-40s %4d lines\n", test.Name, test.UniqueLines)
+				shown++
+				if shown >= 5 && len(rng.Tests) > 5 {
+					fmt.Printf("  ... and %d more\n", len(rng.Tests)-5)
+					break
+				}
+			}
+			fmt.Println()
+		}
+	}
 }
