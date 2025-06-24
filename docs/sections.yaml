@@ -370,4 +370,308 @@
       content: |
         bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 
+- id: lists
+  title: Lists
+  items:
+    - type: text
+      content: |
+        Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  - 1
+              - code: |
+                  - 2
+              - code: |
+                  - 1
+                  - 2
+            operator: "+"
+          - items:
+              - code: |
+                  - 1
+              - code: |
+                  - 2
+                  - <focus>$replace: true</focus>
+              - code: |
+                  - 2
+            operator: "+"
+          - items:
+              - code: |
+                  - x: 1
+                  - x: 2
+              - code: |
+                  - x: 3
+                  - <focus>$delete:
+                      x: 2</focus>
+              - code: |
+                  - x: 1
+                  - x: 3
+            operator: "+"
+    - type: text
+      content: |
+        bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.
+    - type: text
+      content: |
+        To update a specific list item from a parent layer, use <ifocus>$match</ifocus>. Combine it with <ifocus>$value</ifocus> for scalars.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  - a: 1
+                  - b: 2
+              - code: |
+                  - <focus>$match:
+                      b: 2</focus>
+                    b: 10
+              - code: |
+                  - a: 1
+                  - b: 10
+            operator: "+"
+          - items:
+              - code: |
+                  - 1
+                  - 2
+              - code: |
+                  - <focus>$match: 2
+                    $value: 10</focus>
+              - code: |
+                  - 1
+                  - 10
+            operator: "+"
+
+- id: interp
+  title: $""
+  items:
+    - type: text
+      content: |
+        Use <ifocus>$""</ifocus> to interpolate format strings with <a href="#merge"><ifocus>$merge</ifocus></a>-style references.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  b:
+                    c: foo
+                  d: <focus>$"{b.c} bar {a} 2"</focus>
+              - code: |
+                  a: 1
+                  b:
+                    c: foo
+                  d: <focus>foo bar 1 2</focus>
+            operator: "="
+
+- id: decode
+  title: $decode
+  items:
+    - type: text
+      content: |
+        <ifocus>$decode</ifocus> transforms a string into a tree by parsing standard formats.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  $value: |
+                    <focus>{"a":1}</focus>
+                  <focus>$decode: json</focus>
+              - code: |
+                  <focus>a: 1</focus>
+            operator: "="
+
+- id: env
+  title: $env
+  items:
+    - type: text
+      content: |
+        Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys and values.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  # export FOO=test
+                  <focus>"$env:FOO"</focus>: 1
+              - code: |
+                  <focus>test</focus>: 1
+            operator: "="
+          - items:
+              - code: |
+                  # export FOO=test
+                  a: <focus>$env:FOO</focus>
+              - code: |
+                  a: <focus>test</focus>
+            operator: "="
+    - type: text
+      content: |
+        Note that all <ifocus>$env:</ifocus> substitutions result in string values even if the substituted value is <ifocus>true</ifocus>, <ifocus>false</ifocus>, <ifocus>null</ifocus>, or all digits.
+
+- id: encode
+  title: $encode
+  items:
+    - type: text
+      content: |
+        <ifocus>$encode</ifocus> transforms the subtree into the specified format.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - label: base64
+                code: |
+                  $value: a
+                  <focus>$encode: base64</focus>
+              - code: |
+                  YQ==
+            operator: "="
+          - items:
+              - label: flags
+                code: |
+                  a: 1
+                  b: 2
+                  <focus>$encode: flags</focus>
+                  # [tolist:=, prefix:--]
+              - code: |
+                  - --a=1
+                  - --b=2
+            operator: "="
+          - items:
+              - label: flatten
+                code: |
+                  - - a
+                    - b
+                  - - c
+                    - 4
+                  - e
+                  - <focus>$encode: flatten</focus>
+              - code: |
+                  - a
+                  - b
+                  - c
+                  - 4
+                  - e
+            operator: "="
+          - items:
+              - label: join
+                code: |
+                  $value: [a, b]
+                  <focus>$encode: join:/</focus>
+              - code: |
+                  a/b
+            operator: "="
+          - items:
+              - label: json
+                code: |
+                  a: 1
+                  b: 2
+                  <focus>$encode: json</focus>
+              - code: |
+                  |
+                    {"a":1,"b":2}
+            operator: "="
+          - items:
+              - label: json (list)
+                code: |
+                  - a: 1
+                  - b: 2
+                  - <focus>$encode: json</focus>
+              - code: |
+                  |
+                    [{"a":1},{"b":2}]
+            operator: "="
+          - items:
+              - label: prefix
+                code: |
+                  - a
+                  - 2
+                  - <focus>$encode: prefix:X</focus>
+              - code: |
+                  - Xa
+                  - X2
+            operator: "="
+          - items:
+              - label: tolist
+                code: |
+                  a: 1
+                  b: 2
+                  <focus>$encode: tolist:=</focus>
+              - code: |
+                  - a=1
+                  - b=2
+            operator: "="
+          - items:
+              - label: Stacking
+                code: |
+                  a: 1
+                  b: 2
+                  <focus>$encode: [tolist:=, "join:,"]</focus>
+              - code: |
+                  a=1,b=2
+            operator: "="
+
+- id: required
+  title: $required
+  items:
+    - type: text
+      content: |
+        Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.
+    - type: example
+      example:
+        type: grid
+        rows:
+          - items:
+              - code: |
+                  a: 1
+                  <focus>b: $required</focus>
+              - code: |
+                  c: 3
+              - code: |
+                  Error
+            operator: "+"
+          - items:
+              - code: |
+                  a: 1
+                  <focus>b: $required</focus>
+              - code: |
+                  <focus>b: 2</focus>
+                  c: 3
+              - code: |
+                  a: 1
+                  b: 2
+                  c: 3
+            operator: "+"
+          - items:
+              - code: |
+                  a: 1
+                  <focus>b:
+                    - $required</focus>
+              - code: |
+                  c: 3
+              - code: |
+                  Error
+            operator: "+"
+          - items:
+              - code: |
+                  a: 1
+                  <focus>b:
+                    - $required</focus>
+              - code: |
+                  <focus>b:
+                    - 2</focus>
+                  c: 3
+              - code: |
+                  a: 1
+                  b:
+                    - 2
+                  c: 3
+            operator: "+"
+
 # ... Add more sections following the same pattern ...

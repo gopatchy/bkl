@@ -198,6 +198,7 @@ bkl-code {
 	box-sizing: border-box;
 }
 
+
 doc-grid code,
 doc-grid bkl-code {
 	height: 100%;
@@ -433,7 +434,7 @@ class BklCode extends HTMLElement {
           return prev + space + '<string>' + arg + '</string>';
         });
         highlightedLines.push(line);
-      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s*=/)) {
+      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s+=\s+/)) {
         line = line.replace(/^(\s*)(\[[\w.]+\])(\s*)$/, '$1<key>$2</key>$3');
         line = line.replace(/^(\s*)(\w+)\s*=/, '$1<key>$2</key> =');
         line = line.replace(/=\s*"([^"]+)"/g, '= "<string>$1</string>"');
@@ -550,13 +551,21 @@ BKL</h1>
 {{if eq $example.Type "grid"}}
 <doc-grid>
 {{range $rowIndex, $row := $example.Rows}}
+{{$hasLabels := false}}
+{{range $item := $row.Items}}{{if $item.Label}}{{$hasLabels = true}}{{end}}{{end}}
 <row>
 {{range $itemIndex, $item := $row.Items}}
 {{if eq $itemIndex 1}}{{if $row.Operator}}<op>{{$row.Operator}}</op>{{end}}{{end}}
 {{if eq $itemIndex 2}}<op>=</op>{{end}}
 <div>
-{{if $item.Label}}<label>{{$item.Label}}</label>{{end}}
+{{if $hasLabels}}
+{{if $item.Label}}<label>{{$item.Label}}</label>{{else}}<label class="invisible">invisible</label>{{end}}
+{{end}}
+{{if eq ($item | formatCode) "Error"}}
+<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
+{{else}}
 <bkl-code>{{$item | formatCode}}</bkl-code>
+{{end}}
 </div>
 {{end}}
 </row>
@@ -566,7 +575,7 @@ BKL</h1>
 <doc-grid>
 {{if $example.Label}}
 <div>
-<label>{{$example.Label}}</label>
+<label{{if eq $example.Label "invisible"}} class="invisible"{{end}}>{{$example.Label}}</label>
 <bkl-code>{{$example | formatExample}}</bkl-code>
 </div>
 {{else}}

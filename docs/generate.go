@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"html"
 	"html/template"
 	"log"
 	"os"
@@ -158,17 +157,10 @@ func formatNote(note string) template.HTML {
 func formatCode(item GridItem) template.HTML {
 	code := strings.TrimSpace(item.Code)
 
-	// Apply highlights before escaping
+	// Apply highlights
 	for _, highlight := range item.Highlights {
-		code = strings.ReplaceAll(code, highlight, "<<<FOCUS>>>"+highlight+"<<</FOCUS>>>")
+		code = strings.ReplaceAll(code, highlight, "<focus>"+highlight+"</focus>")
 	}
-
-	// HTML escape the code
-	code = html.EscapeString(code)
-
-	// Replace temporary markers with actual focus tags
-	code = strings.ReplaceAll(code, "&lt;&lt;&lt;FOCUS&gt;&gt;&gt;", "<focus>")
-	code = strings.ReplaceAll(code, "&lt;&lt;&lt;/FOCUS&gt;&gt;&gt;", "</focus>")
 
 	return template.HTML(code)
 }
@@ -176,17 +168,10 @@ func formatCode(item GridItem) template.HTML {
 func formatExample(example Example) template.HTML {
 	code := strings.TrimSpace(example.Code)
 
-	// Apply highlights before escaping
+	// Apply highlights
 	for _, highlight := range example.Highlights {
-		code = strings.ReplaceAll(code, highlight, "<<<FOCUS>>>"+highlight+"<<</FOCUS>>>")
+		code = strings.ReplaceAll(code, highlight, "<focus>"+highlight+"</focus>")
 	}
-
-	// HTML escape the code
-	code = html.EscapeString(code)
-
-	// Replace temporary markers with actual focus tags
-	code = strings.ReplaceAll(code, "&lt;&lt;&lt;FOCUS&gt;&gt;&gt;", "<focus>")
-	code = strings.ReplaceAll(code, "&lt;&lt;&lt;/FOCUS&gt;&gt;&gt;", "</focus>")
 
 	return template.HTML(code)
 }

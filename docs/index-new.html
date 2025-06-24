@@ -198,6 +198,7 @@ bkl-code {
 	box-sizing: border-box;
 }
 
+
 doc-grid code,
 doc-grid bkl-code {
 	height: 100%;
@@ -433,7 +434,7 @@ class BklCode extends HTMLElement {
           return prev + space + '<string>' + arg + '</string>';
         });
         highlightedLines.push(line);
-      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s*=/)) {
+      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s+=\s+/)) {
         line = line.replace(/^(\s*)(\[[\w.]+\])(\s*)$/, '$1<key>$2</key>$3');
         line = line.replace(/^(\s*)(\w+)\s*=/, '$1<key>$2</key> =');
         line = line.replace(/=\s*"([^"]+)"/g, '= "<string>$1</string>"');
@@ -536,6 +537,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	<li><a href="#maps">Maps</a></li>
 
+	<li><a href="#lists">Lists</a></li>
+
+	<li><a href="#interp">$&#34;&#34;</a></li>
+
+	<li><a href="#decode">$decode</a></li>
+
+	<li><a href="#env">$env</a></li>
+
+	<li><a href="#encode">$encode</a></li>
+
+	<li><a href="#required">$required</a></li>
+
 </ol>
 </nav>
 
@@ -564,36 +577,52 @@ BKL</h1>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>service.yaml</label>
+
+
 <bkl-code>addr: 127.0.0.1
 name: myService
 port: 8080</bkl-code>
+
 </div>
 
 
 
 <div>
+
 <label>service.test.toml</label>
+
+
 <bkl-code>port = <focus>8081</focus></bkl-code>
+
 </div>
 
 </row>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>Run it!</label>
+
+
 <bkl-code>$ bkl service.test.toml
-addr = &#39;127.0.0.1&#39;
-name = &#39;myService&#39;
+addr = '127.0.0.1'
+name = 'myService'
 port = <focus>8081</focus></bkl-code>
+
 </div>
 
 </row>
@@ -619,27 +648,39 @@ port = <focus>8081</focus></bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>Using go</label>
-<bkl-code># Install go from &lt;a href=&#34;https://go.dev/dl/&#34;&gt;go.dev&lt;/a&gt;
+
+
+<bkl-code># Install go from <a href="https://go.dev/dl/">go.dev</a>
 $ go install github.com/gopatchy/bkl/...@latest
 # Verify that ~/go/bin is in your $PATH</bkl-code>
+
 </div>
 
 </row>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>macOS using brew</label>
-<bkl-code># Install brew from &lt;a href=&#34;https://brew.sh/&#34;&gt;brew.sh&lt;/a&gt;
+
+
+<bkl-code># Install brew from <a href="https://brew.sh/">brew.sh</a>
 $ brew install gopatchy/bkl/bkl</bkl-code>
+
 </div>
 
 </row>
@@ -670,58 +711,82 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>YAML</label>
+
+
 <bkl-code>$ bkl <focus>-f yaml</focus> service.test.toml
 addr: 127.0.0.1
 name: myService
 port: 8081</bkl-code>
+
 </div>
 
 </row>
+
+
 
 <row>
 
 
 
 <div>
+
 <label>TOML</label>
+
+
 <bkl-code>$ bkl <focus>-f toml</focus> service.test.toml
-addr = &#39;127.0.0.1&#39;
-name = &#39;myService&#39;
+addr = '127.0.0.1'
+name = 'myService'
 port = 8081</bkl-code>
+
 </div>
 
 </row>
+
+
 
 <row>
 
 
 
 <div>
+
 <label>JSON</label>
+
+
 <bkl-code>$ bkl <focus>-f json</focus> service.test.toml
-{&#34;addr&#34;:&#34;127.0.0.1&#34;,&#34;name&#34;:&#34;myService&#34;,&#34;port&#34;:8081}</bkl-code>
+{"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
+
 </div>
 
 </row>
+
+
 
 <row>
 
 
 
 <div>
+
 <label>JSON (pretty)</label>
+
+
 <bkl-code>$ bkl <focus>-f json-pretty</focus> service.test.toml
 {
-  &#34;addr&#34;: &#34;127.0.0.1&#34;,
-  &#34;name&#34;: &#34;myService&#34;,
-  &#34;port&#34;: 8081
+  "addr": "127.0.0.1",
+  "name": "myService",
+  "port": 8081
 }</bkl-code>
+
 </div>
 
 </row>
@@ -745,7 +810,7 @@ port = 8081</bkl-code>
 
 <doc-grid>
 
-<bkl-code>$ bkl service.test.&lt;focus&gt;yaml&lt;/focus&gt;   # real file is service.test.&lt;focus&gt;toml&lt;/focus&gt;
+<bkl-code>$ bkl service.test.<focus>yaml</focus>   # real file is service.test.<focus>toml</focus>
 addr: 127.0.0.1
 name: myService
 port: 8081</bkl-code>
@@ -771,13 +836,19 @@ port: 8081</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>File Output</label>
-<bkl-code>$ bkl &lt;focus&gt;-o out.yaml&lt;/focus&gt; service.test.toml</bkl-code>
+
+
+<bkl-code>$ bkl <focus>-o out.yaml</focus> service.test.toml</bkl-code>
+
 </div>
 
 </row>
@@ -803,13 +874,19 @@ port: 8081</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>Commandline Layering</label>
-<bkl-code>$ bkl &lt;focus&gt;a.b.yaml c.d.yaml&lt;/focus&gt;   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+
+
+<bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+
 </div>
 
 </row>
@@ -828,15 +905,21 @@ port: 8081</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>stdin</label>
-<bkl-code>$ bkl &lt;focus&gt;-- -.yaml&lt;/focus&gt; &lt;&lt;&#39;EOF&#39;
+
+
+<bkl-code>$ bkl <focus>-- -.yaml</focus> <<'EOF'
 a: 1
 EOF</bkl-code>
+
 </div>
 
 </row>
@@ -867,13 +950,19 @@ EOF</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>Set Parent In File</label>
-<bkl-code>&lt;focus&gt;$parent: a.b&lt;/focus&gt;   # inherits from a.b.&lt;ext&gt;, from a.&lt;ext&gt;</bkl-code>
+
+
+<bkl-code><focus>$parent: a.b</focus>   # inherits from a.b.<ext>, from a.<ext></bkl-code>
+
 </div>
 
 </row>
@@ -892,22 +981,32 @@ EOF</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>Parent List</label>
-<bkl-code>&lt;focus&gt;$parent:
+
+
+<bkl-code><focus>$parent:
 - a
-- b&lt;/focus&gt;</bkl-code>
+- b</focus></bkl-code>
+
 </div>
 
 
 
 <div>
+
 <label>Parent Wildcard</label>
-<bkl-code>&lt;focus&gt;$parent: a.*&lt;/focus&gt;</bkl-code>
+
+
+<bkl-code><focus>$parent: a.*</focus></bkl-code>
+
 </div>
 
 </row>
@@ -931,14 +1030,20 @@ EOF</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>Set Parent In CLI</label>
-<bkl-code>$ bkl &lt;focus&gt;a.b.yaml c.d.yaml&lt;/focus&gt;      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
-$ bkl &lt;focus&gt;-P a.b.yaml c.d.yaml&lt;/focus&gt;   # a.b.yaml + c.d.yaml</bkl-code>
+
+
+<bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+$ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml</bkl-code>
+
 </div>
 
 </row>
@@ -957,13 +1062,19 @@ $ bkl &lt;focus&gt;-P a.b.yaml c.d.yaml&lt;/focus&gt;   # a.b.yaml + c.d.yaml</b
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
+
 <label>No Parent</label>
-<bkl-code>&lt;focus&gt;$parent: false&lt;/focus&gt;   # no further inheritance</bkl-code>
+
+
+<bkl-code><focus>$parent: false</focus>   # no further inheritance</bkl-code>
+
 </div>
 
 </row>
@@ -999,65 +1110,81 @@ $ bkl &lt;focus&gt;-P a.b.yaml c.d.yaml&lt;/focus&gt;   # a.b.yaml + c.d.yaml</b
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
 
+
 <bkl-code>a: 1
 ---
 b: 2</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
+
 <bkl-code>c: 3</bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>a: 1
-&lt;focus&gt;c: 3&lt;/focus&gt;
+<focus>c: 3</focus>
 ---
 b: 2
-&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+<focus>c: 3</focus></bkl-code>
+
 </div>
 
 </row>
 
+
+
 <row>
 
 
 
 <div>
 
+
 <bkl-code>a: 1
 ---
 b: 2</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
-<bkl-code>&lt;focus&gt;$match:
-  b: 2&lt;/focus&gt;
+
+<bkl-code><focus>$match:
+  b: 2</focus>
 c: 3</bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>a: 1
 ---
 b: 2
-&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+<focus>c: 3</focus></bkl-code>
+
 </div>
 
 </row>
@@ -1076,39 +1203,47 @@ b: 2
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
 
+
 <bkl-code>a: 1
 ---
 b: 2
 ---
 a: 1</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
-<bkl-code>&lt;focus&gt;$match:
-  a: 1&lt;/focus&gt;
+
+<bkl-code><focus>$match:
+  a: 1</focus>
 c: 3</bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>a: 1
-&lt;focus&gt;c: 3&lt;/focus&gt;
+<focus>c: 3</focus>
 ---
 b: 2
 ---
 a: 1
-&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+<focus>c: 3</focus></bkl-code>
+
 </div>
 
 </row>
@@ -1127,35 +1262,43 @@ a: 1
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
 
+
 <bkl-code>a: 1
 ---
 b: 2</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
+
 <bkl-code>$match:
   a: 1
-  &lt;focus&gt;$invert: true&lt;/focus&gt;
+  <focus>$invert: true</focus>
 c: 3</bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>a: 1
 ---
 b: 2
-&lt;focus&gt;c: 3&lt;/focus&gt;</bkl-code>
+<focus>c: 3</focus></bkl-code>
+
 </div>
 
 </row>
@@ -1174,30 +1317,38 @@ b: 2
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
 
+
 <bkl-code>a: 1</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
-<bkl-code>&lt;focus&gt;$match: null&lt;/focus&gt;
+
+<bkl-code><focus>$match: null</focus>
 b: 2</bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>a: 1
 ---
-&lt;focus&gt;b: 2&lt;/focus&gt;</bkl-code>
+<focus>b: 2</focus></bkl-code>
+
 </div>
 
 </row>
@@ -1223,31 +1374,41 @@ b: 2</bkl-code>
 
 <doc-grid>
 
+
+
 <row>
 
 
 
 <div>
 
+
 <bkl-code>a: 1</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
+
 <bkl-code>b: 2</bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>a: 1
 b: 2</bkl-code>
+
 </div>
 
 </row>
+
+
 
 <row>
 
@@ -1255,25 +1416,33 @@ b: 2</bkl-code>
 
 <div>
 
+
 <bkl-code>a: 1</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
+
 
 <bkl-code>b: 2
-&lt;focus&gt;$replace: true&lt;/focus&gt;</bkl-code>
+<focus>$replace: true</focus></bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
 
+
 <bkl-code>b: 2</bkl-code>
+
 </div>
 
 </row>
+
+
 
 <row>
 
@@ -1281,24 +1450,30 @@ b: 2</bkl-code>
 
 <div>
 
+
 <bkl-code>a: 1
 b: 2</bkl-code>
+
 </div>
 
 <op>&#43;</op>
 
 <div>
 
+
 <bkl-code>c: 3
-&lt;focus&gt;b: $delete&lt;/focus&gt;</bkl-code>
+<focus>b: $delete</focus></bkl-code>
+
 </div>
 
 
 <op>=</op>
 <div>
+
 
 <bkl-code>a: 1
 c: 3</bkl-code>
+
 </div>
 
 </row>
@@ -1310,6 +1485,867 @@ c: 3</bkl-code>
 
 <p>bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 </p>
+
+
+
+</section>
+
+<section id="lists">
+<h2><a name="lists">Lists</a></h2>
+
+
+
+<p>Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- 1</bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>- 2</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- 1
+- 2</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- 1</bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>- 2
+- <focus>$replace: true</focus></bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- 2</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- x: 1
+- x: 2</bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>- x: 3
+- <focus>$delete:
+    x: 2</focus></bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- x: 1
+- x: 3</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.
+</p>
+
+
+
+<p>To update a specific list item from a parent layer, use <ifocus>$match</ifocus>. Combine it with <ifocus>$value</ifocus> for scalars.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- a: 1
+- b: 2</bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>- <focus>$match:
+    b: 2</focus>
+  b: 10</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- a: 1
+- b: 10</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>- 1
+- 2</bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>- <focus>$match: 2
+  $value: 10</focus></bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>- 1
+- 10</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="interp">
+<h2><a name="interp">$&#34;&#34;</a></h2>
+
+
+
+<p>Use <ifocus>$""</ifocus> to interpolate format strings with <a href="#merge"><ifocus>$merge</ifocus></a>-style references.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+b:
+  c: foo
+d: <focus>$"{b.c} bar {a} 2"</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a: 1
+b:
+  c: foo
+d: <focus>foo bar 1 2</focus></bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="decode">
+<h2><a name="decode">$decode</a></h2>
+
+
+
+<p><ifocus>$decode</ifocus> transforms a string into a tree by parsing standard formats.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>$value: |
+  <focus>{"a":1}</focus>
+<focus>$decode: json</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code><focus>a: 1</focus></bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="env">
+<h2><a name="env">$env</a></h2>
+
+
+
+<p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys and values.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code># export FOO=test
+<focus>"$env:FOO"</focus>: 1</bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code><focus>test</focus>: 1</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code># export FOO=test
+a: <focus>$env:FOO</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+
+<bkl-code>a: <focus>test</focus></bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+<p>Note that all <ifocus>$env:</ifocus> substitutions result in string values even if the substituted value is <ifocus>true</ifocus>, <ifocus>false</ifocus>, <ifocus>null</ifocus>, or all digits.
+</p>
+
+
+
+</section>
+
+<section id="encode">
+<h2><a name="encode">$encode</a></h2>
+
+
+
+<p><ifocus>$encode</ifocus> transforms the subtree into the specified format.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>base64</label>
+
+
+<bkl-code>$value: a
+<focus>$encode: base64</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>YQ==</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>flags</label>
+
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: flags</focus>
+# [tolist:=, prefix:--]</bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- --a=1
+- --b=2</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>flatten</label>
+
+
+<bkl-code>- - a
+  - b
+- - c
+  - 4
+- e
+- <focus>$encode: flatten</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- a
+- b
+- c
+- 4
+- e</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>join</label>
+
+
+<bkl-code>$value: [a, b]
+<focus>$encode: join:/</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>a/b</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>json</label>
+
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: json</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>|
+  {"a":1,"b":2}</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>json (list)</label>
+
+
+<bkl-code>- a: 1
+- b: 2
+- <focus>$encode: json</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>|
+  [{"a":1},{"b":2}]</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>prefix</label>
+
+
+<bkl-code>- a
+- 2
+- <focus>$encode: prefix:X</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- Xa
+- X2</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>tolist</label>
+
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: tolist:=</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- a=1
+- b=2</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+<label>Stacking</label>
+
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: [tolist:=, "join:,"]</focus></bkl-code>
+
+</div>
+
+<op>=</op>
+
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>a=1,b=2</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
+
+
+
+</section>
+
+<section id="required">
+<h2><a name="required">$required</a></h2>
+
+
+
+<p>Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.
+</p>
+
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+<focus>b: $required</focus></bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>c: 3</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+<focus>b: $required</focus></bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code><focus>b: 2</focus>
+c: 3</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>a: 1
+b: 2
+c: 3</bkl-code>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+<focus>b:
+  - $required</focus></bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code>c: 3</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
+
+</div>
+
+</row>
+
+
+
+<row>
+
+
+
+<div>
+
+
+<bkl-code>a: 1
+<focus>b:
+  - $required</focus></bkl-code>
+
+</div>
+
+<op>&#43;</op>
+
+<div>
+
+
+<bkl-code><focus>b:
+  - 2</focus>
+c: 3</bkl-code>
+
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>a: 1
+b:
+  - 2
+c: 3</bkl-code>
+
+</div>
+
+</row>
+
+</doc-grid>
+
 
 
 
