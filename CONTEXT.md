@@ -14,7 +14,7 @@
 
 6. **Use MCP servers for Go development**: 
    - Use language-server MCP methods to read/write Go files and find symbols
-   - Use bkl-test-server MCP methods to search through tests
+   - Use bkl-mcp MCP methods to query documentation and search through tests
    - Never use direct file operations when MCP servers provide the functionality
 
 7. **Test management**: 
@@ -77,12 +77,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Use "null" not "nil" in test names (language perspective vs implementation)
   - Use short values in tests: a/b/c, 1/2/3, x/y/z instead of full words
-- **Coverage analysis**: 
-  - Coverage analysis integrated into MCP test server
-  - Supports finding tests with zero coverage contribution
-  - Can analyze overlap between tests to find redundancy
-  - Available through MCP methods: analyze_coverage, find_zero_coverage_tests, get_coverage_summary
-  - Current test coverage: 87.8%
+- **Current test coverage**: 87.8%
 
 ## Key Files and Architecture
 - `file.go`: File loading and parent resolution
@@ -135,7 +130,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - `go test -test.exclude=test1,test2` - Run tests excluding specific ones
 - `go test -bench=BenchmarkLanguage` - Run performance benchmarks
 - `go run ./cmd/bkl` - Run main binary directly
-- `go run ./cmd/mcp-test-server` - Run MCP test server with coverage analysis
+- `go run ./cmd/bkl-mcp` - Run MCP server for documentation and test queries
 - All tests now use the centralized language test framework in `tests.toml`
 
 ## Merge Behavior
@@ -187,12 +182,16 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - Variables created by key-value repeat can be accessed as `$repeat:keyname` in strings and interpolations
 
 ## MCP Servers Available
-- **bkl-test-server** (Model Context Protocol server for test management):
-  - `mcp__bkl-test-server__list_tests` - List all test names with optional filtering
-  - `mcp__bkl-test-server__get_test` - Get specific test details (description, eval files, expected output, file contents)
-  - `mcp__bkl-test-server__find_similar_tests` - Search tests by pattern in names/descriptions
-  - `mcp__bkl-test-server__compare_tests` - Compare two tests to identify differences
-  - `mcp__bkl-test-server__analyze_redundancy` - Analyze test redundancy based on coverage overlap data
+- **bkl-mcp** (Model Context Protocol server for documentation and test queries):
+  - `query` - Unified query for bkl documentation and test examples by keywords (comma-separated)
+    - Returns best-match results from both documentation sections and test examples
+    - Searches titles, content, examples, test names, descriptions, and file contents
+    - Results ranked by relevance with content previews and URL fragments
+    - Supports multiple keywords with enhanced scoring for matches
+  - `get` - Get full content of a documentation section or test
+    - Takes `type` ("documentation" or "test") and `id` (section ID or test name)
+    - Returns complete structured content including all details
+  - Uses embedded `tests.toml` and `docs/sections.yaml` for fast access
 - **language-server** (Model Context Protocol server for code analysis):
   - `mcp__language-server__definition` - Read source code definition of symbols (functions, types, methods)
   - `mcp__language-server__references` - Find all usages/references of a symbol throughout codebase
@@ -200,7 +199,3 @@ bkl is a flexible configuration templating language that simplifies configuratio
   - `mcp__language-server__diagnostics` - Get linting hints and diagnostics for files
   - `mcp__language-server__edit_file` - Apply text edits to files by line numbers
   - `mcp__language-server__rename_symbol` - Rename symbols and update all references
-  - Additional coverage analysis methods:
-    - `mcp__bkl-test-server__analyze_coverage` - Analyze test coverage contributions with optional test filter
-    - `mcp__bkl-test-server__find_zero_coverage_tests` - Find tests with zero unique coverage
-    - `mcp__bkl-test-server__get_coverage_summary` - Get overall coverage statistics
