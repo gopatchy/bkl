@@ -77,7 +77,7 @@ Related tools:
 	}
 
 	if opts.Verbose {
-		p.SetDebug(true)
+		bkl.Debug = true
 	}
 
 	format := ""

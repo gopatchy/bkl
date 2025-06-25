@@ -16,6 +16,9 @@ import (
 	"strings"
 )
 
+// Debug controls debug log output to stderr for all BKL operations.
+var Debug = os.Getenv("BKL_DEBUG") != ""
+
 // A BKL reads input documents, merges layers, and generates outputs.
 //
 // # Terminology
@@ -68,19 +71,11 @@ import (
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
 type BKL struct {
-	docs  []*Document
-	debug bool
+	docs []*Document
 }
 
 func New() (*BKL, error) {
-	return &BKL{
-		debug: os.Getenv("BKL_DEBUG") != "",
-	}, nil
-}
-
-// SetDebug enables or disables debug log output to stderr.
-func (b *BKL) SetDebug(debug bool) {
-	b.debug = debug
+	return &BKL{}, nil
 }
 
 // MergeDocument applies the supplied Document to the [BKL]'s current
@@ -511,7 +506,7 @@ func (b *BKL) EvaluateToData(fsys fs.FS, files []string, skipParent bool, format
 }
 
 func (b *BKL) log(format string, v ...any) {
-	if !b.debug {
+	if !Debug {
 		return
 	}
 
