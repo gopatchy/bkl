@@ -36,8 +36,14 @@ func WrapOrDie(cmd string) {
 			fatal(err)
 		}
 
+		// Prepare the path for FileMatch
+		preparedPaths, err := b.PreparePathsFromCwd([]string{arg}, "/")
+		if err != nil {
+			continue
+		}
+
 		fsys := os.DirFS("/")
-		realPath, f, err := b.FileMatch(fsys, arg)
+		realPath, f, err := b.FileMatch(fsys, preparedPaths[0])
 		if err != nil {
 			continue
 		}
