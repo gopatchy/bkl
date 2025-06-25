@@ -16,7 +16,7 @@ type file struct {
 	docs  []*Document
 }
 
-func (p *Parser) loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
+func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 	f := &file{
 		id:    path,
 		child: child,
@@ -27,9 +27,9 @@ func (p *Parser) loadFile(fsys *fileSystem, path string, child *file) (*file, er
 		f.id = fmt.Sprintf("%s|%s", child.id, f.id)
 	}
 
-	p.log("[%s] loading", f)
+	b.log("[%s] loading", f)
 
-	format, err := GetFormat(p.Ext(path))
+	format, err := GetFormat(b.Ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
@@ -76,16 +76,16 @@ func (p *Parser) loadFile(fsys *fileSystem, path string, child *file) (*file, er
 	return f, nil
 }
 
-func (p *Parser) loadFileAndParents(fsys *fileSystem, path string, child *file) ([]*file, error) {
-	return p.loadFileAndParentsInt(fsys, path, child, []string{})
+func (b *BKL) loadFileAndParents(fsys *fileSystem, path string, child *file) ([]*file, error) {
+	return b.loadFileAndParentsInt(fsys, path, child, []string{})
 }
 
-func (p *Parser) loadFileAndParentsInt(fsys *fileSystem, path string, child *file, stack []string) ([]*file, error) {
+func (b *BKL) loadFileAndParentsInt(fsys *fileSystem, path string, child *file, stack []string) ([]*file, error) {
 	if slices.Contains(stack, path) {
 		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), ErrCircularRef)
 	}
 
-	f, err := p.loadFile(fsys, path, child)
+	f, err := b.loadFile(fsys, path, child)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (p *Parser) loadFileAndParentsInt(fsys *fileSystem, path string, child *fil
 	files := []*file{}
 
 	for _, parent := range parents {
-		parentFiles, err := p.loadFileAndParentsInt(fsys, parent, f, stack)
+		parentFiles, err := b.loadFileAndParentsInt(fsys, parent, f, stack)
 		if err != nil {
 			return nil, err
 		}

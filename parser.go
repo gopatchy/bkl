@@ -16,10 +16,10 @@ import (
 	"strings"
 )
 
-// A Parser reads input documents, merges layers, and generates outputs.
+// A BKL reads input documents, merges layers, and generates outputs.
 //
 // # Terminology
-//   - Each Parser can read multiple files
+//   - Each BKL can read multiple files
 //   - Each file represents a single layer
 //   - Each file contains one or more documents
 //   - Each document generates one or more outputs
@@ -59,7 +59,7 @@ import (
 //
 // When applying a new document to internal state, it may be merged into one or
 // more existing documents or appended as a new document. To select merge
-// targets, Parser considers (in order):
+// targets, BKL considers (in order):
 //   - If $match:
 //   - $match: null -> append
 //   - $match within parent documents -> merge
@@ -67,27 +67,27 @@ import (
 //   - No matching documents -> error
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
-type Parser struct {
+type BKL struct {
 	docs  []*Document
 	debug bool
 }
 
-func New() (*Parser, error) {
-	return &Parser{
+func New() (*BKL, error) {
+	return &BKL{
 		debug: os.Getenv("BKL_DEBUG") != "",
 	}, nil
 }
 
 // SetDebug enables or disables debug log output to stderr.
-func (p *Parser) SetDebug(debug bool) {
-	p.debug = debug
+func (b *BKL) SetDebug(debug bool) {
+	b.debug = debug
 }
 
-// MergeDocument applies the supplied Document to the [Parser]'s current
+// MergeDocument applies the supplied Document to the [BKL]'s current
 // internal document state using bkl's merge semantics. If expand is true,
 // documents without $match will append; otherwise this is an error.
-func (p *Parser) mergeDocument(patch *Document) error {
-	matched, err := p.mergePatchMatch(patch)
+func (b *BKL) mergeDocument(patch *Document) error {
+	matched, err := b.mergePatchMatch(patch)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (p *Parser) mergeDocument(patch *Document) error {
 		return nil
 	}
 
-	for _, doc := range p.parents(patch) {
+	for _, doc := range b.parents(patch) {
 		matched = true
 
 		err = mergeDocs(doc, patch)
@@ -106,18 +106,18 @@ func (p *Parser) mergeDocument(patch *Document) error {
 	}
 
 	if !matched {
-		p.docs = append(p.docs, patch)
+		b.docs = append(b.docs, patch)
 	}
 
 	return nil
 }
 
-func (p *Parser) parents(patch *Document) []*Document {
+func (b *BKL) parents(patch *Document) []*Document {
 	ret := []*Document{}
 
 	parents := patch.allParents()
 
-	for _, doc := range p.docs {
+	for _, doc := range b.docs {
 		if _, found := parents[doc.ID]; found {
 			ret = append(ret, doc)
 		}
@@ -129,7 +129,7 @@ func (p *Parser) parents(patch *Document) []*Document {
 // mergePatchMatch attempts to apply the supplied patch to one or more
 // documents specified by $match. It returns success and error separately;
 // (false, nil) means no $match directive. Zero matches is an error.
-func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
+func (b *BKL) mergePatchMatch(patch *Document) (bool, error) {
 	found, m := patch.popMapValue("$match")
 	if !found {
 		return false, nil
@@ -138,11 +138,11 @@ func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
 	if m == nil {
 		// Explicit append
 		doc := newDocument(fmt.Sprintf("%s|matchnull", patch.ID))
-		p.docs = append(p.docs, doc)
+		b.docs = append(b.docs, doc)
 		return true, mergeDocs(doc, patch)
 	}
 
-	docs := p.findMatches(patch, m)
+	docs := b.findMatches(patch, m)
 	if len(docs) == 0 {
 		return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
 	}
@@ -157,11 +157,11 @@ func (p *Parser) mergePatchMatch(patch *Document) (bool, error) {
 	return true, nil
 }
 
-func (p *Parser) findMatches(doc *Document, pat any) []*Document {
+func (b *BKL) findMatches(doc *Document, pat any) []*Document {
 	ret := []*Document{}
 
 	// Try parents, then all docs
-	for _, ds := range [][]*Document{p.parents(doc), p.docs} {
+	for _, ds := range [][]*Document{b.parents(doc), b.docs} {
 		for _, d := range ds {
 			if matchDoc(d, pat) {
 				ret = append(ret, d)
@@ -177,27 +177,27 @@ func (p *Parser) findMatches(doc *Document, pat any) []*Document {
 }
 
 // MergeFile parses the file at path and merges its contents into the
-// [Parser]'s document state using bkl's merge semantics.
-func (p *Parser) mergeFile(fsys *fileSystem, path string) error {
-	f, err := p.loadFile(fsys, path, nil)
+// [BKL]'s document state using bkl's merge semantics.
+func (b *BKL) mergeFile(fsys *fileSystem, path string) error {
+	f, err := b.loadFile(fsys, path, nil)
 	if err != nil {
 		return err
 	}
 
-	return p.mergeFileObj(f)
+	return b.mergeFileObj(f)
 }
 
 // MergeFileLayers determines relevant layers from the supplied path and merges
 // them in order.
-func (p *Parser) MergeFileLayers(fsys fs.FS, path string) error {
+func (b *BKL) MergeFileLayers(fsys fs.FS, path string) error {
 	fileSystem := newFS(fsys)
-	files, err := p.loadFileAndParents(fileSystem, path, nil)
+	files, err := b.loadFileAndParents(fileSystem, path, nil)
 	if err != nil {
 		return err
 	}
 
 	for _, f := range files {
-		err := p.mergeFileObj(f)
+		err := b.mergeFileObj(f)
 		if err != nil {
 			return err
 		}
@@ -206,15 +206,15 @@ func (p *Parser) MergeFileLayers(fsys fs.FS, path string) error {
 	return nil
 }
 
-// mergeFile applies an already-parsed file object into the [Parser]'s
+// mergeFile applies an already-parsed file object into the [BKL]'s
 // document state.
-func (p *Parser) mergeFileObj(f *file) error {
-	p.log("[%s] merging", f)
+func (b *BKL) mergeFileObj(f *file) error {
+	b.log("[%s] merging", f)
 
 	for _, doc := range f.docs {
-		p.log("[%s] merging", doc)
+		b.log("[%s] merging", doc)
 
-		err := p.mergeDocument(doc)
+		err := b.mergeDocument(doc)
 		if err != nil {
 			return fmt.Errorf("[%s:%s]: %w", f, doc, err)
 		}
@@ -225,14 +225,14 @@ func (p *Parser) mergeFileObj(f *file) error {
 
 // Documents returns the parsed, merged (but not processed) trees for all
 // documents.
-func (p *Parser) Documents() []*Document {
-	return p.docs
+func (b *BKL) Documents() []*Document {
+	return b.docs
 }
 
 // outputDocument returns the output objects generated by the specified
 // document.
-func (p *Parser) outputDocument(doc *Document, env map[string]string) ([]any, error) {
-	docs, err := doc.Process(p.docs, env)
+func (b *BKL) outputDocument(doc *Document, env map[string]string) ([]any, error) {
+	docs, err := doc.Process(b.docs, env)
 	if err != nil {
 		return nil, err
 	}
@@ -272,11 +272,11 @@ func (p *Parser) outputDocument(doc *Document, env map[string]string) ([]any, er
 }
 
 // OutputDocuments returns the output objects generated by all documents.
-func (p *Parser) outputDocuments(env map[string]string) ([]any, error) {
+func (b *BKL) outputDocuments(env map[string]string) ([]any, error) {
 	ret := []any{}
 
-	for _, doc := range p.docs {
-		outs, err := p.outputDocument(doc, env)
+	for _, doc := range b.docs {
+		outs, err := b.outputDocument(doc, env)
 		if err != nil {
 			return nil, err
 		}
@@ -289,8 +289,8 @@ func (p *Parser) outputDocuments(env map[string]string) ([]any, error) {
 
 // Output returns all documents encoded in the specified format and merged into
 // a stream.
-func (p *Parser) output(format string, env map[string]string) ([]byte, error) {
-	outs, err := p.outputDocuments(env)
+func (b *BKL) output(format string, env map[string]string) ([]byte, error) {
+	outs, err := b.outputDocuments(env)
 	if err != nil {
 		return nil, err
 	}
@@ -307,9 +307,9 @@ func (p *Parser) output(format string, env map[string]string) ([]byte, error) {
 // to the specified output path.
 //
 // If format is "", it is inferred from path's file extension.
-func (p *Parser) OutputToFile(path, format string, env map[string]string) error {
+func (b *BKL) OutputToFile(path, format string, env map[string]string) error {
 	if format == "" {
-		format = p.Ext(path)
+		format = b.Ext(path)
 	}
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -319,7 +319,7 @@ func (p *Parser) OutputToFile(path, format string, env map[string]string) error 
 
 	defer fh.Close()
 
-	err = p.outputToWriter(fh, format, env)
+	err = b.outputToWriter(fh, format, env)
 	if err != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
@@ -331,12 +331,12 @@ func (p *Parser) OutputToFile(path, format string, env map[string]string) error 
 // to the specified [io.Writer].
 //
 // If format is "", it defaults to "json-pretty".
-func (p *Parser) outputToWriter(fh io.Writer, format string, env map[string]string) error {
+func (b *BKL) outputToWriter(fh io.Writer, format string, env map[string]string) error {
 	if format == "" {
 		format = "json-pretty"
 	}
 
-	out, err := p.output(format, env)
+	out, err := b.output(format, env)
 	if err != nil {
 		return err
 	}
@@ -349,7 +349,7 @@ func (p *Parser) outputToWriter(fh io.Writer, format string, env map[string]stri
 	return nil
 }
 
-func (p *Parser) makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
+func (b *BKL) makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
 	result := make([]string, len(paths))
 	for i, path := range paths {
 		if filepath.IsAbs(path) {
@@ -361,7 +361,7 @@ func (p *Parser) makePathsAbsolute(paths []string, workingDir string) ([]string,
 	return result, nil
 }
 
-func (p *Parser) rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
+func (b *BKL) rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
 	absRootPath := rootPath
 	if !filepath.IsAbs(rootPath) {
 		absRootPath = filepath.Join(workingDir, rootPath)
@@ -384,28 +384,28 @@ func (p *Parser) rebasePathsToRoot(absPaths []string, rootPath string, workingDi
 	return result, nil
 }
 
-func (p *Parser) preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
-	absPaths, err := p.makePathsAbsolute(paths, workingDir)
+func (b *BKL) preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
+	absPaths, err := b.makePathsAbsolute(paths, workingDir)
 	if err != nil {
 		return nil, err
 	}
 
-	return p.rebasePathsToRoot(absPaths, rootPath, workingDir)
+	return b.rebasePathsToRoot(absPaths, rootPath, workingDir)
 }
 
 // PreparePathsFromCwd prepares file paths relative to the current working directory
 // and rebases them to the given root path.
-func (p *Parser) PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
+func (b *BKL) PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
 
-	return p.preparePathsForParser(paths, rootPath, wd)
+	return b.preparePathsForParser(paths, rootPath, wd)
 }
 
 // GetOSEnv returns the current OS environment as a map.
-func (p *Parser) GetOSEnv() map[string]string {
+func (b *BKL) GetOSEnv() map[string]string {
 	env := make(map[string]string)
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
@@ -417,12 +417,12 @@ func (p *Parser) GetOSEnv() map[string]string {
 }
 
 // Ext returns the file extension without the leading dot.
-func (p *Parser) Ext(path string) string {
+func (b *BKL) Ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
 
 // GetFormat returns the Format for the given format name.
-func (p *Parser) GetFormat(name string) (*Format, error) {
+func (b *BKL) GetFormat(name string) (*Format, error) {
 	f, found := formatByExtension[name]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)
@@ -431,8 +431,8 @@ func (p *Parser) GetFormat(name string) (*Format, error) {
 	return &f, nil
 }
 
-func (p *Parser) Evaluate(fsys fs.FS, files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
-	evalFiles, err := p.preparePathsForParser(files, rootPath, workingDir)
+func (b *BKL) Evaluate(fsys fs.FS, files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
+	evalFiles, err := b.preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
@@ -440,7 +440,7 @@ func (p *Parser) Evaluate(fsys fs.FS, files []string, skipParent bool, format st
 	// Set environment variables for evaluation
 
 	for _, path := range evalFiles {
-		realPath, fileFormat, err := p.FileMatch(fsys, path)
+		realPath, fileFormat, err := b.FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -451,9 +451,9 @@ func (p *Parser) Evaluate(fsys fs.FS, files []string, skipParent bool, format st
 
 		if skipParent {
 			fileSystem := newFS(fsys)
-			err = p.mergeFile(fileSystem, realPath)
+			err = b.mergeFile(fileSystem, realPath)
 		} else {
-			err = p.MergeFileLayers(fsys, realPath)
+			err = b.MergeFileLayers(fsys, realPath)
 		}
 
 		if err != nil {
@@ -461,18 +461,18 @@ func (p *Parser) Evaluate(fsys fs.FS, files []string, skipParent bool, format st
 		}
 	}
 
-	return p.output(format, env)
+	return b.output(format, env)
 }
 
 // EvaluateToData is like Evaluate but returns the raw data instead of marshaled output
-func (p *Parser) EvaluateToData(fsys fs.FS, files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) (any, error) {
-	evalFiles, err := p.preparePathsForParser(files, rootPath, workingDir)
+func (b *BKL) EvaluateToData(fsys fs.FS, files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) (any, error) {
+	evalFiles, err := b.preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, path := range evalFiles {
-		realPath, fileFormat, err := p.FileMatch(fsys, path)
+		realPath, fileFormat, err := b.FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -483,9 +483,9 @@ func (p *Parser) EvaluateToData(fsys fs.FS, files []string, skipParent bool, for
 
 		if skipParent {
 			fileSystem := newFS(fsys)
-			err = p.mergeFile(fileSystem, realPath)
+			err = b.mergeFile(fileSystem, realPath)
 		} else {
-			err = p.MergeFileLayers(fsys, realPath)
+			err = b.MergeFileLayers(fsys, realPath)
 		}
 
 		if err != nil {
@@ -494,7 +494,7 @@ func (p *Parser) EvaluateToData(fsys fs.FS, files []string, skipParent bool, for
 	}
 
 	// Get the raw output data
-	outs, err := p.outputDocuments(env)
+	outs, err := b.outputDocuments(env)
 	if err != nil {
 		return nil, err
 	}
@@ -510,8 +510,8 @@ func (p *Parser) EvaluateToData(fsys fs.FS, files []string, skipParent bool, for
 	}
 }
 
-func (p *Parser) log(format string, v ...any) {
-	if !p.debug {
+func (b *BKL) log(format string, v ...any) {
+	if !b.debug {
 		return
 	}
 
@@ -525,8 +525,8 @@ func (p *Parser) log(format string, v ...any) {
 //
 // Returns the real filename and the requested output format, or
 // ("", "", error).
-func (p *Parser) FileMatch(fsys fs.FS, path string) (string, string, error) {
-	format := p.Ext(path)
+func (b *BKL) FileMatch(fsys fs.FS, path string) (string, string, error) {
+	format := b.Ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}

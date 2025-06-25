@@ -8,7 +8,7 @@ import (
 // RequiredFile loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
 // The file is loaded with MergeFileLayers but not processed, matching bklr behavior.
-func (p *Parser) RequiredFile(fsys fs.FS, path string) (any, error) {
+func (b *BKL) RequiredFile(fsys fs.FS, path string) (any, error) {
 	// Create new parser for the file
 	parser, err := New()
 	if err != nil {
@@ -29,12 +29,12 @@ func (p *Parser) RequiredFile(fsys fs.FS, path string) (any, error) {
 		return nil, fmt.Errorf("required operates on exactly 1 document, got %d in %s", len(docs), path)
 	}
 
-	return p.Required(docs[0].Data)
+	return b.Required(docs[0].Data)
 }
 
 // Required returns only the required fields and their ancestors from the given value.
 // It recursively traverses the value and keeps only paths that lead to "$required" markers.
-func (p *Parser) Required(obj any) (any, error) {
+func (b *BKL) Required(obj any) (any, error) {
 	return required(obj)
 }
 

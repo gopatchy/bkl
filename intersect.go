@@ -9,7 +9,7 @@ import (
 // IntersectFiles loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
 // The files are loaded with MergeFileLayers but not processed, matching bkli behavior.
-func (p *Parser) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
+func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 	if len(paths) < 2 {
 		return nil, fmt.Errorf("intersect requires at least 2 files, got %d", len(paths))
 	}
@@ -42,7 +42,7 @@ func (p *Parser) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 			continue
 		}
 
-		result, err = p.Intersect(docs[0].Data, result)
+		result, err = b.Intersect(result, docs[0].Data)
 		if err != nil {
 			return nil, err
 		}
@@ -52,10 +52,9 @@ func (p *Parser) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 }
 
 // Intersect returns the intersection of two values.
-// For maps, it returns keys present in both with matching values or $required for conflicts.
 // For lists, it returns elements present in both lists.
-func (p *Parser) Intersect(a, b any) (any, error) {
-	return intersect(a, b)
+func (b *BKL) Intersect(a, bVal any) (any, error) {
+	return intersect(a, bVal)
 }
 
 func intersect(a, b any) (any, error) {

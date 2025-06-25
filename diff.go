@@ -11,7 +11,7 @@ import (
 // DiffFiles loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
 // The files are loaded with MergeFileLayers but not processed, matching bkld behavior.
-func (p *Parser) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
+func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	// Load source file
 	p1, err := New()
 	if err != nil {
@@ -53,12 +53,12 @@ func (p *Parser) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	}
 
 	// Perform diff
-	return p.Diff(srcDocs[0].Data, dstDocs[0].Data, nil)
+	return b.Diff(srcDocs[0].Data, dstDocs[0].Data, nil)
 }
 
 // Diff generates the minimal intermediate layer needed to transform src into dst.
 // It returns a document that, when merged with src, produces dst.
-func (p *Parser) Diff(src, dst any, env map[string]string) (any, error) {
+func (b *BKL) Diff(src, dst any, env map[string]string) (any, error) {
 	result, err := diff(dst, src)
 	if err != nil {
 		return nil, err
