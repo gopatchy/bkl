@@ -7,7 +7,7 @@ import (
 
 // RequiredFile loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
-// The file is loaded with MergeFileLayers but not processed, matching bklr behavior.
+// The file is loaded directly without processing, matching bklr behavior.
 func (b *BKL) RequiredFile(fsys fs.FS, path string) (any, error) {
 	// Create new parser for the file
 	parser, err := New()
@@ -20,8 +20,18 @@ func (b *BKL) RequiredFile(fsys fs.FS, path string) (any, error) {
 		return nil, fmt.Errorf("file %s: %w", path, err)
 	}
 
-	if err := parser.MergeFileLayers(fsys, realPath); err != nil {
-		return nil, fmt.Errorf("merging %s: %w", path, err)
+	// Load file directly without processing
+	fileSystem := newFS(fsys)
+	fileObjs, err := parser.loadFileAndParents(fileSystem, realPath, nil)
+	if err != nil {
+		return nil, fmt.Errorf("loading %s: %w", path, err)
+	}
+
+	for _, f := range fileObjs {
+		err := parser.mergeFileObj(f)
+		if err != nil {
+			return nil, fmt.Errorf("merging %s: %w", path, err)
+		}
 	}
 
 	docs := parser.docs

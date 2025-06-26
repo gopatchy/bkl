@@ -48,7 +48,7 @@ func WrapOrDie(cmd string) {
 			continue
 		}
 
-		err = b.MergeFileLayers(fsys, realPath)
+		_, err = b.MergeFiles(fsys, []string{realPath}, false, f, b.GetOSEnv())
 		if err != nil {
 			fatal(err)
 		}

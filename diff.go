@@ -10,7 +10,7 @@ import (
 
 // DiffFiles loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
-// The files are loaded with MergeFileLayers but not processed, matching bkld behavior.
+// The files are loaded directly without processing, matching bkld behavior.
 func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	// Load source file
 	p1, err := New()
@@ -23,8 +23,18 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
 
-	if err := p1.MergeFileLayers(fsys, realSrcPath); err != nil {
-		return nil, fmt.Errorf("merging source %s: %w", srcPath, err)
+	// Load file directly without processing
+	fileSystem := newFS(fsys)
+	fileObjs, err := p1.loadFileAndParents(fileSystem, realSrcPath, nil)
+	if err != nil {
+		return nil, fmt.Errorf("loading source %s: %w", srcPath, err)
+	}
+
+	for _, f := range fileObjs {
+		err := p1.mergeFileObj(f)
+		if err != nil {
+			return nil, fmt.Errorf("merging source %s: %w", srcPath, err)
+		}
 	}
 
 	srcDocs := p1.docs
@@ -43,8 +53,18 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 		return nil, fmt.Errorf("destination file %s: %w", dstPath, err)
 	}
 
-	if err := p2.MergeFileLayers(fsys, realDstPath); err != nil {
-		return nil, fmt.Errorf("merging destination %s: %w", dstPath, err)
+	// Load file directly without processing
+	fileSystem2 := newFS(fsys)
+	fileObjs2, err := p2.loadFileAndParents(fileSystem2, realDstPath, nil)
+	if err != nil {
+		return nil, fmt.Errorf("loading destination %s: %w", dstPath, err)
+	}
+
+	for _, f := range fileObjs2 {
+		err := p2.mergeFileObj(f)
+		if err != nil {
+			return nil, fmt.Errorf("merging destination %s: %w", dstPath, err)
+		}
 	}
 
 	dstDocs := p2.docs

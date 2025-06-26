@@ -8,7 +8,7 @@ import (
 
 // IntersectFiles loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
-// The files are loaded with MergeFileLayers but not processed, matching bkli behavior.
+// The files are loaded directly without processing, matching bkli behavior.
 func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 	if len(paths) < 2 {
 		return nil, fmt.Errorf("intersect requires at least 2 files, got %d", len(paths))
@@ -28,8 +28,18 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
 
-		if err := parser.MergeFileLayers(fsys, realPath); err != nil {
-			return nil, fmt.Errorf("merging %s: %w", path, err)
+		// Load file directly without processing
+		fileSystem := newFS(fsys)
+		fileObjs, err := parser.loadFileAndParents(fileSystem, realPath, nil)
+		if err != nil {
+			return nil, fmt.Errorf("loading %s: %w", path, err)
+		}
+
+		for _, f := range fileObjs {
+			err := parser.mergeFileObj(f)
+			if err != nil {
+				return nil, fmt.Errorf("merging %s: %w", path, err)
+			}
 		}
 
 		docs := parser.docs

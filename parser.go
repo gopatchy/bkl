@@ -214,25 +214,6 @@ func (b *BKL) MergeFiles(fsys fs.FS, files []string, skipParent bool, format str
 	return b.output(format, env)
 }
 
-// MergeFileLayers determines relevant layers from the supplied path and merges
-// them in order.
-func (b *BKL) MergeFileLayers(fsys fs.FS, path string) error {
-	fileSystem := newFS(fsys)
-	files, err := b.loadFileAndParents(fileSystem, path, nil)
-	if err != nil {
-		return err
-	}
-
-	for _, f := range files {
-		err := b.mergeFileObj(f)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // mergeFile applies an already-parsed file object into the [BKL]'s
 // document state.
 func (b *BKL) mergeFileObj(f *file) error {
