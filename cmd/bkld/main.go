@@ -83,12 +83,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		format = f
 	}
 
-	outF, err := p.GetFormat(format)
-	if err != nil {
-		fatal(err)
-	}
-
-	enc, err := outF.MarshalStream([]any{doc})
+	enc, err := p.FormatOutput(doc, format)
 	if err != nil {
 		fatal(err)
 	}

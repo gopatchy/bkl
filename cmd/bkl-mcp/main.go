@@ -651,11 +651,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		if format == "" {
 			format = "yaml"
 		}
-		f, err := p.GetFormat(format)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid format: %v", err)), nil
-		}
-		output, err = f.MarshalStream([]any{requiredResult})
+		output, err = p.FormatOutput(requiredResult, format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal required result: %v", err)), nil
 		}
@@ -671,11 +667,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		if format == "" {
 			format = "yaml"
 		}
-		f, err := p.GetFormat(format)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid format: %v", err)), nil
-		}
-		output, err = f.MarshalStream([]any{intersectResult})
+		output, err = p.FormatOutput(intersectResult, format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal intersect result: %v", err)), nil
 		}
@@ -691,11 +683,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		if format == "" {
 			format = "yaml"
 		}
-		f, err := p.GetFormat(format)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid format: %v", err)), nil
-		}
-		output, err = f.MarshalStream([]any{diffResult})
+		output, err = p.FormatOutput(diffResult, format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal diff result: %v", err)), nil
 		}

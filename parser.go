@@ -289,7 +289,7 @@ func (b *BKL) output(format string, env map[string]string) ([]byte, error) {
 		return nil, err
 	}
 
-	f, err := GetFormat(format)
+	f, err := getFormat(format)
 	if err != nil {
 		return nil, err
 	}
@@ -415,14 +415,16 @@ func (b *BKL) Ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
 
-// GetFormat returns the Format for the given format name.
-func (b *BKL) GetFormat(name string) (*Format, error) {
-	f, found := formatByExtension[name]
+// FormatOutput marshals the given data to the specified format.
+// Returns the marshaled bytes or an error if the format is unknown or marshaling fails.
+func (b *BKL) FormatOutput(data any, format string) ([]byte, error) {
+	f, found := formatByExtension[format]
 	if !found {
-		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)
+		return nil, fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}
 
-	return &f, nil
+	// Always wrap in a slice for MarshalStream - it expects a stream of documents
+	return f.MarshalStream([]any{data})
 }
 
 func (b *BKL) Evaluate(fsys fs.FS, files []string, skipParent bool, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {

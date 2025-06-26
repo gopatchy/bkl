@@ -87,11 +87,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		f, err := p.GetFormat(format)
-		if err != nil {
-			return nil, err
-		}
-		output, err = f.MarshalStream([]any{requiredResult})
+		output, err = p.FormatOutput(requiredResult, format)
 		if err != nil {
 			return nil, err
 		}
@@ -113,11 +109,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		f, err := p.GetFormat(format)
-		if err != nil {
-			return nil, err
-		}
-		output, err = f.MarshalStream([]any{intersectResult})
+		output, err = p.FormatOutput(intersectResult, format)
 		if err != nil {
 			return nil, err
 		}
@@ -139,11 +131,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		f, err := p.GetFormat(format)
-		if err != nil {
-			return nil, err
-		}
-		output, err = f.MarshalStream([]any{diffResult})
+		output, err = p.FormatOutput(diffResult, format)
 		if err != nil {
 			return nil, err
 		}

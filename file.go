@@ -29,7 +29,7 @@ func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error
 
 	debugLog("[%s] loading", f)
 
-	format, err := GetFormat(b.Ext(path))
+	format, err := getFormat(b.Ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}

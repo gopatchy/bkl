@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-type Format struct {
+type format struct {
 	MarshalStream   func([]any) ([]byte, error)
 	UnmarshalStream func([]byte) ([]any, error)
 }
 
-var formatByExtension = map[string]Format{
+var formatByExtension = map[string]format{
 	"json": {
 		MarshalStream:   jsonMarshalStream,
 		UnmarshalStream: jsonUnmarshalStream,
@@ -36,8 +36,8 @@ var formatByExtension = map[string]Format{
 	},
 }
 
-// GetFormat returns the Format for the given name (extension).
-func GetFormat(name string) (*Format, error) {
+// getFormat returns the format for the given name (extension).
+func getFormat(name string) (*format, error) {
 	f, found := formatByExtension[name]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", name, ErrUnknownFormat)
