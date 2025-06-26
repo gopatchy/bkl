@@ -22,10 +22,6 @@ func newDocumentWithData(id string, data any) *Document {
 	return doc
 }
 
-func (d *Document) addParents(parents ...*Document) {
-	d.Parents = append(d.Parents, parents...)
-}
-
 func (d *Document) allParents() map[string]*Document {
 	parents := map[string]*Document{}
 	d.allParentsInt(parents)
@@ -57,18 +53,9 @@ func (d *Document) clone(suffix string) (*Document, error) {
 	return d2, nil
 }
 
-func (d *Document) dataAsMap() map[string]any {
-	dataMap, ok := d.Data.(map[string]any)
-	if ok {
-		return dataMap
-	} else {
-		return nil
-	}
-}
-
 func (d *Document) popMapValue(key string) (bool, any) {
-	dataMap := d.dataAsMap()
-	if dataMap == nil {
+	dataMap, ok := d.Data.(map[string]any)
+	if !ok {
 		return false, nil
 	}
 
@@ -81,7 +68,7 @@ func (d *Document) popMapValue(key string) (bool, any) {
 	return found, val
 }
 
-func (d *Document) Process(mergeFromDocs []*Document, env map[string]string) ([]*Document, error) {
+func (d *Document) process(mergeFromDocs []*Document, env map[string]string) ([]*Document, error) {
 	var err error
 
 	ec := newEvalContext(env)

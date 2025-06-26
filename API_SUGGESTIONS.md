@@ -2,22 +2,22 @@
 
 ## Current Public API
 
-### Core Types
+### Package-level Functions
 
-1. **BKL** - Main entry point for the library
-   - `New() (*BKL, error)` - Constructor
-   - `Documents() []*Document` - Get parsed documents
+- `New() (*BKL, error)` - Constructor for BKL instance
+- `GetMCPDocSections() ([]MCPDocSection, error)` - Get documentation sections for MCP server
+- `GetMCPTests() (map[string]*MCPTestCase, error)` - Get test cases for MCP server
 
 ### Package-level Variables
 
 - `Debug bool` - Controls debug logging for all BKL operations (initialized from BKL_DEBUG env var)
-   
-2. **Document** - Represents a parsed configuration document
-   - `Process([]*Document, map[string]string) ([]*Document, error)` - Process with merge docs and env vars
-   - `String() string` - String representation
 
-3. **Format** - Configuration format handling
-   - `GetFormat(string) (*Format, error)` - Get format by name
+### Core Types
+
+1. **BKL** - Main entry point for the library
+
+2. **Document** - Represents a parsed configuration document
+   - `String() string` - String representation (implements fmt.Stringer)
 
 ### Main Operations
 
@@ -26,13 +26,11 @@
    - `OutputToFile(string, string, map[string]string) error` - Write output to file
    - `Evaluate(fs.FS, []string, bool, string, string, string, map[string]string) ([]byte, error)` - Full evaluation pipeline
    - `EvaluateToData(...)` - Same as Evaluate but returns data instead of bytes
+   - `FormatOutput(data any, format string) ([]byte, error)` - Format data to specified output format
 
 2. **Specialized Operations**
-   - `Diff(any, any, map[string]string) (any, error)` - Compare two configurations
    - `DiffFiles(fs.FS, string, string) (any, error)` - Compare two files
-   - `Intersect(any, any) (any, error)` - Find common elements
    - `IntersectFiles(fs.FS, []string) (any, error)` - Intersect multiple files
-   - `Required(any) (any, error)` - Extract required fields
    - `RequiredFile(fs.FS, string) (any, error)` - Extract required from file
 
 3. **Utility Methods**
@@ -41,11 +39,12 @@
    - `Ext(string) string` - Get file extension
    - `FileMatch(fs.FS, string) (string, string, error)` - Match file patterns
 
+
 ## Issues with Current API
 
 1. **Inconsistent Naming**
    - Some methods use `File` suffix (DiffFiles, RequiredFile) while others don't (MergeFileLayers)
-   - Mix of verb-first (GetFormat) and noun-first (OutputToFile) naming
+   - Mix of verb-first and noun-first naming
 
 2. **Complex Method Signatures**
    - `Evaluate` has 7 parameters - difficult to use correctly
@@ -139,12 +138,10 @@ func (e *BKLError) Error() string
 func (e *BKLError) Unwrap() error
 ```
 
-### 6. Format Registration
+### 6. Format Support
 
 ```go
-// Allow custom format registration
-func RegisterFormat(name string, format *Format) error
-func UnregisterFormat(name string) error
+// List supported formats
 func ListFormats() []string
 ```
 
@@ -221,9 +218,9 @@ for _, err := range errors {
 }
 
 // Document manipulation
-docs := parser.Documents()
-value, _ := docs[0].GetString("server.host")
-docs[0].Set("server.port", 8080)
+doc := &Document{Data: config}
+value, _ := doc.GetString("server.host")
+doc.Set("server.port", 8080)
 ```
 
 This would make the API more intuitive, consistent, and easier to use while maintaining the power of the current implementation.

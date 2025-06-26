@@ -41,7 +41,7 @@ func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error
 	}
 
 	if fh == nil {
-		fh, err = fsys.Open(path)
+		fh, err = fsys.open(path)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}
@@ -123,7 +123,7 @@ func (f *file) setParents() {
 	}
 
 	for _, doc := range f.child.docs {
-		doc.addParents(f.docs...)
+		doc.Parents = append(doc.Parents, f.docs...)
 	}
 }
 

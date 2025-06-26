@@ -17,23 +17,23 @@ func newFS(fsys fs.FS) *fileSystem {
 	}
 }
 
-func (f *fileSystem) Open(name string) (fs.File, error) {
+func (f *fileSystem) open(name string) (fs.File, error) {
 	return f.fsys.Open(f.convertToFS(name))
 }
 
-func (f *fileSystem) ReadDir(name string) ([]fs.DirEntry, error) {
+func (f *fileSystem) readDir(name string) ([]fs.DirEntry, error) {
 	rdf := f.fsys.(fs.ReadDirFS)
 	return rdf.ReadDir(f.convertToFS(name))
 }
 
-func (f *fileSystem) Stat(name string) (fs.FileInfo, error) {
+func (f *fileSystem) stat(name string) (fs.FileInfo, error) {
 	sf, ok := f.fsys.(fs.StatFS)
 	if ok {
 		return sf.Stat(f.convertToFS(name))
 	}
 
 	// Fallback: use Open and get FileInfo from the file
-	file, err := f.Open(name)
+	file, err := f.open(name)
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,11 @@ func (f *fileSystem) Stat(name string) (fs.FileInfo, error) {
 	return file.Stat()
 }
 
-func (f *fileSystem) Glob(pattern string) ([]string, error) {
+func (f *fileSystem) glob(pattern string) ([]string, error) {
 	dir, file := filepath.Split(pattern)
 	dir = strings.TrimSuffix(dir, "/")
 
-	entries, err := f.ReadDir(dir)
+	entries, err := f.readDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("glob %s: %w", pattern, err)
 	}
@@ -77,7 +77,7 @@ func (f *fileSystem) convertToFS(path string) string {
 func (f *fileSystem) findFile(path string) string {
 	for ext := range formatByExtension {
 		extPath := fmt.Sprintf("%s.%s", path, ext)
-		if _, err := f.Stat(extPath); err == nil {
+		if _, err := f.stat(extPath); err == nil {
 			return extPath
 		}
 	}
@@ -86,7 +86,7 @@ func (f *fileSystem) findFile(path string) string {
 
 func (f *fileSystem) globFiles(path string) ([]string, error) {
 	pat := fmt.Sprintf("%s.*", path)
-	matches, err := f.Glob(pat)
+	matches, err := f.glob(pat)
 	if err != nil {
 		return nil, fmt.Errorf("glob %s: %w", pat, err)
 	}

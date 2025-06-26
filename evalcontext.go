@@ -21,13 +21,13 @@ func newEvalContext(env map[string]string) *evalContext {
 	}
 }
 
-func (ec *evalContext) Clone() *evalContext {
+func (ec *evalContext) clone() *evalContext {
 	return &evalContext{
 		Vars: maps.Clone(ec.Vars),
 	}
 }
 
-func (ec *evalContext) GetVar(name string) (any, error) {
+func (ec *evalContext) getVar(name string) (any, error) {
 	v, found := ec.Vars[name]
 	if found {
 		return v, nil

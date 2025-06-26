@@ -12,7 +12,7 @@ func getWithVar(doc *Document, docs []*Document, ec *evalContext, m any) (any, e
 	if err != nil {
 		switch m2 := m.(type) {
 		case string:
-			return ec.GetVar(m2)
+			return ec.getVar(m2)
 
 		default:
 			return nil, err

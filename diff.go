@@ -27,7 +27,7 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 		return nil, fmt.Errorf("merging source %s: %w", srcPath, err)
 	}
 
-	srcDocs := p1.Documents()
+	srcDocs := p1.docs
 	if len(srcDocs) != 1 {
 		return nil, fmt.Errorf("diff operates on exactly 1 source document per file, got %d", len(srcDocs))
 	}
@@ -47,18 +47,18 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 		return nil, fmt.Errorf("merging destination %s: %w", dstPath, err)
 	}
 
-	dstDocs := p2.Documents()
+	dstDocs := p2.docs
 	if len(dstDocs) != 1 {
 		return nil, fmt.Errorf("diff operates on exactly 1 destination document per file, got %d", len(dstDocs))
 	}
 
 	// Perform diff
-	return b.Diff(srcDocs[0].Data, dstDocs[0].Data, nil)
+	return b.diff(srcDocs[0].Data, dstDocs[0].Data, nil)
 }
 
-// Diff generates the minimal intermediate layer needed to transform src into dst.
+// diff generates the minimal intermediate layer needed to transform src into dst.
 // It returns a document that, when merged with src, produces dst.
-func (b *BKL) Diff(src, dst any, env map[string]string) (any, error) {
+func (b *BKL) diff(src, dst any, env map[string]string) (any, error) {
 	result, err := diff(dst, src)
 	if err != nil {
 		return nil, err

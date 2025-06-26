@@ -32,7 +32,7 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 			return nil, fmt.Errorf("merging %s: %w", path, err)
 		}
 
-		docs := parser.Documents()
+		docs := parser.docs
 		if len(docs) != 1 {
 			return nil, fmt.Errorf("intersect operates on exactly 1 document per file, got %d in %s", len(docs), path)
 		}
@@ -42,7 +42,7 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 			continue
 		}
 
-		result, err = b.Intersect(result, docs[0].Data)
+		result, err = b.intersect(result, docs[0].Data)
 		if err != nil {
 			return nil, err
 		}
@@ -51,9 +51,9 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 	return result, nil
 }
 
-// Intersect returns the intersection of two values.
+// intersect returns the intersection of two values.
 // For lists, it returns elements present in both lists.
-func (b *BKL) Intersect(a, bVal any) (any, error) {
+func (b *BKL) intersect(a, bVal any) (any, error) {
 	return intersect(a, bVal)
 }
 

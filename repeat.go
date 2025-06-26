@@ -116,7 +116,7 @@ func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 	case int:
 		contexts := make([]*evalContext, r2)
 		for i := 0; i < r2; i++ {
-			ctx := ec.Clone()
+			ctx := ec.clone()
 			ctx.Vars["$repeat"] = i
 			contexts[i] = ctx
 		}
@@ -125,7 +125,7 @@ func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 	case []any:
 		contexts := make([]*evalContext, len(r2))
 		for i, value := range r2 {
-			ctx := ec.Clone()
+			ctx := ec.clone()
 			ctx.Vars["$repeat"] = value
 			contexts[i] = ctx
 		}
@@ -139,7 +139,7 @@ func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 			}
 			contexts := make([]*evalContext, len(values))
 			for i, value := range values {
-				ctx := ec.Clone()
+				ctx := ec.clone()
 				ctx.Vars["$repeat"] = value
 				contexts[i] = ctx
 			}
@@ -154,7 +154,7 @@ func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 }
 
 func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalContext, error) {
-	ec = ec.Clone()
+	ec = ec.clone()
 	for k, v := range rs {
 		ec.Vars[fmt.Sprintf("$repeat.%s", k)] = v
 	}
@@ -192,7 +192,7 @@ func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalC
 
 		for _, ctx := range contexts {
 			for _, item := range values {
-				newCtx := ctx.Clone()
+				newCtx := ctx.clone()
 				newCtx.Vars[fmt.Sprintf("$repeat:%s", name)] = item
 				newContexts = append(newContexts, newCtx)
 			}

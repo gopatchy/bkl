@@ -24,17 +24,17 @@ func (b *BKL) RequiredFile(fsys fs.FS, path string) (any, error) {
 		return nil, fmt.Errorf("merging %s: %w", path, err)
 	}
 
-	docs := parser.Documents()
+	docs := parser.docs
 	if len(docs) != 1 {
 		return nil, fmt.Errorf("required operates on exactly 1 document, got %d in %s", len(docs), path)
 	}
 
-	return b.Required(docs[0].Data)
+	return b.required(docs[0].Data)
 }
 
-// Required returns only the required fields and their ancestors from the given value.
+// required returns only the required fields and their ancestors from the given value.
 // It recursively traverses the value and keeps only paths that lead to "$required" markers.
-func (b *BKL) Required(obj any) (any, error) {
+func (b *BKL) required(obj any) (any, error) {
 	return required(obj)
 }
 
