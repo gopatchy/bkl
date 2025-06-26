@@ -4893,3 +4893,49 @@ items:
       d3: $"deep3-{$repeat}-{data.level1}-{data.level3}"
 '''
 
+[diamondInheritance]
+description = "Wildcard complex inheritance pattern"
+eval = ["a.b.c.e.yaml"]
+format = "yaml"
+expected = '''
+x:
+  - a
+  - a.b.c
+  - a.b.c.d0
+  - a.b.c.e
+---
+x:
+  - a
+  - a.b.c
+  - a.b.c.d1
+  - a.b.c.e
+'''
+[diamondInheritance.files]
+"a.yaml" = '''
+x:
+- a
+'''
+"a.b.yaml" = '''
+'''
+"a.b.c.yaml" = '''
+$match: {}
+x:
+- a.b.c
+'''
+"a.b.c.d0.yaml" = '''
+$match: {}
+x:
+- a.b.c.d0
+'''
+"a.b.c.d1.yaml" = '''
+$match: {}
+x:
+- a.b.c.d1
+'''
+"a.b.c.e.yaml" = '''
+$parent:
+- a.b.c.d*
+$match: {}
+x:
+- a.b.c.e
+'''

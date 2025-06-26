@@ -27,7 +27,7 @@ func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error
 		f.id = fmt.Sprintf("%s|%s", child.id, f.id)
 	}
 
-	b.log("[%s] loading", f)
+	debugLog("[%s] loading", f)
 
 	format, err := GetFormat(b.Ext(path))
 	if err != nil {
@@ -100,7 +100,13 @@ func (b *BKL) loadFileAndParentsInt(fsys *fileSystem, path string, child *file, 
 	files := []*file{}
 
 	for _, parent := range parents {
-		parentFiles, err := b.loadFileAndParentsInt(fsys, parent, f, stack)
+		// If the current file has no docs, skip it in the hierarchy
+		child2 := f
+		if len(f.docs) == 0 {
+			child2 = child
+		}
+
+		parentFiles, err := b.loadFileAndParentsInt(fsys, parent, child2, stack)
 		if err != nil {
 			return nil, err
 		}

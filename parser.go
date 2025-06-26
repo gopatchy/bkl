@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -204,10 +203,10 @@ func (b *BKL) MergeFileLayers(fsys fs.FS, path string) error {
 // mergeFile applies an already-parsed file object into the [BKL]'s
 // document state.
 func (b *BKL) mergeFileObj(f *file) error {
-	b.log("[%s] merging", f)
+	debugLog("[%s] merging", f)
 
 	for _, doc := range f.docs {
-		b.log("[%s] merging", doc)
+		debugLog("[%s] merging", doc)
 
 		err := b.mergeDocument(doc)
 		if err != nil {
@@ -503,14 +502,6 @@ func (b *BKL) EvaluateToData(fsys fs.FS, files []string, skipParent bool, format
 		// Multiple documents - return as list
 		return outs, nil
 	}
-}
-
-func (b *BKL) log(format string, v ...any) {
-	if !Debug {
-		return
-	}
-
-	log.Printf(format, v...)
 }
 
 // FileMatch attempts to find a file with the same base name as path, but
