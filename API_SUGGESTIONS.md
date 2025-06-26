@@ -5,28 +5,64 @@
 ### Package-level Functions
 
 - `New() (*BKL, error)` - Constructor for BKL instance
-- `GetMCPDocSections() ([]MCPDocSection, error)` - Get documentation sections for MCP server
-- `GetMCPTests() (map[string]*MCPTestCase, error)` - Get test cases for MCP server
+- `GetDocSections() ([]DocSection, error)` - Get embedded documentation sections
+- `GetTests() (map[string]*TestCase, error)` - Get embedded test cases
 
 ### Package-level Variables
 
 - `Debug bool` - Controls debug logging for all BKL operations (initialized from BKL_DEBUG env var)
 
-### Core Types
+### Exported Types
 
-1. **BKL** - Main entry point for the library
-
-2. **Document** - Represents a parsed configuration document
+1. **BKL** - The main struct that reads input documents, merges layers, and generates outputs
+2. **Document** - Represents a document with ID, Parents, and Data fields
    - `String() string` - String representation (implements fmt.Stringer)
+3. **TestCase** - Test case structure
+4. **DocSection** - Documentation section structure
+5. **ContentItem** - Content item within a documentation section
+6. **Example** - Example within a content item
+7. **GridRow** - Grid row for examples
+8. **GridItem** - Individual grid item
 
-### Main Operations
+### Exported Error Variables
+
+- `Err` - Base error; every error in bkl inherits from this
+- `ErrCircularRef` - Circular reference error
+- `ErrConflictingParent` - Conflicting $parent error
+- `ErrExtraEntries` - Extra entries error
+- `ErrExtraKeys` - Extra keys error
+- `ErrInvalidArguments` - Invalid arguments error
+- `ErrInvalidDirective` - Invalid directive error
+- `ErrInvalidIndex` - Invalid index error
+- `ErrInvalidFilename` - Invalid filename error
+- `ErrInvalidInput` - Invalid input error
+- `ErrInvalidType` - Invalid type error
+- `ErrInvalidParent` - Invalid $parent error
+- `ErrInvalidRepeat` - Invalid $repeat error
+- `ErrMarshal` - Encoding error
+- `ErrRefNotFound` - Reference not found error
+- `ErrMissingEnv` - Missing environment variable error
+- `ErrMissingFile` - Missing file error
+- `ErrMissingMatch` - Missing $match error
+- `ErrMultiMatch` - Multiple documents $match error
+- `ErrNoMatchFound` - No document/entry matched $match error
+- `ErrNoCloneFound` - No document/entry matched $clone error
+- `ErrOutputFile` - Error opening output file
+- `ErrRequiredField` - Required field not set error
+- `ErrUnknownFormat` - Unknown format error
+- `ErrUnmarshal` - Decoding error
+- `ErrUselessOverride` - Useless override error
+- `ErrVariableNotFound` - Variable not found error
+
+### BKL Methods
 
 1. **File Operations**
    - `MergeFileLayers(fs.FS, string) error` - Merge layers from a file
    - `OutputToFile(string, string, map[string]string) error` - Write output to file
    - `Evaluate(fs.FS, []string, bool, string, string, string, map[string]string) ([]byte, error)` - Full evaluation pipeline
-   - `EvaluateToData(...)` - Same as Evaluate but returns data instead of bytes
+   - `EvaluateToData(fs.FS, []string, bool, string, string, string, map[string]string) (any, error)` - Same as Evaluate but returns data instead of bytes
    - `FormatOutput(data any, format string) ([]byte, error)` - Format data to specified output format
+   - `FileMatch(fs.FS, string) (string, string, error)` - Match file patterns
 
 2. **Specialized Operations**
    - `DiffFiles(fs.FS, string, string) (any, error)` - Compare two files
@@ -37,7 +73,6 @@
    - `PreparePathsFromCwd([]string, string) ([]string, error)` - Path preparation
    - `GetOSEnv() map[string]string` - Get environment variables
    - `Ext(string) string` - Get file extension
-   - `FileMatch(fs.FS, string) (string, string, error)` - Match file patterns
 
 
 ## Issues with Current API

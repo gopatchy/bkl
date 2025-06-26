@@ -13,7 +13,7 @@ var testsData []byte
 //go:embed docs/sections.yaml
 var sectionsData []byte
 
-type MCPTestCase struct {
+type TestCase struct {
 	Description string            `toml:"description"`
 	Eval        []string          `toml:"eval"`
 	Format      string            `toml:"format"`
@@ -26,47 +26,47 @@ type MCPTestCase struct {
 	Skip        bool              `toml:"skip,omitempty"`
 }
 
-type MCPDocSection struct {
-	ID    string           `yaml:"id"`
-	Title string           `yaml:"title"`
-	Items []MCPContentItem `yaml:"items"`
+type DocSection struct {
+	ID    string        `yaml:"id"`
+	Title string        `yaml:"title"`
+	Items []ContentItem `yaml:"items"`
 }
 
-type MCPContentItem struct {
-	Type    string     `yaml:"type"`
-	Content string     `yaml:"content"`
-	Example MCPExample `yaml:"example"`
+type ContentItem struct {
+	Type    string  `yaml:"type"`
+	Content string  `yaml:"content"`
+	Example Example `yaml:"example"`
 }
 
-type MCPExample struct {
-	Type       string       `yaml:"type"`
-	Label      string       `yaml:"label"`
-	Code       string       `yaml:"code"`
-	Rows       []MCPGridRow `yaml:"rows"`
-	Highlights []string     `yaml:"highlights"`
+type Example struct {
+	Type       string    `yaml:"type"`
+	Label      string    `yaml:"label"`
+	Code       string    `yaml:"code"`
+	Rows       []GridRow `yaml:"rows"`
+	Highlights []string  `yaml:"highlights"`
 }
 
-type MCPGridRow struct {
-	Items    []MCPGridItem `yaml:"items"`
-	Operator string        `yaml:"operator"`
+type GridRow struct {
+	Items    []GridItem `yaml:"items"`
+	Operator string     `yaml:"operator"`
 }
 
-type MCPGridItem struct {
+type GridItem struct {
 	Label      string   `yaml:"label"`
 	Code       string   `yaml:"code"`
 	Highlights []string `yaml:"highlights"`
 }
 
-func GetMCPTests() (map[string]*MCPTestCase, error) {
-	var tests map[string]*MCPTestCase
+func GetTests() (map[string]*TestCase, error) {
+	var tests map[string]*TestCase
 	if err := toml.Unmarshal(testsData, &tests); err != nil {
 		return nil, err
 	}
 	return tests, nil
 }
 
-func GetMCPDocSections() ([]MCPDocSection, error) {
-	var sections []MCPDocSection
+func GetDocSections() ([]DocSection, error) {
+	var sections []DocSection
 	if err := yaml.Unmarshal(sectionsData, &sections); err != nil {
 		return nil, err
 	}

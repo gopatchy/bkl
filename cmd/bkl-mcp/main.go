@@ -16,21 +16,21 @@ import (
 )
 
 var (
-	tests    map[string]*bkl.MCPTestCase
-	sections []bkl.MCPDocSection
+	tests    map[string]*bkl.TestCase
+	sections []bkl.DocSection
 )
 
 func loadData() error {
 	var err error
 
 	// Load tests from bkl package
-	tests, err = bkl.GetMCPTests()
+	tests, err = bkl.GetTests()
 	if err != nil {
 		return fmt.Errorf("failed to load tests: %v", err)
 	}
 
 	// Load documentation sections from bkl package
-	sections, err = bkl.GetMCPDocSections()
+	sections, err = bkl.GetDocSections()
 	if err != nil {
 		return fmt.Errorf("failed to load documentation sections: %v", err)
 	}
@@ -374,7 +374,7 @@ func getHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 	}
 }
 
-func getTestFeatures(test *bkl.MCPTestCase) []string {
+func getTestFeatures(test *bkl.TestCase) []string {
 	var features []string
 
 	if test.Diff {
