@@ -30,14 +30,30 @@ for FILE in "$@"; do
     OUTPUT2=$(go run github.com/gopatchy/bkl/cmd/bkl@$VERSION2 "$FILE" 2>&1)
     EXIT2=$?
     
-    # Check if either version failed
+    # Check if both versions failed with the same error
+    if [ $EXIT1 -ne 0 ] && [ $EXIT2 -ne 0 ]; then
+        if [ "$OUTPUT1" = "$OUTPUT2" ]; then
+            echo -e "${GREEN}PASS${NC} $FILE (both versions error identically)"
+        else
+            echo -e "${RED}ERROR${NC} $FILE (different errors)"
+            echo "  $VERSION1: $OUTPUT1"
+            echo "  $VERSION2: $OUTPUT2"
+        fi
+        continue
+    fi
+    
+    # Check if only one version failed
     if [ $EXIT1 -ne 0 ] || [ $EXIT2 -ne 0 ]; then
-        echo -e "${RED}ERROR${NC} $FILE"
+        echo -e "${RED}ERROR${NC} $FILE (only one version failed)"
         if [ $EXIT1 -ne 0 ]; then
             echo "  $VERSION1 failed: $OUTPUT1"
+        else
+            echo "  $VERSION1 succeeded"
         fi
         if [ $EXIT2 -ne 0 ]; then
             echo "  $VERSION2 failed: $OUTPUT2"
+        else
+            echo "  $VERSION2 succeeded"
         fi
         continue
     fi
