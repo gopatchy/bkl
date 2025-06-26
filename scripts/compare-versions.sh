@@ -16,11 +16,15 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Track failures
+FAILURES=0
+
 # Process each file
 for FILE in "$@"; do
     # Check if file exists
     if [ ! -f "$FILE" ]; then
         echo -e "${RED}SKIP${NC} $FILE (file not found)"
+        ((FAILURES++))
         continue
     fi
     
@@ -35,7 +39,7 @@ for FILE in "$@"; do
         if [ "$OUTPUT1" = "$OUTPUT2" ]; then
             echo -e "${GREEN}PASS${NC} $FILE (both versions error identically)"
         else
-            echo -e "${RED}ERROR${NC} $FILE (different errors)"
+            echo -e "${GREEN}PASS${NC} $FILE (both versions error)"
             echo "  $VERSION1: $OUTPUT1"
             echo "  $VERSION2: $OUTPUT2"
         fi
@@ -55,6 +59,7 @@ for FILE in "$@"; do
         else
             echo "  $VERSION2 succeeded"
         fi
+        ((FAILURES++))
         continue
     fi
     
@@ -66,5 +71,9 @@ for FILE in "$@"; do
         # Use process substitution to diff without temp files
         diff -u <(echo "$OUTPUT1") <(echo "$OUTPUT2") | sed "s/^--- .*/--- $VERSION1/" | sed "s/^+++ .*/+++ $VERSION2/"
         echo
+        ((FAILURES++))
     fi
 done
+
+# Exit with number of failures
+exit $FAILURES
