@@ -181,6 +181,39 @@ func (b *BKL) mergeFile(fsys *fileSystem, path string) error {
 	return b.mergeFileObj(f)
 }
 
+// MergeFiles merges multiple files and returns the result in the specified format.
+// If format is empty, it defaults to "json-pretty".
+// If skipParent is true, only the specified files are loaded without their parent layers.
+func (b *BKL) MergeFiles(fsys fs.FS, files []string, skipParent bool, format string, env map[string]string) ([]byte, error) {
+	if format == "" {
+		format = "json-pretty"
+	}
+
+	fileSystem := newFS(fsys)
+	for _, path := range files {
+		if skipParent {
+			err := b.mergeFile(fileSystem, path)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			fileObjs, err := b.loadFileAndParents(fileSystem, path, nil)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, f := range fileObjs {
+				err := b.mergeFileObj(f)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	return b.output(format, env)
+}
+
 // MergeFileLayers determines relevant layers from the supplied path and merges
 // them in order.
 func (b *BKL) MergeFileLayers(fsys fs.FS, path string) error {
@@ -427,31 +460,20 @@ func (b *BKL) Evaluate(fsys fs.FS, files []string, skipParent bool, format strin
 		return nil, err
 	}
 
-	// Set environment variables for evaluation
-
-	for _, path := range evalFiles {
+	realFiles := make([]string, len(evalFiles))
+	for i, path := range evalFiles {
 		realPath, fileFormat, err := b.FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
+		realFiles[i] = realPath
 
 		if format == "" {
 			format = fileFormat
 		}
-
-		if skipParent {
-			fileSystem := newFS(fsys)
-			err = b.mergeFile(fileSystem, realPath)
-		} else {
-			err = b.MergeFileLayers(fsys, realPath)
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("merging %s: %w", path, err)
-		}
 	}
 
-	return b.output(format, env)
+	return b.MergeFiles(fsys, realFiles, skipParent, format, env)
 }
 
 // EvaluateToData is like Evaluate but returns the raw data instead of marshaled output
@@ -461,41 +483,34 @@ func (b *BKL) EvaluateToData(fsys fs.FS, files []string, skipParent bool, format
 		return nil, err
 	}
 
-	for _, path := range evalFiles {
+	realFiles := make([]string, len(evalFiles))
+	for i, path := range evalFiles {
 		realPath, fileFormat, err := b.FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
+		realFiles[i] = realPath
 
 		if format == "" {
 			format = fileFormat
 		}
-
-		if skipParent {
-			fileSystem := newFS(fsys)
-			err = b.mergeFile(fileSystem, realPath)
-		} else {
-			err = b.MergeFileLayers(fsys, realPath)
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("merging %s: %w", path, err)
-		}
 	}
 
-	// Get the raw output data
+	_, err = b.MergeFiles(fsys, realFiles, skipParent, format, env)
+	if err != nil {
+		return nil, err
+	}
+
 	outs, err := b.outputDocuments(env)
 	if err != nil {
 		return nil, err
 	}
 
-	// Merge all outputs into a single value
 	if len(outs) == 0 {
 		return nil, nil
 	} else if len(outs) == 1 {
 		return outs[0], nil
 	} else {
-		// Multiple documents - return as list
 		return outs, nil
 	}
 }
