@@ -4893,8 +4893,8 @@ items:
       d3: $"deep3-{$repeat}-{data.level1}-{data.level3}"
 '''
 
-[diamondInheritance]
-description = "Wildcard complex inheritance pattern"
+[emptyIntermediateFile]
+description = "Empty intermediate file in the hierarchy"
 eval = ["a.b.c.e.yaml"]
 format = "yaml"
 expected = '''
@@ -4910,7 +4910,7 @@ x:
   - a.b.c.d1
   - a.b.c.e
 '''
-[diamondInheritance.files]
+[emptyIntermediateFile.files]
 "a.yaml" = '''
 x:
 - a
@@ -4938,4 +4938,43 @@ $parent:
 $match: {}
 x:
 - a.b.c.e
+'''
+
+[nullChildDoc]
+description = "Null child document is also a no-op (same as empty)"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+x:
+  - a
+'''
+[nullChildDoc.files]
+"a.yaml" = '''
+x:
+- a
+'''
+"a.b.yaml" = '''
+null
+'''
+
+
+[emptyChildDoc]
+description = "Empty child document merges as no-op"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+x:
+  - a
+  - a.b
+'''
+[emptyChildDoc.files]
+"a.yaml" = '''
+x:
+- a
+'''
+"a.b.yaml" = '''
+x:
+- a.b
+---
+
 '''

@@ -5,6 +5,11 @@ import (
 )
 
 func mergeDocs(doc, patch *Document) error {
+	// If patch document is completely empty (nil), it's a no-op
+	if patch.Data == nil {
+		return nil
+	}
+
 	merged, err := merge(doc.Data, patch.Data)
 	if err != nil {
 		return err
