@@ -2304,23 +2304,6 @@ $parent: a
 data: "from b.yaml"
 '''
 
-[parentSkip]
-description = "Test skip parent (-P) flag prevents automatic parent loading"
-eval = ["a.b.yaml", "c.yaml"]
-format = "yaml"
-skipParent = true
-expected = '''
-a: 1
-b: 2
-'''
-files."a.b.yaml" = '''
-a: 1
-'''
-files."c.yaml" = '''
-$match: {}
-b: 2
-'''
-
 [parentSet]
 description = "Test $parent directive for explicit parent file reference"
 eval = ["a.b.yaml"]

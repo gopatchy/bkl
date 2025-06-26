@@ -16,7 +16,6 @@ type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
 	RootPath     string          `short:"r" long:"root-path" description:"restrict file access to this root directory" default:"/"`
-	SkipParent   bool            `short:"P" long:"skip-parent" description:"skip loading parent templates"`
 	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
 	Version      bool            `short:"V" long:"version" description:"print version and exit"`
 
@@ -93,7 +92,7 @@ Related tools:
 	}
 
 	fsys := os.DirFS(opts.RootPath)
-	output, err := p.Evaluate(fsys, files, opts.SkipParent, format, opts.RootPath, wd, p.GetOSEnv())
+	output, err := p.Evaluate(fsys, files, format, opts.RootPath, wd, p.GetOSEnv())
 	if err != nil {
 		fatal(err)
 	}

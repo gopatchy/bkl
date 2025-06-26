@@ -21,7 +21,6 @@ type TestCase struct {
 	Expected    string
 	Files       map[string]string
 	Error       string            // Expected error from evaluation
-	SkipParent  bool              // Skip loading parent templates
 	RootPath    string            // Root path for restricting file access
 	Env         map[string]string // Environment variables for the test
 	Diff        bool              // Run diff operation instead of eval
@@ -137,7 +136,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 	default:
-		output, err = p.Evaluate(testFS, testCase.Eval, testCase.SkipParent, testCase.Format, rootPath, "/", testCase.Env)
+		output, err = p.Evaluate(testFS, testCase.Eval, testCase.Format, rootPath, "/", testCase.Env)
 	}
 
 	return output, err

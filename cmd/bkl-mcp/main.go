@@ -90,9 +90,6 @@ func main() {
 			mcp.Required(),
 			mcp.Description("Map of filename to file content for the evaluation"),
 		),
-		mcp.WithBoolean("skipParent",
-			mcp.Description("Skip loading parent templates (default: false)"),
-		),
 		mcp.WithString("rootPath",
 			mcp.Description("Root path for restricting file access (default: /)"),
 		),
@@ -528,13 +525,6 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 	}
 
-	skipParent := false
-	if sp := args["skipParent"]; sp != nil {
-		if b, ok := sp.(bool); ok {
-			skipParent = b
-		}
-	}
-
 	rootPath := "/"
 	if rp := args["rootPath"]; rp != nil {
 		if str, ok := rp.(string); ok && str != "" {
@@ -690,7 +680,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	default:
 		// Regular evaluation
-		output, err = p.Evaluate(testFS, files, skipParent, format, rootPath, workingDir, env)
+		output, err = p.Evaluate(testFS, files, format, rootPath, workingDir, env)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 		}
@@ -713,7 +703,6 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		"operation":  operationType,
 		"rootPath":   rootPath,
 		"workingDir": workingDir,
-		"skipParent": skipParent,
 	}
 
 	if len(env) > 0 {
@@ -724,6 +713,5 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-
 	return mcp.NewToolResultText(string(resultJSON)), nil
 }
