@@ -166,11 +166,7 @@ func (b *bkl) findMatches(doc *document, pat any) []*document {
 
 // mergeFiles merges multiple files and returns the result in the specified format.
 // If format is empty, it defaults to "json-pretty".
-func (b *bkl) mergeFiles(fsys fs.FS, files []string, format string, env map[string]string) ([]byte, error) {
-	if format == "" {
-		format = "json-pretty"
-	}
-
+func (b *bkl) mergeFiles(fsys fs.FS, files []string, format *format, env map[string]string) ([]byte, error) {
 	fileSystem := newFS(fsys)
 	for _, path := range files {
 		fileObjs, err := loadFileAndParents(fileSystem, path, nil)
@@ -266,18 +262,13 @@ func (b *bkl) outputDocuments(env map[string]string) ([]any, error) {
 
 // Output returns all documents encoded in the specified format and merged into
 // a stream.
-func (b *bkl) output(format string, env map[string]string) ([]byte, error) {
+func (b *bkl) output(format *format, env map[string]string) ([]byte, error) {
 	outs, err := b.outputDocuments(env)
 	if err != nil {
 		return nil, err
 	}
 
-	f, err := getFormat(format)
-	if err != nil {
-		return nil, err
-	}
-
-	return f.MarshalStream(outs)
+	return format.MarshalStream(outs)
 }
 
 // makePathsAbsolute converts relative paths to absolute paths using the provided working directory.
@@ -350,24 +341,34 @@ func getOSEnv() map[string]string {
 	return env
 }
 
-// FormatOutput marshals the given data to the specified format.
-// If format is empty, it looks at the provided paths (as string pointers) and uses
-// the file extension of the first non-nil path as the format.
-// Returns the marshaled bytes or an error if the format is unknown or marshaling fails.
-func FormatOutput(data any, format string, paths ...*string) ([]byte, error) {
-	// If format is empty, try to infer from paths
-	if format == "" {
-		for _, path := range paths {
-			if path != nil && *path != "" {
-				format = ext(*path)
-				break
+// determineFormat determines the format to use based on the provided format pointer and paths.
+// If format is nil or points to an empty string, it infers from the paths.
+// Returns an error if no format can be determined.
+func determineFormat(formatName *string, paths ...*string) (*format, error) {
+	if formatName != nil && *formatName != "" {
+		return getFormat(*formatName)
+	}
+
+	// Try to infer from paths
+	for _, path := range paths {
+		if path != nil && *path != "" {
+			if name := ext(*path); name != "" {
+				return getFormat(name)
 			}
 		}
 	}
 
-	f, found := formatByExtension[format]
-	if !found {
-		return nil, fmt.Errorf("%s: %w", format, ErrUnknownFormat)
+	return getFormat("")
+}
+
+// FormatOutput marshals the given data to the specified format.
+// If format is nil or points to an empty string, it looks at the provided paths
+// and uses the file extension of the first non-nil path as the format.
+// Returns the marshaled bytes or an error if the format is unknown or marshaling fails.
+func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
+	f, err := determineFormat(format, paths...)
+	if err != nil {
+		return nil, err
 	}
 
 	// Always wrap in a slice for MarshalStream - it expects a stream of documents
@@ -404,25 +405,14 @@ func Evaluate(fsys fs.FS, files []string, format *string, rootPath string, worki
 		}
 	}
 
-	// Determine format to use
-	finalFormat := ""
-	if format != nil && *format != "" {
-		finalFormat = *format
-	} else {
-		// Try to infer from paths parameter first
-		for _, path := range paths {
-			if path != nil && *path != "" {
-				finalFormat = ext(*path)
-				break
-			}
-		}
-		// If still empty, use the inferred format from input files
-		if finalFormat == "" {
-			finalFormat = inferredFormat
-		}
+	// Determine format to use - append inferredFormat to paths for fallback
+	allPaths := append(paths, &inferredFormat)
+	f, err := determineFormat(format, allPaths...)
+	if err != nil {
+		return nil, err
 	}
 
-	return b.mergeFiles(fsys, realFiles, finalFormat, env)
+	return b.mergeFiles(fsys, realFiles, f, env)
 }
 
 // FileMatch attempts to find a file with the same base name as path, but

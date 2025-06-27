@@ -57,13 +57,8 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 	}
 
 	// Get format from file if not specified
-	format := ""
-	if opts.OutputFormat != nil {
-		format = *opts.OutputFormat
-	}
-
 	// Pass output path and input path - FormatOutput will use their extensions if format is empty
-	enc, err := bkl.FormatOutput(out, format, (*string)(opts.OutputPath), &preparedPaths[0])
+	enc, err := bkl.FormatOutput(out, opts.OutputFormat, (*string)(opts.OutputPath), &preparedPaths[0])
 	if err != nil {
 		fatal(err)
 	}

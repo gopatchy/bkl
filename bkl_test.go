@@ -84,7 +84,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = bkl.FormatOutput(requiredResult, format)
+		output, err = bkl.FormatOutput(requiredResult, &format)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +106,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = bkl.FormatOutput(intersectResult, format)
+		output, err = bkl.FormatOutput(intersectResult, &format)
 		if err != nil {
 			return nil, err
 		}
@@ -128,13 +128,13 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = bkl.FormatOutput(diffResult, format)
+		output, err = bkl.FormatOutput(diffResult, &format)
 		if err != nil {
 			return nil, err
 		}
 
 	default:
-		output, err = bkl.Evaluate(testFS, testCase.Eval, &testCase.Format, rootPath, "/", testCase.Env)
+		output, err = bkl.Evaluate(testFS, testCase.Eval, &testCase.Format, rootPath, "/", testCase.Env, &testCase.Eval[0])
 	}
 
 	return output, err

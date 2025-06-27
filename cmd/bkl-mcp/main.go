@@ -674,7 +674,7 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.FormatOutput(diffResult, format)
+	output, err := bkl.FormatOutput(diffResult, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal diff result: %v", err)), nil
 	}
@@ -746,7 +746,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.FormatOutput(intersectResult, format)
+	output, err := bkl.FormatOutput(intersectResult, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal intersect result: %v", err)), nil
 	}
@@ -803,7 +803,7 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.FormatOutput(requiredResult, format)
+	output, err := bkl.FormatOutput(requiredResult, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal required result: %v", err)), nil
 	}

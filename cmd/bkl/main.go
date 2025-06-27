@@ -82,7 +82,7 @@ Related tools:
 	}
 
 	fsys := os.DirFS(opts.RootPath)
-	output, err := bkl.Evaluate(fsys, files, opts.OutputFormat, opts.RootPath, wd, nil, (*string)(opts.OutputPath))
+	output, err := bkl.Evaluate(fsys, files, opts.OutputFormat, opts.RootPath, wd, nil, (*string)(opts.OutputPath), &files[0])
 	if err != nil {
 		fatal(err)
 	}

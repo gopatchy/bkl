@@ -43,11 +43,6 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		os.Exit(1)
 	}
 
-	format := ""
-	if opts.OutputFormat != nil {
-		format = *opts.OutputFormat
-	}
-
 	// Convert paths to strings
 	paths := make([]string, len(opts.Positional.InputPaths))
 	for i, path := range opts.Positional.InputPaths {
@@ -68,7 +63,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	}
 
 	// Pass output path and input path - FormatOutput will use their extensions if format is empty
-	enc, err := bkl.FormatOutput(doc, format, (*string)(opts.OutputPath), &preparedPaths[0])
+	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &preparedPaths[0])
 	if err != nil {
 		fatal(err)
 	}

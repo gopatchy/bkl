@@ -44,11 +44,6 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		os.Exit(1)
 	}
 
-	format := ""
-	if opts.OutputFormat != nil {
-		format = *opts.OutputFormat
-	}
-
 	// Prepare paths from current working directory
 	paths := []string{string(opts.Positional.BasePath), string(opts.Positional.TargetPath)}
 	preparedPaths, err := bkl.PreparePathsFromCwd(paths, "/")
@@ -64,7 +59,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	}
 
 	// Pass output path and input path - FormatOutput will use their extensions if format is empty
-	enc, err := bkl.FormatOutput(doc, format, (*string)(opts.OutputPath), &preparedPaths[0])
+	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &preparedPaths[0])
 	if err != nil {
 		fatal(err)
 	}
