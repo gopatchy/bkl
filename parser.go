@@ -6,9 +6,7 @@
 package bkl
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -71,10 +69,6 @@ var Debug = os.Getenv("BKL_DEBUG") != ""
 //   - If no parent documents -> append
 type bkl struct {
 	docs []*Document
-}
-
-func New() (*bkl, error) {
-	return &bkl{}, nil
 }
 
 // MergeDocument applies the supplied Document to the [bkl]'s current
@@ -168,17 +162,6 @@ func (b *bkl) findMatches(doc *Document, pat any) []*Document {
 	}
 
 	return nil
-}
-
-// MergeFile parses the file at path and merges its contents into the
-// [bkl]'s document state using bkl's merge semantics.
-func (b *bkl) mergeFile(fsys *fileSystem, path string) error {
-	f, err := loadFile(fsys, path, nil)
-	if err != nil {
-		return err
-	}
-
-	return b.mergeFileObj(f)
 }
 
 // mergeFiles merges multiple files and returns the result in the specified format.
@@ -297,52 +280,6 @@ func (b *bkl) output(format string, env map[string]string) ([]byte, error) {
 	return f.MarshalStream(outs)
 }
 
-// outputToFile encodes all documents in the specified format and writes them
-// to the specified output path.
-//
-// If format is "", it is inferred from path's file extension.
-func (b *bkl) outputToFile(path, format string, env map[string]string) error {
-	if format == "" {
-		format = Ext(path)
-	}
-
-	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
-	if err != nil {
-		return errors.Join(fmt.Errorf("%s: %w", path, ErrOutputFile), err)
-	}
-
-	defer fh.Close()
-
-	err = b.outputToWriter(fh, format, env)
-	if err != nil {
-		return fmt.Errorf("%s: %w", path, err)
-	}
-
-	return nil
-}
-
-// OutputToWriter encodes all documents in the specified format and writes them
-// to the specified [io.Writer].
-//
-// If format is "", it defaults to "json-pretty".
-func (b *bkl) outputToWriter(fh io.Writer, format string, env map[string]string) error {
-	if format == "" {
-		format = "json-pretty"
-	}
-
-	out, err := b.output(format, env)
-	if err != nil {
-		return err
-	}
-
-	_, err = fh.Write(out)
-	if err != nil {
-		return errors.Join(ErrOutputFile, err)
-	}
-
-	return nil
-}
-
 // makePathsAbsolute converts relative paths to absolute paths using the provided working directory.
 func makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
 	result := make([]string, len(paths))
@@ -428,10 +365,7 @@ func FormatOutput(data any, format string) ([]byte, error) {
 // Evaluate processes the specified files and returns the formatted output.
 // It creates a new bkl instance internally to process the files.
 func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
-	b, err := New()
-	if err != nil {
-		return nil, err
-	}
+	b := &bkl{}
 
 	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {

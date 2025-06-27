@@ -13,10 +13,7 @@ import (
 // The files are loaded directly without processing, matching bkld behavior.
 func DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	// Load source file
-	p1, err := New()
-	if err != nil {
-		return nil, err
-	}
+	p1 := &bkl{}
 
 	realSrcPath, _, err := FileMatch(fsys, srcPath)
 	if err != nil {
@@ -43,10 +40,7 @@ func DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	}
 
 	// Load destination file
-	p2, err := New()
-	if err != nil {
-		return nil, err
-	}
+	p2 := &bkl{}
 
 	realDstPath, _, err := FileMatch(fsys, dstPath)
 	if err != nil {

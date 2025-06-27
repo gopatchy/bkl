@@ -18,10 +18,7 @@ func IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 
 	for i, path := range paths {
 		// Create new parser for each file
-		parser, err := New()
-		if err != nil {
-			return nil, err
-		}
+		parser := &bkl{}
 
 		realPath, _, err := FileMatch(fsys, path)
 		if err != nil {

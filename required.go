@@ -10,10 +10,7 @@ import (
 // The file is loaded directly without processing, matching bklr behavior.
 func RequiredFile(fsys fs.FS, path string) (any, error) {
 	// Create new parser for the file
-	parser, err := New()
-	if err != nil {
-		return nil, err
-	}
+	parser := &bkl{}
 
 	realPath, _, err := FileMatch(fsys, path)
 	if err != nil {
