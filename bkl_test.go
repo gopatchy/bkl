@@ -316,9 +316,6 @@ func TestCLI(t *testing.T) {
 			if strings.Contains(testName, "deepCloneFuncError") {
 				t.Skip("CLI doesn't expose internal errors")
 			}
-			if strings.Contains(testName, "formatUnknown") {
-				t.Skip("CLI validates format differently")
-			}
 			if testName == "rootPathCur" {
 				t.Skip("CLI runs from different directory")
 			}
@@ -437,7 +434,14 @@ func TestCLI(t *testing.T) {
 				if err == nil {
 					t.Fatalf("Expected error containing %q, but got no error", testCase.Error)
 				}
-				if !strings.Contains(string(output), testCase.Error) && !strings.Contains(err.Error(), testCase.Error) {
+				errorFound := strings.Contains(string(output), testCase.Error) || strings.Contains(err.Error(), testCase.Error)
+
+				// Special case for format errors - CLI validates differently
+				if testCase.Error == "unknown format" && strings.Contains(string(output), "Invalid value") && strings.Contains(string(output), "for option") {
+					errorFound = true
+				}
+
+				if !errorFound {
 					t.Fatalf("Expected error containing %q, but got: %v\nOutput: %s", testCase.Error, err, output)
 				}
 				return
