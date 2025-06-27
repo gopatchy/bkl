@@ -20,7 +20,7 @@ func IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 		// Create new parser for each file
 		parser := &bkl{}
 
-		realPath, _, err := FileMatch(fsys, path)
+		realPath, _, err := fileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}

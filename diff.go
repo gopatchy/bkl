@@ -15,7 +15,7 @@ func DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	// Load source file
 	p1 := &bkl{}
 
-	realSrcPath, _, err := FileMatch(fsys, srcPath)
+	realSrcPath, _, err := fileMatch(fsys, srcPath)
 	if err != nil {
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
@@ -42,7 +42,7 @@ func DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	// Load destination file
 	p2 := &bkl{}
 
-	realDstPath, _, err := FileMatch(fsys, dstPath)
+	realDstPath, _, err := fileMatch(fsys, dstPath)
 	if err != nil {
 		return nil, fmt.Errorf("destination file %s: %w", dstPath, err)
 	}

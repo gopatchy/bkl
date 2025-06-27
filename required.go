@@ -12,7 +12,7 @@ func RequiredFile(fsys fs.FS, path string) (any, error) {
 	// Create new parser for the file
 	parser := &bkl{}
 
-	realPath, _, err := FileMatch(fsys, path)
+	realPath, _, err := fileMatch(fsys, path)
 	if err != nil {
 		return nil, fmt.Errorf("file %s: %w", path, err)
 	}

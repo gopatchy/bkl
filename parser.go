@@ -394,7 +394,7 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 	realFiles := make([]string, len(evalFiles))
 	var inferredFormat string
 	for i, path := range evalFiles {
-		realPath, fileFormat, err := FileMatch(fsys, path)
+		realPath, fileFormat, err := fileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -415,14 +415,14 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 	return b.mergeFiles(fsys, realFiles, f, env)
 }
 
-// FileMatch attempts to find a file with the same base name as path, but
+// fileMatch attempts to find a file with the same base name as path, but
 // possibly with a different supported extension. It is intended to support
 // "virtual" filenames that auto-convert from the format of the underlying
 // real file.
 //
 // Returns the real filename and the requested output format, or
 // ("", "", error).
-func FileMatch(fsys fs.FS, path string) (string, string, error) {
+func fileMatch(fsys fs.FS, path string) (string, string, error) {
 	format := ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
