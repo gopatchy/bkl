@@ -118,27 +118,29 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - **File maintenance**: Clean up and reorganize CONTEXT.md sections as needed during updates
 - **No line numbers**: Don't cite specific line numbers in documentation as they become stale
 - **No implementation details**: Don't describe specific implementation details that change with code
-
-## Commands for Development
-- `just` - Run complete build and test pipeline (preferred)
-  - Includes Go unit tests with race detection and coverage reporting
-  - Performs linting with `go vet` and formatting with `gofumpt`
-  - Generates coverage report at `cover.html`
-- `just bench` - Run performance benchmarks
-- `go test -run TestLanguage` - Run all language tests
-- `go test -run TestLanguage -test.filter=test1,test2,test3` - Run specific language tests
-- `go test -test.exclude=test1,test2` - Run tests excluding specific ones
-- `go test -bench=BenchmarkLanguage` - Run performance benchmarks
-- `go run ./cmd/bkl` - Run main binary directly
-- `go run ./cmd/bkl-mcp` - Run MCP server for documentation and test queries
-- All tests now use the centralized language test framework in `tests.toml`
-
-## Merge Behavior
-- Maps merge recursively by default, with special `$replace` directive to override
-- Lists append by default, with `$match`, `$delete`, and `$replace` directives for control
-- **Type conflicts**: When merging different types, the source value replaces the destination
-  - This includes maps, lists, strings, numbers, and null values
-  - Merging any non-map value (including null) into a map replaces the entire map
+## MCP Servers Available
+- **bkl-mcp** (Model Context Protocol server for documentation and test queries):
+  - `query` - Unified query for bkl documentation and test examples by keywords (comma-separated)
+    - Returns best-match results from both documentation sections and test examples
+    - Searches titles, content, examples, test names, descriptions, and file contents
+    - Results ranked by relevance with content previews and URL fragments
+    - Supports multiple keywords with enhanced scoring for matches
+  - `get` - Get full content of a documentation section or test
+    - Takes `type` ("documentation" or "test") and `id` (section ID or test name)
+    - Returns complete structured content including all details
+  - `evaluate` - Evaluate bkl files with given environment and return results
+    - Takes `files` (comma-separated list), `format`, `environment`, `fileSystem`, `rootPath`, `workingDir`
+    - Returns evaluated output in specified format
+  - `diff` - Generate the minimal intermediate layer needed to create the target output from the base layer (bkld)
+    - Takes `baseFile`, `targetFile`, `format`, `fileSystem`, `rootPath`
+    - Returns diff output in specified format
+  - `intersect` - Generate the maximal base layer that the specified targets have in common (bkli)
+    - Takes `files` (comma-separated list, requires at least 2), `format`, `fileSystem`, `rootPath`
+    - Returns intersect output in specified format
+  - `required` - Generate a document containing just the required fields and their ancestors (bklr)
+    - Takes `file`, `format`, `fileSystem`, `rootPath`
+    - Returns required fields output in specified format
+  - Uses embedded `tests.toml` and `docs/sections.yaml` for fast access
 - Empty maps can be overridden by any value without error
 - Cross-document merging follows filename inheritance patterns
 - **Match behavior**: `$match` uses partial matching (`x: {}` matches any map with an `x` key)
