@@ -76,8 +76,13 @@ Related tools:
 		files[i] = string(path)
 	}
 
-	fsys := os.DirFS(opts.RootPath)
-	output, err := bkl.Evaluate(fsys, files, opts.RootPath, "", nil, opts.OutputFormat, (*string)(opts.OutputPath), &files[0])
+	root, err := os.OpenRoot(opts.RootPath)
+	if err != nil {
+		fatal(err)
+	}
+	defer root.Close()
+
+	output, err := bkl.Evaluate(root.FS(), files, opts.RootPath, "", nil, opts.OutputFormat, (*string)(opts.OutputPath), &files[0])
 	if err != nil {
 		fatal(err)
 	}

@@ -4,3 +4,4 @@ integration-coverage.out
 integration-coverage.html
 pkg
 .idea
+tmp

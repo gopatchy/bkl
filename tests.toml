@@ -6,7 +6,7 @@
 description = "Test error when $delete has extra keys"
 eval = ["a.b.yaml"]
 format = "yaml"
-error = "extra keys"
+errors = ["extra keys"]
 files."a.yaml" = '''
 - x: 1
 - x: 2
@@ -139,7 +139,7 @@ c: 3
 description = "Test error when $replace has extra keys"
 eval = ["a.b.yaml"]
 format = "yaml"
-error = "bool as reference: invalid type"
+errors = ["bool as reference: invalid type"]
 files."a.yaml" = '''
 - 1
 '''
@@ -153,7 +153,7 @@ files."a.b.yaml" = '''
 description = "Test error with invalid replace path reference"
 eval = ["a.yaml"]
 format = "yaml"
-error = "reference not found"
+errors = ["reference not found"]
 files."a.yaml" = '''
 $output: false
 a: 1
@@ -331,7 +331,7 @@ zig:
 description = "Test circular merge reference error"
 eval = ["a.yaml"]
 format = "yaml"
-error = "circular reference"
+errors = ["circular reference"]
 files."a.yaml" = '''
 a: $merge:b
 b: $merge:a
@@ -341,7 +341,7 @@ b: $merge:a
 description = "Test error with invalid merge path reference"
 eval = ["a.yaml"]
 format = "yaml"
-error = "reference not found"
+errors = ["reference not found"]
 files."a.yaml" = '''
 $output: false
 a: 1
@@ -357,7 +357,7 @@ $merge: [{a: 1}, b.c]
 description = "Test error when deleting non-existent key"
 eval = ["a.b.yaml"]
 format = "yaml"
-error = "useless override"
+errors = ["useless override"]
 files."a.yaml" = '''
 a: 1
 '''
@@ -369,7 +369,7 @@ b: $delete
 description = "Test error for useless delete operation"
 eval = ["a.b.yaml"]
 format = "yaml"
-error = "useless override"
+errors = ["useless override"]
 files."a.yaml" = '''
 a: 1
 '''
@@ -381,7 +381,7 @@ b: $delete
 description = "Test error for redundant merge"
 eval = ["a.b.yaml"]
 format = "yaml"
-error = "useless override"
+errors = ["useless override"]
 files."a.yaml" = '''
 a: 1
 '''
@@ -887,7 +887,7 @@ a: "string"
 description = "Test error with multiple matches in $replace"
 eval = ["a.yaml"]
 format = "yaml"
-error = "multiple documents $match"
+errors = ["multiple documents $match"]
 files."a.yaml" = '''
 a: 1
 b: 2
@@ -1197,7 +1197,7 @@ files."a.b.yaml" = '''
 description = "Test error when required field is missing in flags encoding"
 eval = ["a.yaml"]
 format = "yaml"
-error = "required field not set"
+errors = ["required field not set"]
 files."a.yaml" = '''
 a: $required
 $encode: flags
@@ -2045,7 +2045,7 @@ description = "Test $repeat with $step=0 error"
 eval = ["a.yaml"]
 format = "yaml"
 expected = ""
-error = "$step cannot be 0"
+errors = ["$step cannot be 0"]
 files."a.yaml" = '''
 $repeat:
   $first: 1
@@ -2059,7 +2059,7 @@ description = "Test $repeat with negative $count error"
 eval = ["a.yaml"]
 format = "yaml"
 expected = ""
-error = "must be positive"
+errors = ["must be positive"]
 files."a.yaml" = '''
 $repeat:
   $first: 1
@@ -2072,7 +2072,7 @@ description = "Test $repeat with all three params error"
 eval = ["a.yaml"]
 format = "yaml"
 expected = ""
-error = "cannot specify all of"
+errors = ["cannot specify all of"]
 files."a.yaml" = '''
 $repeat:
   $first: 1
@@ -2086,7 +2086,7 @@ description = "Test $repeat with non-divisible range error"
 eval = ["a.yaml"]
 format = "yaml"
 expected = ""
-error = "must be divisible by"
+errors = ["must be divisible by"]
 files."a.yaml" = '''
 $repeat:
   $first: 1
@@ -2100,7 +2100,7 @@ description = "Test $repeat with only one parameter error"
 eval = ["a.yaml"]
 format = "yaml"
 expected = ""
-error = "must specify exactly 2"
+errors = ["must specify exactly 2"]
 files."a.yaml" = '''
 $repeat:
   $first: 1
@@ -2289,7 +2289,7 @@ a:
 description = "Test circular parent reference error"
 eval = ["a.yaml"]
 format = "yaml"
-error = "circular reference"
+errors = ["circular reference"]
 files."a.yaml" = '''
 # Test that circular parent references are handled gracefully
 # a.yaml → b.yaml → a.yaml (circular)
@@ -2756,7 +2756,7 @@ description = "Test unknown format error"
 eval = ["a.xyz"]
 format = "xyz"
 expected = ""
-error = "unknown format"
+errors = ["unknown format", "Invalid value"]
 [formatUnknown.files]
 "a.xyz" = "x: 1"
 
@@ -2787,7 +2787,7 @@ mapKey: $$pod
 description = "Test error when required field is not set"
 eval = ["a.yaml"]
 format = "yaml"
-error = "required field not set"
+errors = ["required field not set"]
 files."a.yaml" = '''
 a: 1
 b: $required
@@ -2797,7 +2797,7 @@ b: $required
 description = "Test required field error with YAML anchors"
 eval = ["a.yaml"]
 format = "yaml"
-error = "required field not set"
+errors = ["required field not set"]
 files."a.yaml" = '''
 a: &anchor
   $required
@@ -2826,7 +2826,7 @@ files."a.b.yaml" = '''
 description = "Test error when $value has extra keys"
 eval = ["a.yaml"]
 format = "yaml"
-error = "extra keys"
+errors = ["extra keys"]
 files."a.yaml" = '''
 a:
   $value: "foo"
@@ -2837,7 +2837,7 @@ a:
 description = "Test string interpolation with missing variable"
 eval = ["a.yaml"]
 format = "yaml"
-error = "missing_variable: variable not found"
+errors = ["missing_variable: variable not found"]
 files."a.yaml" = '''
 # Test for string interpolation with missing variable
 # This should trigger a variable not found error
@@ -3071,7 +3071,7 @@ description = "Test root path restriction prevents access outside root"
 eval = ["a.yaml"]
 format = "yaml"
 rootPath = "sub"
-error = "outside root path"
+errors = ["outside root path", "no such file or directory"]
 files."a.yaml" = '''
 a: 1
 b: $merge:a
@@ -3137,7 +3137,7 @@ a:
 description = "Test missing environment variable error"
 eval = ["a.yaml"]
 format = "yaml"
-error = "$env:FOO: variable not found"
+errors = ["$env:FOO: variable not found"]
 files."a.yaml" = '''
 a: $env:FOO
 '''
@@ -3292,7 +3292,7 @@ eval = ["missing.yaml", "b.yaml"]
 format = "yaml"
 diff = true
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [diffMissingSourceFile.files]
 "b.yaml" = "x: 1"
 
@@ -3302,7 +3302,7 @@ eval = ["a.yaml", "missing.yaml"]
 format = "yaml"
 diff = true
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [diffMissingDestFile.files]
 "a.yaml" = "x: 1"
 
@@ -3312,7 +3312,7 @@ eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
 expected = ""
-error = "diff operates on exactly 1 source document per file"
+errors = ["diff operates on exactly 1 source document per file"]
 [diffMultipleDocsSource.files]
 "a.yaml" = '''
 ---
@@ -3328,7 +3328,7 @@ eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
 expected = ""
-error = "diff operates on exactly 1 destination document per file"
+errors = ["diff operates on exactly 1 destination document per file"]
 [diffMultipleDocsDest.files]
 "a.yaml" = "x: 1"
 "b.yaml" = '''
@@ -3482,7 +3482,7 @@ eval = ["a.yaml", "missing.yaml"]
 format = "yaml"
 intersect = true
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [intersectMissingFile.files]
 "a.yaml" = "x: 1"
 
@@ -3492,7 +3492,7 @@ eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
 expected = ""
-error = "intersect operates on exactly 1 document per file"
+errors = ["intersect operates on exactly 1 document per file"]
 [intersectMultipleDocs.files]
 "a.yaml" = '''
 ---
@@ -3595,7 +3595,7 @@ eval = ["missing.yaml"]
 format = "yaml"
 required = true
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [requiredMissingFile.files]
 
 [requiredMultipleDocs]
@@ -3604,7 +3604,7 @@ eval = ["a.yaml"]
 format = "yaml"
 required = true
 expected = ""
-error = "required operates on exactly 1 document"
+errors = ["required operates on exactly 1 document"]
 [requiredMultipleDocs.files]
 "a.yaml" = '''
 ---
@@ -3641,7 +3641,7 @@ expected = ""
 description = "Test loading file with invalid format"
 eval = ["test.invalid"]
 expected = ""
-error = "unknown format"
+errors = ["unknown format"]
 [fileLoadInvalidFormat.files]
 "test.invalid" = "x: 1"
 
@@ -3650,7 +3650,7 @@ error = "unknown format"
 description = "Test unmarshal error with invalid YAML"
 eval = ["bad.yaml"]
 expected = ""
-error = "did not find expected node content"
+errors = ["did not find expected node content"]
 [unmarshalError.files]
 "bad.yaml" = "{ invalid yaml: ["
 
@@ -3659,7 +3659,7 @@ error = "did not find expected node content"
 description = "Test merge list delete with extra keys error"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [mergeListDeleteExtraKeys.files]
 "a.yaml" = '''
 - $delete:
@@ -3671,7 +3671,7 @@ error = "invalid directive"
 description = "Test merge list replace with invalid boolean"
 eval = ["a.yaml"]
 expected = ""
-error = "reference not found"
+errors = ["reference not found"]
 [mergeListReplaceError.files]
 "a.yaml" = '''
 - $replace: "not a boolean"
@@ -3681,7 +3681,7 @@ error = "reference not found"
 description = "Test merge list match not found"
 eval = ["a.yaml"]
 expected = ""
-error = "not found"
+errors = ["not found"]
 [mergeListMatchNotFound.files]
 "a.yaml" = '''
 base:
@@ -3699,7 +3699,7 @@ result:
 description = "Test decode with invalid type"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [decodeInvalidType.files]
 "a.yaml" = '''
 $decode: 123
@@ -3709,7 +3709,7 @@ $decode: 123
 description = "Test decode on non-map type"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [decodeNotString.files]
 "a.yaml" = '''
 - $decode: base64
@@ -3719,7 +3719,7 @@ error = "invalid type"
 description = "Test decode missing $value"
 eval = ["a.yaml"]
 expected = ""
-error = "missing $value"
+errors = ["missing $value"]
 [decodeMissingValue.files]
 "a.yaml" = '''
 $decode: base64
@@ -3730,7 +3730,7 @@ other: field
 description = "Test decode with non-string $value"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [decodeValueNotString.files]
 "a.yaml" = '''
 $decode: base64
@@ -3741,7 +3741,7 @@ $value: 123
 description = "Test decode with extra keys"
 eval = ["a.yaml"]
 expected = ""
-error = "extra keys"
+errors = ["extra keys"]
 [decodeExtraKeys.files]
 "a.yaml" = '''
 $decode: base64
@@ -3753,7 +3753,7 @@ extra: key
 description = "Test decode with invalid YAML"
 eval = ["a.yaml"]
 expected = ""
-error = "yaml:"
+errors = ["yaml:"]
 [decodeInvalidYAML.files]
 "a.yaml" = '''
 $decode: yaml
@@ -3764,7 +3764,7 @@ $value: "{ invalid: yaml ["
 description = "Test decode with invalid JSON"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid character"
+errors = ["invalid character"]
 [decodeInvalidJSON.files]
 "a.yaml" = '''
 $decode: json
@@ -3775,7 +3775,7 @@ $value: "{ invalid json"
 description = "Test decode with unknown format"
 eval = ["a.yaml"]
 expected = ""
-error = "unknown format"
+errors = ["unknown format"]
 [decodeUnknownFormat.files]
 "a.yaml" = '''
 $decode: unknownformat
@@ -3787,7 +3787,7 @@ $value: data
 description = "Test normalize error with function value"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [normalizeError.files]
 "a.yaml" = "func: $env"
 
@@ -3877,7 +3877,7 @@ args:
 description = "Test deep clone with function causes error"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [deepCloneError.files]
 "a.yaml" = '''
 base:
@@ -3892,7 +3892,7 @@ copy:
 description = "Test tolist with invalid delimiter argument"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid arguments"
+errors = ["invalid arguments"]
 [toListInvalidDelimiter.files]
 "a.yaml" = '''
 $encode: tolist
@@ -3904,7 +3904,7 @@ $value:
 description = "Test tolist with non-map value"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [toListNonMap.files]
 "a.yaml" = '''
 $encode: tolist:=
@@ -3916,7 +3916,7 @@ $value: "not a map"
 description = "Test encode with invalid arguments"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid arguments"
+errors = ["invalid arguments"]
 [encodeInvalidArguments.files]
 "a.yaml" = '''
 $encode: base64:extra
@@ -3927,7 +3927,7 @@ $value: data
 description = "Test encode flatten with non-list"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [encodeFlattenNonList.files]
 "a.yaml" = '''
 $encode: flatten
@@ -3938,7 +3938,7 @@ $value: "not a list"
 description = "Test encode sha256 with invalid arguments"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid arguments"
+errors = ["invalid arguments"]
 [encodeSHA256InvalidArgs.files]
 "a.yaml" = '''
 $encode: sha256:extra
@@ -3975,7 +3975,7 @@ child: value
 description = "Test decode with multiple documents error"
 eval = ["a.yaml"]
 expected = ""
-error = "decoding error"
+errors = ["decoding error"]
 [decodeMultipleDocs.files]
 "a.yaml" = '''
 $decode: yaml
@@ -4037,7 +4037,7 @@ result: 123
 description = "Test get variable not found"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [getVarNotFound.files]
 "a.yaml" = '''
 result: $nonexistent
@@ -4047,7 +4047,7 @@ result: $nonexistent
 description = "Test get cross document error"
 eval = ["a.yaml", "b.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [getCrossDocError.files]
 "a.yaml" = '''
 result:
@@ -4062,7 +4062,7 @@ field: value
 description = "Test get path from string with YAML parse error"
 eval = ["a.yaml"]
 expected = ""
-error = "yaml:"
+errors = ["yaml:"]
 [getPathFromStringError.files]
 "a.yaml" = '''
 result: $"[invalid: yaml: ["
@@ -4102,7 +4102,7 @@ expected = '''
 description = "Test output filter with nested error"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid"
+errors = ["invalid"]
 [outputFilterNestedError.files]
 "a.yaml" = '''
 data:
@@ -4114,7 +4114,7 @@ data:
 description = "Test find outputs with error"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid"
+errors = ["invalid"]
 [findOutputsError.files]
 "a.yaml" = '''
 data:
@@ -4150,7 +4150,7 @@ data: not a list
 description = "Test JSON marshal with function type"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [jsonMarshalError.files]
 "a.yaml" = '''
 func: $env
@@ -4176,7 +4176,7 @@ expected = '''
 description = "Test decode on non-map"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [decodeNonMap.files]
 "a.yaml" = '''
 - item
@@ -4249,7 +4249,7 @@ list:
 description = "Test toStringList with mixed types"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [toStringListMixed.files]
 "a.yaml" = '''
 data:
@@ -4260,7 +4260,7 @@ data:
 description = "Test YAML unmarshal stream with invalid input"
 eval = ["a.yaml"]
 expected = ""
-error = "yaml:"
+errors = ["yaml:"]
 [yamlUnmarshalStreamError.files]
 "a.yaml" = '''
 {invalid yaml & here
@@ -4277,7 +4277,7 @@ expected = ""
 description = "Test encode with unknown command"
 eval = ["a.yaml"]
 expected = ""
-error = "unknown format"
+errors = ["unknown format"]
 [encodeUnknownCommand.files]
 "a.yaml" = '''
 $encode: unknowncommand
@@ -4288,7 +4288,7 @@ $value: data
 description = "Test process2 circular reference detection"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [process2CircularRef.files]
 "a.yaml" = '''
 a: $b
@@ -4318,7 +4318,7 @@ $merge: data
 description = "Test process1 merge with error"
 eval = ["a.yaml"]
 expected = ""
-error = "reference not found"
+errors = ["reference not found"]
 [process1MergeError.files]
 "a.yaml" = '''
 $merge: nonexistent
@@ -4328,7 +4328,7 @@ $merge: nonexistent
 description = "Test process1 parent directive error"
 eval = ["a.yaml"]
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [process1ParentError.files]
 "a.yaml" = '''
 $parent: [nonexistent]
@@ -4339,7 +4339,7 @@ data: value
 description = "Test process1 with invalid merge type"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [process1InvalidMerge.files]
 "a.yaml" = '''
 $merge: 123
@@ -4351,7 +4351,7 @@ $merge: 123
 description = "Test GetFormat with unknown format"
 eval = ["unknown.xyz"]
 expected = ""
-error = "unknown format"
+errors = ["unknown format"]
 [getFormatError.files]
 "unknown.xyz" = "data: value"
 
@@ -4371,7 +4371,7 @@ service: value
 description = "Test missing parent file from filename"
 eval = ["service.missing.base.yaml"]
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [missingParentFile.files]
 "service.missing.base.yaml" = "content: value"
 
@@ -4380,7 +4380,7 @@ error = "missing file"
 description = "Test encode any with invalid command type"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [encodeAnyInvalidType.files]
 "a.yaml" = '''
 $encode: {not: string}
@@ -4392,7 +4392,7 @@ $value: data
 description = "Test YAML with unknown scalar tag"
 eval = ["a.yaml"]
 expected = ""
-error = "unknown yaml short tag"
+errors = ["unknown yaml short tag"]
 [yamlUnknownTag.files]
 "a.yaml" = '''
 value: !!unknown "test"
@@ -4403,7 +4403,7 @@ value: !!unknown "test"
 description = "Test decode on non-map value"
 eval = ["a.yaml"]
 expected = ""
-error = "$decode: missing $value"
+errors = ["$decode: missing $value"]
 [process2DecodeNonMap.files]
 "a.yaml" = '''
 - $decode: json
@@ -4496,7 +4496,7 @@ list:
 description = "Test repeat object map with invalid context"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid directive"
+errors = ["invalid directive"]
 [process2RepeatObjMapInvalid.files]
 "a.yaml" = '''
 item:
@@ -4508,7 +4508,7 @@ item:
 description = "Test repeat object list with invalid context"
 eval = ["a.yaml"]
 expected = ""
-error = "reference not found"
+errors = ["reference not found"]
 [process2RepeatObjListInvalid.files]
 "a.yaml" = '''
 - $repeat: 2
@@ -4519,7 +4519,7 @@ error = "reference not found"
 description = "Test YAML merge with non-map value"
 eval = ["a.yaml"]
 expected = ""
-error = "unknown type for merge target"
+errors = ["unknown type for merge target"]
 [yamlMergeNonMap.files]
 "a.yaml" = '''
 <<: [1, 2, 3]
@@ -4558,7 +4558,7 @@ result:
 description = "Test process1 string merge with invalid reference"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [process1StringMergeInvalid.files]
 "a.yaml" = '''
 value:
@@ -4569,7 +4569,7 @@ value:
 description = "Test process1 string replace with invalid reference"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [process1StringReplaceInvalid.files]
 "a.yaml" = '''
 value:
@@ -4580,7 +4580,7 @@ value:
 description = "Test merge list match with invalid match value"
 eval = ["a.yaml"]
 expected = ""
-error = "match"
+errors = ["match"]
 [mergeListMatchInvalid.files]
 "a.yaml" = '''
 - a: 1
@@ -4593,7 +4593,7 @@ description = "Test diff with missing source file"
 diff = true
 eval = ["missing.yaml", "b.yaml"]
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [diffFileMissing.files]
 "b.yaml" = "value: 2"
 
@@ -4602,7 +4602,7 @@ description = "Test intersect with missing file"
 intersect = true
 eval = ["missing.yaml", "b.yaml"]
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [intersectFileMissing.files]
 "b.yaml" = "value: 2"
 
@@ -4611,7 +4611,7 @@ description = "Test required with missing file"
 required = true
 eval = ["missing.yaml"]
 expected = ""
-error = "missing file"
+errors = ["missing file"]
 [requiredFileMissing.files]
 # No files - testing missing file scenario
 
@@ -4647,7 +4647,7 @@ items:
 description = "Test toList on list with non-map"
 eval = ["a.yaml"]
 expected = ""
-error = "unknown format"
+errors = ["unknown format"]
 [process2ToListListError.files]
 "a.yaml" = '''
 $encode: toList
@@ -4659,7 +4659,7 @@ $value:
 description = "Test YAML merge with scalar value"
 eval = ["a.yaml"]
 expected = ""
-error = "unknown type for merge target"
+errors = ["unknown type for merge target"]
 [yamlMergeScalar.files]
 "a.yaml" = '''
 base: &base 123
@@ -4705,7 +4705,7 @@ ts: 2021-01-01T00:00:00Z
 description = "Test encode any with non-string command"
 eval = ["a.yaml"]
 expected = ""
-error = "invalid type"
+errors = ["invalid type"]
 [encodeAnyNonString.files]
 "a.yaml" = '''
 $encode: 123

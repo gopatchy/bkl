@@ -22,7 +22,7 @@ type TestCase struct {
 	Format      string
 	Expected    string
 	Files       map[string]string
-	Error       string            // Expected error from evaluation
+	Errors      []string          // Expected errors from evaluation (one must match)
 	RootPath    string            // Root path for restricting file access
 	Env         map[string]string // Environment variables for the test
 	Diff        bool              // Run diff operation instead of eval
@@ -160,12 +160,22 @@ func TestBKL(t *testing.T) {
 
 			output, err := runTestCase(testCase)
 
-			if testCase.Error != "" {
+			// Handle expected errors
+			if len(testCase.Errors) > 0 {
 				if err == nil {
-					t.Fatalf("Expected error containing %q, but got no error", testCase.Error)
+					t.Fatalf("Expected error containing one of %v, but got no error", testCase.Errors)
 				}
-				if !strings.Contains(err.Error(), testCase.Error) {
-					t.Fatalf("Expected error containing %q, but got: %v", testCase.Error, err)
+
+				errorFound := false
+				for _, expectedError := range testCase.Errors {
+					if strings.Contains(err.Error(), expectedError) {
+						errorFound = true
+						break
+					}
+				}
+
+				if !errorFound {
+					t.Fatalf("Expected error containing one of %v, but got: %v", testCase.Errors, err)
 				}
 				return
 			}
@@ -203,7 +213,7 @@ func BenchmarkBKL(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				output, err := runTestCase(testCase)
 
-				if err != nil && testCase.Error == "" {
+				if err != nil && len(testCase.Errors) == 0 {
 					b.Fatalf("Unexpected error: %v", err)
 				}
 
@@ -339,19 +349,22 @@ func TestCLI(t *testing.T) {
 
 			output, err := cmd.CombinedOutput()
 
-			if testCase.Error != "" {
+			// Handle expected errors
+			if len(testCase.Errors) > 0 {
 				if err == nil {
-					t.Fatalf("Expected error containing %q, but got no error", testCase.Error)
+					t.Fatalf("Expected error containing one of %v, but got no error", testCase.Errors)
 				}
-				errorFound := strings.Contains(string(output), testCase.Error) || strings.Contains(err.Error(), testCase.Error)
 
-				// Special case for format errors - CLI validates differently
-				if testCase.Error == "unknown format" && strings.Contains(string(output), "Invalid value") && strings.Contains(string(output), "for option") {
-					errorFound = true
+				errorFound := false
+				for _, expectedError := range testCase.Errors {
+					if strings.Contains(string(output), expectedError) || strings.Contains(err.Error(), expectedError) {
+						errorFound = true
+						break
+					}
 				}
 
 				if !errorFound {
-					t.Fatalf("Expected error containing %q, but got: %v\nOutput: %s", testCase.Error, err, output)
+					t.Fatalf("Expected error containing one of %v, but got: %v\nOutput: %s", testCase.Errors, err, output)
 				}
 				return
 			}
