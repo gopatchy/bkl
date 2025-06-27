@@ -145,6 +145,8 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 }
 
 func TestBKL(t *testing.T) {
+	t.Parallel()
+
 	data, err := os.ReadFile("tests.toml")
 	if err != nil {
 		t.Fatalf("Failed to read tests.toml: %v", err)
@@ -258,6 +260,8 @@ func BenchmarkBKL(b *testing.B) {
 }
 
 func TestCLI(t *testing.T) {
+	t.Parallel()
+
 	data, err := os.ReadFile("tests.toml")
 	if err != nil {
 		t.Fatalf("Failed to read tests.toml: %v", err)
@@ -312,6 +316,8 @@ func TestCLI(t *testing.T) {
 		}
 
 		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
+
 			// Skip tests that aren't applicable to CLI
 
 			// Create a temporary directory for test files
