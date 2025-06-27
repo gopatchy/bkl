@@ -5,10 +5,10 @@ import (
 	"io/fs"
 )
 
-// RequiredFile loads a file and returns only the required fields and their ancestors.
+// Required loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
 // The file is loaded directly without processing, matching bklr behavior.
-func RequiredFile(fsys fs.FS, path string, rootPath string, workingDir string) (any, error) {
+func Required(fsys fs.FS, path string, rootPath string, workingDir string) (any, error) {
 	// Prepare path
 	paths := []string{path}
 	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)

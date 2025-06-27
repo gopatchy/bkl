@@ -49,9 +49,9 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		paths[i] = string(path)
 	}
 
-	// Use IntersectFiles helper which handles loading and validation
+	// Use Intersect helper which handles loading and validation
 	fsys := os.DirFS("/")
-	doc, err := bkl.IntersectFiles(fsys, paths, "/", "")
+	doc, err := bkl.Intersect(fsys, paths, "/", "")
 	if err != nil {
 		fatal(err)
 	}

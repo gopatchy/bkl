@@ -44,9 +44,9 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		os.Exit(1)
 	}
 
-	// Use DiffFiles helper which handles loading and validation
+	// Use Diff helper which handles loading and validation
 	fsys := os.DirFS("/")
-	doc, err := bkl.DiffFiles(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "")
+	doc, err := bkl.Diff(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "")
 	if err != nil {
 		fatal(err)
 	}

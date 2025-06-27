@@ -6,10 +6,10 @@ import (
 	"reflect"
 )
 
-// IntersectFiles loads multiple files and returns their intersection.
+// Intersect loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkli behavior.
-func IntersectFiles(fsys fs.FS, paths []string, rootPath string, workingDir string) (any, error) {
+func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string) (any, error) {
 	// Prepare paths
 	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {

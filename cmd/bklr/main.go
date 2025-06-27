@@ -43,9 +43,9 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	// Use RequiredFile helper which handles loading and validation
+	// Use Required helper which handles loading and validation
 	fsys := os.DirFS("/")
-	out, err := bkl.RequiredFile(fsys, string(opts.Positional.InputPath), "/", "")
+	out, err := bkl.Required(fsys, string(opts.Positional.InputPath), "/", "")
 	if err != nil {
 		fatal(err)
 	}

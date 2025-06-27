@@ -8,10 +8,10 @@ import (
 	"slices"
 )
 
-// DiffFiles loads two files and returns the diff between them.
+// Diff loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkld behavior.
-func DiffFiles(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string) (any, error) {
+func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string) (any, error) {
 	// Prepare paths
 	paths := []string{srcPath, dstPath}
 	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)

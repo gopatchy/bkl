@@ -73,8 +73,8 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 		}
 
-		// Use the RequiredFile helper which matches bklr behavior
-		requiredResult, err := bkl.RequiredFile(testFS, testCase.Eval[0], rootPath, rootPath)
+		// Use the Required helper which matches bklr behavior
+		requiredResult, err := bkl.Required(testFS, testCase.Eval[0], rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
@@ -95,8 +95,8 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		// Use the IntersectFiles helper which matches bkli behavior
-		intersectResult, err := bkl.IntersectFiles(testFS, testCase.Eval, rootPath, rootPath)
+		// Use the Intersect helper which matches bkli behavior
+		intersectResult, err := bkl.Intersect(testFS, testCase.Eval, rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
@@ -117,8 +117,8 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		// Use the DiffFiles helper which matches bkld behavior
-		diffResult, err := bkl.DiffFiles(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath)
+		// Use the Diff helper which matches bkld behavior
+		diffResult, err := bkl.Diff(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
