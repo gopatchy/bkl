@@ -43,22 +43,15 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	// Prepare path from current working directory
-	preparedPaths, err := bkl.PreparePathsFromCwd([]string{string(opts.Positional.InputPath)}, "/")
-	if err != nil {
-		fatal(err)
-	}
-
 	// Use RequiredFile helper which handles loading and validation
 	fsys := os.DirFS("/")
-	out, err := bkl.RequiredFile(fsys, preparedPaths[0])
+	out, err := bkl.RequiredFile(fsys, string(opts.Positional.InputPath), "/", "")
 	if err != nil {
 		fatal(err)
 	}
 
-	// Get format from file if not specified
 	// Pass output path and input path - FormatOutput will use their extensions if format is empty
-	enc, err := bkl.FormatOutput(out, opts.OutputFormat, (*string)(opts.OutputPath), &preparedPaths[0])
+	enc, err := bkl.FormatOutput(out, opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.InputPath))
 	if err != nil {
 		fatal(err)
 	}

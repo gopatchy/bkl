@@ -74,7 +74,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 		// Use the RequiredFile helper which matches bklr behavior
-		requiredResult, err := bkl.RequiredFile(testFS, testCase.Eval[0])
+		requiredResult, err := bkl.RequiredFile(testFS, testCase.Eval[0], rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 		// Use the IntersectFiles helper which matches bkli behavior
-		intersectResult, err := bkl.IntersectFiles(testFS, testCase.Eval)
+		intersectResult, err := bkl.IntersectFiles(testFS, testCase.Eval, rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
@@ -118,7 +118,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 		// Use the DiffFiles helper which matches bkld behavior
-		diffResult, err := bkl.DiffFiles(testFS, testCase.Eval[0], testCase.Eval[1])
+		diffResult, err := bkl.DiffFiles(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
@@ -134,7 +134,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 	default:
-		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, "/", testCase.Env, &testCase.Format, &testCase.Eval[0])
+		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, rootPath, testCase.Env, &testCase.Format, &testCase.Eval[0])
 	}
 
 	return output, err

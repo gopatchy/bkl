@@ -9,7 +9,13 @@ import (
 // IntersectFiles loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkli behavior.
-func IntersectFiles(fsys fs.FS, paths []string) (any, error) {
+func IntersectFiles(fsys fs.FS, paths []string, rootPath string, workingDir string) (any, error) {
+	// Prepare paths
+	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
+	if err != nil {
+		return nil, err
+	}
+	paths = preparedPaths
 	if len(paths) < 2 {
 		return nil, fmt.Errorf("intersect requires at least 2 files, got %d", len(paths))
 	}

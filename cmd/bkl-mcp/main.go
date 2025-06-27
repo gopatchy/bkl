@@ -651,7 +651,7 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	diffResult, err := bkl.DiffFiles(testFS, baseFile, targetFile)
+	diffResult, err := bkl.DiffFiles(testFS, baseFile, targetFile, "/", "")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
@@ -715,7 +715,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	intersectResult, err := bkl.IntersectFiles(testFS, files)
+	intersectResult, err := bkl.IntersectFiles(testFS, files, "/", "")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
@@ -765,7 +765,7 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	requiredResult, err := bkl.RequiredFile(testFS, file)
+	requiredResult, err := bkl.RequiredFile(testFS, file, "/", "")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}

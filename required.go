@@ -8,7 +8,14 @@ import (
 // RequiredFile loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
 // The file is loaded directly without processing, matching bklr behavior.
-func RequiredFile(fsys fs.FS, path string) (any, error) {
+func RequiredFile(fsys fs.FS, path string, rootPath string, workingDir string) (any, error) {
+	// Prepare path
+	paths := []string{path}
+	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
+	if err != nil {
+		return nil, err
+	}
+	path = preparedPaths[0]
 	// Create new parser for the file
 	parser := &bkl{}
 

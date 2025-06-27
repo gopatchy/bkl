@@ -11,7 +11,15 @@ import (
 // DiffFiles loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkld behavior.
-func DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
+func DiffFiles(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string) (any, error) {
+	// Prepare paths
+	paths := []string{srcPath, dstPath}
+	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
+	if err != nil {
+		return nil, err
+	}
+	srcPath = preparedPaths[0]
+	dstPath = preparedPaths[1]
 	// Load source file
 	p1 := &bkl{}
 

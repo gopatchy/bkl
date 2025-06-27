@@ -326,17 +326,6 @@ func preparePathsForParser(paths []string, rootPath string, workingDir string) (
 	return rebasePathsToRoot(absPaths, rootPath, workingDir)
 }
 
-// PreparePathsFromCwd prepares file paths relative to the current working directory
-// and rebases them to the given root path.
-func PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	return preparePathsForParser(paths, rootPath, wd)
-}
-
 // getOSEnv returns the current OS environment as a map.
 func getOSEnv() map[string]string {
 	env := make(map[string]string)

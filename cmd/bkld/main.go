@@ -44,22 +44,15 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		os.Exit(1)
 	}
 
-	// Prepare paths from current working directory
-	paths := []string{string(opts.Positional.BasePath), string(opts.Positional.TargetPath)}
-	preparedPaths, err := bkl.PreparePathsFromCwd(paths, "/")
-	if err != nil {
-		fatal(err)
-	}
-
 	// Use DiffFiles helper which handles loading and validation
 	fsys := os.DirFS("/")
-	doc, err := bkl.DiffFiles(fsys, preparedPaths[0], preparedPaths[1])
+	doc, err := bkl.DiffFiles(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "")
 	if err != nil {
 		fatal(err)
 	}
 
 	// Pass output path and input path - FormatOutput will use their extensions if format is empty
-	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &preparedPaths[0])
+	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.BasePath))
 	if err != nil {
 		fatal(err)
 	}

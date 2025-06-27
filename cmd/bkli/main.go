@@ -49,21 +49,15 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		paths[i] = string(path)
 	}
 
-	// Prepare paths from current working directory
-	preparedPaths, err := bkl.PreparePathsFromCwd(paths, "/")
-	if err != nil {
-		fatal(err)
-	}
-
 	// Use IntersectFiles helper which handles loading and validation
 	fsys := os.DirFS("/")
-	doc, err := bkl.IntersectFiles(fsys, preparedPaths)
+	doc, err := bkl.IntersectFiles(fsys, paths, "/", "")
 	if err != nil {
 		fatal(err)
 	}
 
 	// Pass output path and input path - FormatOutput will use their extensions if format is empty
-	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &preparedPaths[0])
+	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &paths[0])
 	if err != nil {
 		fatal(err)
 	}
