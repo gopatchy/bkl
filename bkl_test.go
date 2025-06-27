@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -142,7 +144,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 	return output, err
 }
 
-func TestLanguage(t *testing.T) {
+func TestBKL(t *testing.T) {
 	data, err := os.ReadFile("tests.toml")
 	if err != nil {
 		t.Fatalf("Failed to read tests.toml: %v", err)
@@ -222,7 +224,7 @@ func TestLanguage(t *testing.T) {
 	}
 }
 
-func BenchmarkLanguage(b *testing.B) {
+func BenchmarkBKL(b *testing.B) {
 	data, err := os.ReadFile("tests.toml")
 	if err != nil {
 		b.Fatalf("Failed to read tests.toml: %v", err)
@@ -250,6 +252,212 @@ func BenchmarkLanguage(b *testing.B) {
 
 				// Don't validate output in benchmarks - we just care about performance
 				_ = output
+			}
+		})
+	}
+}
+
+func TestCLI(t *testing.T) {
+	data, err := os.ReadFile("tests.toml")
+	if err != nil {
+		t.Fatalf("Failed to read tests.toml: %v", err)
+	}
+
+	var suite TestSuite
+	err = toml.Unmarshal(data, &suite)
+	if err != nil {
+		t.Fatalf("Failed to parse tests.toml: %v", err)
+	}
+
+	// Parse filter list
+	filterTests := map[string]bool{}
+	if *testFilter != "" {
+		for _, name := range strings.Split(*testFilter, ",") {
+			name = strings.TrimSpace(name)
+			if name != "" {
+				if _, ok := suite[name]; !ok {
+					t.Fatalf("Test %q not found in tests.toml", name)
+				}
+				filterTests[name] = true
+			}
+		}
+	}
+
+	// Parse exclude list
+	excludeTests := map[string]bool{}
+	if *testExclude != "" {
+		for _, name := range strings.Split(*testExclude, ",") {
+			name = strings.TrimSpace(name)
+			if name != "" {
+				if _, ok := suite[name]; !ok {
+					t.Fatalf("Test %q not found in tests.toml", name)
+				}
+				excludeTests[name] = true
+			}
+		}
+	}
+
+	for testName, testCase := range suite {
+		if len(filterTests) > 0 && !filterTests[testName] {
+			continue
+		}
+
+		if excludeTests[testName] {
+			continue
+		}
+
+		// Skip benchmark tests in regular test runs
+		if testCase.Benchmark {
+			continue
+		}
+
+		t.Run(testName, func(t *testing.T) {
+			// Skip tests that aren't applicable to CLI
+			if testCase.Format == "jsonl" {
+				t.Skip("CLI doesn't support jsonl format")
+			}
+			if strings.Contains(testName, "jsonlInput") || strings.Contains(testName, "jsonlOutput") {
+				t.Skip("CLI doesn't support jsonl format")
+			}
+			if strings.Contains(testName, "InputStream") {
+				t.Skip("CLI outputs native format for streams")
+			}
+			if strings.Contains(testName, "deepCloneFuncError") {
+				t.Skip("CLI doesn't expose internal errors")
+			}
+			if strings.Contains(testName, "formatUnknown") {
+				t.Skip("CLI validates format differently")
+			}
+			if testName == "rootPathCur" {
+				t.Skip("CLI runs from different directory")
+			}
+			if testName == "rootPathBreak" {
+				t.Skip("CLI handles root path validation differently")
+			}
+			if testName == "rootPathSub" || testName == "rootPathRoot" {
+				t.Skip("CLI requires explicit root path flag")
+			}
+
+			// Create a temporary directory for test files
+			tmpDir := t.TempDir()
+
+			// Write test files to temp directory
+			for filename, content := range testCase.Files {
+				fullPath := filepath.Join(tmpDir, filename)
+				dir := filepath.Dir(fullPath)
+				if dir != tmpDir && dir != "." {
+					err := os.MkdirAll(dir, 0o755)
+					if err != nil {
+						t.Fatalf("Failed to create directory %s: %v", dir, err)
+					}
+				}
+				err := os.WriteFile(fullPath, []byte(content), 0o644)
+				if err != nil {
+					t.Fatalf("Failed to write test file %s: %v", filename, err)
+				}
+			}
+
+			// Determine which CLI tool to use
+			var cmdPath string
+			var args []string
+
+			// For root path tests, we need to use relative paths from the root
+			useRelativePaths := testCase.RootPath != ""
+
+			switch {
+			case testCase.Diff:
+				cmdPath = "./cmd/bkld/main.go"
+				if len(testCase.Eval) != 2 {
+					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
+				}
+				if useRelativePaths {
+					args = append(args, testCase.Eval[0])
+					args = append(args, testCase.Eval[1])
+				} else {
+					args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
+					args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
+				}
+			case testCase.Intersect:
+				cmdPath = "./cmd/bkli/main.go"
+				if len(testCase.Eval) < 2 {
+					t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
+				}
+				for _, evalFile := range testCase.Eval {
+					if useRelativePaths {
+						args = append(args, evalFile)
+					} else {
+						args = append(args, filepath.Join(tmpDir, evalFile))
+					}
+				}
+			case testCase.Required:
+				cmdPath = "./cmd/bklr/main.go"
+				if len(testCase.Eval) != 1 {
+					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
+				}
+				if useRelativePaths {
+					args = append(args, testCase.Eval[0])
+				} else {
+					args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
+				}
+			default:
+				cmdPath = "./cmd/bkl/main.go"
+				for _, evalFile := range testCase.Eval {
+					if useRelativePaths {
+						args = append(args, evalFile)
+					} else {
+						args = append(args, filepath.Join(tmpDir, evalFile))
+					}
+				}
+			}
+
+			// Add format flag if specified
+			if testCase.Format != "" && testCase.Format != "yaml" {
+				args = append(args, "--format", testCase.Format)
+			}
+
+			// Add root path flag if specified
+			if testCase.RootPath != "" {
+				if testCase.RootPath == "/" {
+					// Use tmpDir as root
+					args = append([]string{"--root-path", tmpDir}, args...)
+				} else {
+					// Use subdirectory as root
+					args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
+				}
+			}
+
+			// Build the command
+			cmdArgs := append([]string{"run", cmdPath}, args...)
+			cmd := exec.Command("go", cmdArgs...)
+			cmd.Dir = "."
+
+			// Set environment variables
+			if testCase.Env != nil {
+				cmd.Env = os.Environ()
+				for k, v := range testCase.Env {
+					cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+				}
+			}
+
+			// Run the command
+			output, err := cmd.CombinedOutput()
+
+			if testCase.Error != "" {
+				if err == nil {
+					t.Fatalf("Expected error containing %q, but got no error", testCase.Error)
+				}
+				if !strings.Contains(string(output), testCase.Error) && !strings.Contains(err.Error(), testCase.Error) {
+					t.Fatalf("Expected error containing %q, but got: %v\nOutput: %s", testCase.Error, err, output)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("Unexpected error: %v\nOutput: %s", err, output)
+			}
+
+			if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(testCase.Expected))) {
+				t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", testCase.Expected, output)
 			}
 		})
 	}
