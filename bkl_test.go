@@ -313,9 +313,6 @@ func TestCLI(t *testing.T) {
 
 		t.Run(testName, func(t *testing.T) {
 			// Skip tests that aren't applicable to CLI
-			if strings.Contains(testName, "deepCloneFuncError") {
-				t.Skip("CLI doesn't expose internal errors")
-			}
 			if testName == "rootPathCur" {
 				t.Skip("CLI runs from different directory")
 			}

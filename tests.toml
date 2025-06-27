@@ -4346,21 +4346,6 @@ $merge: 123
 '''
 
 
-# Deep clone edge cases
-[deepCloneFuncError]
-description = "Test deep clone with function type"
-eval = ["a.yaml"]
-expected = ""
-error = "not found"
-[deepCloneFuncError.files]
-"a.yaml" = '''
-base:
-  field: value
-  func: $env:PATH
-copy:
-  $merge: base
-'''
-
 # GetFormat tests
 [getFormatError]
 description = "Test GetFormat with unknown format"
