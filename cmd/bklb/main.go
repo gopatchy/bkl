@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	"github.com/gopatchy/bkl/wrapper"
 )
 
 func main() {
+	debug.SetGCPercent(-1)
 	cmd := filepath.Base(os.Args[0])
 
 	if strings.HasSuffix(cmd, "b") {

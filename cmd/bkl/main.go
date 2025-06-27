@@ -27,6 +27,8 @@ type options struct {
 }
 
 func main() {
+	debug.SetGCPercent(-1)
+
 	opts := &options{}
 
 	fp := flags.NewParser(opts, flags.Default)

@@ -19,6 +19,7 @@ type options struct {
 }
 
 func main() {
+	debug.SetGCPercent(-1)
 	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
 		if !ok {
