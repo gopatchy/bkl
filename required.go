@@ -8,9 +8,9 @@ import (
 // Required loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
 // The file is loaded directly without processing, matching bklr behavior.
-func Required(fsys fs.FS, path string, rootPath string, workingDir string) (any, error) {
-	paths := []string{path}
-	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
+// If format is nil, it infers the format from the paths parameter.
+func Required(fsys fs.FS, path string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
+	preparedPaths, err := preparePathsForParser([]string{path}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,17 @@ func Required(fsys fs.FS, path string, rootPath string, workingDir string) (any,
 		return nil, fmt.Errorf("required operates on exactly 1 document, got %d in %s", len(docs), path)
 	}
 
-	return required(docs[0].Data)
+	result, err := required(docs[0].Data)
+	if err != nil {
+		return nil, err
+	}
+
+	// Determine format and return formatted output
+	f, err := determineFormat(format, paths...)
+	if err != nil {
+		return nil, err
+	}
+	return f.MarshalStream([]any{result})
 }
 
 func required(obj any) (any, error) {

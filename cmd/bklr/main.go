@@ -44,12 +44,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 	}
 
 	fsys := os.DirFS("/")
-	out, err := bkl.Required(fsys, string(opts.Positional.InputPath), "/", "")
-	if err != nil {
-		fatal(err)
-	}
-
-	enc, err := bkl.FormatOutput(out, opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.InputPath))
+	enc, err := bkl.Required(fsys, string(opts.Positional.InputPath), "/", "", opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.InputPath))
 	if err != nil {
 		fatal(err)
 	}

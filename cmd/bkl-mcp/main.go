@@ -630,17 +630,12 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	diffResult, err := bkl.Diff(testFS, baseFile, targetFile, "/", "")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
-	}
-
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.FormatOutput(diffResult, &format)
+	output, err := bkl.Diff(testFS, baseFile, targetFile, "/", "", &format)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal diff result: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
 
 	response := map[string]interface{}{
@@ -694,17 +689,12 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	intersectResult, err := bkl.Intersect(testFS, files, "/", "")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
-	}
-
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.FormatOutput(intersectResult, &format)
+	output, err := bkl.Intersect(testFS, files, "/", "", &format)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal intersect result: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
 
 	response := map[string]interface{}{
@@ -744,17 +734,12 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	requiredResult, err := bkl.Required(testFS, file, "/", "")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
-	}
-
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.FormatOutput(requiredResult, &format)
+	output, err := bkl.Required(testFS, file, "/", "", &format)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal required result: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
 
 	response := map[string]interface{}{

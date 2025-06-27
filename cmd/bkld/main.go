@@ -45,12 +45,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	}
 
 	fsys := os.DirFS("/")
-	doc, err := bkl.Diff(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "")
-	if err != nil {
-		fatal(err)
-	}
-
-	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.BasePath))
+	enc, err := bkl.Diff(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "", opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.BasePath))
 	if err != nil {
 		fatal(err)
 	}

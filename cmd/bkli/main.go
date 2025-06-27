@@ -49,12 +49,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	}
 
 	fsys := os.DirFS("/")
-	doc, err := bkl.Intersect(fsys, paths, "/", "")
-	if err != nil {
-		fatal(err)
-	}
-
-	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &paths[0])
+	enc, err := bkl.Intersect(fsys, paths, "/", "", opts.OutputFormat, (*string)(opts.OutputPath), &paths[0])
 	if err != nil {
 		fatal(err)
 	}

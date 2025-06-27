@@ -9,7 +9,8 @@ import (
 // Intersect loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkli behavior.
-func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string) (any, error) {
+// If format is nil, it infers the format from the formatPaths parameter.
+func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string, format *string, formatPaths ...*string) ([]byte, error) {
 	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -60,7 +61,12 @@ func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string) (
 		}
 	}
 
-	return result, nil
+	// Determine format and return formatted output
+	f, err := determineFormat(format, formatPaths...)
+	if err != nil {
+		return nil, err
+	}
+	return f.MarshalStream([]any{result})
 }
 
 func intersect(a, b any) (any, error) {

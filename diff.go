@@ -11,9 +11,9 @@ import (
 // Diff loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkld behavior.
-func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string) (any, error) {
-	paths := []string{srcPath, dstPath}
-	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
+// If format is nil, it infers the format from the paths parameter.
+func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
+	preparedPaths, err := preparePathsForParser([]string{srcPath, dstPath}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
@@ -76,10 +76,11 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 		return nil, err
 	}
 
+	var finalResult any
 	switch result2 := result.(type) {
 	case map[string]any:
 		result2["$match"] = map[string]any{}
-		return result2, nil
+		finalResult = result2
 
 	case []any:
 		result2 = append([]any{
@@ -87,15 +88,22 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 				"$match": map[string]any{},
 			},
 		}, result2...)
-		return result2, nil
+		finalResult = result2
 
 	case nil:
 		// No differences - return just the match directive
-		return map[string]any{"$match": map[string]any{}}, nil
+		finalResult = map[string]any{"$match": map[string]any{}}
 
 	default:
-		return result, nil
+		finalResult = result
 	}
+
+	// Determine format and return formatted output
+	f, err := determineFormat(format, paths...)
+	if err != nil {
+		return nil, err
+	}
+	return f.MarshalStream([]any{finalResult})
 }
 
 func diff(dst, src any) (any, error) {

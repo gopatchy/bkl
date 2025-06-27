@@ -70,16 +70,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 		}
 
-		requiredResult, err := bkl.Required(testFS, testCase.Eval[0], rootPath, rootPath)
-		if err != nil {
-			return nil, err
-		}
-
-		format := testCase.Format
-		if format == "" {
-			format = "yaml"
-		}
-		output, err = bkl.FormatOutput(requiredResult, &format)
+		output, err = bkl.Required(testFS, testCase.Eval[0], rootPath, rootPath, &testCase.Format, &testCase.Eval[0])
 		if err != nil {
 			return nil, err
 		}
@@ -89,16 +80,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		intersectResult, err := bkl.Intersect(testFS, testCase.Eval, rootPath, rootPath)
-		if err != nil {
-			return nil, err
-		}
-
-		format := testCase.Format
-		if format == "" {
-			format = "yaml"
-		}
-		output, err = bkl.FormatOutput(intersectResult, &format)
+		output, err = bkl.Intersect(testFS, testCase.Eval, rootPath, rootPath, &testCase.Format, &testCase.Eval[0])
 		if err != nil {
 			return nil, err
 		}
@@ -108,16 +90,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		diffResult, err := bkl.Diff(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath)
-		if err != nil {
-			return nil, err
-		}
-
-		format := testCase.Format
-		if format == "" {
-			format = "yaml"
-		}
-		output, err = bkl.FormatOutput(diffResult, &format)
+		output, err = bkl.Diff(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath, &testCase.Format, &testCase.Eval[0])
 		if err != nil {
 			return nil, err
 		}
