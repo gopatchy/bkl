@@ -607,14 +607,8 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	// Create parser
-	p, err := bkl.New()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create parser: %v", err)), nil
-	}
-
 	// Regular evaluation - use "/" as default rootPath and workingDir
-	output, err := p.Evaluate(testFS, files, format, "/", "/", env)
+	output, err := bkl.Evaluate(testFS, files, format, "/", "/", env)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}

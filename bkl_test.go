@@ -63,12 +63,8 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 	}
 
-	p, err := bkl.New()
-	if err != nil {
-		return nil, err
-	}
-
 	var output []byte
+	var err error
 
 	switch {
 	case testCase.Required:
@@ -138,7 +134,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 	default:
-		output, err = p.Evaluate(testFS, testCase.Eval, testCase.Format, rootPath, "/", testCase.Env)
+		output, err = bkl.Evaluate(testFS, testCase.Eval, testCase.Format, rootPath, "/", testCase.Env)
 	}
 
 	return output, err

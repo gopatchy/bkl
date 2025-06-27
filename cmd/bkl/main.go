@@ -72,11 +72,6 @@ Related tools:
 		fatal(err)
 	}
 
-	p, err := bkl.New()
-	if err != nil {
-		fatal(err)
-	}
-
 	if opts.Verbose {
 		bkl.Debug = true
 	}
@@ -94,7 +89,7 @@ Related tools:
 	}
 
 	fsys := os.DirFS(opts.RootPath)
-	output, err := p.Evaluate(fsys, files, format, opts.RootPath, wd, bkl.GetOSEnv())
+	output, err := bkl.Evaluate(fsys, files, format, opts.RootPath, wd, bkl.GetOSEnv())
 	if err != nil {
 		fatal(err)
 	}

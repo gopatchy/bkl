@@ -425,7 +425,14 @@ func FormatOutput(data any, format string) ([]byte, error) {
 	return f.MarshalStream([]any{data})
 }
 
-func (b *BKL) Evaluate(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
+// Evaluate processes the specified files and returns the formatted output.
+// It creates a new BKL instance internally to process the files.
+func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
+	b, err := New()
+	if err != nil {
+		return nil, err
+	}
+
 	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
 		return nil, err
