@@ -76,7 +76,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 		// Use the RequiredFile helper which matches bklr behavior
-		requiredResult, err := p.RequiredFile(testFS, testCase.Eval[0])
+		requiredResult, err := bkl.RequiredFile(testFS, testCase.Eval[0])
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = p.FormatOutput(requiredResult, format)
+		output, err = bkl.FormatOutput(requiredResult, format)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 		// Use the IntersectFiles helper which matches bkli behavior
-		intersectResult, err := p.IntersectFiles(testFS, testCase.Eval)
+		intersectResult, err := bkl.IntersectFiles(testFS, testCase.Eval)
 		if err != nil {
 			return nil, err
 		}
@@ -108,7 +108,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = p.FormatOutput(intersectResult, format)
+		output, err = bkl.FormatOutput(intersectResult, format)
 		if err != nil {
 			return nil, err
 		}
@@ -120,7 +120,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 		// Use the DiffFiles helper which matches bkld behavior
-		diffResult, err := p.DiffFiles(testFS, testCase.Eval[0], testCase.Eval[1])
+		diffResult, err := bkl.DiffFiles(testFS, testCase.Eval[0], testCase.Eval[1])
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +130,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = p.FormatOutput(diffResult, format)
+		output, err = bkl.FormatOutput(diffResult, format)
 		if err != nil {
 			return nil, err
 		}

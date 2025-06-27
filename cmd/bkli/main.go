@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"runtime/debug"
-	"strings"
 
 	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
@@ -51,12 +49,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	}
 
 	if format == "" && opts.OutputPath != nil {
-		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
-	}
-
-	p, err := bkl.New()
-	if err != nil {
-		fatal(err)
+		format = bkl.Ext(string(*opts.OutputPath))
 	}
 
 	// Convert paths to strings
@@ -66,28 +59,28 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	}
 
 	// Prepare paths from current working directory
-	preparedPaths, err := p.PreparePathsFromCwd(paths, "/")
+	preparedPaths, err := bkl.PreparePathsFromCwd(paths, "/")
 	if err != nil {
 		fatal(err)
 	}
 
 	// Use IntersectFiles helper which handles loading and validation
 	fsys := os.DirFS("/")
-	doc, err := p.IntersectFiles(fsys, preparedPaths)
+	doc, err := bkl.IntersectFiles(fsys, preparedPaths)
 	if err != nil {
 		fatal(err)
 	}
 
 	// Get format from first file if not specified
 	if format == "" {
-		_, f, err := p.FileMatch(fsys, preparedPaths[0])
+		_, f, err := bkl.FileMatch(fsys, preparedPaths[0])
 		if err != nil {
 			fatal(err)
 		}
 		format = f
 	}
 
-	enc, err := p.FormatOutput(doc, format)
+	enc, err := bkl.FormatOutput(doc, format)
 	if err != nil {
 		fatal(err)
 	}

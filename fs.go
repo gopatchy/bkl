@@ -94,7 +94,7 @@ func (f *fileSystem) globFiles(path string) ([]string, error) {
 	ret := []string{}
 
 	for _, match := range matches {
-		if _, found := formatByExtension[ext(match)]; !found {
+		if _, found := formatByExtension[Ext(match)]; !found {
 			continue
 		}
 

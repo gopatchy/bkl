@@ -9,7 +9,7 @@ import (
 // IntersectFiles loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkli behavior.
-func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
+func IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 	if len(paths) < 2 {
 		return nil, fmt.Errorf("intersect requires at least 2 files, got %d", len(paths))
 	}
@@ -23,7 +23,7 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 			return nil, err
 		}
 
-		realPath, _, err := parser.FileMatch(fsys, path)
+		realPath, _, err := FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -52,19 +52,13 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 			continue
 		}
 
-		result, err = b.intersect(result, docs[0].Data)
+		result, err = intersect(result, docs[0].Data)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return result, nil
-}
-
-// intersect returns the intersection of two values.
-// For lists, it returns elements present in both lists.
-func (b *BKL) intersect(a, bVal any) (any, error) {
-	return intersect(a, bVal)
 }
 
 func intersect(a, b any) (any, error) {

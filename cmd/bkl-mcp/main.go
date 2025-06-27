@@ -632,7 +632,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	switch {
 	case required:
 		// Use RequiredFile helper
-		requiredResult, err := p.RequiredFile(testFS, files[0])
+		requiredResult, err := bkl.RequiredFile(testFS, files[0])
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 		}
@@ -641,14 +641,14 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = p.FormatOutput(requiredResult, format)
+		output, err = bkl.FormatOutput(requiredResult, format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal required result: %v", err)), nil
 		}
 
 	case intersect:
 		// Use IntersectFiles helper
-		intersectResult, err := p.IntersectFiles(testFS, files)
+		intersectResult, err := bkl.IntersectFiles(testFS, files)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 		}
@@ -657,14 +657,14 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = p.FormatOutput(intersectResult, format)
+		output, err = bkl.FormatOutput(intersectResult, format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal intersect result: %v", err)), nil
 		}
 
 	case diff:
 		// Use DiffFiles helper
-		diffResult, err := p.DiffFiles(testFS, files[0], files[1])
+		diffResult, err := bkl.DiffFiles(testFS, files[0], files[1])
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 		}
@@ -673,7 +673,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		if format == "" {
 			format = "yaml"
 		}
-		output, err = p.FormatOutput(diffResult, format)
+		output, err = bkl.FormatOutput(diffResult, format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal diff result: %v", err)), nil
 		}

@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"runtime/debug"
-	"strings"
 
 	"github.com/gopatchy/bkl"
 	"github.com/jessevdk/go-flags"
@@ -44,20 +42,15 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 		os.Exit(1)
 	}
 
-	p, err := bkl.New()
-	if err != nil {
-		fatal(err)
-	}
-
 	// Prepare path from current working directory
-	preparedPaths, err := p.PreparePathsFromCwd([]string{string(opts.Positional.InputPath)}, "/")
+	preparedPaths, err := bkl.PreparePathsFromCwd([]string{string(opts.Positional.InputPath)}, "/")
 	if err != nil {
 		fatal(err)
 	}
 
 	// Use RequiredFile helper which handles loading and validation
 	fsys := os.DirFS("/")
-	out, err := p.RequiredFile(fsys, preparedPaths[0])
+	out, err := bkl.RequiredFile(fsys, preparedPaths[0])
 	if err != nil {
 		fatal(err)
 	}
@@ -65,7 +58,7 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 	// Get format from file if not specified
 	format := ""
 	if opts.OutputPath != nil {
-		format = strings.TrimPrefix(filepath.Ext(string(*opts.OutputPath)), ".")
+		format = bkl.Ext(string(*opts.OutputPath))
 	}
 
 	if opts.OutputFormat != nil {
@@ -73,14 +66,14 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 	}
 
 	if format == "" {
-		_, f, err := p.FileMatch(fsys, preparedPaths[0])
+		_, f, err := bkl.FileMatch(fsys, preparedPaths[0])
 		if err != nil {
 			fatal(err)
 		}
 		format = f
 	}
 
-	enc, err := p.FormatOutput(out, format)
+	enc, err := bkl.FormatOutput(out, format)
 	if err != nil {
 		fatal(err)
 	}

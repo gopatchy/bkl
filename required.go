@@ -8,14 +8,14 @@ import (
 // RequiredFile loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
 // The file is loaded directly without processing, matching bklr behavior.
-func (b *BKL) RequiredFile(fsys fs.FS, path string) (any, error) {
+func RequiredFile(fsys fs.FS, path string) (any, error) {
 	// Create new parser for the file
 	parser, err := New()
 	if err != nil {
 		return nil, err
 	}
 
-	realPath, _, err := parser.FileMatch(fsys, path)
+	realPath, _, err := FileMatch(fsys, path)
 	if err != nil {
 		return nil, fmt.Errorf("file %s: %w", path, err)
 	}
@@ -39,13 +39,7 @@ func (b *BKL) RequiredFile(fsys fs.FS, path string) (any, error) {
 		return nil, fmt.Errorf("required operates on exactly 1 document, got %d in %s", len(docs), path)
 	}
 
-	return b.required(docs[0].Data)
-}
-
-// required returns only the required fields and their ancestors from the given value.
-// It recursively traverses the value and keeps only paths that lead to "$required" markers.
-func (b *BKL) required(obj any) (any, error) {
-	return required(obj)
+	return required(docs[0].Data)
 }
 
 func required(obj any) (any, error) {

@@ -11,14 +11,14 @@ import (
 // DiffFiles loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkld behavior.
-func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
+func DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	// Load source file
 	p1, err := New()
 	if err != nil {
 		return nil, err
 	}
 
-	realSrcPath, _, err := p1.FileMatch(fsys, srcPath)
+	realSrcPath, _, err := FileMatch(fsys, srcPath)
 	if err != nil {
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
@@ -48,7 +48,7 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 		return nil, err
 	}
 
-	realDstPath, _, err := p2.FileMatch(fsys, dstPath)
+	realDstPath, _, err := FileMatch(fsys, dstPath)
 	if err != nil {
 		return nil, fmt.Errorf("destination file %s: %w", dstPath, err)
 	}
@@ -73,13 +73,7 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 	}
 
 	// Perform diff
-	return b.diff(srcDocs[0].Data, dstDocs[0].Data, nil)
-}
-
-// diff generates the minimal intermediate layer needed to transform src into dst.
-// It returns a document that, when merged with src, produces dst.
-func (b *BKL) diff(src, dst any, env map[string]string) (any, error) {
-	result, err := diff(dst, src)
+	result, err := diff(dstDocs[0].Data, srcDocs[0].Data)
 	if err != nil {
 		return nil, err
 	}

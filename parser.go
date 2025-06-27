@@ -303,7 +303,7 @@ func (b *BKL) output(format string, env map[string]string) ([]byte, error) {
 // If format is "", it is inferred from path's file extension.
 func (b *BKL) OutputToFile(path, format string, env map[string]string) error {
 	if format == "" {
-		format = ext(path)
+		format = Ext(path)
 	}
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -343,7 +343,8 @@ func (b *BKL) outputToWriter(fh io.Writer, format string, env map[string]string)
 	return nil
 }
 
-func (b *BKL) makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
+// makePathsAbsolute converts relative paths to absolute paths using the provided working directory.
+func makePathsAbsolute(paths []string, workingDir string) ([]string, error) {
 	result := make([]string, len(paths))
 	for i, path := range paths {
 		if filepath.IsAbs(path) {
@@ -355,7 +356,8 @@ func (b *BKL) makePathsAbsolute(paths []string, workingDir string) ([]string, er
 	return result, nil
 }
 
-func (b *BKL) rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
+// rebasePathsToRoot rebases absolute paths to be relative to the root path.
+func rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([]string, error) {
 	absRootPath := rootPath
 	if !filepath.IsAbs(rootPath) {
 		absRootPath = filepath.Join(workingDir, rootPath)
@@ -378,28 +380,29 @@ func (b *BKL) rebasePathsToRoot(absPaths []string, rootPath string, workingDir s
 	return result, nil
 }
 
-func (b *BKL) preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
-	absPaths, err := b.makePathsAbsolute(paths, workingDir)
+// preparePathsForParser prepares paths by making them absolute and rebasing to root.
+func preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
+	absPaths, err := makePathsAbsolute(paths, workingDir)
 	if err != nil {
 		return nil, err
 	}
 
-	return b.rebasePathsToRoot(absPaths, rootPath, workingDir)
+	return rebasePathsToRoot(absPaths, rootPath, workingDir)
 }
 
 // PreparePathsFromCwd prepares file paths relative to the current working directory
 // and rebases them to the given root path.
-func (b *BKL) PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
+func PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
 
-	return b.preparePathsForParser(paths, rootPath, wd)
+	return preparePathsForParser(paths, rootPath, wd)
 }
 
 // GetOSEnv returns the current OS environment as a map.
-func (b *BKL) GetOSEnv() map[string]string {
+func GetOSEnv() map[string]string {
 	env := make(map[string]string)
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
@@ -410,14 +413,9 @@ func (b *BKL) GetOSEnv() map[string]string {
 	return env
 }
 
-// Ext returns the file extension without the leading dot.
-func (b *BKL) Ext(path string) string {
-	return ext(path)
-}
-
 // FormatOutput marshals the given data to the specified format.
 // Returns the marshaled bytes or an error if the format is unknown or marshaling fails.
-func (b *BKL) FormatOutput(data any, format string) ([]byte, error) {
+func FormatOutput(data any, format string) ([]byte, error) {
 	f, found := formatByExtension[format]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", format, ErrUnknownFormat)
@@ -428,14 +426,14 @@ func (b *BKL) FormatOutput(data any, format string) ([]byte, error) {
 }
 
 func (b *BKL) Evaluate(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
-	evalFiles, err := b.preparePathsForParser(files, rootPath, workingDir)
+	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
 
 	realFiles := make([]string, len(evalFiles))
 	for i, path := range evalFiles {
-		realPath, fileFormat, err := b.FileMatch(fsys, path)
+		realPath, fileFormat, err := FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -451,14 +449,14 @@ func (b *BKL) Evaluate(fsys fs.FS, files []string, format string, rootPath strin
 
 // EvaluateToData is like Evaluate but returns the raw data instead of marshaled output
 func (b *BKL) EvaluateToData(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) (any, error) {
-	evalFiles, err := b.preparePathsForParser(files, rootPath, workingDir)
+	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
 
 	realFiles := make([]string, len(evalFiles))
 	for i, path := range evalFiles {
-		realPath, fileFormat, err := b.FileMatch(fsys, path)
+		realPath, fileFormat, err := FileMatch(fsys, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -495,8 +493,8 @@ func (b *BKL) EvaluateToData(fsys fs.FS, files []string, format string, rootPath
 //
 // Returns the real filename and the requested output format, or
 // ("", "", error).
-func (b *BKL) FileMatch(fsys fs.FS, path string) (string, string, error) {
-	format := ext(path)
+func FileMatch(fsys fs.FS, path string) (string, string, error) {
+	format := Ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}

@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-// ext returns the file extension without the leading dot.
-func ext(path string) string {
+// Ext returns the file extension without the leading dot.
+func Ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
 
@@ -34,7 +34,7 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 
 	debugLog("[%s] loading", f)
 
-	format, err := getFormat(ext(path))
+	format, err := getFormat(Ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}

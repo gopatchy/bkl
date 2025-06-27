@@ -37,18 +37,18 @@ func WrapOrDie(cmd string) {
 		}
 
 		// Prepare the path for FileMatch
-		preparedPaths, err := b.PreparePathsFromCwd([]string{arg}, "/")
+		preparedPaths, err := bkl.PreparePathsFromCwd([]string{arg}, "/")
 		if err != nil {
 			continue
 		}
 
 		fsys := os.DirFS("/")
-		realPath, f, err := b.FileMatch(fsys, preparedPaths[0])
+		realPath, f, err := bkl.FileMatch(fsys, preparedPaths[0])
 		if err != nil {
 			continue
 		}
 
-		_, err = b.MergeFiles(fsys, []string{realPath}, f, b.GetOSEnv())
+		_, err = b.MergeFiles(fsys, []string{realPath}, f, bkl.GetOSEnv())
 		if err != nil {
 			fatal(err)
 		}
@@ -64,7 +64,7 @@ func WrapOrDie(cmd string) {
 			fatal(err)
 		}
 
-		err = b.OutputToFile(tmp.Name(), f, b.GetOSEnv())
+		err = b.OutputToFile(tmp.Name(), f, bkl.GetOSEnv())
 		if err != nil {
 			fatal(err)
 		}
