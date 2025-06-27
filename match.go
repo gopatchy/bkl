@@ -1,6 +1,6 @@
 package bkl
 
-func matchDoc(doc *Document, pat any) bool {
+func matchDoc(doc *document, pat any) bool {
 	return match(doc.Data, pat)
 }
 

@@ -18,7 +18,7 @@ type file struct {
 	id    string
 	child *file
 	path  string
-	docs  []*Document
+	docs  []*document
 }
 
 func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {

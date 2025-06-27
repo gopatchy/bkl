@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func mergeDocs(doc, patch *Document) error {
+func mergeDocs(doc, patch *document) error {
 	// If patch document is completely empty (nil), it's a no-op
 	if patch.Data == nil {
 		return nil

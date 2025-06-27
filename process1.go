@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func process1(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+func process1(obj any, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	depth++
 
 	if depth > 1000 {
@@ -27,7 +27,7 @@ func process1(obj any, mergeFrom *Document, mergeFromDocs []*Document, depth int
 	}
 }
 
-func process1Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+func process1Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	// Not copying obj before merge preserves the layering behavior that
 	// tests/merge-race relies upon.
 	if v, found := obj["$merge"]; found {
@@ -54,7 +54,7 @@ func process1Map(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Docum
 	})
 }
 
-func process1MapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+func process1MapMerge(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, v any, depth int) (any, error) {
 	in, err := get(mergeFrom, mergeFromDocs, v)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func process1MapMerge(obj map[string]any, mergeFrom *Document, mergeFromDocs []*
 	return process1(next, mergeFrom, mergeFromDocs, depth)
 }
 
-func process1MapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs []*Document, v any, depth int) (any, error) {
+func process1MapReplace(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, v any, depth int) (any, error) {
 	next, err := get(mergeFrom, mergeFromDocs, v)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func process1MapReplace(obj map[string]any, mergeFrom *Document, mergeFromDocs [
 	return process1(next, mergeFrom, mergeFromDocs, depth)
 }
 
-func process1List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+func process1List(obj []any, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	merge := []any{}
 
 	obj, err := filterList(obj, func(v any) ([]any, error) {
@@ -134,7 +134,7 @@ func process1List(obj []any, mergeFrom *Document, mergeFromDocs []*Document, dep
 	})
 }
 
-func process1ListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
+func process1ListMerge(obj []any, mergeFrom *document, mergeFromDocs []*document, m any, depth int) (any, error) {
 	in, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func process1ListMerge(obj []any, mergeFrom *Document, mergeFromDocs []*Document
 	return mergeList(obj, in)
 }
 
-func process1ListReplace(obj []any, mergeFrom *Document, mergeFromDocs []*Document, m any, depth int) (any, error) {
+func process1ListReplace(obj []any, mergeFrom *document, mergeFromDocs []*document, m any, depth int) (any, error) {
 	next, err := get(mergeFrom, mergeFromDocs, m)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func process1ListReplace(obj []any, mergeFrom *Document, mergeFromDocs []*Docume
 	return process1(next, mergeFrom, mergeFromDocs, depth)
 }
 
-func process1String(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+func process1String(obj string, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	if strings.HasPrefix(obj, "$merge:") {
 		return process1StringMerge(obj, mergeFrom, mergeFromDocs, depth)
 	}
@@ -164,7 +164,7 @@ func process1String(obj string, mergeFrom *Document, mergeFromDocs []*Document, 
 	return obj, nil
 }
 
-func process1StringMerge(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+func process1StringMerge(obj string, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	path := strings.TrimPrefix(obj, "$merge:")
 
 	in, err := get(mergeFrom, mergeFromDocs, path)
@@ -175,7 +175,7 @@ func process1StringMerge(obj string, mergeFrom *Document, mergeFromDocs []*Docum
 	return process1(in, mergeFrom, mergeFromDocs, depth)
 }
 
-func process1StringReplace(obj string, mergeFrom *Document, mergeFromDocs []*Document, depth int) (any, error) {
+func process1StringReplace(obj string, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	path := strings.TrimPrefix(obj, "$replace:")
 
 	in, err := get(mergeFrom, mergeFromDocs, path)

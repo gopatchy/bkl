@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func repeatDoc(doc *Document, ec *evalContext) ([]*Document, []*evalContext, error) {
+func repeatDoc(doc *document, ec *evalContext) ([]*document, []*evalContext, error) {
 	switch obj := doc.Data.(type) {
 	case map[string]any:
 		return repeatDocMap(doc, ec, obj)
@@ -13,20 +13,20 @@ func repeatDoc(doc *Document, ec *evalContext) ([]*Document, []*evalContext, err
 		return repeatDocList(doc, ec, obj)
 
 	default:
-		return []*Document{doc}, []*evalContext{ec}, nil
+		return []*document{doc}, []*evalContext{ec}, nil
 	}
 }
 
-func repeatDocMap(doc *Document, ec *evalContext, data map[string]any) ([]*Document, []*evalContext, error) {
+func repeatDocMap(doc *document, ec *evalContext, data map[string]any) ([]*document, []*evalContext, error) {
 	if found, v, data := popMapValue(data, "$repeat"); found {
 		doc.Data = data
 		return repeatDocGen(doc, ec, v)
 	}
 
-	return []*Document{doc}, []*evalContext{ec}, nil
+	return []*document{doc}, []*evalContext{ec}, nil
 }
 
-func repeatDocList(doc *Document, ec *evalContext, data []any) ([]*Document, []*evalContext, error) {
+func repeatDocList(doc *document, ec *evalContext, data []any) ([]*document, []*evalContext, error) {
 	v, data2, err := popListMapValue(data, "$repeat")
 	if err != nil {
 		return nil, nil, err
@@ -37,16 +37,16 @@ func repeatDocList(doc *Document, ec *evalContext, data []any) ([]*Document, []*
 		return repeatDocGen(doc, ec, v)
 	}
 
-	return []*Document{doc}, []*evalContext{ec}, nil
+	return []*document{doc}, []*evalContext{ec}, nil
 }
 
-func repeatDocGen(doc *Document, ec *evalContext, v any) ([]*Document, []*evalContext, error) {
+func repeatDocGen(doc *document, ec *evalContext, v any) ([]*document, []*evalContext, error) {
 	contexts, err := repeatGenerateContexts(ec, v)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	docs := make([]*Document, len(contexts))
+	docs := make([]*document, len(contexts))
 	ecs := make([]*evalContext, len(contexts))
 
 	for i, ctx := range contexts {
