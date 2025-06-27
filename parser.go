@@ -55,7 +55,7 @@ var Debug = os.Getenv("BKL_DEBUG") != ""
 // Phase 6
 //   - $output
 //
-// # Document Layer Matching Logic
+// # document Layer Matching Logic
 //
 // When applying a new document to internal state, it may be merged into one or
 // more existing documents or appended as a new document. To select merge
@@ -71,7 +71,7 @@ type bkl struct {
 	docs []*Document
 }
 
-// MergeDocument applies the supplied Document to the [bkl]'s current
+// mergeDocument applies the supplied document to the [bkl]'s current
 // internal document state using bkl's merge semantics. If expand is true,
 // documents without $match will append; otherwise this is an error.
 func (b *bkl) mergeDocument(patch *Document) error {
