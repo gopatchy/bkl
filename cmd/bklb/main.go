@@ -17,8 +17,6 @@ func main() {
 	if strings.HasSuffix(cmd, "b") {
 		cmd = strings.TrimSuffix(cmd, "b")
 	} else {
-		// Run as bklb, not via symlink
-		//nolint:goerr113,revive,stylecheck
 		fatal(fmt.Errorf(`Usage:
   ln -s $(which bklb) toolb  # bklb will run 'tool'
 

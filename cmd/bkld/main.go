@@ -24,7 +24,7 @@ func main() {
 	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
 		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
+			fatal(fmt.Errorf("ReadBuildInfo() failed"))
 		}
 
 		fmt.Printf("%s", bi)
@@ -44,14 +44,12 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		os.Exit(1)
 	}
 
-	// Use Diff helper which handles loading and validation
 	fsys := os.DirFS("/")
 	doc, err := bkl.Diff(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "")
 	if err != nil {
 		fatal(err)
 	}
 
-	// Pass output path and input path - FormatOutput will use their extensions if format is empty
 	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.BasePath))
 	if err != nil {
 		fatal(err)

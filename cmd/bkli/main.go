@@ -43,20 +43,17 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 		os.Exit(1)
 	}
 
-	// Convert paths to strings
 	paths := make([]string, len(opts.Positional.InputPaths))
 	for i, path := range opts.Positional.InputPaths {
 		paths[i] = string(path)
 	}
 
-	// Use Intersect helper which handles loading and validation
 	fsys := os.DirFS("/")
 	doc, err := bkl.Intersect(fsys, paths, "/", "")
 	if err != nil {
 		fatal(err)
 	}
 
-	// Pass output path and input path - FormatOutput will use their extensions if format is empty
 	enc, err := bkl.FormatOutput(doc, opts.OutputFormat, (*string)(opts.OutputPath), &paths[0])
 	if err != nil {
 		fatal(err)

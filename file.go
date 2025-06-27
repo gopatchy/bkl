@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-// Ext returns the file extension without the leading dot.
 func ext(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }

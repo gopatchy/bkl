@@ -23,13 +23,11 @@ var (
 func loadData() error {
 	var err error
 
-	// Load tests from bkl package
 	tests, err = bkl.GetTests()
 	if err != nil {
 		return fmt.Errorf("failed to load tests: %v", err)
 	}
 
-	// Load documentation sections from bkl package
 	sections, err = bkl.GetDocSections()
 	if err != nil {
 		return fmt.Errorf("failed to load documentation sections: %v", err)
@@ -39,19 +37,16 @@ func loadData() error {
 }
 
 func main() {
-	// Load embedded data
 	if err := loadData(); err != nil {
 		log.Fatalf("Failed to load data: %v", err)
 	}
 
-	// Create a new MCP server
 	mcpServer := server.NewMCPServer(
 		"bkl-mcp",
 		"1.0.0",
 		server.WithToolCapabilities(false),
 	)
 
-	// Define common parameters
 	formatParam := mcp.WithString("format",
 		mcp.Description("Output format (yaml, json, toml) - will auto-detect if not specified"),
 	)
@@ -60,7 +55,6 @@ func main() {
 		mcp.Description("Map of filename to file content for the operation"),
 	)
 
-	// Register tools
 	queryTool := mcp.NewTool("query",
 		mcp.WithDescription("Query bkl documentation and test examples by keywords"),
 		mcp.WithString("keywords",
@@ -134,7 +128,6 @@ func main() {
 	)
 	mcpServer.AddTool(requiredTool, requiredHandler)
 
-	// Start the stdio transport
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
@@ -146,7 +139,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	// Split keywords by comma and normalize
 	keywordFields := strings.Split(keywordsStr, ",")
 	var keywords []string
 	for _, kw := range keywordFields {
@@ -160,7 +152,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		return mcp.NewToolResultError("No keywords provided"), nil
 	}
 
-	// Normalize keywords to lowercase
 	normalizedKeywords := make([]string, len(keywords))
 	for i, keyword := range keywords {
 		normalizedKeywords[i] = strings.ToLower(keyword)
@@ -168,12 +159,10 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 
 	var allResults []map[string]interface{}
 
-	// Search documentation sections
 	for _, section := range sections {
 		score := 0
 		details := map[string]interface{}{}
 
-		// Check section title and ID
 		titleLower := strings.ToLower(section.Title)
 		idLower := strings.ToLower(section.ID)
 
@@ -183,7 +172,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		score += titleMatches * 20
 		score += idMatches * 15
 
-		// Check content items
 		matchingContent := []string{}
 		for _, item := range section.Items {
 			if item.Type == "text" {
@@ -208,7 +196,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 				}
 			}
 			if item.Type == "example" {
-				// Check example code and labels
 				if item.Example.Type == "grid" {
 					for _, row := range item.Example.Rows {
 						for _, gridItem := range row.Items {
@@ -253,7 +240,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		}
 	}
 
-	// Search tests
 	for name, test := range tests {
 		if strings.HasSuffix(name, ".files") {
 			continue
@@ -268,7 +254,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		nameMatches := countKeywordMatches(nameLower, normalizedKeywords)
 		descMatches := countKeywordMatches(descLower, normalizedKeywords)
 
-		// Check for keywords in file contents
 		var matchingFileContent string
 		var bestFileMatches int
 		for filename, content := range test.Files {
@@ -336,7 +321,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		return scoreI > scoreJ
 	})
 
-	// Limit to top 15 results
 	if len(allResults) > 15 {
 		allResults = allResults[:15]
 	}
@@ -415,7 +399,6 @@ func getTestFeatures(test *bkl.TestCase) []string {
 		features = append(features, "multi-file")
 	}
 
-	// Check for special directives in file contents
 	for _, content := range test.Files {
 		if strings.Contains(content, "$delete") {
 			features = append(features, "$delete")
@@ -495,8 +478,6 @@ func findFirstKeyword(text string, keywords []string) string {
 	return firstKeyword
 }
 
-// Helper functions for parsing common parameters
-
 func parseFileSystem(args map[string]interface{}) (map[string]string, error) {
 	fileSystemRaw := args["fileSystem"]
 	if fileSystemRaw == nil {
@@ -508,7 +489,6 @@ func parseFileSystem(args map[string]interface{}) (map[string]string, error) {
 		return nil, fmt.Errorf("fileSystem must be an object")
 	}
 
-	// Convert fileSystem object to map[string]string
 	fileSystem := make(map[string]string)
 	for k, v := range fileSystemMap {
 		if str, ok := v.(string); ok {
@@ -531,7 +511,6 @@ func parseOptionalString(args map[string]interface{}, key string, defaultValue s
 }
 
 func createTestFS(fileSystem map[string]string) (fs.FS, error) {
-	// Create filesystem from provided files
 	fsys := fstest.MapFS{}
 	for filename, content := range fileSystem {
 		fsys[filename] = &fstest.MapFile{

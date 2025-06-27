@@ -12,7 +12,6 @@ import (
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkld behavior.
 func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string) (any, error) {
-	// Prepare paths
 	paths := []string{srcPath, dstPath}
 	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
@@ -20,7 +19,6 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 	}
 	srcPath = preparedPaths[0]
 	dstPath = preparedPaths[1]
-	// Load source file
 	p1 := &bkl{}
 
 	realSrcPath, _, err := fileMatch(fsys, srcPath)
@@ -28,7 +26,6 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
 
-	// Load file directly without processing
 	fileSystem := newFS(fsys)
 	fileObjs, err := loadFileAndParents(fileSystem, realSrcPath, nil)
 	if err != nil {
@@ -47,7 +44,6 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 		return nil, fmt.Errorf("diff operates on exactly 1 source document per file, got %d", len(srcDocs))
 	}
 
-	// Load destination file
 	p2 := &bkl{}
 
 	realDstPath, _, err := fileMatch(fsys, dstPath)
@@ -80,7 +76,6 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 		return nil, err
 	}
 
-	// Add $match directive at the appropriate level
 	switch result2 := result.(type) {
 	case map[string]any:
 		result2["$match"] = map[string]any{}

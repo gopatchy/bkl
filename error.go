@@ -3,10 +3,8 @@ package bkl
 import "fmt"
 
 var (
-	// Base error; every error in bkl inherits from this
 	Err = fmt.Errorf("bkl error")
 
-	// Format and system errors
 	ErrCircularRef       = fmt.Errorf("circular reference (%w)", Err)
 	ErrConflictingParent = fmt.Errorf("conflicting $parent (%w)", Err)
 	ErrExtraEntries      = fmt.Errorf("extra entries (%w)", Err)

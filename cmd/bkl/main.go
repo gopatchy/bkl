@@ -96,7 +96,7 @@ Related tools:
 func version() {
 	bi, ok := debug.ReadBuildInfo()
 	if !ok {
-		fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
+		fatal(fmt.Errorf("ReadBuildInfo() failed"))
 	}
 
 	ver, src := versionFromBuildInfo(bi)

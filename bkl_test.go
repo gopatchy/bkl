@@ -38,7 +38,6 @@ var (
 	testExclude = flag.String("test.exclude", "", "Exclude specified tests from tests.toml (comma-separated list)")
 )
 
-// runTestCase executes a single test case and returns the output and error
 func runTestCase(testCase TestCase) ([]byte, error) {
 	fsys := fstest.MapFS{}
 
@@ -53,7 +52,6 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		rootPath = "/"
 	}
 
-	// Create a filesystem view rooted at the rootPath
 	var testFS fs.FS = fsys
 	if rootPath != "/" {
 		var err error
@@ -68,18 +66,15 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 
 	switch {
 	case testCase.Required:
-		// For required tests, we expect exactly 1 eval file
 		if len(testCase.Eval) != 1 {
 			return nil, fmt.Errorf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 		}
 
-		// Use the Required helper which matches bklr behavior
 		requiredResult, err := bkl.Required(testFS, testCase.Eval[0], rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
 
-		// Marshal the required result
 		format := testCase.Format
 		if format == "" {
 			format = "yaml"
@@ -90,18 +85,15 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 	case testCase.Intersect:
-		// For intersect tests, we need at least 2 files
 		if len(testCase.Eval) < 2 {
 			return nil, fmt.Errorf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		// Use the Intersect helper which matches bkli behavior
 		intersectResult, err := bkl.Intersect(testFS, testCase.Eval, rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
 
-		// Marshal the intersect result
 		format := testCase.Format
 		if format == "" {
 			format = "yaml"
@@ -112,18 +104,15 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 	case testCase.Diff:
-		// For diff tests, we expect exactly 2 eval files
 		if len(testCase.Eval) != 2 {
 			return nil, fmt.Errorf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		// Use the Diff helper which matches bkld behavior
 		diffResult, err := bkl.Diff(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath)
 		if err != nil {
 			return nil, err
 		}
 
-		// Marshal the diff result
 		format := testCase.Format
 		if format == "" {
 			format = "yaml"
@@ -154,7 +143,6 @@ func TestBKL(t *testing.T) {
 		t.Fatalf("Failed to parse tests.toml: %v", err)
 	}
 
-	// Parse filter list
 	filterTests := map[string]bool{}
 	if *testFilter != "" {
 		for _, name := range strings.Split(*testFilter, ",") {
@@ -168,7 +156,6 @@ func TestBKL(t *testing.T) {
 		}
 	}
 
-	// Parse exclude list
 	excludeTests := map[string]bool{}
 	if *testExclude != "" {
 		for _, name := range strings.Split(*testExclude, ",") {
@@ -191,7 +178,6 @@ func TestBKL(t *testing.T) {
 			continue
 		}
 
-		// Skip benchmark tests in regular test runs
 		if testCase.Benchmark {
 			continue
 		}
@@ -248,7 +234,6 @@ func BenchmarkBKL(b *testing.B) {
 					b.Fatalf("Unexpected error: %v", err)
 				}
 
-				// Don't validate output in benchmarks - we just care about performance
 				_ = output
 			}
 		})
@@ -269,7 +254,6 @@ func TestCLI(t *testing.T) {
 		t.Fatalf("Failed to parse tests.toml: %v", err)
 	}
 
-	// Parse filter list
 	filterTests := map[string]bool{}
 	if *testFilter != "" {
 		for _, name := range strings.Split(*testFilter, ",") {
@@ -283,7 +267,6 @@ func TestCLI(t *testing.T) {
 		}
 	}
 
-	// Parse exclude list
 	excludeTests := map[string]bool{}
 	if *testExclude != "" {
 		for _, name := range strings.Split(*testExclude, ",") {
@@ -306,7 +289,6 @@ func TestCLI(t *testing.T) {
 			continue
 		}
 
-		// Skip benchmark tests in regular test runs
 		if testCase.Benchmark {
 			continue
 		}
@@ -314,12 +296,8 @@ func TestCLI(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			t.Parallel()
 
-			// Skip tests that aren't applicable to CLI
-
-			// Create a temporary directory for test files
 			tmpDir := t.TempDir()
 
-			// Write test files to temp directory
 			for filename, content := range testCase.Files {
 				fullPath := filepath.Join(tmpDir, filename)
 				dir := filepath.Dir(fullPath)
@@ -335,7 +313,6 @@ func TestCLI(t *testing.T) {
 				}
 			}
 
-			// Determine which CLI tool to use
 			var cmdPath string
 			var args []string
 
@@ -368,22 +345,18 @@ func TestCLI(t *testing.T) {
 				}
 			}
 
-			// Add format flag if specified
 			if testCase.Format != "" {
 				args = append(args, "--format", testCase.Format)
 			}
 
-			// Add root path flag if specified
 			if testCase.RootPath != "" {
 				args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
 			}
 
-			// Build the command
 			cmdArgs := append([]string{"run", cmdPath}, args...)
 			cmd := exec.Command("go", cmdArgs...)
 			cmd.Dir = "."
 
-			// Set environment variables
 			if testCase.Env != nil {
 				cmd.Env = os.Environ()
 				for k, v := range testCase.Env {
@@ -391,7 +364,6 @@ func TestCLI(t *testing.T) {
 				}
 			}
 
-			// Run the command
 			output, err := cmd.CombinedOutput()
 
 			if testCase.Error != "" {

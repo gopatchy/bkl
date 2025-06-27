@@ -36,7 +36,6 @@ var formatByExtension = map[string]format{
 	},
 }
 
-// getFormat returns the format for the given name (extension).
 func getFormat(name string) (*format, error) {
 	f, found := formatByExtension[name]
 	if !found {

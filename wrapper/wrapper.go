@@ -50,7 +50,6 @@ func WrapOrDie(cmd string) {
 			fatal(err)
 		}
 
-		// Write the output to the temp file
 		_, err = tmp.Write(output)
 		if err != nil {
 			fatal(err)

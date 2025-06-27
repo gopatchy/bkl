@@ -368,7 +368,6 @@ func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
 		return nil, err
 	}
 
-	// Always wrap in a slice for MarshalStream - it expects a stream of documents
 	return f.MarshalStream([]any{data})
 }
 
