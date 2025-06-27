@@ -359,7 +359,7 @@ func FormatOutput(data any, format string, paths ...*string) ([]byte, error) {
 	if format == "" {
 		for _, path := range paths {
 			if path != nil && *path != "" {
-				format = Ext(*path)
+				format = ext(*path)
 				break
 			}
 		}
@@ -376,8 +376,9 @@ func FormatOutput(data any, format string, paths ...*string) ([]byte, error) {
 
 // Evaluate processes the specified files and returns the formatted output.
 // It creates a new bkl instance internally to process the files.
+// If format is nil, it infers the format from the paths parameter (output path first, then input files).
 // If env is nil, it uses the current OS environment.
-func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
+func Evaluate(fsys fs.FS, files []string, format *string, rootPath string, workingDir string, env map[string]string, paths ...*string) ([]byte, error) {
 	b := &bkl{}
 
 	if env == nil {
@@ -390,6 +391,7 @@ func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workin
 	}
 
 	realFiles := make([]string, len(evalFiles))
+	var inferredFormat string
 	for i, path := range evalFiles {
 		realPath, fileFormat, err := FileMatch(fsys, path)
 		if err != nil {
@@ -397,12 +399,30 @@ func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workin
 		}
 		realFiles[i] = realPath
 
-		if format == "" {
-			format = fileFormat
+		if inferredFormat == "" {
+			inferredFormat = fileFormat
 		}
 	}
 
-	return b.mergeFiles(fsys, realFiles, format, env)
+	// Determine format to use
+	finalFormat := ""
+	if format != nil && *format != "" {
+		finalFormat = *format
+	} else {
+		// Try to infer from paths parameter first
+		for _, path := range paths {
+			if path != nil && *path != "" {
+				finalFormat = ext(*path)
+				break
+			}
+		}
+		// If still empty, use the inferred format from input files
+		if finalFormat == "" {
+			finalFormat = inferredFormat
+		}
+	}
+
+	return b.mergeFiles(fsys, realFiles, finalFormat, env)
 }
 
 // FileMatch attempts to find a file with the same base name as path, but
@@ -413,7 +433,7 @@ func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workin
 // Returns the real filename and the requested output format, or
 // ("", "", error).
 func FileMatch(fsys fs.FS, path string) (string, string, error) {
-	format := Ext(path)
+	format := ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}

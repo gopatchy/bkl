@@ -608,7 +608,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	// Regular evaluation - use "/" as default rootPath and workingDir
-	output, err := bkl.Evaluate(testFS, files, format, "/", "/", env)
+	output, err := bkl.Evaluate(testFS, files, &format, "/", "/", env)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}

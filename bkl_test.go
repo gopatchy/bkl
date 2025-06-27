@@ -134,7 +134,7 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 		}
 
 	default:
-		output, err = bkl.Evaluate(testFS, testCase.Eval, testCase.Format, rootPath, "/", testCase.Env)
+		output, err = bkl.Evaluate(testFS, testCase.Eval, &testCase.Format, rootPath, "/", testCase.Env)
 	}
 
 	return output, err

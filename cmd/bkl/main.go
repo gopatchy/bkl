@@ -76,20 +76,13 @@ Related tools:
 		bkl.Debug = true
 	}
 
-	format := ""
-	if opts.OutputFormat != nil {
-		format = *opts.OutputFormat
-	} else if opts.OutputPath != nil {
-		format = bkl.Ext(string(*opts.OutputPath))
-	}
-
 	files := make([]string, len(opts.Positional.InputPaths))
 	for i, path := range opts.Positional.InputPaths {
 		files[i] = string(path)
 	}
 
 	fsys := os.DirFS(opts.RootPath)
-	output, err := bkl.Evaluate(fsys, files, format, opts.RootPath, wd, nil)
+	output, err := bkl.Evaluate(fsys, files, opts.OutputFormat, opts.RootPath, wd, nil, (*string)(opts.OutputPath))
 	if err != nil {
 		fatal(err)
 	}
