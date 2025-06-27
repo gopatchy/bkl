@@ -67,11 +67,6 @@ Related tools:
 		os.Exit(1)
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		fatal(err)
-	}
-
 	if opts.Verbose {
 		bkl.Debug = true
 	}
@@ -82,7 +77,7 @@ Related tools:
 	}
 
 	fsys := os.DirFS(opts.RootPath)
-	output, err := bkl.Evaluate(fsys, files, opts.RootPath, wd, nil, opts.OutputFormat, (*string)(opts.OutputPath), &files[0])
+	output, err := bkl.Evaluate(fsys, files, opts.RootPath, "", nil, opts.OutputFormat, (*string)(opts.OutputPath), &files[0])
 	if err != nil {
 		fatal(err)
 	}

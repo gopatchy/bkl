@@ -31,15 +31,9 @@ func WrapOrDie(cmd string) {
 	args := slices.Clone(os.Args[1:])
 
 	for i, arg := range args {
-		// Get current working directory for Evaluate
-		wd, err := os.Getwd()
-		if err != nil {
-			fatal(err)
-		}
-
 		// Try to evaluate the file - Evaluate handles FileMatch internally
 		fsys := os.DirFS("/")
-		output, err := bkl.Evaluate(fsys, []string{arg}, "/", wd, nil, nil, &arg)
+		output, err := bkl.Evaluate(fsys, []string{arg}, "/", "", nil, nil, &arg)
 		if err != nil {
 			// Not a bkl file, skip
 			continue

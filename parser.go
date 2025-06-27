@@ -310,6 +310,14 @@ func rebasePathsToRoot(absPaths []string, rootPath string, workingDir string) ([
 
 // preparePathsForParser prepares paths by making them absolute and rebasing to root.
 func preparePathsForParser(paths []string, rootPath string, workingDir string) ([]string, error) {
+	if workingDir == "" {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		workingDir = wd
+	}
+
 	absPaths, err := makePathsAbsolute(paths, workingDir)
 	if err != nil {
 		return nil, err
