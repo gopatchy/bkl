@@ -31,11 +31,6 @@ func WrapOrDie(cmd string) {
 	args := slices.Clone(os.Args[1:])
 
 	for i, arg := range args {
-		b, err := bkl.New()
-		if err != nil {
-			fatal(err)
-		}
-
 		// Prepare the path for FileMatch
 		preparedPaths, err := bkl.PreparePathsFromCwd([]string{arg}, "/")
 		if err != nil {
@@ -48,7 +43,14 @@ func WrapOrDie(cmd string) {
 			continue
 		}
 
-		_, err = b.MergeFiles(fsys, []string{realPath}, f, bkl.GetOSEnv())
+		// Get current working directory for Evaluate
+		wd, err := os.Getwd()
+		if err != nil {
+			fatal(err)
+		}
+
+		// Use Evaluate to process the file
+		output, err := bkl.Evaluate(fsys, []string{realPath}, f, "/", wd, bkl.GetOSEnv())
 		if err != nil {
 			fatal(err)
 		}
@@ -64,7 +66,8 @@ func WrapOrDie(cmd string) {
 			fatal(err)
 		}
 
-		err = b.OutputToFile(tmp.Name(), f, bkl.GetOSEnv())
+		// Write the output to the temp file
+		_, err = tmp.Write(output)
 		if err != nil {
 			fatal(err)
 		}
