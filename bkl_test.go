@@ -313,15 +313,6 @@ func TestCLI(t *testing.T) {
 
 		t.Run(testName, func(t *testing.T) {
 			// Skip tests that aren't applicable to CLI
-			if testName == "rootPathCur" {
-				t.Skip("CLI runs from different directory")
-			}
-			if testName == "rootPathBreak" {
-				t.Skip("CLI handles root path validation differently")
-			}
-			if testName == "rootPathSub" || testName == "rootPathRoot" {
-				t.Skip("CLI requires explicit root path flag")
-			}
 
 			// Create a temporary directory for test files
 			tmpDir := t.TempDir()
@@ -346,8 +337,8 @@ func TestCLI(t *testing.T) {
 			var cmdPath string
 			var args []string
 
-			// For root path tests, we need to use relative paths from the root
-			useRelativePaths := testCase.RootPath != ""
+			// Always use absolute paths for CLI
+			useAbsolutePaths := true
 
 			switch {
 			case testCase.Diff:
@@ -355,12 +346,12 @@ func TestCLI(t *testing.T) {
 				if len(testCase.Eval) != 2 {
 					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 				}
-				if useRelativePaths {
-					args = append(args, testCase.Eval[0])
-					args = append(args, testCase.Eval[1])
-				} else {
+				if useAbsolutePaths {
 					args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
 					args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
+				} else {
+					args = append(args, testCase.Eval[0])
+					args = append(args, testCase.Eval[1])
 				}
 			case testCase.Intersect:
 				cmdPath = "./cmd/bkli/main.go"
@@ -368,10 +359,10 @@ func TestCLI(t *testing.T) {
 					t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 				}
 				for _, evalFile := range testCase.Eval {
-					if useRelativePaths {
-						args = append(args, evalFile)
-					} else {
+					if useAbsolutePaths {
 						args = append(args, filepath.Join(tmpDir, evalFile))
+					} else {
+						args = append(args, evalFile)
 					}
 				}
 			case testCase.Required:
@@ -379,18 +370,18 @@ func TestCLI(t *testing.T) {
 				if len(testCase.Eval) != 1 {
 					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 				}
-				if useRelativePaths {
-					args = append(args, testCase.Eval[0])
-				} else {
+				if useAbsolutePaths {
 					args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
+				} else {
+					args = append(args, testCase.Eval[0])
 				}
 			default:
 				cmdPath = "./cmd/bkl/main.go"
 				for _, evalFile := range testCase.Eval {
-					if useRelativePaths {
-						args = append(args, evalFile)
-					} else {
+					if useAbsolutePaths {
 						args = append(args, filepath.Join(tmpDir, evalFile))
+					} else {
+						args = append(args, evalFile)
 					}
 				}
 			}
@@ -402,13 +393,7 @@ func TestCLI(t *testing.T) {
 
 			// Add root path flag if specified
 			if testCase.RootPath != "" {
-				if testCase.RootPath == "/" {
-					// Use tmpDir as root
-					args = append([]string{"--root-path", tmpDir}, args...)
-				} else {
-					// Use subdirectory as root
-					args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
-				}
+				args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
 			}
 
 			// Build the command
