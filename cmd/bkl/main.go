@@ -89,7 +89,7 @@ Related tools:
 	}
 
 	fsys := os.DirFS(opts.RootPath)
-	output, err := bkl.Evaluate(fsys, files, format, opts.RootPath, wd, bkl.GetOSEnv())
+	output, err := bkl.Evaluate(fsys, files, format, opts.RootPath, wd, nil)
 	if err != nil {
 		fatal(err)
 	}

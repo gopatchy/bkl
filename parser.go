@@ -338,8 +338,8 @@ func PreparePathsFromCwd(paths []string, rootPath string) ([]string, error) {
 	return preparePathsForParser(paths, rootPath, wd)
 }
 
-// GetOSEnv returns the current OS environment as a map.
-func GetOSEnv() map[string]string {
+// getOSEnv returns the current OS environment as a map.
+func getOSEnv() map[string]string {
 	env := make(map[string]string)
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
@@ -364,8 +364,13 @@ func FormatOutput(data any, format string) ([]byte, error) {
 
 // Evaluate processes the specified files and returns the formatted output.
 // It creates a new bkl instance internally to process the files.
+// If env is nil, it uses the current OS environment.
 func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) ([]byte, error) {
 	b := &bkl{}
+
+	if env == nil {
+		env = getOSEnv()
+	}
 
 	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
 	if err != nil {
