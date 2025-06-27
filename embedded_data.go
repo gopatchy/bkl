@@ -27,31 +27,31 @@ type TestCase struct {
 }
 
 type DocSection struct {
-	ID    string        `yaml:"id"`
-	Title string        `yaml:"title"`
-	Items []ContentItem `yaml:"items"`
+	ID    string    `yaml:"id"`
+	Title string    `yaml:"title"`
+	Items []DocItem `yaml:"items"`
 }
 
-type ContentItem struct {
-	Type    string  `yaml:"type"`
-	Content string  `yaml:"content"`
-	Example Example `yaml:"example"`
+type DocItem struct {
+	Type    string     `yaml:"type"`
+	Content string     `yaml:"content"`
+	Example DocExample `yaml:"example"`
 }
 
-type Example struct {
-	Type       string    `yaml:"type"`
-	Label      string    `yaml:"label"`
-	Code       string    `yaml:"code"`
-	Rows       []GridRow `yaml:"rows"`
-	Highlights []string  `yaml:"highlights"`
+type DocExample struct {
+	Type       string   `yaml:"type"`
+	Label      string   `yaml:"label"`
+	Code       string   `yaml:"code"`
+	Rows       []DocRow `yaml:"rows"`
+	Highlights []string `yaml:"highlights"`
 }
 
-type GridRow struct {
-	Items    []GridItem `yaml:"items"`
-	Operator string     `yaml:"operator"`
+type DocRow struct {
+	Items    []DocGridItem `yaml:"items"`
+	Operator string        `yaml:"operator"`
 }
 
-type GridItem struct {
+type DocGridItem struct {
 	Label      string   `yaml:"label"`
 	Code       string   `yaml:"code"`
 	Highlights []string `yaml:"highlights"`

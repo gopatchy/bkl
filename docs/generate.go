@@ -9,44 +9,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gopatchy/bkl"
 	"gopkg.in/yaml.v3"
 )
-
-// Section represents a documentation section
-type Section struct {
-	ID    string        `yaml:"id"`
-	Title string        `yaml:"title"`
-	Items []ContentItem `yaml:"items"`
-}
-
-// ContentItem represents a piece of content (text or example)
-type ContentItem struct {
-	Type    string  `yaml:"type"` // "text" or "example"
-	Content string  `yaml:"content"`
-	Example Example `yaml:"example"`
-}
-
-// Example represents a code example
-type Example struct {
-	Type       string    `yaml:"type"`
-	Label      string    `yaml:"label"`
-	Code       string    `yaml:"code"`
-	Rows       []GridRow `yaml:"rows"`
-	Highlights []string  `yaml:"highlights"`
-}
-
-// GridRow represents a row of items in a grid
-type GridRow struct {
-	Items    []GridItem `yaml:"items"`
-	Operator string     `yaml:"operator"` // Optional: "+", "-", etc.
-}
-
-// GridItem represents an item in a grid example
-type GridItem struct {
-	Label      string   `yaml:"label"`
-	Code       string   `yaml:"code"`
-	Highlights []string `yaml:"highlights"`
-}
 
 // TemplateData holds all data for the template
 type TemplateData struct {
@@ -54,7 +19,7 @@ type TemplateData struct {
 	IntroText1            string
 	IntroText2            string
 	Badges                string
-	Sections              []Section
+	Sections              []bkl.DocSection
 	LogoData              string
 	KometFontData         string
 	SourceCodeProFontData string
@@ -67,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var sections []Section
+	var sections []bkl.DocSection
 	if err := yaml.Unmarshal(data, &sections); err != nil {
 		log.Fatal(err)
 	}
@@ -152,7 +117,7 @@ func formatNote(note string) template.HTML {
 	return template.HTML(note)
 }
 
-func formatCode(item GridItem) template.HTML {
+func formatCode(item bkl.DocGridItem) template.HTML {
 	code := strings.TrimSpace(item.Code)
 
 	// Apply highlights
@@ -163,7 +128,7 @@ func formatCode(item GridItem) template.HTML {
 	return template.HTML(code)
 }
 
-func formatExample(example Example) template.HTML {
+func formatExample(example bkl.DocExample) template.HTML {
 	code := strings.TrimSpace(example.Code)
 
 	// Apply highlights
