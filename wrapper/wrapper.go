@@ -50,7 +50,7 @@ func WrapOrDie(cmd string) {
 		}
 
 		// Use Evaluate to process the file
-		output, err := bkl.Evaluate(fsys, []string{realPath}, &f, "/", wd, nil)
+		output, err := bkl.Evaluate(fsys, []string{realPath}, "/", wd, nil, &f)
 		if err != nil {
 			fatal(err)
 		}

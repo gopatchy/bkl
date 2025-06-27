@@ -379,7 +379,7 @@ func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
 // It creates a new bkl instance internally to process the files.
 // If format is nil, it infers the format from the paths parameter (output path first, then input files).
 // If env is nil, it uses the current OS environment.
-func Evaluate(fsys fs.FS, files []string, format *string, rootPath string, workingDir string, env map[string]string, paths ...*string) ([]byte, error) {
+func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, paths ...*string) ([]byte, error) {
 	b := &bkl{}
 
 	if env == nil {
