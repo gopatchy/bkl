@@ -31,28 +31,18 @@ func WrapOrDie(cmd string) {
 	args := slices.Clone(os.Args[1:])
 
 	for i, arg := range args {
-		// Prepare the path for FileMatch
-		preparedPaths, err := bkl.PreparePathsFromCwd([]string{arg}, "/")
-		if err != nil {
-			continue
-		}
-
-		fsys := os.DirFS("/")
-		realPath, f, err := bkl.FileMatch(fsys, preparedPaths[0])
-		if err != nil {
-			continue
-		}
-
 		// Get current working directory for Evaluate
 		wd, err := os.Getwd()
 		if err != nil {
 			fatal(err)
 		}
 
-		// Use Evaluate to process the file
-		output, err := bkl.Evaluate(fsys, []string{realPath}, "/", wd, nil, &f)
+		// Try to evaluate the file - Evaluate handles FileMatch internally
+		fsys := os.DirFS("/")
+		output, err := bkl.Evaluate(fsys, []string{arg}, "/", wd, nil, nil, &arg)
 		if err != nil {
-			fatal(err)
+			// Not a bkl file, skip
+			continue
 		}
 
 		pat := fmt.Sprintf(
