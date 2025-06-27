@@ -103,7 +103,3 @@ func (f *fileSystem) globFiles(path string) ([]string, error) {
 
 	return ret, nil
 }
-
-func ext(path string) string {
-	return strings.TrimPrefix(filepath.Ext(path), ".")
-}

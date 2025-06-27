@@ -30,7 +30,7 @@ func (b *BKL) IntersectFiles(fsys fs.FS, paths []string) (any, error) {
 
 		// Load file directly without processing
 		fileSystem := newFS(fsys)
-		fileObjs, err := parser.loadFileAndParents(fileSystem, realPath, nil)
+		fileObjs, err := loadFileAndParents(fileSystem, realPath, nil)
 		if err != nil {
 			return nil, fmt.Errorf("loading %s: %w", path, err)
 		}

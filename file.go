@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+// ext returns the file extension without the leading dot.
+func ext(path string) string {
+	return strings.TrimPrefix(filepath.Ext(path), ".")
+}
+
 type file struct {
 	id    string
 	child *file
@@ -16,7 +21,7 @@ type file struct {
 	docs  []*Document
 }
 
-func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
+func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 	f := &file{
 		id:    path,
 		child: child,
@@ -29,7 +34,7 @@ func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error
 
 	debugLog("[%s] loading", f)
 
-	format, err := getFormat(b.Ext(path))
+	format, err := getFormat(ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
@@ -76,16 +81,16 @@ func (b *BKL) loadFile(fsys *fileSystem, path string, child *file) (*file, error
 	return f, nil
 }
 
-func (b *BKL) loadFileAndParents(fsys *fileSystem, path string, child *file) ([]*file, error) {
-	return b.loadFileAndParentsInt(fsys, path, child, []string{})
+func loadFileAndParents(fsys *fileSystem, path string, child *file) ([]*file, error) {
+	return loadFileAndParentsInt(fsys, path, child, []string{})
 }
 
-func (b *BKL) loadFileAndParentsInt(fsys *fileSystem, path string, child *file, stack []string) ([]*file, error) {
+func loadFileAndParentsInt(fsys *fileSystem, path string, child *file, stack []string) ([]*file, error) {
 	if slices.Contains(stack, path) {
 		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), ErrCircularRef)
 	}
 
-	f, err := b.loadFile(fsys, path, child)
+	f, err := loadFile(fsys, path, child)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +111,7 @@ func (b *BKL) loadFileAndParentsInt(fsys *fileSystem, path string, child *file, 
 			child2 = child
 		}
 
-		parentFiles, err := b.loadFileAndParentsInt(fsys, parent, child2, stack)
+		parentFiles, err := loadFileAndParentsInt(fsys, parent, child2, stack)
 		if err != nil {
 			return nil, err
 		}

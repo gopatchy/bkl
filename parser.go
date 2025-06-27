@@ -173,7 +173,7 @@ func (b *BKL) findMatches(doc *Document, pat any) []*Document {
 // MergeFile parses the file at path and merges its contents into the
 // [BKL]'s document state using bkl's merge semantics.
 func (b *BKL) mergeFile(fsys *fileSystem, path string) error {
-	f, err := b.loadFile(fsys, path, nil)
+	f, err := loadFile(fsys, path, nil)
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ func (b *BKL) MergeFiles(fsys fs.FS, files []string, format string, env map[stri
 
 	fileSystem := newFS(fsys)
 	for _, path := range files {
-		fileObjs, err := b.loadFileAndParents(fileSystem, path, nil)
+		fileObjs, err := loadFileAndParents(fileSystem, path, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -303,7 +303,7 @@ func (b *BKL) output(format string, env map[string]string) ([]byte, error) {
 // If format is "", it is inferred from path's file extension.
 func (b *BKL) OutputToFile(path, format string, env map[string]string) error {
 	if format == "" {
-		format = b.Ext(path)
+		format = ext(path)
 	}
 
 	fh, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
@@ -412,7 +412,7 @@ func (b *BKL) GetOSEnv() map[string]string {
 
 // Ext returns the file extension without the leading dot.
 func (b *BKL) Ext(path string) string {
-	return strings.TrimPrefix(filepath.Ext(path), ".")
+	return ext(path)
 }
 
 // FormatOutput marshals the given data to the specified format.
@@ -496,7 +496,7 @@ func (b *BKL) EvaluateToData(fsys fs.FS, files []string, format string, rootPath
 // Returns the real filename and the requested output format, or
 // ("", "", error).
 func (b *BKL) FileMatch(fsys fs.FS, path string) (string, string, error) {
-	format := b.Ext(path)
+	format := ext(path)
 	if _, found := formatByExtension[format]; !found {
 		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
 	}

@@ -25,7 +25,7 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 
 	// Load file directly without processing
 	fileSystem := newFS(fsys)
-	fileObjs, err := p1.loadFileAndParents(fileSystem, realSrcPath, nil)
+	fileObjs, err := loadFileAndParents(fileSystem, realSrcPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading source %s: %w", srcPath, err)
 	}
@@ -55,7 +55,7 @@ func (b *BKL) DiffFiles(fsys fs.FS, srcPath, dstPath string) (any, error) {
 
 	// Load file directly without processing
 	fileSystem2 := newFS(fsys)
-	fileObjs2, err := p2.loadFileAndParents(fileSystem2, realDstPath, nil)
+	fileObjs2, err := loadFileAndParents(fileSystem2, realDstPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading destination %s: %w", dstPath, err)
 	}
