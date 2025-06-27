@@ -11,7 +11,7 @@ import (
 
 type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
-	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"toml" choice:"yaml"`
+	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"jsonl" choice:"toml" choice:"yaml"`
 
 	Positional struct {
 		BasePath   flags.Filename `positional-arg-name:"basePath" required:"true" description:"base layer file path"`

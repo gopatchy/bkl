@@ -313,15 +313,6 @@ func TestCLI(t *testing.T) {
 
 		t.Run(testName, func(t *testing.T) {
 			// Skip tests that aren't applicable to CLI
-			if testCase.Format == "jsonl" {
-				t.Skip("CLI doesn't support jsonl format")
-			}
-			if strings.Contains(testName, "jsonlInput") || strings.Contains(testName, "jsonlOutput") {
-				t.Skip("CLI doesn't support jsonl format")
-			}
-			if strings.Contains(testName, "InputStream") {
-				t.Skip("CLI outputs native format for streams")
-			}
 			if strings.Contains(testName, "deepCloneFuncError") {
 				t.Skip("CLI doesn't expose internal errors")
 			}
@@ -411,7 +402,7 @@ func TestCLI(t *testing.T) {
 			}
 
 			// Add format flag if specified
-			if testCase.Format != "" && testCase.Format != "yaml" {
+			if testCase.Format != "" {
 				args = append(args, "--format", testCase.Format)
 			}
 
