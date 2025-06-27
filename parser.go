@@ -351,8 +351,20 @@ func getOSEnv() map[string]string {
 }
 
 // FormatOutput marshals the given data to the specified format.
+// If format is empty, it looks at the provided paths (as string pointers) and uses
+// the file extension of the first non-nil path as the format.
 // Returns the marshaled bytes or an error if the format is unknown or marshaling fails.
-func FormatOutput(data any, format string) ([]byte, error) {
+func FormatOutput(data any, format string, paths ...*string) ([]byte, error) {
+	// If format is empty, try to infer from paths
+	if format == "" {
+		for _, path := range paths {
+			if path != nil && *path != "" {
+				format = Ext(*path)
+				break
+			}
+		}
+	}
+
 	f, found := formatByExtension[format]
 	if !found {
 		return nil, fmt.Errorf("%s: %w", format, ErrUnknownFormat)

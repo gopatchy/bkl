@@ -45,13 +45,8 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	}
 
 	format := ""
-
 	if opts.OutputFormat != nil {
 		format = *opts.OutputFormat
-	}
-
-	if format == "" && opts.OutputPath != nil {
-		format = bkl.Ext(string(*opts.OutputPath))
 	}
 
 	// Prepare paths from current working directory
@@ -68,16 +63,8 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 		fatal(err)
 	}
 
-	// Get format from first file if not specified
-	if format == "" {
-		_, f, err := bkl.FileMatch(fsys, preparedPaths[0])
-		if err != nil {
-			fatal(err)
-		}
-		format = f
-	}
-
-	enc, err := bkl.FormatOutput(doc, format)
+	// Pass output path and input path - FormatOutput will use their extensions if format is empty
+	enc, err := bkl.FormatOutput(doc, format, (*string)(opts.OutputPath), &preparedPaths[0])
 	if err != nil {
 		fatal(err)
 	}
