@@ -339,14 +339,14 @@ func TestCLI(t *testing.T) {
 
 			switch {
 			case testCase.Diff:
-				cmdPath = "./cmd/bkld/main.go"
+				cmdPath = "./cmd/bkld"
 				if len(testCase.Eval) != 2 {
 					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 				}
 				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
 				args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
 			case testCase.Intersect:
-				cmdPath = "./cmd/bkli/main.go"
+				cmdPath = "./cmd/bkli"
 				if len(testCase.Eval) < 2 {
 					t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 				}
@@ -354,13 +354,13 @@ func TestCLI(t *testing.T) {
 					args = append(args, filepath.Join(tmpDir, evalFile))
 				}
 			case testCase.Required:
-				cmdPath = "./cmd/bklr/main.go"
+				cmdPath = "./cmd/bklr"
 				if len(testCase.Eval) != 1 {
 					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 				}
 				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
 			default:
-				cmdPath = "./cmd/bkl/main.go"
+				cmdPath = "./cmd/bkl"
 				for _, evalFile := range testCase.Eval {
 					args = append(args, filepath.Join(tmpDir, evalFile))
 				}
