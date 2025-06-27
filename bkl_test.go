@@ -337,52 +337,32 @@ func TestCLI(t *testing.T) {
 			var cmdPath string
 			var args []string
 
-			// Always use absolute paths for CLI
-			useAbsolutePaths := true
-
 			switch {
 			case testCase.Diff:
 				cmdPath = "./cmd/bkld/main.go"
 				if len(testCase.Eval) != 2 {
 					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 				}
-				if useAbsolutePaths {
-					args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
-					args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
-				} else {
-					args = append(args, testCase.Eval[0])
-					args = append(args, testCase.Eval[1])
-				}
+				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
+				args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
 			case testCase.Intersect:
 				cmdPath = "./cmd/bkli/main.go"
 				if len(testCase.Eval) < 2 {
 					t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 				}
 				for _, evalFile := range testCase.Eval {
-					if useAbsolutePaths {
-						args = append(args, filepath.Join(tmpDir, evalFile))
-					} else {
-						args = append(args, evalFile)
-					}
+					args = append(args, filepath.Join(tmpDir, evalFile))
 				}
 			case testCase.Required:
 				cmdPath = "./cmd/bklr/main.go"
 				if len(testCase.Eval) != 1 {
 					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 				}
-				if useAbsolutePaths {
-					args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
-				} else {
-					args = append(args, testCase.Eval[0])
-				}
+				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
 			default:
 				cmdPath = "./cmd/bkl/main.go"
 				for _, evalFile := range testCase.Eval {
-					if useAbsolutePaths {
-						args = append(args, filepath.Join(tmpDir, evalFile))
-					} else {
-						args = append(args, evalFile)
-					}
+					args = append(args, filepath.Join(tmpDir, evalFile))
 				}
 			}
 
