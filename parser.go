@@ -454,45 +454,6 @@ func Evaluate(fsys fs.FS, files []string, format string, rootPath string, workin
 	return b.MergeFiles(fsys, realFiles, format, env)
 }
 
-// EvaluateToData is like Evaluate but returns the raw data instead of marshaled output
-func (b *BKL) EvaluateToData(fsys fs.FS, files []string, format string, rootPath string, workingDir string, env map[string]string) (any, error) {
-	evalFiles, err := preparePathsForParser(files, rootPath, workingDir)
-	if err != nil {
-		return nil, err
-	}
-
-	realFiles := make([]string, len(evalFiles))
-	for i, path := range evalFiles {
-		realPath, fileFormat, err := FileMatch(fsys, path)
-		if err != nil {
-			return nil, fmt.Errorf("file %s: %w", path, err)
-		}
-		realFiles[i] = realPath
-
-		if format == "" {
-			format = fileFormat
-		}
-	}
-
-	_, err = b.MergeFiles(fsys, realFiles, format, env)
-	if err != nil {
-		return nil, err
-	}
-
-	outs, err := b.outputDocuments(env)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(outs) == 0 {
-		return nil, nil
-	} else if len(outs) == 1 {
-		return outs[0], nil
-	} else {
-		return outs, nil
-	}
-}
-
 // FileMatch attempts to find a file with the same base name as path, but
 // possibly with a different supported extension. It is intended to support
 // "virtual" filenames that auto-convert from the format of the underlying
