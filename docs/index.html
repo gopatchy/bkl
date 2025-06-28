@@ -279,6 +279,11 @@ flag {
 	color: var(--blue5);
 }
 
+comment {
+	color: var(--neutral5);
+	font-style: italic;
+}
+
  
 bkl-code highlight,
 bkl-code highlight > * {
@@ -308,8 +313,6 @@ class DocGrid extends HTMLElement {
     this.style.display = 'flex';
     this.style.flexDirection = 'column';
     this.style.gap = '15px';
-    
-    this.initializeGrid();
   }
   
   initializeGrid() {
@@ -381,20 +384,6 @@ class DocGrid extends HTMLElement {
 }
 
 class BklCode extends HTMLElement {
-  connectedCallback() {
-    if (this.innerHTML.length > 0) {
-      this.highlight();
-    } else {
-      const observer = new MutationObserver((mutations) => {
-        if (this.innerHTML.length > 0) {
-          observer.disconnect();
-          this.highlight();
-        }
-      });
-      
-      observer.observe(this, { childList: true, subtree: true });
-    }
-  }
   
   highlight() {
     let languages = [];
@@ -507,7 +496,188 @@ class BklCode extends HTMLElement {
   
   
   highlightYaml(text, startOffset, insertions) {
+    let state = 'lineStart';
+    let tokenStart = 0;
+    let quoteChar = '';
+    let escapeNext = false;
     
+    const addToken = (type, start, end) => {
+      insertions.push({pos: startOffset + start, text: `<${type}>`});
+      insertions.push({pos: startOffset + end, text: `</${type}>`});
+    };
+    
+    for (let pos = 0; pos < text.length; pos++) {
+      const ch = text[pos];
+      
+      switch (state) {
+        case 'lineStart':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === '-') {
+            state = 'maybeDash';
+          } else if (ch === '\n') {
+            
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'string';
+          } else {
+            tokenStart = pos;
+            state = 'keyOrScalar';
+          }
+          break;
+          
+        case 'maybeDash':
+          if (ch === ' ' || ch === '\n') {
+            state = 'listValue';
+          } else {
+            
+            tokenStart = pos - 1;
+            state = 'keyOrScalar';
+          }
+          break;
+          
+        case 'listValue':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'string';
+          } else {
+            tokenStart = pos;
+            state = 'scalar';
+          }
+          break;
+          
+        case 'keyOrScalar':
+          if (ch === ':') {
+            state = 'colonFound';
+          } else if (ch === '\n') {
+            
+            const value = text.substring(tokenStart, pos).trim();
+            if (value === 'true' || value === 'false') {
+              addToken('bool', tokenStart, tokenStart + value.length);
+            } else if (/^-?\d+(\.\d+)?$/.test(value)) {
+              addToken('number', tokenStart, tokenStart + value.length);
+            } else if (value.length > 0) {
+              addToken('string', tokenStart, tokenStart + value.length);
+            }
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'colonFound':
+          if (ch === ' ' || ch === '\n' || ch === '\t') {
+            
+            addToken('key', tokenStart, pos - 1);
+            state = 'afterColon';
+            if (ch === '\n') {
+              state = 'lineStart';
+            }
+          } else {
+            
+            state = 'scalar';
+          }
+          break;
+          
+        case 'afterColon':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'string';
+          } else {
+            tokenStart = pos;
+            state = 'scalar';
+          }
+          break;
+          
+        case 'scalar':
+          if (ch === '\n' || ch === '#') {
+            const value = text.substring(tokenStart, pos).trim();
+            if (value === 'true' || value === 'false') {
+              addToken('bool', tokenStart, tokenStart + value.length);
+            } else if (/^-?\d+(\.\d+)?$/.test(value)) {
+              addToken('number', tokenStart, tokenStart + value.length);
+            } else if (value.length > 0) {
+              addToken('string', tokenStart, tokenStart + value.length);
+            }
+            
+            if (ch === '\n') {
+              state = 'lineStart';
+            } else {
+              tokenStart = pos;
+              state = 'comment';
+            }
+          }
+          break;
+          
+        case 'string':
+          if (escapeNext) {
+            escapeNext = false;
+          } else if (ch === '\\' && quoteChar === '"') {
+            escapeNext = true;
+          } else if (ch === quoteChar) {
+            addToken('string', tokenStart, pos + 1);
+            state = 'afterString';
+          } else if (ch === '\n' && quoteChar === "'") {
+            
+            addToken('string', tokenStart, pos);
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'afterString':
+          if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch !== ' ' && ch !== '\t') {
+            
+            state = 'scalar';
+          }
+          break;
+          
+        case 'comment':
+          if (ch === '\n') {
+            addToken('comment', tokenStart, pos);
+            state = 'lineStart';
+          }
+          break;
+      }
+    }
+    
+    
+    if (state === 'comment') {
+      addToken('comment', tokenStart, text.length);
+    } else if (state === 'string') {
+      addToken('string', tokenStart, text.length);
+    } else if (state === 'scalar' || state === 'keyOrScalar') {
+      const value = text.substring(tokenStart).trim();
+      if (value === 'true' || value === 'false') {
+        addToken('bool', tokenStart, tokenStart + value.length);
+      } else if (/^-?\d+(\.\d+)?$/.test(value)) {
+        addToken('number', tokenStart, tokenStart + value.length);
+      } else if (value.length > 0) {
+        addToken('string', tokenStart, tokenStart + value.length);
+      }
+    }
   }
   
   highlightToml(text, startOffset, insertions) {
@@ -533,6 +703,18 @@ class BklCode extends HTMLElement {
 
 customElements.define('doc-grid', DocGrid);
 customElements.define('bkl-code', BklCode);
+
+document.addEventListener('DOMContentLoaded', () => {
+  
+  document.querySelectorAll('doc-grid').forEach(el => {
+    el.initializeGrid();
+  });
+  
+  
+  document.querySelectorAll('bkl-code').forEach(el => {
+    el.highlight();
+  });
+});
 </script>
 </head>
 <body>
