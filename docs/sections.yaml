@@ -1361,7 +1361,7 @@
           
           $ catb service.test.json
           {"addr":"127.0.0.1","name":"myService","port":8081}
-        languages: [[0, "shell"], [2, "shell"], [3, "yaml"], [8, "shell"], [9, "toml"], [11, "shell"], [12, "toml"], [17, "shell"], [18, "shell"], [21, "shell"], [22, "yaml"], [27, "shell"], [28, "json"]]
+        languages: [[0, "shell"], [3, "yaml"], [8, "shell"], [9, "toml"], [11, "shell"], [12, "toml"], [17, "shell"], [22, "yaml"], [27, "shell"], [28, "json"]]
         highlights: ["ln -s ~/go/bin/bklb ~/go/bin/catb", "catb service.test.toml", "catb service.test.yaml", "catb service.test.json"]
     - content: |
         Note that the files mentioned don't have to exist; <highlight>bklb</highlight> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
@@ -1449,14 +1449,17 @@
               a: 1
               b: 2
               c: 3
+            languages: [[0, "yaml"]]
           - code: |
               a: 1
               b: 10
               d: 4
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             b: $required
+          languages: [[0, "yaml"]]
     - example:
         operation: intersect
         layers:
@@ -1464,13 +1467,16 @@
               - a: 1
               - b: 2
               - c: 3
+            languages: [[0, "yaml"]]
           - code: |
               - a: 1
               - b: 10
               - d: 4
+            languages: [[0, "yaml"]]
         result:
           code: |
             - a: 1
+          languages: [[0, "yaml"]]
 
 - id: bklr
   title: bklr
@@ -1478,6 +1484,7 @@
     - code:
         code: |
           $ bklr &lt;lower_layer_path&gt;
+        languages: [[0, "shell"]]
     - content: |
         <highlight>bklr</highlight> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
     - example:
@@ -1487,10 +1494,12 @@
               a:
                 b: $required
                 c: 3
+            languages: [[0, "yaml"]]
         result:
           code: |
             a:
               b: $required
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -1499,10 +1508,12 @@
                 - $required
               b:
                 - 2
+            languages: [[0, "yaml"]]
         result:
           code: |
             a:
               - $required
+          languages: [[0, "yaml"]]
 
 - id: kubectl-bkl
   title: kubectl bkl
@@ -1511,6 +1522,7 @@
         code: |
           $ kubectl bkl &lt;kubectl_commands&gt;
         highlights: ["bkl"]
+        languages: [[0, "shell"]]
     - content: |
         <highlight>kubectl bkl</highlight> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
     - code:
@@ -1518,6 +1530,7 @@
           # deploy.dev.yaml and deploy.yaml are bkl layer files
           $ kubectl bkl apply -f deploy.dev.yaml
           deployment.apps/deploy-dev unchanged
+        languages: [[0, "shell"]]
 
 - id: docker
   title: Docker
@@ -1531,6 +1544,7 @@
           
           FROM debian:latest AS build
           COPY --from=bkl /bin /bin
+        languages: [[0, "dockerfile"]]
 
 - id: diff
   title: diff
@@ -1551,6 +1565,7 @@
           a: 1                              a: 1
           b: 2                            &lt;
           c: 3                              c: 3
+        languages: [[0, "shell"], [1, "diff"], [8, "shell"], [9, "diff"]]
         highlights: ["diff -ud --color", "(bkl a.yaml)", "(bkl b.yaml)", "-b: 2", "diff -y --color", "&lt;"]
 
 - id: migrate
@@ -1577,27 +1592,32 @@
           # "kubectl neat" removes status and default value fields
           $ kubectl neat get -- deploy deploy-dev > deploy-dev-orig.yaml
           $ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml
+        languages: [[0, "shell"]]
     - code:
         label: Generate Base Layer
         code: |
           # See bkli details <a href="#bkli">here</a>
           $ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml
+        languages: [[0, "shell"]]
     - code:
         label: Generate Service Layers
         code: |
           # See bkld details <a href="#bkld">here</a>
           $ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
           $ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml
+        languages: [[0, "shell"]]
     - code:
         label: Check Results
         code: |
           # Should show no diff
           $ kubectl bkl diff -f deploy.dev.yaml
           $ kubectl bkl diff -f deploy.prod.yaml
+        languages: [[0, "shell"]]
     - code:
         label: Clean Up
         code: |
           $ rm deploy-dev-orig.yaml deploy-prod-orig.yaml
+        languages: [[0, "shell"]]
     - content: |
         You now have 3 bkl files:
         
