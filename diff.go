@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 )
@@ -22,7 +23,8 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	}
 	srcPath = preparedPaths[0]
 	dstPath = preparedPaths[1]
-	p1 := &bkl{}
+
+	var srcDocs []*document.Document
 
 	realSrcPath, _, err := fileMatch(fx, srcPath)
 	if err != nil {
@@ -35,18 +37,17 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	}
 
 	for _, f := range fileObjs {
-		err := p1.mergeFileObj(f)
+		srcDocs, err = mergeFileObj(srcDocs, f)
 		if err != nil {
 			return nil, fmt.Errorf("merging source %s: %w", srcPath, err)
 		}
 	}
 
-	srcDocs := p1.docs
 	if len(srcDocs) != 1 {
 		return nil, fmt.Errorf("diff operates on exactly 1 source document per file, got %d", len(srcDocs))
 	}
 
-	p2 := &bkl{}
+	var dstDocs []*document.Document
 
 	realDstPath, _, err := fileMatch(fx, dstPath)
 	if err != nil {
@@ -61,13 +62,12 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	}
 
 	for _, f := range fileObjs2 {
-		err := p2.mergeFileObj(f)
+		dstDocs, err = mergeFileObj(dstDocs, f)
 		if err != nil {
 			return nil, fmt.Errorf("merging destination %s: %w", dstPath, err)
 		}
 	}
 
-	dstDocs := p2.docs
 	if len(dstDocs) != 1 {
 		return nil, fmt.Errorf("diff operates on exactly 1 destination document per file, got %d", len(dstDocs))
 	}

@@ -23,13 +23,7 @@ import (
 	"github.com/gopatchy/bkl/pkg/log"
 )
 
-// A bkl reads input documents, merges layers, and generates outputs.
-//
-// # Terminology
-//   - Each bkl can read multiple files
-//   - Each file represents a single layer
-//   - Each file contains one or more documents
-//   - Each document generates one or more outputs
+// bkl reads input documents, merges layers, and generates outputs.
 //
 // # Directive Evaluation Order
 //
@@ -74,45 +68,45 @@ import (
 //   - No matching documents -> error
 //   - If parent documents -> merge into all parents
 //   - If no parent documents -> append
-type bkl struct {
-	docs []*document.Document
-}
 
-// mergeDocument applies the supplied document to the [bkl]'s current
-// internal document state using bkl's merge semantics. If expand is true,
-// documents without $match will append; otherwise this is an error.
-func (b *bkl) mergeDocument(patch *document.Document) error {
-	matched, err := b.mergePatchMatch(patch)
+// mergeDocument applies the supplied document to the current
+// internal document state using bkl's merge semantics.
+// It returns the updated document slice.
+func mergeDocument(docs []*document.Document, patch *document.Document) ([]*document.Document, error) {
+	matched, updatedDocs, err := mergePatchMatch(docs, patch)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	if matched {
-		return nil
+		return updatedDocs, nil
 	}
 
-	for _, doc := range b.parents(patch) {
+	parents := findParents(docs, patch)
+	for _, doc := range parents {
 		matched = true
-
 		err = process.MergeDocs(doc, patch)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	if !matched {
-		b.docs = append(b.docs, patch)
+		// Create a new slice to avoid modifying the input
+		newDocs := make([]*document.Document, len(docs), len(docs)+1)
+		copy(newDocs, docs)
+		newDocs = append(newDocs, patch)
+		return newDocs, nil
 	}
 
-	return nil
+	return docs, nil
 }
 
-func (b *bkl) parents(patch *document.Document) []*document.Document {
+func findParents(docs []*document.Document, patch *document.Document) []*document.Document {
 	ret := []*document.Document{}
 
 	parents := patch.AllParents()
 
-	for _, doc := range b.docs {
+	for _, doc := range docs {
 		if _, found := parents[doc.ID]; found {
 			ret = append(ret, doc)
 		}
@@ -122,41 +116,45 @@ func (b *bkl) parents(patch *document.Document) []*document.Document {
 }
 
 // mergePatchMatch attempts to apply the supplied patch to one or more
-// documents specified by $match. It returns success and error separately;
-// (false, nil) means no $match directive. Zero matches is an error.
-func (b *bkl) mergePatchMatch(patch *document.Document) (bool, error) {
+// documents specified by $match. It returns matched status, updated docs, and error.
+// (false, docs, nil) means no $match directive. Zero matches is an error.
+func mergePatchMatch(docs []*document.Document, patch *document.Document) (bool, []*document.Document, error) {
 	found, m := patch.PopMapValue("$match")
 	if !found {
-		return false, nil
+		return false, docs, nil
 	}
 
 	if m == nil {
-		// Explicit append
+		// Explicit append - create a new slice
 		doc := document.New(fmt.Sprintf("%s|matchnull", patch.ID))
-		b.docs = append(b.docs, doc)
-		return true, process.MergeDocs(doc, patch)
+		newDocs := make([]*document.Document, len(docs), len(docs)+1)
+		copy(newDocs, docs)
+		newDocs = append(newDocs, doc)
+		err := process.MergeDocs(doc, patch)
+		return true, newDocs, err
 	}
 
-	docs := b.findMatches(patch, m)
-	if len(docs) == 0 {
-		return true, fmt.Errorf("%#v: %w", m, errors.ErrNoMatchFound)
+	matches := findMatches(docs, patch, m)
+	if len(matches) == 0 {
+		return true, nil, fmt.Errorf("%#v: %w", m, errors.ErrNoMatchFound)
 	}
 
-	for _, doc := range docs {
+	for _, doc := range matches {
 		err := process.MergeDocs(doc, patch)
 		if err != nil {
-			return true, err
+			return true, nil, err
 		}
 	}
 
-	return true, nil
+	return true, docs, nil
 }
 
-func (b *bkl) findMatches(doc *document.Document, pat any) []*document.Document {
+func findMatches(docs []*document.Document, doc *document.Document, pat any) []*document.Document {
 	ret := []*document.Document{}
 
 	// Try parents, then all docs
-	for _, ds := range [][]*document.Document{b.parents(doc), b.docs} {
+	parents := findParents(docs, doc)
+	for _, ds := range [][]*document.Document{parents, docs} {
 		for _, d := range ds {
 			if process.MatchDoc(d, pat) {
 				ret = append(ret, d)
@@ -173,8 +171,10 @@ func (b *bkl) findMatches(doc *document.Document, pat any) []*document.Document 
 
 // mergeFiles merges multiple files and returns the result in the specified format.
 // If format is empty, it defaults to "json-pretty".
-func (b *bkl) mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
+func mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
+	var docs []*document.Document
 	fileSystem := fsys.New(fx)
+
 	for _, path := range files {
 		fileObjs, err := file.LoadAndParents(fileSystem, path, nil)
 		if err != nil {
@@ -182,44 +182,45 @@ func (b *bkl) mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[st
 		}
 
 		for _, f := range fileObjs {
-			err := b.mergeFileObj(f)
+			docs, err = mergeFileObj(docs, f)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	return b.output(ft, env)
+	return outputBytes(docs, ft, env)
 }
 
-// mergeFile applies an already-parsed file object into the [bkl]'s
-// document state.
-func (b *bkl) mergeFileObj(f *file.File) error {
+// mergeFileObj applies an already-parsed file object into the document state.
+// It returns the updated document slice.
+func mergeFileObj(docs []*document.Document, f *file.File) ([]*document.Document, error) {
 	log.Debugf("[%s] merging", f)
 
 	for _, doc := range f.Docs {
 		log.Debugf("[%s] merging", doc)
 
-		err := b.mergeDocument(doc)
+		var err error
+		docs, err = mergeDocument(docs, doc)
 		if err != nil {
-			return fmt.Errorf("[%s:%s]: %w", f, doc, err)
+			return nil, fmt.Errorf("[%s:%s]: %w", f, doc, err)
 		}
 	}
 
-	return nil
+	return docs, nil
 }
 
 // outputDocument returns the output objects generated by the specified
 // document.
-func (b *bkl) outputDocument(doc *document.Document, env map[string]string) ([]any, error) {
-	docs, err := process.Document(doc, b.docs, env)
+func outputDocument(docs []*document.Document, doc *document.Document, env map[string]string) ([]any, error) {
+	processedDocs, err := process.Document(doc, docs, env)
 	if err != nil {
 		return nil, err
 	}
 
 	outs := []any{}
 
-	for _, d := range docs {
+	for _, d := range processedDocs {
 		obj, out, err := output.FindOutputs(d.Data)
 		if err != nil {
 			return nil, err
@@ -251,12 +252,12 @@ func (b *bkl) outputDocument(doc *document.Document, env map[string]string) ([]a
 	})
 }
 
-// OutputDocuments returns the output objects generated by all documents.
-func (b *bkl) outputDocuments(env map[string]string) ([]any, error) {
+// outputDocuments returns the output objects generated by all documents.
+func outputDocuments(docs []*document.Document, env map[string]string) ([]any, error) {
 	ret := []any{}
 
-	for _, doc := range b.docs {
-		outs, err := b.outputDocument(doc, env)
+	for _, doc := range docs {
+		outs, err := outputDocument(docs, doc, env)
 		if err != nil {
 			return nil, err
 		}
@@ -267,10 +268,10 @@ func (b *bkl) outputDocuments(env map[string]string) ([]any, error) {
 	return ret, nil
 }
 
-// Output returns all documents encoded in the specified format and merged into
+// outputBytes returns all documents encoded in the specified format and merged into
 // a stream.
-func (b *bkl) output(ft *format.Format, env map[string]string) ([]byte, error) {
-	outs, err := b.outputDocuments(env)
+func outputBytes(docs []*document.Document, ft *format.Format, env map[string]string) ([]byte, error) {
+	outs, err := outputDocuments(docs, env)
 	if err != nil {
 		return nil, err
 	}
@@ -379,12 +380,9 @@ func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
 }
 
 // Evaluate processes the specified files and returns the formatted output.
-// It creates a new bkl instance internally to process the files.
 // If format is nil, it infers the format from the paths parameter (output path first, then input files).
 // If env is nil, it uses the current OS environment.
 func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, paths ...*string) ([]byte, error) {
-	b := &bkl{}
-
 	if env == nil {
 		env = getOSEnv()
 	}
@@ -415,7 +413,7 @@ func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env 
 		return nil, err
 	}
 
-	return b.mergeFiles(fx, realFiles, ft, env)
+	return mergeFiles(fx, realFiles, ft, env)
 }
 
 // fileMatch attempts to find a file with the same base name as path, but

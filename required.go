@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 
+	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 )
@@ -18,7 +19,7 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 		return nil, err
 	}
 	path = preparedPaths[0]
-	parser := &bkl{}
+	var docs []*document.Document
 
 	realPath, _, err := fileMatch(fx, path)
 	if err != nil {
@@ -32,13 +33,12 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 	}
 
 	for _, f := range fileObjs {
-		err := parser.mergeFileObj(f)
+		docs, err = mergeFileObj(docs, f)
 		if err != nil {
 			return nil, fmt.Errorf("merging %s: %w", path, err)
 		}
 	}
 
-	docs := parser.docs
 	if len(docs) != 1 {
 		return nil, fmt.Errorf("required operates on exactly 1 document, got %d in %s", len(docs), path)
 	}
