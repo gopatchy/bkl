@@ -284,6 +284,10 @@ comment {
 	font-style: italic;
 }
 
+keyword {
+	color: var(--red5);
+}
+
 /* Highlights in code blocks - no background */
 bkl-code highlight,
 bkl-code highlight > * {
@@ -685,7 +689,177 @@ class BklCode extends HTMLElement {
   }
   
   highlightJson(text, startOffset, insertions) {
-    // TODO: Implement JSON syntax highlighting
+    let state = 'value';
+    let tokenStart = 0;
+    let escapeNext = false;
+    let contextStack = []; // Track whether we're in object or array
+    
+    const addToken = (type, start, end) => {
+      insertions.push({pos: startOffset + start, text: `<${type}>`});
+      insertions.push({pos: startOffset + end, text: `</${type}>`});
+    };
+    
+    for (let pos = 0; pos < text.length; pos++) {
+      const ch = text[pos];
+      
+      switch (state) {
+        case 'value':
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            // Skip whitespace
+          } else if (ch === '"') {
+            tokenStart = pos;
+            state = 'string';
+          } else if (ch === '{') {
+            contextStack.push('object');
+            state = 'objectStart';
+          } else if (ch === '[') {
+            contextStack.push('array');
+            state = 'value';
+          } else if (ch === 't' || ch === 'f' || ch === 'n') {
+            tokenStart = pos;
+            state = 'keyword';
+          } else if (ch === '-' || (ch >= '0' && ch <= '9')) {
+            tokenStart = pos;
+            state = 'number';
+          } else if (ch === '}' || ch === ']') {
+            contextStack.pop();
+            state = contextStack.length === 0 ? 'done' : 'afterValue';
+          }
+          break;
+          
+        case 'objectStart':
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            // Skip whitespace
+          } else if (ch === '"') {
+            tokenStart = pos;
+            state = 'objectKey';
+          } else if (ch === '}') {
+            contextStack.pop();
+            state = contextStack.length === 0 ? 'done' : 'afterValue';
+          }
+          break;
+          
+        case 'objectKey':
+          if (escapeNext) {
+            escapeNext = false;
+          } else if (ch === '\\') {
+            escapeNext = true;
+          } else if (ch === '"') {
+            addToken('key', tokenStart, pos + 1);
+            state = 'afterKey';
+          }
+          break;
+          
+        case 'afterKey':
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            // Skip whitespace
+          } else if (ch === ':') {
+            state = 'value';
+          }
+          break;
+          
+        case 'string':
+          if (escapeNext) {
+            escapeNext = false;
+          } else if (ch === '\\') {
+            escapeNext = true;
+          } else if (ch === '"') {
+            addToken('string', tokenStart, pos + 1);
+            state = 'afterValue';
+          }
+          break;
+          
+        case 'number':
+          if (ch === ',' || ch === '}' || ch === ']' || ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            addToken('number', tokenStart, pos);
+            if (ch === ',') {
+              const context = contextStack[contextStack.length - 1];
+              state = context === 'object' ? 'expectKey' : 'value';
+            } else if (ch === '}' || ch === ']') {
+              contextStack.pop();
+              state = contextStack.length === 0 ? 'done' : 'afterValue';
+            } else {
+              state = 'afterValue';
+            }
+          } else if ((ch >= '0' && ch <= '9') || ch === '.' || ch === 'e' || ch === 'E' || ch === '+' || ch === '-') {
+            // Continue number
+          } else {
+            // Invalid number
+            state = 'error';
+          }
+          break;
+          
+        case 'keyword':
+          if (ch === ',' || ch === '}' || ch === ']' || ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            const keyword = text.substring(tokenStart, pos);
+            if (keyword === 'true' || keyword === 'false') {
+              addToken('bool', tokenStart, pos);
+            } else if (keyword === 'null') {
+              addToken('keyword', tokenStart, pos);
+            }
+            if (ch === ',') {
+              const context = contextStack[contextStack.length - 1];
+              state = context === 'object' ? 'expectKey' : 'value';
+            } else if (ch === '}' || ch === ']') {
+              contextStack.pop();
+              state = contextStack.length === 0 ? 'done' : 'afterValue';
+            } else {
+              state = 'afterValue';
+            }
+          } else if (ch >= 'a' && ch <= 'z') {
+            // Continue keyword
+          } else {
+            // Invalid keyword
+            state = 'error';
+          }
+          break;
+          
+        case 'afterValue':
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            // Skip whitespace
+          } else if (ch === ',') {
+            const context = contextStack[contextStack.length - 1];
+            state = context === 'object' ? 'expectKey' : 'value';
+          } else if (ch === '}' || ch === ']') {
+            contextStack.pop();
+            state = contextStack.length === 0 ? 'done' : 'afterValue';
+          }
+          break;
+          
+        case 'expectKey':
+          if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+            // Skip whitespace
+          } else if (ch === '"') {
+            tokenStart = pos;
+            state = 'objectKey';
+          } else if (ch === '}') {
+            contextStack.pop();
+            state = contextStack.length === 0 ? 'done' : 'afterValue';
+          }
+          break;
+          
+        case 'error':
+        case 'done':
+          // Stop processing
+          break;
+      }
+    }
+    
+    // Handle any remaining tokens at end of text
+    if (state === 'string') {
+      addToken('string', tokenStart, text.length);
+    } else if (state === 'objectKey') {
+      addToken('key', tokenStart, text.length);
+    } else if (state === 'number') {
+      addToken('number', tokenStart, text.length);
+    } else if (state === 'keyword') {
+      const keyword = text.substring(tokenStart);
+      if (keyword === 'true' || keyword === 'false') {
+        addToken('bool', tokenStart, text.length);
+      } else if (keyword === 'null') {
+        addToken('keyword', tokenStart, text.length);
+      }
+    }
   }
   
   highlightShell(text, startOffset, insertions) {
