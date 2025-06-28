@@ -1,4 +1,4 @@
-package bkl
+package fsys
 
 import (
 	"fmt"
@@ -10,33 +10,33 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-type fileSystem struct {
+type FS struct {
 	fsys fs.FS
 }
 
-func newFS(fsys fs.FS) *fileSystem {
-	return &fileSystem{
+func New(fsys fs.FS) *FS {
+	return &FS{
 		fsys: fsys,
 	}
 }
 
-func (f *fileSystem) open(name string) (fs.File, error) {
+func (f *FS) Open(name string) (fs.File, error) {
 	return f.fsys.Open(f.convertToFS(name))
 }
 
-func (f *fileSystem) readDir(name string) ([]fs.DirEntry, error) {
+func (f *FS) readDir(name string) ([]fs.DirEntry, error) {
 	rdf := f.fsys.(fs.ReadDirFS)
 	return rdf.ReadDir(f.convertToFS(name))
 }
 
-func (f *fileSystem) stat(name string) (fs.FileInfo, error) {
+func (f *FS) stat(name string) (fs.FileInfo, error) {
 	sf, ok := f.fsys.(fs.StatFS)
 	if ok {
 		return sf.Stat(f.convertToFS(name))
 	}
 
 	// Fallback: use Open and get FileInfo from the file
-	file, err := f.open(name)
+	file, err := f.Open(name)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (f *fileSystem) stat(name string) (fs.FileInfo, error) {
 	return file.Stat()
 }
 
-func (f *fileSystem) glob(pattern string) ([]string, error) {
+func (f *FS) glob(pattern string) ([]string, error) {
 	dir, file := filepath.Split(pattern)
 	dir = strings.TrimSuffix(dir, "/")
 
@@ -69,7 +69,7 @@ func (f *fileSystem) glob(pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func (f *fileSystem) convertToFS(path string) string {
+func (f *FS) convertToFS(path string) string {
 	result := strings.TrimPrefix(path, "/")
 	if result == "" {
 		return "."
@@ -77,7 +77,7 @@ func (f *fileSystem) convertToFS(path string) string {
 	return result
 }
 
-func (f *fileSystem) findFile(path string) string {
+func (f *FS) FindFile(path string) string {
 	for _, ext := range format.Extensions() {
 		extPath := fmt.Sprintf("%s.%s", path, ext)
 		if _, err := f.stat(extPath); err == nil {
@@ -87,7 +87,7 @@ func (f *fileSystem) findFile(path string) string {
 	return ""
 }
 
-func (f *fileSystem) globFiles(path string) ([]string, error) {
+func (f *FS) GlobFiles(path string) ([]string, error) {
 	pat := fmt.Sprintf("%s.*", path)
 	matches, err := f.glob(pat)
 	if err != nil {

@@ -3,13 +3,15 @@ package bkl
 import (
 	"fmt"
 	"io/fs"
+
+	"github.com/gopatchy/bkl/internal/fsys"
 )
 
 // Required loads a file and returns only the required fields and their ancestors.
 // It expects the file to contain exactly one document.
 // The file is loaded directly without processing, matching bklr behavior.
 // If format is nil, it infers the format from the paths parameter.
-func Required(fsys fs.FS, path string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
+func Required(fx fs.FS, path string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
 	preparedPaths, err := preparePathsForParser([]string{path}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -17,14 +19,13 @@ func Required(fsys fs.FS, path string, rootPath string, workingDir string, forma
 	path = preparedPaths[0]
 	parser := &bkl{}
 
-	realPath, _, err := fileMatch(fsys, path)
+	realPath, _, err := fileMatch(fx, path)
 	if err != nil {
 		return nil, fmt.Errorf("file %s: %w", path, err)
 	}
 
 	// Load file directly without processing
-	fileSystem := newFS(fsys)
-	fileObjs, err := loadFileAndParents(fileSystem, realPath, nil)
+	fileObjs, err := loadFileAndParents(fsys.New(fx), realPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading %s: %w", path, err)
 	}

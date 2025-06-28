@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"io/fs"
 	"reflect"
+
+	"github.com/gopatchy/bkl/internal/fsys"
 )
 
 // Intersect loads multiple files and returns their intersection.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkli behavior.
 // If format is nil, it infers the format from the formatPaths parameter.
-func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string, format *string, formatPaths ...*string) ([]byte, error) {
+func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, format *string, formatPaths ...*string) ([]byte, error) {
 	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -21,19 +23,19 @@ func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string, f
 	}
 
 	var result any
+	fx2 := fsys.New(fx)
 
 	for i, path := range paths {
 		// Create new parser for each file
 		parser := &bkl{}
 
-		realPath, _, err := fileMatch(fsys, path)
+		realPath, _, err := fileMatch(fx, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
 
 		// Load file directly without processing
-		fileSystem := newFS(fsys)
-		fileObjs, err := loadFileAndParents(fileSystem, realPath, nil)
+		fileObjs, err := loadFileAndParents(fx2, realPath, nil)
 		if err != nil {
 			return nil, fmt.Errorf("loading %s: %w", path, err)
 		}

@@ -6,13 +6,15 @@ import (
 	"maps"
 	"reflect"
 	"slices"
+
+	"github.com/gopatchy/bkl/internal/fsys"
 )
 
 // Diff loads two files and returns the diff between them.
 // It expects each file to contain exactly one document.
 // The files are loaded directly without processing, matching bkld behavior.
 // If format is nil, it infers the format from the paths parameter.
-func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
+func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
 	preparedPaths, err := preparePathsForParser([]string{srcPath, dstPath}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -21,13 +23,12 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 	dstPath = preparedPaths[1]
 	p1 := &bkl{}
 
-	realSrcPath, _, err := fileMatch(fsys, srcPath)
+	realSrcPath, _, err := fileMatch(fx, srcPath)
 	if err != nil {
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
 
-	fileSystem := newFS(fsys)
-	fileObjs, err := loadFileAndParents(fileSystem, realSrcPath, nil)
+	fileObjs, err := loadFileAndParents(fsys.New(fx), realSrcPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading source %s: %w", srcPath, err)
 	}
@@ -46,13 +47,13 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 
 	p2 := &bkl{}
 
-	realDstPath, _, err := fileMatch(fsys, dstPath)
+	realDstPath, _, err := fileMatch(fx, dstPath)
 	if err != nil {
 		return nil, fmt.Errorf("destination file %s: %w", dstPath, err)
 	}
 
 	// Load file directly without processing
-	fileSystem2 := newFS(fsys)
+	fileSystem2 := fsys.New(fx)
 	fileObjs2, err := loadFileAndParents(fileSystem2, realDstPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading destination %s: %w", dstPath, err)

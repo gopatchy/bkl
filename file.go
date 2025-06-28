@@ -10,6 +10,7 @@ import (
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
@@ -20,7 +21,7 @@ type file struct {
 	docs  []*document.Document
 }
 
-func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
+func loadFile(fsys *fsys.FS, path string, child *file) (*file, error) {
 	f := &file{
 		id:    path,
 		child: child,
@@ -44,7 +45,7 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 		fh = os.Stdin
 	}
 	if fh == nil {
-		fh, err = fsys.open(path)
+		fh, err = fsys.Open(path)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}
@@ -79,11 +80,11 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 	return f, nil
 }
 
-func loadFileAndParents(fsys *fileSystem, path string, child *file) ([]*file, error) {
+func loadFileAndParents(fsys *fsys.FS, path string, child *file) ([]*file, error) {
 	return loadFileAndParentsInt(fsys, path, child, []string{})
 }
 
-func loadFileAndParentsInt(fsys *fileSystem, path string, child *file, stack []string) ([]*file, error) {
+func loadFileAndParentsInt(fsys *fsys.FS, path string, child *file, stack []string) ([]*file, error) {
 	if slices.Contains(stack, path) {
 		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), ErrCircularRef)
 	}
@@ -130,7 +131,7 @@ func (f *file) setParents() {
 	}
 }
 
-func (f *file) parents(fsys *fileSystem) ([]string, error) {
+func (f *file) parents(fsys *fsys.FS) ([]string, error) {
 	parents, err := f.parentsFromDirective(fsys)
 	if err != nil {
 		return nil, err
@@ -143,7 +144,7 @@ func (f *file) parents(fsys *fileSystem) ([]string, error) {
 	return f.parentsFromFilename(fsys)
 }
 
-func (f *file) parentsFromDirective(fsys *fileSystem) ([]string, error) {
+func (f *file) parentsFromDirective(fsys *fsys.FS) ([]string, error) {
 	parents := []string{}
 	noParent := false
 
@@ -192,7 +193,7 @@ func (f *file) parentsFromDirective(fsys *fileSystem) ([]string, error) {
 	return f.toAbsolutePaths(fsys, parents)
 }
 
-func (f *file) parentsFromFilename(fsys *fileSystem) ([]string, error) {
+func (f *file) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
 	if utils.IsStdin(f.path) {
 		return []string{}, nil
 	}
@@ -213,7 +214,7 @@ func (f *file) parentsFromFilename(fsys *fileSystem) ([]string, error) {
 	default:
 		layerPath := filepath.Join(dir, strings.Join(parts[:len(parts)-2], "."))
 
-		extPath := fsys.findFile(layerPath)
+		extPath := fsys.FindFile(layerPath)
 		if extPath == "" {
 			return nil, fmt.Errorf("[%s]: %w", layerPath, ErrMissingFile)
 		}
@@ -222,13 +223,13 @@ func (f *file) parentsFromFilename(fsys *fileSystem) ([]string, error) {
 	}
 }
 
-func (f *file) toAbsolutePaths(fsys *fileSystem, paths []string) ([]string, error) {
+func (f *file) toAbsolutePaths(fsys *fsys.FS, paths []string) ([]string, error) {
 	ret := []string{}
 
 	for _, path := range paths {
 		path = filepath.Join(filepath.Dir(f.path), path)
 
-		matches, err := fsys.globFiles(path)
+		matches, err := fsys.GlobFiles(path)
 		if err != nil {
 			return nil, err
 		}

@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
@@ -170,8 +171,8 @@ func (b *bkl) findMatches(doc *document.Document, pat any) []*document.Document 
 
 // mergeFiles merges multiple files and returns the result in the specified format.
 // If format is empty, it defaults to "json-pretty".
-func (b *bkl) mergeFiles(fsys fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
-	fileSystem := newFS(fsys)
+func (b *bkl) mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
+	fileSystem := fsys.New(fx)
 	for _, path := range files {
 		fileObjs, err := loadFileAndParents(fileSystem, path, nil)
 		if err != nil {
@@ -379,7 +380,7 @@ func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
 // It creates a new bkl instance internally to process the files.
 // If format is nil, it infers the format from the paths parameter (output path first, then input files).
 // If env is nil, it uses the current OS environment.
-func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, paths ...*string) ([]byte, error) {
+func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, paths ...*string) ([]byte, error) {
 	b := &bkl{}
 
 	if env == nil {
@@ -394,7 +395,7 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 	realFiles := make([]string, len(evalFiles))
 	var inferredFormat string
 	for i, path := range evalFiles {
-		realPath, fileFormat, err := fileMatch(fsys, path)
+		realPath, fileFormat, err := fileMatch(fx, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -412,7 +413,7 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 		return nil, err
 	}
 
-	return b.mergeFiles(fsys, realFiles, ft, env)
+	return b.mergeFiles(fx, realFiles, ft, env)
 }
 
 // fileMatch attempts to find a file with the same base name as path, but
@@ -422,7 +423,7 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 //
 // Returns the real filename and the requested output format, or
 // ("", "", error).
-func fileMatch(fsys fs.FS, path string) (string, string, error) {
+func fileMatch(fx fs.FS, path string) (string, string, error) {
 	formatName := utils.Ext(path)
 	if _, err := format.Get(formatName); err != nil {
 		return "", "", err
@@ -434,8 +435,8 @@ func fileMatch(fsys fs.FS, path string) (string, string, error) {
 		return path, formatName, nil
 	}
 
-	fileSystem := newFS(fsys)
-	realPath := fileSystem.findFile(withoutExt)
+	fileSystem := fsys.New(fx)
+	realPath := fileSystem.FindFile(withoutExt)
 
 	if realPath == "" {
 		return "", "", fmt.Errorf("%s.*: %w", withoutExt, ErrMissingFile)
