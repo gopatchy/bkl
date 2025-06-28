@@ -159,10 +159,9 @@
         label: Set Parent In CLI
         code: |
           $ bkl a.b.yaml c.d.yaml      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
-          $ bkl -P a.b.yaml c.d.yaml   # a.b.yaml + c.d.yaml
-        highlights: ["a.b.yaml c.d.yaml", "-P a.b.yaml c.d.yaml"]
+        highlights: ["a.b.yaml c.d.yaml"]
     - content: |
-        Layer order can be specified with commandline argument order. The <highlight>-P</highlight> flag (or <highlight>--skip-parent</highlight>) tells bkl to not load parent layers using filenames or <highlight>$parent</highlight>.
+        Layer order can be specified with commandline argument order.
     - code:
         label: No Parent
         code: |

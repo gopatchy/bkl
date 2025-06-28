@@ -176,7 +176,6 @@ label.invisible {
 	color: transparent;
 }
 
-code,
 bkl-code {
 	color: var(--neutral7);
 	background: var(--neutral0);
@@ -200,27 +199,22 @@ bkl-code {
 }
 
 
-doc-grid code,
 doc-grid bkl-code {
 	height: 100%;
 }
 
 /* Fix top-left corner when label is present */
-label:not(.invisible) + code,
 label:not(.invisible) + bkl-code {
 	border-top-left-radius: 0 !important;
 }
 
 /* Keep rounded corners for invisible labels */
-label.invisible + code,
 label.invisible + bkl-code {
 	border-top-left-radius: 4px !important;
 }
 
-code + p,
 bkl-code + p,
 doc-grid + p,
-div:has(> code) + p,
 div:has(> bkl-code) + p {
 	margin-top: 10px;
 }
@@ -285,11 +279,15 @@ flag {
 	color: var(--blue5);
 }
 
-focus, focus > * {
+/* Highlights in code blocks - no background */
+bkl-code highlight,
+bkl-code highlight > * {
 	color: var(--red6);
+	background: transparent;
 }
 
-highlight {
+/* Inline highlights in text - with background */
+p highlight {
 	background: var(--neutral8);
 	color: var(--red6);
 	display: inline-block;
@@ -299,7 +297,7 @@ highlight {
 	white-space: nowrap;
 }
 
-highlight * {
+p highlight * {
 	color: var(--red6) !important;
 }
 </style>
@@ -365,7 +363,7 @@ class DocGrid extends HTMLElement {
       element.style.flexDirection = 'column';
       
       const label = element.querySelector('label');
-      const code = element.querySelector('code, bkl-code');
+      const code = element.querySelector('bkl-code');
       
       if (label && code) {
         label.style.marginBottom = '0';
@@ -399,10 +397,10 @@ class BklCode extends HTMLElement {
     // Get the raw text content
     let html = this.innerHTML;
     
-    // Preserve existing HTML tags first (like focus tags)
+    // Preserve existing HTML tags first (like highlight tags)
     const placeholder = '___PLACEHOLDER___';
     const preserved = [];
-    html = html.replace(/<(focus|highlight|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
+    html = html.replace(/<(highlight|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
       preserved.push(match);
       return placeholder + (preserved.length - 1) + placeholder;
     });
@@ -472,11 +470,11 @@ class BklCode extends HTMLElement {
     html = highlightedLines.join('\n');
     
     html = html.replace(/\$(env|merge|replace|match|output|repeat|decode|encode|delete|required|parent|value|path|invert|first|last|count|step)(?::[\w.]+)?/g, (match) => {
-      return '<focus>' + match + '</focus>';
+      return '<highlight>' + match + '</highlight>';
     });
     
     html = html.replace(/\$"[^"]+"/g, (match) => {
-      return '<focus>' + match + '</focus>';
+      return '<highlight>' + match + '</highlight>';
     });
     
     html = html.replace(new RegExp(placeholder + '(\\d+)' + placeholder, 'g'), (match, index) => {
