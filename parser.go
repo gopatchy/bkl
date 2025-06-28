@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 // Debug controls debug log output to stderr for all bkl operations.
@@ -227,7 +228,7 @@ func (b *bkl) outputDocument(doc *document, env map[string]string) ([]any, error
 		}
 	}
 
-	return filterList(outs, func(v any) ([]any, error) {
+	return utils.FilterList(outs, func(v any) ([]any, error) {
 		v2, include, err := filterOutput(v)
 		if err != nil {
 			return nil, err
@@ -351,7 +352,7 @@ func determineFormat(formatName *string, paths ...*string) (*format.Format, erro
 	// Try to infer from paths
 	for _, path := range paths {
 		if path != nil && *path != "" {
-			if name := ext(*path); name != "" {
+			if name := utils.Ext(*path); name != "" {
 				return format.Get(name)
 			}
 		}
@@ -421,7 +422,7 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 // Returns the real filename and the requested output format, or
 // ("", "", error).
 func fileMatch(fsys fs.FS, path string) (string, string, error) {
-	formatName := ext(path)
+	formatName := utils.Ext(path)
 	if _, err := format.Get(formatName); err != nil {
 		return "", "", err
 	}

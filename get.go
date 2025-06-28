@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gopatchy/bkl/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
@@ -60,7 +61,7 @@ func getPathFromList(obj any, docs []*document, path []any) (any, error) {
 		}
 	}
 
-	path2, err := toStringList(path)
+	path2, err := utils.ToStringList(path)
 	if err != nil {
 		return nil, fmt.Errorf("%v: %w", path, err)
 	}
@@ -108,7 +109,7 @@ func getPath(obj any, parts []string) (any, error) {
 }
 
 func getCross(docs []*document, conf map[string]any) (any, error) {
-	found, pat, _ := popMapValue(conf, "$match")
+	found, pat, _ := utils.PopMapValue(conf, "$match")
 	if !found {
 		return nil, fmt.Errorf("%#v: %w", conf, ErrMissingMatch)
 	}
@@ -118,7 +119,7 @@ func getCross(docs []*document, conf map[string]any) (any, error) {
 		return nil, err
 	}
 
-	found, path, _ := popMapValue(conf, "$path")
+	found, path, _ := utils.PopMapValue(conf, "$path")
 	if found {
 		return get(doc, docs, path)
 	}

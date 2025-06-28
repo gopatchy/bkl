@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 func process2(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
@@ -34,10 +35,10 @@ func process2(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalC
 }
 
 func process2Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
-	obj, err := filterMap(obj, func(k string, v any) (map[string]any, error) {
+	obj, err := utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
 		switch v2 := v.(type) {
 		case map[string]any:
-			if found, r, v3 := popMapValue(v2, "$repeat"); found {
+			if found, r, v3 := utils.PopMapValue(v2, "$repeat"); found {
 				return process2RepeatObjMap(v3, mergeFrom, mergeFromDocs, ec, k, r, depth)
 			}
 		}
@@ -48,15 +49,15 @@ func process2Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*docum
 		return nil, err
 	}
 
-	if found, v, obj := popMapValue(obj, "$encode"); found {
+	if found, v, obj := utils.PopMapValue(obj, "$encode"); found {
 		return process2Encode(obj, mergeFrom, mergeFromDocs, ec, v, depth)
 	}
 
-	if found, v, obj := popMapValue(obj, "$decode"); found {
+	if found, v, obj := utils.PopMapValue(obj, "$decode"); found {
 		return process2Decode(obj, mergeFrom, mergeFromDocs, ec, v, depth)
 	}
 
-	if found, v, obj := popMapValue(obj, "$value"); found {
+	if found, v, obj := utils.PopMapValue(obj, "$value"); found {
 		if len(obj) != 0 {
 			return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
 		}
@@ -64,7 +65,7 @@ func process2Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*docum
 		return process2MapValue(obj, mergeFrom, mergeFromDocs, ec, v, depth)
 	}
 
-	return filterMap(obj, func(k string, v any) (map[string]any, error) {
+	return utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := process2(v, mergeFrom, mergeFromDocs, ec, depth)
 		if err != nil {
 			return nil, err
@@ -168,7 +169,7 @@ func process2EncodeString(obj any, mergeFrom *document, mergeFromDocs []*documen
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
 
-		strs, err := toStringListPermissive(obj)
+		strs, err := utils.ToStringListPermissive(obj)
 		if err != nil {
 			return nil, fmt.Errorf("$encode: %s: %w", v, err)
 		}
@@ -182,7 +183,7 @@ func process2EncodeString(obj any, mergeFrom *document, mergeFromDocs []*documen
 
 		prefix := parts[1]
 
-		strs, err := toStringListPermissive(obj)
+		strs, err := utils.ToStringListPermissive(obj)
 		if err != nil {
 			return nil, fmt.Errorf("$encode: %s: %w", v, err)
 		}
@@ -270,7 +271,7 @@ func process2DecodeString(obj any, mergeFrom *document, mergeFromDocs []*documen
 }
 
 func process2DecodeStringMap(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, v string, depth int) (any, error) {
-	found, val, obj := popMapValue(obj, "$value")
+	found, val, obj := utils.PopMapValue(obj, "$value")
 	if !found {
 		return nil, fmt.Errorf("$decode: missing $value in %#v (%w)", obj, ErrInvalidType)
 	}
@@ -330,7 +331,7 @@ func process2ToListMap(obj any, delim string) ([]any, error) {
 
 	ret := []any{}
 
-	for k, v := range sortedMap(obj2) {
+	for k, v := range utils.SortedMap(obj2) {
 		switch v2 := v.(type) {
 		case []any:
 			for _, v3 := range v2 {
@@ -354,7 +355,7 @@ func process2ToListValue(k, delim string, v any) string {
 }
 
 func process2List(obj []any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
-	m, obj, err := popListMapValue(obj, "$encode")
+	m, obj, err := utils.PopListMapValue(obj, "$encode")
 	if err != nil {
 		return nil, err
 	}
@@ -363,10 +364,10 @@ func process2List(obj []any, mergeFrom *document, mergeFromDocs []*document, ec 
 		return process2Encode(obj, mergeFrom, mergeFromDocs, ec, m, depth)
 	}
 
-	return filterList(obj, func(v any) ([]any, error) {
+	return utils.FilterList(obj, func(v any) ([]any, error) {
 		switch v2 := v.(type) {
 		case map[string]any:
-			if found, r, v3 := popMapValue(v2, "$repeat"); found {
+			if found, r, v3 := utils.PopMapValue(v2, "$repeat"); found {
 				return process2RepeatObjList(v3, mergeFrom, mergeFromDocs, ec, r, depth)
 			}
 		}
@@ -433,7 +434,7 @@ func process2StringInterp(obj string, mergeFrom *document, mergeFromDocs []*docu
 func process2ValuesMap(obj map[string]any) ([]any, error) {
 	vals := []any{}
 
-	for _, v := range sortedMap(obj) {
+	for _, v := range utils.SortedMap(obj) {
 		vals = append(vals, v)
 	}
 

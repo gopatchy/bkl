@@ -3,6 +3,8 @@ package bkl
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 func normalize(obj any) (any, error) {
@@ -25,7 +27,7 @@ func normalize(obj any) (any, error) {
 }
 
 func normalizeMap(obj map[string]any) (map[string]any, error) {
-	return filterMap(obj, func(k string, v any) (map[string]any, error) {
+	return utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := normalize(v)
 		if err != nil {
 			return nil, err
@@ -36,7 +38,7 @@ func normalizeMap(obj map[string]any) (map[string]any, error) {
 }
 
 func normalizeList(obj []any) ([]any, error) {
-	return filterList(obj, func(v any) ([]any, error) {
+	return utils.FilterList(obj, func(v any) ([]any, error) {
 		v2, err := normalize(v)
 		if err != nil {
 			return nil, err

@@ -2,6 +2,8 @@ package bkl
 
 import (
 	"fmt"
+
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 func mergeDocs(doc, patch *document) error {
@@ -52,7 +54,7 @@ func mergeMap(dst map[string]any, src any) (any, error) {
 }
 
 func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error) {
-	replace, found := getMapBoolValue(src, "$replace")
+	replace, found := utils.GetMapBoolValue(src, "$replace")
 	if found && replace {
 		delete(src, "$replace")
 		return src, nil
@@ -61,7 +63,7 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 	for k, v := range src {
 		existing, found := dst[k]
 
-		if toString(v) == "$delete" {
+		if utils.ToString(v) == "$delete" {
 			if !found {
 				return nil, fmt.Errorf("%s=null: %w", k, ErrUselessOverride)
 			}
@@ -80,7 +82,7 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 		} else {
 			var err error
 
-			dst[k], err = deepClone(v)
+			dst[k], err = utils.DeepClone(v)
 			if err != nil {
 				return nil, err
 			}
@@ -101,12 +103,12 @@ func mergeList(dst []any, src any) (any, error) {
 }
 
 func mergeListList(dst []any, src []any) ([]any, error) {
-	replace, src := popListString(src, "$replace")
+	replace, src := utils.PopListString(src, "$replace")
 	if replace {
 		return src, nil
 	}
 
-	replace, src, err := popListMapBoolValue(src, "$replace", true)
+	replace, src, err := utils.PopListMapBoolValue(src, "$replace", true)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +117,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 		return src, nil
 	}
 
-	_, dst = popListString(dst, "$required")
+	_, dst = utils.PopListString(dst, "$required")
 
 	for _, v := range src {
 		vMap, ok := v.(map[string]any)
@@ -124,7 +126,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			continue
 		}
 
-		found, del, vMap := popMapValue(vMap, "$delete")
+		found, del, vMap := utils.PopMapValue(vMap, "$delete")
 		if found {
 			if len(vMap) > 0 {
 				return nil, fmt.Errorf("%#v: %w", vMap, ErrExtraKeys)
@@ -138,7 +140,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			continue
 		}
 
-		found, m, vMap := popMapValue(vMap, "$match")
+		found, m, vMap := utils.PopMapValue(vMap, "$match")
 		if found {
 			dst, err = mergeListMatch(dst, m, vMap)
 			if err != nil {
@@ -159,7 +161,7 @@ func mergeListDelete(obj []any, del any) ([]any, error) {
 
 	deleted := false
 
-	obj, err = filterList(obj, func(v any) ([]any, error) {
+	obj, err = utils.FilterList(obj, func(v any) ([]any, error) {
 		if match(v, del) {
 			deleted = true
 			return nil, nil
@@ -181,7 +183,7 @@ func mergeListDelete(obj []any, del any) ([]any, error) {
 func mergeListMatch(obj []any, m any, v map[string]any) ([]any, error) {
 	var val any = v
 
-	found, v2, v := popMapValue(v, "$value")
+	found, v2, v := utils.PopMapValue(v, "$value")
 	if found {
 		if len(v) > 0 {
 			return nil, fmt.Errorf("%#v: %w", v, ErrExtraKeys)
@@ -192,7 +194,7 @@ func mergeListMatch(obj []any, m any, v map[string]any) ([]any, error) {
 
 	found = false
 
-	obj, err := filterList(obj, func(v2 any) ([]any, error) {
+	obj, err := utils.FilterList(obj, func(v2 any) ([]any, error) {
 		if match(v2, m) {
 			found = true
 

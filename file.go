@@ -9,11 +9,8 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/utils"
 )
-
-func ext(path string) string {
-	return strings.TrimPrefix(filepath.Ext(path), ".")
-}
 
 type file struct {
 	id    string
@@ -35,17 +32,16 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 
 	debugLog("[%s] loading", f)
 
-	ft, err := format.Get(ext(path))
+	ft, err := format.Get(utils.Ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 
 	var fh io.ReadCloser
 
-	if isStdin(path) {
+	if utils.IsStdin(path) {
 		fh = os.Stdin
 	}
-
 	if fh == nil {
 		fh, err = fsys.open(path)
 		if err != nil {
@@ -161,7 +157,7 @@ func (f *file) parentsFromDirective(fsys *fileSystem) ([]string, error) {
 			parents = append(parents, val2)
 
 		case []any:
-			val3, err := toStringList(val2)
+			val3, err := utils.ToStringList(val2)
 			if err != nil {
 				return nil, fmt.Errorf("$parent=%#v: %w", val2, ErrInvalidParent)
 			}
@@ -196,7 +192,7 @@ func (f *file) parentsFromDirective(fsys *fileSystem) ([]string, error) {
 }
 
 func (f *file) parentsFromFilename(fsys *fileSystem) ([]string, error) {
-	if isStdin(f.path) {
+	if utils.IsStdin(f.path) {
 		return []string{}, nil
 	}
 
@@ -248,8 +244,4 @@ func (f *file) toAbsolutePaths(fsys *fileSystem, paths []string) ([]string, erro
 
 func (f *file) String() string {
 	return f.id
-}
-
-func isStdin(path string) bool {
-	return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)) == "-"
 }

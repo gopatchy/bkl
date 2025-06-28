@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 type fileSystem struct {
@@ -96,7 +97,7 @@ func (f *fileSystem) globFiles(path string) ([]string, error) {
 	ret := []string{}
 
 	for _, match := range matches {
-		if _, err := format.Get(ext(match)); err != nil {
+		if _, err := format.Get(utils.Ext(match)); err != nil {
 			continue
 		}
 

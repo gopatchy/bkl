@@ -3,6 +3,8 @@ package bkl
 import (
 	"fmt"
 	"strings"
+
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 func process1(obj any, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
@@ -35,11 +37,11 @@ func process1Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*docum
 		return process1MapMerge(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
-	if found, v, obj := popMapValue(obj, "$replace"); found {
+	if found, v, obj := utils.PopMapValue(obj, "$replace"); found {
 		return process1MapReplace(obj, mergeFrom, mergeFromDocs, v, depth)
 	}
 
-	return filterMap(obj, func(k string, v any) (map[string]any, error) {
+	return utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
 		v2, err := process1(v, mergeFrom, mergeFromDocs, depth)
 		if err != nil {
 			return nil, err
@@ -80,7 +82,7 @@ func process1MapReplace(obj map[string]any, mergeFrom *document, mergeFromDocs [
 func process1List(obj []any, mergeFrom *document, mergeFromDocs []*document, depth int) (any, error) {
 	merge := []any{}
 
-	obj, err := filterList(obj, func(v any) ([]any, error) {
+	obj, err := utils.FilterList(obj, func(v any) ([]any, error) {
 		v2, ok := v.(map[string]any)
 		if !ok {
 			return []any{v}, nil
@@ -90,7 +92,7 @@ func process1List(obj []any, mergeFrom *document, mergeFromDocs []*document, dep
 			return []any{v}, nil
 		}
 
-		found, val, v2 := popMapValue(v2, "$merge")
+		found, val, v2 := utils.PopMapValue(v2, "$merge")
 		if found {
 			merge = append(merge, val)
 			return nil, nil
@@ -115,7 +117,7 @@ func process1List(obj []any, mergeFrom *document, mergeFromDocs []*document, dep
 		obj = objList
 	}
 
-	m, obj, err := popListMapValue(obj, "$replace")
+	m, obj, err := utils.PopListMapValue(obj, "$replace")
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +126,7 @@ func process1List(obj []any, mergeFrom *document, mergeFromDocs []*document, dep
 		return process1ListReplace(obj, mergeFrom, mergeFromDocs, m, depth)
 	}
 
-	return filterList(obj, func(v any) ([]any, error) {
+	return utils.FilterList(obj, func(v any) ([]any, error) {
 		v2, err := process1(v, mergeFrom, mergeFromDocs, depth)
 		if err != nil {
 			return nil, err

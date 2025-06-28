@@ -2,6 +2,8 @@ package bkl
 
 import (
 	"fmt"
+
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 func repeatDoc(doc *document, ec *evalContext) ([]*document, []*evalContext, error) {
@@ -18,7 +20,7 @@ func repeatDoc(doc *document, ec *evalContext) ([]*document, []*evalContext, err
 }
 
 func repeatDocMap(doc *document, ec *evalContext, data map[string]any) ([]*document, []*evalContext, error) {
-	if found, v, data := popMapValue(data, "$repeat"); found {
+	if found, v, data := utils.PopMapValue(data, "$repeat"); found {
 		doc.Data = data
 		return repeatDocGen(doc, ec, v)
 	}
@@ -27,7 +29,7 @@ func repeatDocMap(doc *document, ec *evalContext, data map[string]any) ([]*docum
 }
 
 func repeatDocList(doc *document, ec *evalContext, data []any) ([]*document, []*evalContext, error) {
-	v, data2, err := popListMapValue(data, "$repeat")
+	v, data2, err := utils.PopListMapValue(data, "$repeat")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -72,10 +74,10 @@ func repeatIsRangeParamsMap(rs map[string]any) bool {
 }
 
 func repeatGetRangeParamValues(rs map[string]any) ([]any, error) {
-	first, hasFirst := getMapIntValue(rs, "$first")
-	last, hasLast := getMapIntValue(rs, "$last")
-	count, hasCount := getMapIntValue(rs, "$count")
-	step, hasStep := getMapIntValue(rs, "$step")
+	first, hasFirst := utils.GetMapIntValue(rs, "$first")
+	last, hasLast := utils.GetMapIntValue(rs, "$last")
+	count, hasCount := utils.GetMapIntValue(rs, "$count")
+	step, hasStep := utils.GetMapIntValue(rs, "$step")
 
 	if !hasStep {
 		step = 1
@@ -161,7 +163,7 @@ func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalC
 
 	contexts := []*evalContext{ec}
 
-	for name, value := range sortedMap(rs) {
+	for name, value := range utils.SortedMap(rs) {
 		var newContexts []*evalContext
 		var values []any
 		var err error

@@ -1,5 +1,7 @@
 package bkl
 
+import "github.com/gopatchy/bkl/internal/utils"
+
 func matchDoc(doc *document, pat any) bool {
 	return match(doc.Data, pat)
 }
@@ -18,7 +20,7 @@ func match(obj any, pat any) bool {
 }
 
 func matchMap(obj any, pat map[string]any) bool {
-	invert, pat := popMapBoolValue(pat, "$invert", true)
+	invert, pat := utils.PopMapBoolValue(pat, "$invert", true)
 	if invert {
 		return !matchMap(obj, pat)
 	}

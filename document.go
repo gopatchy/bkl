@@ -2,6 +2,8 @@ package bkl
 
 import (
 	"fmt"
+
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 type document struct {
@@ -39,7 +41,7 @@ func (d *document) allParentsInt(parents map[string]*document) {
 }
 
 func (d *document) clone(suffix string) (*document, error) {
-	data, err := deepClone(d.Data)
+	data, err := utils.DeepClone(d.Data)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +61,7 @@ func (d *document) popMapValue(key string) (bool, any) {
 		return false, nil
 	}
 
-	found, val, data := popMapValue(dataMap, key)
+	found, val, data := utils.PopMapValue(dataMap, key)
 
 	if found {
 		d.Data = data
