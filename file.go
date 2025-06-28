@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/gopatchy/bkl/internal/format"
 )
 
 func ext(path string) string {
@@ -33,7 +35,7 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 
 	debugLog("[%s] loading", f)
 
-	format, err := getFormat(ext(path))
+	ft, err := format.Get(ext(path))
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
@@ -58,7 +60,7 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 		return nil, err
 	}
 
-	docs, err := format.UnmarshalStream(raw)
+	docs, err := ft.UnmarshalStream(raw)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}

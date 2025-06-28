@@ -1,4 +1,4 @@
-package bkl
+package format
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 func yamlMarshalStream(vs []any) ([]byte, error) {
@@ -146,7 +148,7 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 			return node.Value, nil
 
 		default:
-			return nil, fmt.Errorf("unknown yaml short tag: %s (%w)", node.ShortTag(), ErrInvalidType)
+			return nil, fmt.Errorf("unknown yaml short tag: %s (%w)", node.ShortTag(), errors.ErrInvalidType)
 		}
 
 	case yaml.AliasNode:
@@ -156,7 +158,7 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 		return nil, nil
 
 	default:
-		return nil, fmt.Errorf("unknown yaml type: %d (%w)", node.Kind, ErrInvalidType)
+		return nil, fmt.Errorf("unknown yaml type: %d (%w)", node.Kind, errors.ErrInvalidType)
 	}
 }
 
@@ -175,11 +177,11 @@ func yamlMerge(dst map[string]any, src any, node *yaml.Node) error {
 					dst[k] = v
 				}
 			default:
-				return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, ErrInvalidType)
+				return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, errors.ErrInvalidType)
 			}
 		}
 	default:
-		return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, ErrInvalidType)
+		return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, errors.ErrInvalidType)
 	}
 
 	return nil

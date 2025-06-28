@@ -34,6 +34,6 @@ pkg:
 		cp LICENSE $DIR
 		CGO_ENABLED=0 go build -tags bkl-$VER,bkl-src-pkg -trimpath -ldflags=-extldflags=-static -o $DIR ./...
 		cd $DIR
-		tar -czf {{justfile_directory()}}/pkg/bkl-$GOOS-$GOARCH-$VER.tar.gz *
+		tar -czf {{justfile_directory()}}/out/bkl-$GOOS-$GOARCH-$VER.tar.gz *
 		cd ~-
 	done

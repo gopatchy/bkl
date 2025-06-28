@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"github.com/gopatchy/bkl/internal/format"
 )
 
 type fileSystem struct {
@@ -75,7 +77,7 @@ func (f *fileSystem) convertToFS(path string) string {
 }
 
 func (f *fileSystem) findFile(path string) string {
-	for ext := range formatByExtension {
+	for _, ext := range format.Extensions() {
 		extPath := fmt.Sprintf("%s.%s", path, ext)
 		if _, err := f.stat(extPath); err == nil {
 			return extPath
@@ -94,7 +96,7 @@ func (f *fileSystem) globFiles(path string) ([]string, error) {
 	ret := []string{}
 
 	for _, match := range matches {
-		if _, found := formatByExtension[ext(match)]; !found {
+		if _, err := format.Get(ext(match)); err != nil {
 			continue
 		}
 

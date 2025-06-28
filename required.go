@@ -47,11 +47,11 @@ func Required(fsys fs.FS, path string, rootPath string, workingDir string, forma
 	}
 
 	// Determine format and return formatted output
-	f, err := determineFormat(format, paths...)
+	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err
 	}
-	return f.MarshalStream([]any{result})
+	return ft.MarshalStream([]any{result})
 }
 
 func required(obj any) (any, error) {

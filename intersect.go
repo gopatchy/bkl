@@ -62,11 +62,11 @@ func Intersect(fsys fs.FS, paths []string, rootPath string, workingDir string, f
 	}
 
 	// Determine format and return formatted output
-	f, err := determineFormat(format, formatPaths...)
+	ft, err := determineFormat(format, formatPaths...)
 	if err != nil {
 		return nil, err
 	}
-	return f.MarshalStream([]any{result})
+	return ft.MarshalStream([]any{result})
 }
 
 func intersect(a, b any) (any, error) {

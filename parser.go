@@ -11,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gopatchy/bkl/internal/format"
 )
 
 // Debug controls debug log output to stderr for all bkl operations.
@@ -166,7 +168,7 @@ func (b *bkl) findMatches(doc *document, pat any) []*document {
 
 // mergeFiles merges multiple files and returns the result in the specified format.
 // If format is empty, it defaults to "json-pretty".
-func (b *bkl) mergeFiles(fsys fs.FS, files []string, format *format, env map[string]string) ([]byte, error) {
+func (b *bkl) mergeFiles(fsys fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
 	fileSystem := newFS(fsys)
 	for _, path := range files {
 		fileObjs, err := loadFileAndParents(fileSystem, path, nil)
@@ -182,7 +184,7 @@ func (b *bkl) mergeFiles(fsys fs.FS, files []string, format *format, env map[str
 		}
 	}
 
-	return b.output(format, env)
+	return b.output(ft, env)
 }
 
 // mergeFile applies an already-parsed file object into the [bkl]'s
@@ -262,13 +264,13 @@ func (b *bkl) outputDocuments(env map[string]string) ([]any, error) {
 
 // Output returns all documents encoded in the specified format and merged into
 // a stream.
-func (b *bkl) output(format *format, env map[string]string) ([]byte, error) {
+func (b *bkl) output(ft *format.Format, env map[string]string) ([]byte, error) {
 	outs, err := b.outputDocuments(env)
 	if err != nil {
 		return nil, err
 	}
 
-	return format.MarshalStream(outs)
+	return ft.MarshalStream(outs)
 }
 
 // makePathsAbsolute converts relative paths to absolute paths using the provided working directory.
@@ -341,21 +343,21 @@ func getOSEnv() map[string]string {
 // determineFormat determines the format to use based on the provided format pointer and paths.
 // If format is nil or points to an empty string, it infers from the paths.
 // Returns an error if no format can be determined.
-func determineFormat(formatName *string, paths ...*string) (*format, error) {
+func determineFormat(formatName *string, paths ...*string) (*format.Format, error) {
 	if formatName != nil && *formatName != "" {
-		return getFormat(*formatName)
+		return format.Get(*formatName)
 	}
 
 	// Try to infer from paths
 	for _, path := range paths {
 		if path != nil && *path != "" {
 			if name := ext(*path); name != "" {
-				return getFormat(name)
+				return format.Get(name)
 			}
 		}
 	}
 
-	return getFormat("")
+	return format.Get("")
 }
 
 // FormatOutput marshals the given data to the specified format.
@@ -363,12 +365,12 @@ func determineFormat(formatName *string, paths ...*string) (*format, error) {
 // and uses the file extension of the first non-nil path as the format.
 // Returns the marshaled bytes or an error if the format is unknown or marshaling fails.
 func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
-	f, err := determineFormat(format, paths...)
+	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err
 	}
 
-	return f.MarshalStream([]any{data})
+	return ft.MarshalStream([]any{data})
 }
 
 // Evaluate processes the specified files and returns the formatted output.
@@ -403,12 +405,12 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 
 	// Determine format to use - append inferredFormat to paths for fallback
 	allPaths := append(paths, &inferredFormat)
-	f, err := determineFormat(format, allPaths...)
+	ft, err := determineFormat(format, allPaths...)
 	if err != nil {
 		return nil, err
 	}
 
-	return b.mergeFiles(fsys, realFiles, f, env)
+	return b.mergeFiles(fsys, realFiles, ft, env)
 }
 
 // fileMatch attempts to find a file with the same base name as path, but
@@ -419,15 +421,15 @@ func Evaluate(fsys fs.FS, files []string, rootPath string, workingDir string, en
 // Returns the real filename and the requested output format, or
 // ("", "", error).
 func fileMatch(fsys fs.FS, path string) (string, string, error) {
-	format := ext(path)
-	if _, found := formatByExtension[format]; !found {
-		return "", "", fmt.Errorf("%s: %w", format, ErrUnknownFormat)
+	formatName := ext(path)
+	if _, err := format.Get(formatName); err != nil {
+		return "", "", err
 	}
 
-	withoutExt := strings.TrimSuffix(path, "."+format)
+	withoutExt := strings.TrimSuffix(path, "."+formatName)
 
 	if filepath.Base(withoutExt) == "-" {
-		return path, format, nil
+		return path, formatName, nil
 	}
 
 	fileSystem := newFS(fsys)
@@ -437,5 +439,5 @@ func fileMatch(fsys fs.FS, path string) (string, string, error) {
 		return "", "", fmt.Errorf("%s.*: %w", withoutExt, ErrMissingFile)
 	}
 
-	return realPath, format, nil
+	return realPath, formatName, nil
 }

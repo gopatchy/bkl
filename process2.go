@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/gopatchy/bkl/internal/format"
 )
 
 func process2(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
@@ -233,12 +235,12 @@ func process2EncodeString(obj any, mergeFrom *document, mergeFromDocs []*documen
 			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
 		}
 
-		f, err := getFormat(cmd)
+		ft, err := format.Get(cmd)
 		if err != nil {
 			return nil, err
 		}
 
-		enc, err := f.MarshalStream([]any{obj})
+		enc, err := ft.MarshalStream([]any{obj})
 		if err != nil {
 			return nil, err
 		}
@@ -282,12 +284,12 @@ func process2DecodeStringMap(obj map[string]any, mergeFrom *document, mergeFromD
 		return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
 	}
 
-	f, err := getFormat(v)
+	ft, err := format.Get(v)
 	if err != nil {
 		return nil, err
 	}
 
-	decs, err := f.UnmarshalStream([]byte(val2))
+	decs, err := ft.UnmarshalStream([]byte(val2))
 	if err != nil {
 		return nil, err
 	}

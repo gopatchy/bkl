@@ -99,11 +99,11 @@ func Diff(fsys fs.FS, srcPath, dstPath string, rootPath string, workingDir strin
 	}
 
 	// Determine format and return formatted output
-	f, err := determineFormat(format, paths...)
+	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err
 	}
-	return f.MarshalStream([]any{finalResult})
+	return ft.MarshalStream([]any{finalResult})
 }
 
 func diff(dst, src any) (any, error) {
