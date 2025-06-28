@@ -1,4 +1,4 @@
-package bkl
+package file
 
 import (
 	"fmt"
@@ -11,29 +11,28 @@ import (
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
+	"github.com/gopatchy/bkl/internal/normalize"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
 )
 
-type file struct {
-	id    string
-	child *file
-	path  string
-	docs  []*document.Document
+type File struct {
+	ID    string
+	Child *File
+	Path  string
+	Docs  []*document.Document
 }
 
-func loadFile(fsys *fsys.FS, path string, child *file) (*file, error) {
-	f := &file{
-		id:    path,
-		child: child,
-		path:  path,
+func Load(fsys *fsys.FS, path string, child *File) (*File, error) {
+	f := &File{
+		ID:    path,
+		Child: child,
+		Path:  path,
 	}
 
 	if child != nil {
-		f.id = fmt.Sprintf("%s|%s", child.id, f.id)
+		f.ID = fmt.Sprintf("%s|%s", child.ID, f.ID)
 	}
-
-	debugLog("[%s] loading", f)
 
 	ft, err := format.Get(utils.Ext(path))
 	if err != nil {
@@ -67,13 +66,13 @@ func loadFile(fsys *fsys.FS, path string, child *file) (*file, error) {
 	for i, doc := range docs {
 		id := fmt.Sprintf("%s|doc%d", f, i)
 
-		doc, err = normalize(doc)
+		doc, err = normalize.Document(doc)
 		if err != nil {
 			return nil, fmt.Errorf("[%s]: %w", id, err)
 		}
 
 		docObj := document.NewWithData(id, doc)
-		f.docs = append(f.docs, docObj)
+		f.Docs = append(f.Docs, docObj)
 	}
 
 	f.setParents()
@@ -81,16 +80,16 @@ func loadFile(fsys *fsys.FS, path string, child *file) (*file, error) {
 	return f, nil
 }
 
-func loadFileAndParents(fsys *fsys.FS, path string, child *file) ([]*file, error) {
+func LoadAndParents(fsys *fsys.FS, path string, child *File) ([]*File, error) {
 	return loadFileAndParentsInt(fsys, path, child, []string{})
 }
 
-func loadFileAndParentsInt(fsys *fsys.FS, path string, child *file, stack []string) ([]*file, error) {
+func loadFileAndParentsInt(fsys *fsys.FS, path string, child *File, stack []string) ([]*File, error) {
 	if slices.Contains(stack, path) {
 		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), errors.ErrCircularRef)
 	}
 
-	f, err := loadFile(fsys, path, child)
+	f, err := Load(fsys, path, child)
 	if err != nil {
 		return nil, err
 	}
@@ -102,12 +101,12 @@ func loadFileAndParentsInt(fsys *fsys.FS, path string, child *file, stack []stri
 		return nil, err
 	}
 
-	files := []*file{}
+	files := []*File{}
 
 	for _, parent := range parents {
 		// If the current file has no docs, skip it in the hierarchy
 		child2 := f
-		if len(f.docs) == 0 {
+		if len(f.Docs) == 0 {
 			child2 = child
 		}
 
@@ -122,17 +121,17 @@ func loadFileAndParentsInt(fsys *fsys.FS, path string, child *file, stack []stri
 	return append(files, f), nil
 }
 
-func (f *file) setParents() {
-	if f.child == nil {
+func (f *File) setParents() {
+	if f.Child == nil {
 		return
 	}
 
-	for _, doc := range f.child.docs {
-		doc.Parents = append(doc.Parents, f.docs...)
+	for _, doc := range f.Child.Docs {
+		doc.Parents = append(doc.Parents, f.Docs...)
 	}
 }
 
-func (f *file) parents(fsys *fsys.FS) ([]string, error) {
+func (f *File) parents(fsys *fsys.FS) ([]string, error) {
 	parents, err := f.parentsFromDirective(fsys)
 	if err != nil {
 		return nil, err
@@ -145,11 +144,11 @@ func (f *file) parents(fsys *fsys.FS) ([]string, error) {
 	return f.parentsFromFilename(fsys)
 }
 
-func (f *file) parentsFromDirective(fsys *fsys.FS) ([]string, error) {
+func (f *File) parentsFromDirective(fsys *fsys.FS) ([]string, error) {
 	parents := []string{}
 	noParent := false
 
-	for _, doc := range f.docs {
+	for _, doc := range f.Docs {
 		found, val := doc.PopMapValue("$parent")
 		if !found {
 			continue
@@ -194,20 +193,20 @@ func (f *file) parentsFromDirective(fsys *fsys.FS) ([]string, error) {
 	return f.toAbsolutePaths(fsys, parents)
 }
 
-func (f *file) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
-	if utils.IsStdin(f.path) {
+func (f *File) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
+	if utils.IsStdin(f.Path) {
 		return []string{}, nil
 	}
 
-	dir := filepath.Dir(f.path)
-	base := filepath.Base(f.path)
+	dir := filepath.Dir(f.Path)
+	base := filepath.Base(f.Path)
 
 	parts := strings.Split(base, ".")
 	// Last part is file extension
 
 	switch {
 	case len(parts) < 2:
-		return nil, fmt.Errorf("[%s] %w", f.path, errors.ErrInvalidFilename)
+		return nil, fmt.Errorf("[%s] %w", f.Path, errors.ErrInvalidFilename)
 
 	case len(parts) == 2:
 		return []string{}, nil
@@ -224,11 +223,11 @@ func (f *file) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
 	}
 }
 
-func (f *file) toAbsolutePaths(fsys *fsys.FS, paths []string) ([]string, error) {
+func (f *File) toAbsolutePaths(fsys *fsys.FS, paths []string) ([]string, error) {
 	ret := []string{}
 
 	for _, path := range paths {
-		path = filepath.Join(filepath.Dir(f.path), path)
+		path = filepath.Join(filepath.Dir(f.Path), path)
 
 		matches, err := fsys.GlobFiles(path)
 		if err != nil {
@@ -245,6 +244,6 @@ func (f *file) toAbsolutePaths(fsys *fsys.FS, paths []string) ([]string, error) 
 	return ret, nil
 }
 
-func (f *file) String() string {
-	return f.id
+func (f *File) String() string {
+	return f.ID
 }

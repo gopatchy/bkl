@@ -1,9 +1,10 @@
 package bkl
 
 import (
-	"github.com/gopatchy/bkl/pkg/errors"
 	"fmt"
 	"maps"
+
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 type evalContext struct {

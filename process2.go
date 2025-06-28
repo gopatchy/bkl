@@ -1,7 +1,6 @@
 package bkl
 
 import (
-	"github.com/gopatchy/bkl/internal/document"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -9,7 +8,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/format"
+	"github.com/gopatchy/bkl/internal/normalize"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
 )
@@ -302,7 +303,7 @@ func process2DecodeStringMap(obj map[string]any, mergeFrom *document.Document, m
 	}
 
 	// First normalize the decoded value
-	normalized, err := normalize(decs[0])
+	normalized, err := normalize.Document(decs[0])
 	if err != nil {
 		return nil, err
 	}

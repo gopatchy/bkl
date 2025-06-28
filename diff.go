@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"slices"
 
+	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 )
 
@@ -28,7 +29,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
 
-	fileObjs, err := loadFileAndParents(fsys.New(fx), realSrcPath, nil)
+	fileObjs, err := file.LoadAndParents(fsys.New(fx), realSrcPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading source %s: %w", srcPath, err)
 	}
@@ -54,7 +55,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 
 	// Load file directly without processing
 	fileSystem2 := fsys.New(fx)
-	fileObjs2, err := loadFileAndParents(fileSystem2, realDstPath, nil)
+	fileObjs2, err := file.LoadAndParents(fileSystem2, realDstPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading destination %s: %w", dstPath, err)
 	}

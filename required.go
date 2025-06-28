@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 
+	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 )
 
@@ -25,7 +26,7 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 	}
 
 	// Load file directly without processing
-	fileObjs, err := loadFileAndParents(fsys.New(fx), realPath, nil)
+	fileObjs, err := file.LoadAndParents(fsys.New(fx), realPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading %s: %w", path, err)
 	}

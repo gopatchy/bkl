@@ -6,13 +6,15 @@
 package bkl
 
 import (
-	"github.com/gopatchy/bkl/internal/document"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/gopatchy/bkl/internal/document"
+
+	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/utils"
@@ -175,7 +177,7 @@ func (b *bkl) findMatches(doc *document.Document, pat any) []*document.Document 
 func (b *bkl) mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
 	fileSystem := fsys.New(fx)
 	for _, path := range files {
-		fileObjs, err := loadFileAndParents(fileSystem, path, nil)
+		fileObjs, err := file.LoadAndParents(fileSystem, path, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -193,10 +195,10 @@ func (b *bkl) mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[st
 
 // mergeFile applies an already-parsed file object into the [bkl]'s
 // document state.
-func (b *bkl) mergeFileObj(f *file) error {
+func (b *bkl) mergeFileObj(f *file.File) error {
 	debugLog("[%s] merging", f)
 
-	for _, doc := range f.docs {
+	for _, doc := range f.Docs {
 		debugLog("[%s] merging", doc)
 
 		err := b.mergeDocument(doc)

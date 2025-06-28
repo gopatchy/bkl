@@ -1,9 +1,10 @@
 package bkl
 
 import (
-	"github.com/gopatchy/bkl/internal/document"
 	"fmt"
 	"strings"
+
+	"github.com/gopatchy/bkl/internal/document"
 
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"

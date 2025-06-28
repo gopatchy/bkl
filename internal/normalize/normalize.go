@@ -1,4 +1,4 @@
-package bkl
+package normalize
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"github.com/gopatchy/bkl/pkg/errors"
 )
 
-func normalize(obj any) (any, error) {
+func Document(obj any) (any, error) {
 	switch obj2 := obj.(type) {
 	case map[any]any:
 		return nil, fmt.Errorf("numeric keys not supported (%w)", errors.ErrInvalidType)
@@ -29,7 +29,7 @@ func normalize(obj any) (any, error) {
 
 func normalizeMap(obj map[string]any) (map[string]any, error) {
 	return utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
-		v2, err := normalize(v)
+		v2, err := Document(v)
 		if err != nil {
 			return nil, err
 		}
@@ -40,7 +40,7 @@ func normalizeMap(obj map[string]any) (map[string]any, error) {
 
 func normalizeList(obj []any) ([]any, error) {
 	return utils.FilterList(obj, func(v any) ([]any, error) {
-		v2, err := normalize(v)
+		v2, err := Document(v)
 		if err != nil {
 			return nil, err
 		}

@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"reflect"
 
+	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 )
 
@@ -35,7 +36,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 		}
 
 		// Load file directly without processing
-		fileObjs, err := loadFileAndParents(fx2, realPath, nil)
+		fileObjs, err := file.LoadAndParents(fx2, realPath, nil)
 		if err != nil {
 			return nil, fmt.Errorf("loading %s: %w", path, err)
 		}
