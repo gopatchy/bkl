@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"github.com/gopatchy/bkl/internal/document"
 	"fmt"
 	"strings"
 
@@ -8,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func getWithVar(doc *document, docs []*document, ec *evalContext, m any) (any, error) {
+func getWithVar(doc *document.Document, docs []*document.Document, ec *evalContext, m any) (any, error) {
 	ret, err := get(doc, docs, m)
 	if err != nil {
 		switch m2 := m.(type) {
@@ -23,7 +24,7 @@ func getWithVar(doc *document, docs []*document, ec *evalContext, m any) (any, e
 	return ret, nil
 }
 
-func get(doc *document, docs []*document, m any) (any, error) {
+func get(doc *document.Document, docs []*document.Document, m any) (any, error) {
 	switch m2 := m.(type) {
 	case string:
 		return getPathFromString(doc.Data, docs, m2)
@@ -39,7 +40,7 @@ func get(doc *document, docs []*document, m any) (any, error) {
 	}
 }
 
-func getPathFromList(obj any, docs []*document, path []any) (any, error) {
+func getPathFromList(obj any, docs []*document.Document, path []any) (any, error) {
 	if len(path) > 0 {
 		var pat any
 
@@ -69,7 +70,7 @@ func getPathFromList(obj any, docs []*document, path []any) (any, error) {
 	return getPath(obj, path2)
 }
 
-func getPathFromString(obj any, docs []*document, path string) (any, error) {
+func getPathFromString(obj any, docs []*document.Document, path string) (any, error) {
 	var path2 any
 	err := yaml.Unmarshal([]byte(path), &path2)
 	if err != nil {
@@ -108,7 +109,7 @@ func getPath(obj any, parts []string) (any, error) {
 	}
 }
 
-func getCross(docs []*document, conf map[string]any) (any, error) {
+func getCross(docs []*document.Document, conf map[string]any) (any, error) {
 	found, pat, _ := utils.PopMapValue(conf, "$match")
 	if !found {
 		return nil, fmt.Errorf("%#v: %w", conf, ErrMissingMatch)
@@ -127,8 +128,8 @@ func getCross(docs []*document, conf map[string]any) (any, error) {
 	return doc.Data, nil
 }
 
-func getCrossDoc(docs []*document, pat any) (*document, error) {
-	var ret *document
+func getCrossDoc(docs []*document.Document, pat any) (*document.Document, error) {
+	var ret *document.Document
 
 	for _, doc := range docs {
 		if matchDoc(doc, pat) {

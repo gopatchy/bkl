@@ -1,12 +1,13 @@
 package bkl
 
 import (
+	"github.com/gopatchy/bkl/internal/document"
 	"fmt"
 
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-func mergeDocs(doc, patch *document) error {
+func mergeDocs(doc, patch *document.Document) error {
 	// If patch document is completely empty (nil), it's a no-op
 	if patch.Data == nil {
 		return nil

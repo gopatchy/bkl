@@ -1,12 +1,13 @@
 package bkl
 
 import (
+	"github.com/gopatchy/bkl/internal/document"
 	"fmt"
 
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-func repeatDoc(doc *document, ec *evalContext) ([]*document, []*evalContext, error) {
+func repeatDoc(doc *document.Document, ec *evalContext) ([]*document.Document, []*evalContext, error) {
 	switch obj := doc.Data.(type) {
 	case map[string]any:
 		return repeatDocMap(doc, ec, obj)
@@ -15,20 +16,20 @@ func repeatDoc(doc *document, ec *evalContext) ([]*document, []*evalContext, err
 		return repeatDocList(doc, ec, obj)
 
 	default:
-		return []*document{doc}, []*evalContext{ec}, nil
+		return []*document.Document{doc}, []*evalContext{ec}, nil
 	}
 }
 
-func repeatDocMap(doc *document, ec *evalContext, data map[string]any) ([]*document, []*evalContext, error) {
+func repeatDocMap(doc *document.Document, ec *evalContext, data map[string]any) ([]*document.Document, []*evalContext, error) {
 	if found, v, data := utils.PopMapValue(data, "$repeat"); found {
 		doc.Data = data
 		return repeatDocGen(doc, ec, v)
 	}
 
-	return []*document{doc}, []*evalContext{ec}, nil
+	return []*document.Document{doc}, []*evalContext{ec}, nil
 }
 
-func repeatDocList(doc *document, ec *evalContext, data []any) ([]*document, []*evalContext, error) {
+func repeatDocList(doc *document.Document, ec *evalContext, data []any) ([]*document.Document, []*evalContext, error) {
 	v, data2, err := utils.PopListMapValue(data, "$repeat")
 	if err != nil {
 		return nil, nil, err
@@ -39,20 +40,20 @@ func repeatDocList(doc *document, ec *evalContext, data []any) ([]*document, []*
 		return repeatDocGen(doc, ec, v)
 	}
 
-	return []*document{doc}, []*evalContext{ec}, nil
+	return []*document.Document{doc}, []*evalContext{ec}, nil
 }
 
-func repeatDocGen(doc *document, ec *evalContext, v any) ([]*document, []*evalContext, error) {
+func repeatDocGen(doc *document.Document, ec *evalContext, v any) ([]*document.Document, []*evalContext, error) {
 	contexts, err := repeatGenerateContexts(ec, v)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	docs := make([]*document, len(contexts))
+	docs := make([]*document.Document, len(contexts))
 	ecs := make([]*evalContext, len(contexts))
 
 	for i, ctx := range contexts {
-		doc2, err := doc.clone(fmt.Sprintf("repeat-%d", i))
+		doc2, err := doc.Clone(fmt.Sprintf("repeat-%d", i))
 		if err != nil {
 			return nil, nil, err
 		}

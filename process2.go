@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"github.com/gopatchy/bkl/internal/document"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -12,7 +13,7 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-func process2(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
+func process2(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, depth int) (any, error) {
 	depth++
 
 	if depth > 1000 {
@@ -34,7 +35,7 @@ func process2(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalC
 	}
 }
 
-func process2Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
+func process2Map(obj map[string]any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, depth int) (any, error) {
 	obj, err := utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
 		switch v2 := v.(type) {
 		case map[string]any:
@@ -80,11 +81,11 @@ func process2Map(obj map[string]any, mergeFrom *document, mergeFromDocs []*docum
 	})
 }
 
-func process2MapValue(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, v any, depth int) (any, error) {
+func process2MapValue(obj map[string]any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, v any, depth int) (any, error) {
 	return process2(v, mergeFrom, mergeFromDocs, ec, depth)
 }
 
-func process2Encode(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, v any, depth int) (any, error) {
+func process2Encode(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, v any, depth int) (any, error) {
 	obj2, err := process2(obj, mergeFrom, mergeFromDocs, ec, depth)
 	if err != nil {
 		return nil, err
@@ -98,7 +99,7 @@ func process2Encode(obj any, mergeFrom *document, mergeFromDocs []*document, ec 
 	return process2EncodeAny(obj2, mergeFrom, mergeFromDocs, v, depth)
 }
 
-func process2EncodeAny(obj any, mergeFrom *document, mergeFromDocs []*document, v any, depth int) (any, error) {
+func process2EncodeAny(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, v any, depth int) (any, error) {
 	switch v2 := v.(type) {
 	case string:
 		return process2EncodeString(obj, mergeFrom, mergeFromDocs, v2, depth)
@@ -120,7 +121,7 @@ func process2EncodeAny(obj any, mergeFrom *document, mergeFromDocs []*document, 
 	}
 }
 
-func process2EncodeString(obj any, mergeFrom *document, mergeFromDocs []*document, v string, depth int) (any, error) {
+func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, v string, depth int) (any, error) {
 	parts := strings.Split(v, ":")
 	cmd := parts[0]
 
@@ -250,7 +251,7 @@ func process2EncodeString(obj any, mergeFrom *document, mergeFromDocs []*documen
 	}
 }
 
-func process2Decode(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, v any, depth int) (any, error) {
+func process2Decode(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, v any, depth int) (any, error) {
 	switch v2 := v.(type) {
 	case string:
 		return process2DecodeString(obj, mergeFrom, mergeFromDocs, ec, v2, depth)
@@ -260,7 +261,7 @@ func process2Decode(obj any, mergeFrom *document, mergeFromDocs []*document, ec 
 	}
 }
 
-func process2DecodeString(obj any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, v string, depth int) (any, error) {
+func process2DecodeString(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, v string, depth int) (any, error) {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		return process2DecodeStringMap(obj2, mergeFrom, mergeFromDocs, ec, v, depth)
@@ -270,7 +271,7 @@ func process2DecodeString(obj any, mergeFrom *document, mergeFromDocs []*documen
 	}
 }
 
-func process2DecodeStringMap(obj map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, v string, depth int) (any, error) {
+func process2DecodeStringMap(obj map[string]any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, v string, depth int) (any, error) {
 	found, val, obj := utils.PopMapValue(obj, "$value")
 	if !found {
 		return nil, fmt.Errorf("$decode: missing $value in %#v (%w)", obj, ErrInvalidType)
@@ -354,7 +355,7 @@ func process2ToListValue(k, delim string, v any) string {
 	}
 }
 
-func process2List(obj []any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
+func process2List(obj []any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, depth int) (any, error) {
 	m, obj, err := utils.PopListMapValue(obj, "$encode")
 	if err != nil {
 		return nil, err
@@ -381,7 +382,7 @@ func process2List(obj []any, mergeFrom *document, mergeFromDocs []*document, ec 
 	})
 }
 
-func process2String(obj string, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
+func process2String(obj string, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, depth int) (any, error) {
 	if strings.HasPrefix(obj, `$"`) && strings.HasSuffix(obj, `"`) {
 		return process2StringInterp(obj, mergeFrom, mergeFromDocs, ec, depth)
 	}
@@ -395,7 +396,7 @@ func process2String(obj string, mergeFrom *document, mergeFromDocs []*document, 
 
 var interpRE = regexp.MustCompile(`{.*?}`)
 
-func process2StringInterp(obj string, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, depth int) (any, error) {
+func process2StringInterp(obj string, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, depth int) (any, error) {
 	obj = strings.TrimSuffix(strings.TrimPrefix(obj, `$"`), `"`)
 
 	var err error
@@ -441,7 +442,7 @@ func process2ValuesMap(obj map[string]any) ([]any, error) {
 	return vals, nil
 }
 
-func process2RepeatObjMap(v map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, k string, r any, depth int) (map[string]any, error) {
+func process2RepeatObjMap(v map[string]any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, k string, r any, depth int) (map[string]any, error) {
 	ret := map[string]any{}
 
 	contexts, err := repeatGenerateContexts(ec, r)
@@ -470,7 +471,7 @@ func process2RepeatObjMap(v map[string]any, mergeFrom *document, mergeFromDocs [
 	return ret, nil
 }
 
-func process2RepeatObjList(v map[string]any, mergeFrom *document, mergeFromDocs []*document, ec *evalContext, r any, depth int) ([]any, error) {
+func process2RepeatObjList(v map[string]any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, r any, depth int) ([]any, error) {
 	ret := []any{}
 
 	contexts, err := repeatGenerateContexts(ec, r)

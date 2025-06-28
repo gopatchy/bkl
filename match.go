@@ -1,8 +1,11 @@
 package bkl
 
-import "github.com/gopatchy/bkl/internal/utils"
+import (
+	"github.com/gopatchy/bkl/internal/document"
+	"github.com/gopatchy/bkl/internal/utils"
+)
 
-func matchDoc(doc *document, pat any) bool {
+func matchDoc(doc *document.Document, pat any) bool {
 	return match(doc.Data, pat)
 }
 

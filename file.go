@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/utils"
 )
@@ -16,7 +17,7 @@ type file struct {
 	id    string
 	child *file
 	path  string
-	docs  []*document
+	docs  []*document.Document
 }
 
 func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
@@ -69,7 +70,7 @@ func loadFile(fsys *fileSystem, path string, child *file) (*file, error) {
 			return nil, fmt.Errorf("[%s]: %w", id, err)
 		}
 
-		docObj := newDocumentWithData(id, doc)
+		docObj := document.NewWithData(id, doc)
 		f.docs = append(f.docs, docObj)
 	}
 
@@ -147,7 +148,7 @@ func (f *file) parentsFromDirective(fsys *fileSystem) ([]string, error) {
 	noParent := false
 
 	for _, doc := range f.docs {
-		found, val := doc.popMapValue("$parent")
+		found, val := doc.PopMapValue("$parent")
 		if !found {
 			continue
 		}
