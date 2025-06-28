@@ -10,6 +10,8 @@ import (
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
+	"github.com/gopatchy/bkl/internal/merge"
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 // Diff loads two files and returns the diff between them.
@@ -17,7 +19,7 @@ import (
 // The files are loaded directly without processing, matching bkld behavior.
 // If format is nil, it infers the format from the paths parameter.
 func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
-	preparedPaths, err := preparePathsForParser([]string{srcPath, dstPath}, rootPath, workingDir)
+	preparedPaths, err := utils.PreparePathsForParser([]string{srcPath, dstPath}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +39,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	}
 
 	for _, f := range fileObjs {
-		srcDocs, err = mergeFileObj(srcDocs, f)
+		srcDocs, err = merge.FileObj(srcDocs, f)
 		if err != nil {
 			return nil, fmt.Errorf("merging source %s: %w", srcPath, err)
 		}
@@ -54,7 +56,6 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		return nil, fmt.Errorf("destination file %s: %w", dstPath, err)
 	}
 
-	// Load file directly without processing
 	fileSystem2 := fsys.New(fx)
 	fileObjs2, err := file.LoadAndParents(fileSystem2, realDstPath, nil)
 	if err != nil {
@@ -62,7 +63,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	}
 
 	for _, f := range fileObjs2 {
-		dstDocs, err = mergeFileObj(dstDocs, f)
+		dstDocs, err = merge.FileObj(dstDocs, f)
 		if err != nil {
 			return nil, fmt.Errorf("merging destination %s: %w", dstPath, err)
 		}
@@ -72,7 +73,6 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		return nil, fmt.Errorf("diff operates on exactly 1 destination document per file, got %d", len(dstDocs))
 	}
 
-	// Perform diff
 	result, err := diff(dstDocs[0].Data, srcDocs[0].Data)
 	if err != nil {
 		return nil, err
@@ -93,14 +93,13 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		finalResult = result2
 
 	case nil:
-		// No differences - return just the match directive
+
 		finalResult = map[string]any{"$match": map[string]any{}}
 
 	default:
 		finalResult = result
 	}
 
-	// Determine format and return formatted output
 	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err
@@ -131,7 +130,7 @@ func diffMap(dst map[string]any, src any) (any, error) {
 		return diffMapMap(dst, src2)
 
 	default:
-		// Different types
+
 		return dst, nil
 	}
 }

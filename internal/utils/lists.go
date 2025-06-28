@@ -70,7 +70,7 @@ func PopListMapBoolValue(l []any, k string, v bool) (bool, []any, error) {
 			return []any{x}, nil
 		}
 
-		// Only match if map has exactly 1 key (the directive we're looking for)
+		// Directive isolation: maps with multiple keys aren't pure directives
 		if len(xMap) != 1 {
 			return []any{x}, nil
 		}

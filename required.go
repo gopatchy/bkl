@@ -7,6 +7,8 @@ import (
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
+	"github.com/gopatchy/bkl/internal/merge"
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 // Required loads a file and returns only the required fields and their ancestors.
@@ -14,7 +16,7 @@ import (
 // The file is loaded directly without processing, matching bklr behavior.
 // If format is nil, it infers the format from the paths parameter.
 func Required(fx fs.FS, path string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
-	preparedPaths, err := preparePathsForParser([]string{path}, rootPath, workingDir)
+	preparedPaths, err := utils.PreparePathsForParser([]string{path}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
@@ -26,14 +28,13 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 		return nil, fmt.Errorf("file %s: %w", path, err)
 	}
 
-	// Load file directly without processing
 	fileObjs, err := file.LoadAndParents(fsys.New(fx), realPath, nil)
 	if err != nil {
 		return nil, fmt.Errorf("loading %s: %w", path, err)
 	}
 
 	for _, f := range fileObjs {
-		docs, err = mergeFileObj(docs, f)
+		docs, err = merge.FileObj(docs, f)
 		if err != nil {
 			return nil, fmt.Errorf("merging %s: %w", path, err)
 		}
@@ -48,7 +49,6 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 		return nil, err
 	}
 
-	// Determine format and return formatted output
 	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err

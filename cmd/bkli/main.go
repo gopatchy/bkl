@@ -23,7 +23,7 @@ func main() {
 	if os.Getenv("BKL_VERSION") != "" {
 		bi, ok := debug.ReadBuildInfo()
 		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113
+			fatal(fmt.Errorf("ReadBuildInfo() failed")) //nolint:goerr113 // Dynamic error for build tool diagnostic output
 		}
 
 		fmt.Printf("%s", bi)

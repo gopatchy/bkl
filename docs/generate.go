@@ -26,7 +26,6 @@ type TemplateData struct {
 }
 
 func main() {
-	// Read sections YAML
 	data, err := os.ReadFile("sections.yaml")
 	if err != nil {
 		log.Fatal(err)
@@ -37,14 +36,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Read logo data from temp file
 	logoData, err := os.ReadFile("/tmp/bkl_logo_data.txt")
 	if err != nil {
 		log.Fatal("Error reading logo data:", err)
 	}
 	logoDataBase64 := string(logoData)
 
-	// Read font data from temp files
 	kometFontData, err := os.ReadFile("/tmp/komet_font_data.txt")
 	if err != nil {
 		log.Fatal("Error reading komet font data:", err)
@@ -57,13 +54,11 @@ func main() {
 	}
 	sourceCodeProFontDataStr := string(sourceCodeProFontData)
 
-	// Read template file
 	templateContent, err := os.ReadFile("template.html")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Create template
 	tmpl := template.Must(template.New("html").Funcs(template.FuncMap{
 		"formatContent": formatContent,
 		"formatNote":    formatNote,
@@ -73,7 +68,6 @@ func main() {
 		"safeURL":       func(s string) template.URL { return template.URL(s) },
 	}).Parse(string(templateContent)))
 
-	// Prepare data
 	templateData := TemplateData{
 		Description: "A flexible configuration templating language that simplifies configuration management across environments.",
 		IntroText1:  "bkl is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.",
@@ -87,13 +81,11 @@ func main() {
 		SourceCodeProFontData: sourceCodeProFontDataStr,
 	}
 
-	// Generate HTML
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, templateData); err != nil {
 		log.Fatal(err)
 	}
 
-	// Write output
 	if err := os.WriteFile("index.html", buf.Bytes(), 0o644); err != nil {
 		log.Fatal(err)
 	}

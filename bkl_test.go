@@ -160,7 +160,6 @@ func TestBKL(t *testing.T) {
 
 			output, err := runTestCase(testCase)
 
-			// Handle expected errors
 			if len(testCase.Errors) > 0 {
 				if err == nil {
 					t.Fatalf("Expected error containing one of %v, but got no error", testCase.Errors)
@@ -349,7 +348,6 @@ func TestCLI(t *testing.T) {
 
 			output, err := cmd.CombinedOutput()
 
-			// Handle expected errors
 			if len(testCase.Errors) > 0 {
 				if err == nil {
 					t.Fatalf("Expected error containing one of %v, but got no error", testCase.Errors)

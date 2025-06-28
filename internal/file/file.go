@@ -202,7 +202,6 @@ func (f *File) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
 	base := filepath.Base(f.Path)
 
 	parts := strings.Split(base, ".")
-	// Last part is file extension
 
 	switch {
 	case len(parts) < 2:

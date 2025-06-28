@@ -8,6 +8,8 @@ import (
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
+	"github.com/gopatchy/bkl/internal/merge"
+	"github.com/gopatchy/bkl/internal/utils"
 )
 
 // Intersect loads multiple files and returns their intersection.
@@ -15,7 +17,7 @@ import (
 // The files are loaded directly without processing, matching bkli behavior.
 // If format is nil, it infers the format from the formatPaths parameter.
 func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, format *string, formatPaths ...*string) ([]byte, error) {
-	preparedPaths, err := preparePathsForParser(paths, rootPath, workingDir)
+	preparedPaths, err := utils.PreparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +30,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 	fx2 := fsys.New(fx)
 
 	for i, path := range paths {
-		// Load and merge files for each path
+
 		var docs []*document.Document
 
 		realPath, _, err := fileMatch(fx, path)
@@ -36,14 +38,13 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
 
-		// Load file directly without processing
 		fileObjs, err := file.LoadAndParents(fx2, realPath, nil)
 		if err != nil {
 			return nil, fmt.Errorf("loading %s: %w", path, err)
 		}
 
 		for _, f := range fileObjs {
-			docs, err = mergeFileObj(docs, f)
+			docs, err = merge.FileObj(docs, f)
 			if err != nil {
 				return nil, fmt.Errorf("merging %s: %w", path, err)
 			}
@@ -64,7 +65,6 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 		}
 	}
 
-	// Determine format and return formatted output
 	ft, err := determineFormat(format, formatPaths...)
 	if err != nil {
 		return nil, err
