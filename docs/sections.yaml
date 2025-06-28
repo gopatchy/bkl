@@ -1012,6 +1012,7 @@
             a: 1
             b: 2
           highlights: ["a: 1", "b: 2"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -1026,6 +1027,7 @@
                   a: 1
                 $path: b
             highlights: ["$replace:", "$match:", "a: 1", "$path: b"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -1033,6 +1035,7 @@
               c: 3
             ---
             c: 3
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$replace</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
     - example:
@@ -1045,6 +1048,7 @@
               c: 3
               $replace: <value>[{a: 1}]</value>
             highlights: ["$replace: <value>[{a: 1}]</value>"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -1053,6 +1057,7 @@
             a: 1
             b: 2
           highlights: ["a: 1", "b: 2"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -1064,6 +1069,7 @@
               d: 4
               $replace: <value>[{a: 1}, b]</value>
             highlights: ["$replace: <value>[{a: 1}, b]</value>"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -1072,6 +1078,7 @@
             ---
             c: 3
           highlights: ["c: 3"]
+          languages: [[0, "yaml"]]
 
 - id: output
   title: $output
@@ -1088,10 +1095,12 @@
                   a: 1
                   b: 2
             highlights: ["$output: true"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             b: 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -1102,10 +1111,12 @@
                   - a: 1
                   - b: 2
             highlights: ["$output: true"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - a: 1
             - b: 2
+          languages: [[0, "yaml"]]
     - content: |
         Multiple instances of <highlight>$output: true</highlight> in a document will generate multiple output documents (delimited with <highlight>---</highlight>).
     - content: |
@@ -1120,10 +1131,12 @@
               c:
                 d: 2
             highlights: ["$output: false"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             c:
               d: 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -1134,10 +1147,12 @@
               c:
                 - d: 2
             highlights: ["$output: false"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             c:
               - d: 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -1147,9 +1162,11 @@
               ---
               b: 2
             highlights: ["$output: false"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             b: 2
+          languages: [[0, "yaml"]]
     - content: |
         Combine <highlight>$output</highlight> with <highlight>$replace</highlight> or <highlight>$merge</highlight> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
 
@@ -1166,6 +1183,7 @@
               b: $repeat
               $repeat: 2
             highlights: ["$repeat: 2", "b: $repeat"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: foo
@@ -1173,6 +1191,7 @@
             ---
             a: foo
             b: 1
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
     - example:
@@ -1184,6 +1203,7 @@
                 b: 3
               $value: $"{$repeat:a},{$repeat:b}"
             highlights: ["$repeat:", "a: 2", "b: 3", "$repeat:a", "$repeat:b"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             0,0
@@ -1197,6 +1217,7 @@
             1,1
             ---
             1,2
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> can contain a list of values to iterate over:
     - example:
@@ -1206,6 +1227,7 @@
               $repeat: [x, y, z]
               a: $repeat
             highlights: ["$repeat: [x, y, z]", "a: $repeat"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: x
@@ -1213,6 +1235,7 @@
             a: y
             ---
             a: z
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> supports range parameters for numeric sequences:
     - example:
@@ -1224,6 +1247,7 @@
                 $count: 3
               a: $repeat
             highlights: ["$repeat:", "$first: 10", "$count: 3", "a: $repeat"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 10
@@ -1231,6 +1255,7 @@
             a: 11
             ---
             a: 12
+          languages: [[0, "yaml"]]
     - content: |
         Range parameters require exactly 2 of <highlight>$first</highlight>, <highlight>$last</highlight>, and <highlight>$count</highlight>. Optional <highlight>$step</highlight> defaults to 1.
     - content: |
@@ -1244,6 +1269,7 @@
                   c: $repeat
                   $repeat: 3
             highlights: ["$repeat: 3", "c: $repeat"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a:
@@ -1253,6 +1279,7 @@
                 c: 1
               b2:
                 c: 2
+          languages: [[0, "yaml"]]
     - content: |
         Object-level repeat in lists:
     - example:
@@ -1263,12 +1290,14 @@
                 - b: $repeat
                   $repeat: [x, y, z]
             highlights: ["$repeat: [x, y, z]", "b: $repeat"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a:
               - b: x
               - b: y
               - b: z
+          languages: [[0, "yaml"]]
 
 - id: escape
   title: $$
@@ -1281,10 +1310,12 @@
           - code: |
               a: $$env:foo
             highlights: ["$$env:foo"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: $env:foo
           highlights: ["$env:foo"]
+          languages: [[0, "yaml"]]
 
 - id: toml
   title: TOML
@@ -1295,6 +1326,7 @@
         code: |
           "$parent" = false
         highlights: ["\"$parent\""]
+        languages: [[0, "toml"]]
 
 - id: bklb
   title: bklb
@@ -1329,6 +1361,7 @@
           
           $ catb service.test.json
           {"addr":"127.0.0.1","name":"myService","port":8081}
+        languages: [[0, "shell"], [2, "shell"], [3, "yaml"], [8, "shell"], [9, "toml"], [11, "shell"], [12, "toml"], [17, "shell"], [18, "shell"], [21, "shell"], [22, "yaml"], [27, "shell"], [28, "json"]]
         highlights: ["ln -s ~/go/bin/bklb ~/go/bin/catb", "catb service.test.toml", "catb service.test.yaml", "catb service.test.json"]
     - content: |
         Note that the files mentioned don't have to exist; <highlight>bklb</highlight> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
@@ -1341,6 +1374,7 @@
     - code:
         code: |
           $ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;
+        languages: [[0, "shell"]]
     - content: |
         <highlight>bkld</highlight> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <highlight><a href="#bkli">bkli</a></highlight>, it automates splitting existing configurations into layers.
     - example:
@@ -1350,43 +1384,52 @@
               a: 1
               b: $required
               c: 3
+            languages: [[0, "yaml"]]
           - code: |
               a: 1
               b: 2
               d: 4
+            languages: [[0, "yaml"]]
         result:
           code: |
             b: 2
             c: null
             d: 4
+          languages: [[0, "yaml"]]
     - example:
         operation: diff
         layers:
           - code: |
               - a: 1
               - b: 2
+            languages: [[0, "yaml"]]
           - code: |
               - a: 1
               - c: 3
+            languages: [[0, "yaml"]]
         result:
           code: |
             - c: 3
             - $delete:
                 b: 2
+          languages: [[0, "yaml"]]
     - example:
         operation: diff
         layers:
           - code: |
               - 1
               - 2
+            languages: [[0, "yaml"]]
           - code: |
               - 1
               - 3
+            languages: [[0, "yaml"]]
         result:
           code: |
             - 1
             - 3
             - $replace: true
+          languages: [[0, "yaml"]]
 
 - id: bkli
   title: bkli
@@ -1394,6 +1437,7 @@
     - code:
         code: |
           $ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...
+        languages: [[0, "shell"]]
     - content: |
         <highlight>bkli</highlight> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <highlight><a href="#bkld">bkld</a></highlight>, it automates splitting existing configurations into layers.
     - content: |
