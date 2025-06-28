@@ -4,1202 +4,1197 @@
 - id: example
   title: Example
   items:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: service.yaml
-                code: |
-                  addr: 127.0.0.1
-                  name: myService
-                  port: 8080
-              - label: service.test.toml
-                code: |
-                  port = 8081
-                highlights: ["8081"]
-          - items:
-              - label: "Run it!"
-                code: |
-                  $ bkl service.test.toml
-                  addr = '127.0.0.1'
-                  name = 'myService'
-                  port = 8081
-                highlights: ["8081"]
-    - type: text
-      content: |
-        bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>) and uses filename extensions to determine formats.
+    - side_by_side:
+        left:
+          label: service.yaml
+          code: |
+            addr: 127.0.0.1
+            name: myService
+            port: 8080
+        right:
+          label: service.test.toml
+          code: |
+            port = 8081
+          highlights: ["8081"]
+    - code:
+        label: "Run it!"
+        code: |
+          $ bkl service.test.toml
+          addr = '127.0.0.1'
+          name = 'myService'
+          port = 8081
+        highlights: ["8081"]
+    - content: |
+        bkl knows that <highlight>service.test.toml</highlight> inherits from <highlight>service.yaml</highlight> by the filename pattern (<a href="#inheritance">override with <highlight>$parent</highlight></a>) and uses filename extensions to determine formats.
 
 - id: install
   title: Install
   items:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: Using go
-                code: |
-                  # Install go from <a href="https://go.dev/dl/">go.dev</a>
-                  $ go install github.com/gopatchy/bkl/...@latest
-                  # Verify that ~/go/bin is in your $PATH
-          - items:
-              - label: macOS using brew
-                code: |
-                  # Install brew from <a href="https://brew.sh/">brew.sh</a>
-                  $ brew install gopatchy/bkl/bkl
-    - type: text
-      content: |
+    - code:
+        label: Using go
+        code: |
+          # Install go from <a href="https://go.dev/dl/">go.dev</a>
+          $ go install github.com/gopatchy/bkl/...@latest
+          # Verify that ~/go/bin is in your $PATH
+    - code:
+        label: macOS using brew
+        code: |
+          # Install brew from <a href="https://brew.sh/">brew.sh</a>
+          $ brew install gopatchy/bkl/bkl
+    - content: |
         You can also download binaries directly <a href="https://github.com/gopatchy/bkl/releases">here</a>.
 
 - id: formats
   title: Formats
   items:
-    - type: text
-      content: |
-        Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: YAML
-                code: |
-                  $ bkl -f yaml service.test.toml
-                  addr: 127.0.0.1
-                  name: myService
-                  port: 8081
-                highlights: ["-f yaml"]
-          - items:
-              - label: TOML
-                code: |
-                  $ bkl -f toml service.test.toml
-                  addr = '127.0.0.1'
-                  name = 'myService'
-                  port = 8081
-                highlights: ["-f toml"]
-          - items:
-              - label: JSON
-                code: |
-                  $ bkl -f json service.test.toml
-                  {"addr":"127.0.0.1","name":"myService","port":8081}
-                highlights: ["-f json"]
-          - items:
-              - label: JSON (pretty)
-                code: |
-                  $ bkl -f json-pretty service.test.toml
-                  {
-                    "addr": "127.0.0.1",
-                    "name": "myService",
-                    "port": 8081
-                  }
-                highlights: ["-f json-pretty"]
-    - type: text
-      content: |
-        <ifocus>jsonl</ifocus> is an alias for <ifocus>json</ifocus> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
-    - type: text
-      content: |
-        You can also set the output format implicitly by using a different file extension.
-    - type: example
-      example:
-        type: single
-        label: ""
+    - content: |
+        Output defaults to the same format as the specified input file. Use <highlight>-f</highlight> (or <highlight>--format</highlight>) to override.
+    - code:
+        label: YAML
         code: |
-          $ bkl service.test.<focus>yaml</focus>   # real file is service.test.<focus>toml</focus>
+          $ bkl -f yaml service.test.toml
           addr: 127.0.0.1
           name: myService
           port: 8081
+        highlights: ["-f yaml"]
+    - code:
+        label: TOML
+        code: |
+          $ bkl -f toml service.test.toml
+          addr = '127.0.0.1'
+          name = 'myService'
+          port = 8081
+        highlights: ["-f toml"]
+    - code:
+        label: JSON
+        code: |
+          $ bkl -f json service.test.toml
+          {"addr":"127.0.0.1","name":"myService","port":8081}
+        highlights: ["-f json"]
+    - code:
+        label: JSON (pretty)
+        code: |
+          $ bkl -f json-pretty service.test.toml
+          {
+            "addr": "127.0.0.1",
+            "name": "myService",
+            "port": 8081
+          }
+        highlights: ["-f json-pretty"]
+    - content: |
+        <highlight>jsonl</highlight> is an alias for <highlight>json</highlight> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
+    - content: |
+        You can also set the output format implicitly by using a different file extension.
+    - code:
+        code: |
+          $ bkl service.test.yaml   # real file is service.test.toml
+          addr: 127.0.0.1
+          name: myService
+          port: 8081
+        highlights: ["yaml", "toml"]
 
 - id: write
-  title: Write
+  title: Output
   items:
-    - type: text
-      content: |
+    - content: |
         Output goes to stdout by default. Errors always go to stderr.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: File Output
-                code: |
-                  $ bkl <focus>-o out.yaml</focus> service.test.toml
-    - type: text
-      content: |
-        Output format is autodetected from output filename (unless specified with <ifocus>-f</ifocus>).
+    - code:
+        label: File Output
+        code: |
+          $ bkl -o out.yaml service.test.toml
+        highlights: ["-o out.yaml"]
+    - content: |
+        Output format is autodetected from output filename (unless specified with <highlight>-f</highlight>).
 
 - id: inputs
   title: Inputs
   items:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: Commandline Layering
-                code: |
-                  $ bkl <focus>a.b.yaml c.d.yaml</focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml
-    - type: text
-      content: |
+    - code:
+        label: Commandline Layering
+        code: |
+          $ bkl a.b.yaml c.d.yaml   # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+        highlights: ["a.b.yaml c.d.yaml"]
+    - content: |
         Specifying multiple input files merges all layers in order.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: stdin
-                code: |
-                  $ bkl <focus>-- -.yaml</focus> <<'EOF'
-                  a: 1
-                  EOF
-    - type: text
-      content: |
-        Specifying an input file with the base name <ifocus>-</ifocus> and a valid format extension causes bkl to read that format from standard input. Use <ifocus>--</ifocus> before the filename to avoid it being treated as a flag.
+    - code:
+        label: stdin
+        code: |
+          $ bkl -- -.yaml <<'EOF'
+          a: 1
+          EOF
+        highlights: ["-- -.yaml"]
+    - content: |
+        Specifying an input file with the base name <highlight>-</highlight> and a valid format extension causes bkl to read that format from standard input. Use <highlight>--</highlight> before the filename to avoid it being treated as a flag.
 
 - id: inheritance
   title: Inheritance
   items:
-    - type: text
-      content: |
-        Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent layers may have any supported file extension.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: Set Parent In File
-                code: |
-                  <focus>$parent: a.b</focus>   # inherits from a.b.<ext>, from a.<ext>
-    - type: text
-      content: |
+    - content: |
+        Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <highlight>.</highlight> and treated as an inheritance hierarchy (e.g. <highlight>a.b.c.yaml</highlight> inherits from <highlight>a.b.&lt;ext&gt;</highlight> inherits from <highlight>a.&lt;ext&gt;</highlight>). Parent layers may have any supported file extension.
+    - code:
+        label: Set Parent In File
+        code: |
+          $parent: a.b   # inherits from a.b.<ext>, from a.<ext>
+        highlights: ["$parent: a.b"]
+    - content: |
         bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: Parent List
-                code: |
-                  <focus>$parent:
-                  - a
-                  - b</focus>
-              - label: Parent Wildcard
-                code: |
-                  <focus>$parent: a.*</focus>
-    - type: text
-      content: |
-        Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
-    - type: text
-      content: |
-        <ifocus>*</ifocus> does not match <ifocus>.</ifocus>. <ifocus>a.*</ifocus> matches <ifocus>a.b.yaml</ifocus> but not <ifocus>a.b.c.yaml</ifocus>.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: Set Parent In CLI
-                code: |
-                  $ bkl <focus>a.b.yaml c.d.yaml</focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
-                  $ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml
-    - type: text
-      content: |
-        Layer order can be specified with commandline argument order. The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: No Parent
-                code: |
-                  <focus>$parent: false</focus>   # no further inheritance
-    - type: text
-      content: |
-        Setting <ifocus>$parent</ifocus> to <ifocus>false</ifocus> or <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.
+    - side_by_side:
+        left:
+          label: Parent List
+          code: |
+            $parent:
+            - a
+            - b
+          highlights: ["$parent:", "- a", "- b"]
+        right:
+          label: Parent Wildcard
+          code: |
+            $parent: a.*
+          highlights: ["$parent: a.*"]
+    - content: |
+        Setting <highlight>$parent</highlight> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
+    - content: |
+        <highlight>*</highlight> does not match <highlight>.</highlight>. <highlight>a.*</highlight> matches <highlight>a.b.yaml</highlight> but not <highlight>a.b.c.yaml</highlight>.
+    - code:
+        label: Set Parent In CLI
+        code: |
+          $ bkl a.b.yaml c.d.yaml      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
+          $ bkl -P a.b.yaml c.d.yaml   # a.b.yaml + c.d.yaml
+        highlights: ["a.b.yaml c.d.yaml", "-P a.b.yaml c.d.yaml"]
+    - content: |
+        Layer order can be specified with commandline argument order. The <highlight>-P</highlight> flag (or <highlight>--skip-parent</highlight>) tells bkl to not load parent layers using filenames or <highlight>$parent</highlight>.
+    - code:
+        label: No Parent
+        code: |
+          $parent: false   # no further inheritance
+        highlights: ["$parent: false"]
+    - content: |
+        Setting <highlight>$parent</highlight> to <highlight>false</highlight> or <highlight>null</highlight> stops any further inheritance regardless of filename structure.
 
 - id: streams
   title: Streams
   items:
-    - type: text
-      content: |
-        Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
-    - type: text
-      content: |
-        To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <ifocus>$match</ifocus> allows applying to specific parent documents.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  ---
-                  b: 2
-              - code: |
-                  c: 3
-              - code: |
-                  a: 1
-                  <focus>c: 3</focus>
-                  ---
-                  b: 2
-                  <focus>c: 3</focus>
-            operator: "+"
-          - items:
-              - code: |
-                  a: 1
-                  ---
-                  b: 2
-              - code: |
-                  <focus>$match:
-                    b: 2</focus>
-                  c: 3
-              - code: |
-                  a: 1
-                  ---
-                  b: 2
-                  <focus>c: 3</focus>
-            operator: "+"
-    - type: text
-      content: |
-        The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  ---
-                  b: 2
-                  ---
-                  a: 1
-              - code: |
-                  <focus>$match:
-                    a: 1</focus>
-                  c: 3
-              - code: |
-                  a: 1
-                  <focus>c: 3</focus>
-                  ---
-                  b: 2
-                  ---
-                  a: 1
-                  <focus>c: 3</focus>
-            operator: "+"
-    - type: text
-      content: |
-        <ifocus>$invert: true</ifocus> inside a <ifocus>$match</ifocus> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  ---
-                  b: 2
-              - code: |
-                  $match:
-                    a: 1
-                    <focus>$invert: true</focus>
-                  c: 3
-              - code: |
-                  a: 1
-                  ---
-                  b: 2
-                  <focus>c: 3</focus>
-            operator: "+"
-    - type: text
-      content: |
-        <ifocus>$match: null</ifocus> forces the updates to apply to a new document.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-              - code: |
-                  <focus>$match: null</focus>
-                  b: 2
-              - code: |
-                  a: 1
-                  ---
-                  <focus>b: 2</focus>
-            operator: "+"
+    - content: |
+        Streams package multiple documents into a single file. YAML/TOML streams are delimited with <highlight>---</highlight> or sometimes <highlight>+++</highlight>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
+    - content: |
+        To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <highlight>$match</highlight> allows applying to specific parent documents.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              ---
+              b: 2
+          - code: |
+              c: 3
+        result:
+          code: |
+            a: 1
+            c: 3
+            ---
+            b: 2
+            c: 3
+          highlights: ["c: 3", "c: 3"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              ---
+              b: 2
+          - code: |
+              $match:
+                b: 2
+              c: 3
+            highlights: ["$match:", "b: 2"]
+        result:
+          code: |
+            a: 1
+            ---
+            b: 2
+            c: 3
+          highlights: ["c: 3"]
+    - content: |
+        The supplied pattern can match multiple documents and the updates will be applied to all of them. <highlight>$match: {}</highlight> matches any documents with a map as their root element, regardless of parent.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              ---
+              b: 2
+              ---
+              a: 1
+          - code: |
+              $match:
+                a: 1
+              c: 3
+            highlights: ["$match:", "a: 1"]
+        result:
+          code: |
+            a: 1
+            c: 3
+            ---
+            b: 2
+            ---
+            a: 1
+            c: 3
+          highlights: ["c: 3", "c: 3"]
+    - content: |
+        <highlight>$invert: true</highlight> inside a <highlight>$match</highlight> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              ---
+              b: 2
+          - code: |
+              $match:
+                a: 1
+                $invert: true
+              c: 3
+            highlights: ["$invert: true"]
+        result:
+          code: |
+            a: 1
+            ---
+            b: 2
+            c: 3
+          highlights: ["c: 3"]
+    - content: |
+        <highlight>$match: null</highlight> forces the updates to apply to a new document.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+          - code: |
+              $match: null
+              b: 2
+            highlights: ["$match: null"]
+        result:
+          code: |
+            a: 1
+            ---
+            b: 2
+          highlights: ["b: 2"]
 
 - id: maps
   title: Maps
   items:
-    - type: text
-      content: |
-        Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-              - code: |
-                  b: 2
-              - code: |
-                  a: 1
-                  b: 2
-            operator: "+"
-          - items:
-              - code: |
-                  a: 1
-              - code: |
-                  b: 2
-                  <focus>$replace: true</focus>
-              - code: |
-                  b: 2
-            operator: "+"
-          - items:
-              - code: |
-                  a: 1
-                  b: 2
-              - code: |
-                  c: 3
-                  <focus>b: $delete</focus>
-              - code: |
-                  a: 1
-                  c: 3
-            operator: "+"
-    - type: text
-      content: |
-        bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
+    - content: |
+        Maps are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+          - code: |
+              b: 2
+        result:
+          code: |
+            a: 1
+            b: 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+          - code: |
+              b: 2
+              $replace: true
+            highlights: ["$replace: true"]
+        result:
+          code: |
+            b: 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: 2
+          - code: |
+              c: 3
+              b: $delete
+            highlights: ["b: $delete"]
+        result:
+          code: |
+            a: 1
+            c: 3
+    - content: |
+        bkl returns an error if you use <highlight>$delete</highlight>, <highlight>$replace: true</highlight>, or a <highlight>key: value</highlight> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 
 - id: lists
   title: Lists
   items:
-    - type: text
-      content: |
-        Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  - 1
-              - code: |
-                  - 2
-              - code: |
-                  - 1
-                  - 2
-            operator: "+"
-          - items:
-              - code: |
-                  - 1
-              - code: |
-                  - 2
-                  - <focus>$replace: true</focus>
-              - code: |
-                  - 2
-            operator: "+"
-          - items:
-              - code: |
-                  - x: 1
-                  - x: 2
-              - code: |
-                  - x: 3
-                  - <focus>$delete:
-                      x: 2</focus>
-              - code: |
-                  - x: 1
-                  - x: 3
-            operator: "+"
-    - type: text
-      content: |
-        bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.
-    - type: text
-      content: |
-        To update a specific list item from a parent layer, use <ifocus>$match</ifocus>. Combine it with <ifocus>$value</ifocus> for scalars.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  - a: 1
-                  - b: 2
-              - code: |
-                  - <focus>$match:
-                      b: 2</focus>
-                    b: 10
-              - code: |
-                  - a: 1
-                  - b: 10
-            operator: "+"
-          - items:
-              - code: |
-                  - 1
-                  - 2
-              - code: |
-                  - <focus>$match: 2
-                    $value: 10</focus>
-              - code: |
-                  - 1
-                  - 10
-            operator: "+"
+    - content: |
+        Lists are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              - 1
+          - code: |
+              - 2
+        result:
+          code: |
+            - 1
+            - 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              - 1
+          - code: |
+              - 2
+              - $replace: true
+            highlights: ["$replace: true"]
+        result:
+          code: |
+            - 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              - x: 1
+              - x: 2
+          - code: |
+              - x: 3
+              - $delete:
+                  x: 2
+            highlights: ["$delete:", "x: 2"]
+        result:
+          code: |
+            - x: 1
+            - x: 3
+    - content: |
+        bkl returns an error if you use <highlight>$replace: true</highlight> or <highlight>$delete</highlight> when they don't override a value from a lower layer. This helps keep upper layers minimal.
+    - content: |
+        To update a specific list item from a parent layer, use <highlight>$match</highlight>. Combine it with <highlight>$value</highlight> for scalars.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              - a: 1
+              - b: 2
+          - code: |
+              - $match:
+                  b: 2
+                b: 10
+            highlights: ["$match:", "b: 2"]
+        result:
+          code: |
+            - a: 1
+            - b: 10
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              - 1
+              - 2
+          - code: |
+              - $match: 2
+                $value: 10
+            highlights: ["$match: 2", "$value: 10"]
+        result:
+          code: |
+            - 1
+            - 10
 
 - id: interp
   title: $""
   items:
-    - type: text
-      content: |
-        Use <ifocus>$""</ifocus> to interpolate format strings with <a href="#merge"><ifocus>$merge</ifocus></a>-style references.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  b:
-                    c: foo
-                  d: <focus>$"{b.c} bar {a} 2"</focus>
-              - code: |
-                  a: 1
-                  b:
-                    c: foo
-                  d: <focus>foo bar 1 2</focus>
-            operator: "="
+    - content: |
+        Use <highlight>$""</highlight> to interpolate format strings with <a href="#merge"><highlight>$merge</highlight></a>-style references.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                c: foo
+              d: $"{b.c} bar {a} 2"
+            highlights: ["$\"{b.c} bar {a} 2\""]
+        result:
+          code: |
+            a: 1
+            b:
+              c: foo
+            d: foo bar 1 2
+          highlights: ["foo bar 1 2"]
 
 - id: decode
   title: $decode
   items:
-    - type: text
-      content: |
-        <ifocus>$decode</ifocus> transforms a string into a tree by parsing standard formats.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  $value: |
-                    <focus>{"a":1}</focus>
-                  <focus>$decode: json</focus>
-              - code: |
-                  <focus>a: 1</focus>
-            operator: "="
+    - content: |
+        <highlight>$decode</highlight> transforms a string into a tree by parsing standard formats.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              $value: |
+                {"a":1}
+              $decode: json
+            highlights: ["{\"a\":1}", "$decode: json"]
+        result:
+          code: |
+            a: 1
+          highlights: ["a: 1"]
 
 - id: env
   title: $env
   items:
-    - type: text
-      content: |
-        Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys and values.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  # export FOO=test
-                  <focus>"$env:FOO"</focus>: 1
-              - code: |
-                  <focus>test</focus>: 1
-            operator: "="
-          - items:
-              - code: |
-                  # export FOO=test
-                  a: <focus>$env:FOO</focus>
-              - code: |
-                  a: <focus>test</focus>
-            operator: "="
-    - type: text
-      content: |
-        Note that all <ifocus>$env:</ifocus> substitutions result in string values even if the substituted value is <ifocus>true</ifocus>, <ifocus>false</ifocus>, <ifocus>null</ifocus>, or all digits.
+    - content: |
+        Use <highlight>$env:</highlight> to substitute environment variables. This is supported in keys and values.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              # export FOO=test
+              "$env:FOO": 1
+            highlights: ["\"$env:FOO\""]
+        result:
+          code: |
+            test: 1
+          highlights: ["test"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              # export FOO=test
+              a: $env:FOO
+            highlights: ["$env:FOO"]
+        result:
+          code: |
+            a: test
+          highlights: ["test"]
+    - content: |
+        Note that all <highlight>$env:</highlight> substitutions result in string values even if the substituted value is <highlight>true</highlight>, <highlight>false</highlight>, <highlight>null</highlight>, or all digits.
 
 - id: encode
   title: $encode
   items:
-    - type: text
-      content: |
-        <ifocus>$encode</ifocus> transforms the subtree into the specified format.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - label: base64
-                code: |
-                  $value: a
-                  <focus>$encode: base64</focus>
-              - code: |
-                  YQ==
-            operator: "="
-          - items:
-              - label: flags
-                code: |
-                  a: 1
-                  b: 2
-                  <focus>$encode: flags</focus>
-                  # [tolist:=, prefix:--]
-              - code: |
-                  - --a=1
-                  - --b=2
-            operator: "="
-          - items:
-              - label: flatten
-                code: |
-                  - - a
-                    - b
-                  - - c
-                    - 4
-                  - e
-                  - <focus>$encode: flatten</focus>
-              - code: |
-                  - a
-                  - b
-                  - c
-                  - 4
-                  - e
-            operator: "="
-          - items:
-              - label: join
-                code: |
-                  $value: [a, b]
-                  <focus>$encode: join:/</focus>
-              - code: |
-                  a/b
-            operator: "="
-          - items:
-              - label: json
-                code: |
-                  a: 1
-                  b: 2
-                  <focus>$encode: json</focus>
-              - code: |
-                  |
-                    {"a":1,"b":2}
-            operator: "="
-          - items:
-              - label: json (list)
-                code: |
-                  - a: 1
-                  - b: 2
-                  - <focus>$encode: json</focus>
-              - code: |
-                  |
-                    [{"a":1},{"b":2}]
-            operator: "="
-          - items:
-              - label: prefix
-                code: |
-                  - a
-                  - 2
-                  - <focus>$encode: prefix:X</focus>
-              - code: |
-                  - Xa
-                  - X2
-            operator: "="
-          - items:
-              - label: tolist
-                code: |
-                  a: 1
-                  b: 2
-                  <focus>$encode: tolist:=</focus>
-              - code: |
-                  - a=1
-                  - b=2
-            operator: "="
-          - items:
-              - label: Stacking
-                code: |
-                  a: 1
-                  b: 2
-                  <focus>$encode: [tolist:=, "join:,"]</focus>
-              - code: |
-                  a=1,b=2
-            operator: "="
+    - content: |
+        <highlight>$encode</highlight> transforms the subtree into the specified format.
+    - example:
+        operation: evaluate
+        layers:
+          - label: base64
+            code: |
+              $value: a
+              $encode: base64
+            highlights: ["$encode: base64"]
+        result:
+          code: |
+            YQ==
+    - example:
+        operation: evaluate
+        layers:
+          - label: flags
+            code: |
+              a: 1
+              b: 2
+              $encode: flags
+              # [tolist:=, prefix:--]
+            highlights: ["$encode: flags"]
+        result:
+          code: |
+            - --a=1
+            - --b=2
+    - example:
+        operation: evaluate
+        layers:
+          - label: flatten
+            code: |
+              - - a
+                - b
+              - - c
+                - 4
+              - e
+              - $encode: flatten
+            highlights: ["$encode: flatten"]
+        result:
+          code: |
+            - a
+            - b
+            - c
+            - 4
+            - e
+    - example:
+        operation: evaluate
+        layers:
+          - label: join
+            code: |
+              $value: [a, b]
+              $encode: join:/
+            highlights: ["$encode: join:/"]
+        result:
+          code: |
+            a/b
+    - example:
+        operation: evaluate
+        layers:
+          - label: json
+            code: |
+              a: 1
+              b: 2
+              $encode: json
+            highlights: ["$encode: json"]
+        result:
+          code: |
+            |
+              {"a":1,"b":2}
+    - example:
+        operation: evaluate
+        layers:
+          - label: json (list)
+            code: |
+              - a: 1
+              - b: 2
+              - $encode: json
+            highlights: ["$encode: json"]
+        result:
+          code: |
+            |
+              [{"a":1},{"b":2}]
+    - example:
+        operation: evaluate
+        layers:
+          - label: prefix
+            code: |
+              - a
+              - 2
+              - $encode: prefix:X
+            highlights: ["$encode: prefix:X"]
+        result:
+          code: |
+            - Xa
+            - X2
+    - example:
+        operation: evaluate
+        layers:
+          - label: tolist
+            code: |
+              a: 1
+              b: 2
+              $encode: tolist:=
+            highlights: ["$encode: tolist:="]
+        result:
+          code: |
+            - a=1
+            - b=2
+    - example:
+        operation: evaluate
+        layers:
+          - label: Stacking
+            code: |
+              a: 1
+              b: 2
+              $encode: [tolist:=, "join:,"]
+            highlights: ["$encode: [tolist:=, \"join:,\"]"]
+        result:
+          code: |
+            a=1,b=2
 
 - id: required
   title: $required
   items:
-    - type: text
-      content: |
-        Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  <focus>b: $required</focus>
-              - code: |
-                  c: 3
-              - code: |
-                  Error
-            operator: "+"
-          - items:
-              - code: |
-                  a: 1
-                  <focus>b: $required</focus>
-              - code: |
-                  <focus>b: 2</focus>
-                  c: 3
-              - code: |
-                  a: 1
-                  b: 2
-                  c: 3
-            operator: "+"
-          - items:
-              - code: |
-                  a: 1
-                  <focus>b:
-                    - $required</focus>
-              - code: |
-                  c: 3
-              - code: |
-                  Error
-            operator: "+"
-          - items:
-              - code: |
-                  a: 1
-                  <focus>b:
-                    - $required</focus>
-              - code: |
-                  <focus>b:
-                    - 2</focus>
-                  c: 3
-              - code: |
-                  a: 1
-                  b:
-                    - 2
-                  c: 3
-            operator: "+"
+    - content: |
+        Use <highlight>$required</highlight> in lower layers to force upper layers to replace the value.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: $required
+            highlights: ["b: $required"]
+          - code: |
+              c: 3
+        result:
+          code: |
+            Error
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: $required
+            highlights: ["b: $required"]
+          - code: |
+              b: 2
+              c: 3
+            highlights: ["b: 2"]
+        result:
+          code: |
+            a: 1
+            b: 2
+            c: 3
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                - $required
+            highlights: ["b:", "- $required"]
+          - code: |
+              c: 3
+        result:
+          code: |
+            Error
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                - $required
+            highlights: ["b:", "- $required"]
+          - code: |
+              b:
+                - 2
+              c: 3
+            highlights: ["b:", "- 2"]
+        result:
+          code: |
+            a: 1
+            b:
+              - 2
+            c: 3
 
 - id: merge
   title: $merge
   items:
-    - type: text
-      content: |
-        Use <ifocus>$merge</ifocus> to merge the contents one subtree or scalar value into another.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    b: 2
-                    <focus>$merge: foo.bar</focus>
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    <focus>a: 1</focus>
-                    b: 2
-            operator: "="
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      - a: 1
-                  zig:
-                    - b: 2
-                    - <focus>$merge: foo.bar</focus>
-              - code: |
-                  foo:
-                    bar:
-                      - a: 1
-                  zig:
-                    - b: 2
-                    - <focus>a: 1</focus>
-            operator: "="
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    b: 2
-                    c: <focus>$merge:foo.bar.a</focus>
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    b: 2
-                    c: <focus>1</focus>
-            operator: "="
-    - type: text
-      content: |
-        You can also merge across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
+    - content: |
+        Use <highlight>$merge</highlight> to merge the contents one subtree or scalar value into another.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
                   a: 1
-                  b: 2
-                  ---
-                  c: 3
-                  <focus>$merge:
-                    $match:
-                      a: 1</focus>
-              - code: |
+              zig:
+                b: 2
+                $merge: foo.bar
+            highlights: ["$merge: foo.bar"]
+        result:
+          code: |
+            foo:
+              bar:
+                a: 1
+            zig:
+              a: 1
+              b: 2
+          highlights: ["a: 1"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
+                  - a: 1
+              zig:
+                - b: 2
+                - $merge: foo.bar
+            highlights: ["$merge: foo.bar"]
+        result:
+          code: |
+            foo:
+              bar:
+                - a: 1
+            zig:
+              - b: 2
+              - a: 1
+          highlights: ["a: 1"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
                   a: 1
-                  b: 2
-                  ---
-                  <focus>a: 1
-                  b: 2</focus>
-                  c: 3
-            operator: "="
-          - items:
-              - code: |
+              zig:
+                b: 2
+                c: $merge:foo.bar.a
+            highlights: ["$merge:foo.bar.a"]
+        result:
+          code: |
+            foo:
+              bar:
+                a: 1
+            zig:
+              b: 2
+              c: 1
+          highlights: ["1"]
+    - content: |
+        You can also merge across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: 2
+              ---
+              c: 3
+              $merge:
+                $match:
                   a: 1
-                  b:
-                    c: 3
-                  ---
-                  d: 4
-                  <focus>$merge:
-                    $match:
-                      a: 1
-                    $path: b</focus>
-              - code: |
+            highlights: ["$merge:", "$match:", "a: 1"]
+        result:
+          code: |
+            a: 1
+            b: 2
+            ---
+            a: 1
+            b: 2
+            c: 3
+          highlights: ["a: 1", "b: 2"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                c: 3
+              ---
+              d: 4
+              $merge:
+                $match:
                   a: 1
-                  b:
-                    c: 3
-                  ---
-                  <focus>c: 3</focus>
-                  d: 4
-            operator: "="
-    - type: text
-      content: |
-        <ifocus>$merge</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  b: 2
-                  ---
-                  c: 3
-                  <focus>$merge: <value>[{a: 1}]</value></focus>
-              - code: |
-                  a: 1
-                  b: 2
-                  ---
-                  <focus>a: 1
-                  b: 2</focus>
-                  c: 3
-            operator: "="
-          - items:
-              - code: |
-                  a: 1
-                  b:
-                    c: 3
-                  ---
-                  d: 4
-                  <focus>$merge: <value>[{a: 1}, b]</value></focus>
-              - code: |
-                  a: 1
-                  b:
-                    c: 3
-                  ---
-                  <focus>c: 3</focus>
-                  d: 4
-            operator: "="
+                $path: b
+            highlights: ["$merge:", "$match:", "a: 1", "$path: b"]
+        result:
+          code: |
+            a: 1
+            b:
+              c: 3
+            ---
+            c: 3
+            d: 4
+          highlights: ["c: 3"]
+    - content: |
+        <highlight>$merge</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: 2
+              ---
+              c: 3
+              $merge: <value>[{a: 1}]</value>
+            highlights: ["$merge: <value>[{a: 1}]</value>"]
+        result:
+          code: |
+            a: 1
+            b: 2
+            ---
+            a: 1
+            b: 2
+            c: 3
+          highlights: ["a: 1", "b: 2"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                c: 3
+              ---
+              d: 4
+              $merge: <value>[{a: 1}, b]</value>
+            highlights: ["$merge: <value>[{a: 1}, b]</value>"]
+        result:
+          code: |
+            a: 1
+            b:
+              c: 3
+            ---
+            c: 3
+            d: 4
+          highlights: ["c: 3"]
 
 - id: replace
   title: $replace
   items:
-    - type: text
-      content: |
-        Use <ifocus>$replace</ifocus> to merge the contents of one subtree or scalar value with another.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    b: 2
-                    <focus>$replace: foo.bar</focus>
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    <focus>a: 1</focus>
-            operator: "="
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      - a: 1
-                  zig:
-                    - b: 2
-                    - <focus>$replace: foo.bar</focus>
-              - code: |
-                  foo:
-                    bar:
-                      - a: 1
-                  zig:
-                    - <focus>a: 1</focus>
-            operator: "="
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    b: 2
-                    c: <focus>$replace:foo.bar.a</focus>
-              - code: |
-                  foo:
-                    bar:
-                      a: 1
-                  zig:
-                    b: 2
-                    c: <focus>1</focus>
-            operator: "="
-    - type: text
-      content: |
-        Note that <ifocus>$merge</ifocus> and <ifocus>$replace</ifocus> are equivalent for scalar values.
-    - type: text
-      content: |
-        You can also replace across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
+    - content: |
+        Use <highlight>$replace</highlight> to merge the contents of one subtree or scalar value with another.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
                   a: 1
-                  b: 2
-                  ---
-                  c: 3
-                  <focus>$replace:
-                    $match:
-                      a: 1</focus>
-              - code: |
+              zig:
+                b: 2
+                $replace: foo.bar
+            highlights: ["$replace: foo.bar"]
+        result:
+          code: |
+            foo:
+              bar:
+                a: 1
+            zig:
+              a: 1
+          highlights: ["a: 1"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
+                  - a: 1
+              zig:
+                - b: 2
+                - $replace: foo.bar
+            highlights: ["$replace: foo.bar"]
+        result:
+          code: |
+            foo:
+              bar:
+                - a: 1
+            zig:
+              - a: 1
+          highlights: ["a: 1"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
                   a: 1
-                  b: 2
-                  ---
-                  <focus>a: 1
-                  b: 2</focus>
-            operator: "="
-          - items:
-              - code: |
+              zig:
+                b: 2
+                c: $replace:foo.bar.a
+            highlights: ["$replace:foo.bar.a"]
+        result:
+          code: |
+            foo:
+              bar:
+                a: 1
+            zig:
+              b: 2
+              c: 1
+          highlights: ["1"]
+    - content: |
+        Note that <highlight>$merge</highlight> and <highlight>$replace</highlight> are equivalent for scalar values.
+    - content: |
+        You can also replace across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: 2
+              ---
+              c: 3
+              $replace:
+                $match:
                   a: 1
-                  b:
-                    c: 3
-                  ---
-                  d: 4
-                  <focus>$replace:
-                    $match:
-                      a: 1
-                    $path: b</focus>
-              - code: |
+            highlights: ["$replace:", "$match:", "a: 1"]
+        result:
+          code: |
+            a: 1
+            b: 2
+            ---
+            a: 1
+            b: 2
+          highlights: ["a: 1", "b: 2"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                c: 3
+              ---
+              d: 4
+              $replace:
+                $match:
                   a: 1
-                  b:
-                    c: 3
-                  ---
-                  <focus>c: 3</focus>
-                  d: 4
-            operator: "="
-    - type: text
-      content: |
-        <ifocus>$replace</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  b: 2
-                  ---
-                  c: 3
-                  <focus>$replace: <value>[{a: 1}]</value></focus>
-              - code: |
-                  a: 1
-                  b: 2
-                  ---
-                  <focus>a: 1
-                  b: 2</focus>
-            operator: "="
-          - items:
-              - code: |
-                  a: 1
-                  b:
-                    c: 3
-                  ---
-                  d: 4
-                  <focus>$replace: <value>[{a: 1}, b]</value></focus>
-              - code: |
-                  a: 1
-                  b:
-                    c: 3
-                  ---
-                  <focus>c: 3</focus>
-                  d: 4
-            operator: "="
+                $path: b
+            highlights: ["$replace:", "$match:", "a: 1", "$path: b"]
+        result:
+          code: |
+            a: 1
+            b:
+              c: 3
+            ---
+            c: 3
+    - content: |
+        <highlight>$replace</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b: 2
+              ---
+              c: 3
+              $replace: <value>[{a: 1}]</value>
+            highlights: ["$replace: <value>[{a: 1}]</value>"]
+        result:
+          code: |
+            a: 1
+            b: 2
+            ---
+            a: 1
+            b: 2
+          highlights: ["a: 1", "b: 2"]
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              b:
+                c: 3
+              ---
+              d: 4
+              $replace: <value>[{a: 1}, b]</value>
+            highlights: ["$replace: <value>[{a: 1}, b]</value>"]
+        result:
+          code: |
+            a: 1
+            b:
+              c: 3
+            ---
+            c: 3
+          highlights: ["c: 3"]
 
 - id: output
   title: $output
   items:
-    - type: text
-      content: |
-        Use <ifocus>$output: true</ifocus> to select a subtree for output instead of the document root.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      <focus>$output: true</focus>
-                      a: 1
-                      b: 2
-              - code: |
+    - content: |
+        Use <highlight>$output: true</highlight> to select a subtree for output instead of the document root.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
+                  $output: true
                   a: 1
                   b: 2
-            operator: "="
-          - items:
-              - code: |
-                  foo:
-                    bar:
-                      - <focus>$output: true</focus>
-                      - a: 1
-                      - b: 2
-              - code: |
+            highlights: ["$output: true"]
+        result:
+          code: |
+            a: 1
+            b: 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              foo:
+                bar:
+                  - $output: true
                   - a: 1
                   - b: 2
-            operator: "="
-    - type: text
-      content: |
-        Multiple instances of <ifocus>$output: true</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
-    - type: text
-      content: |
-        Use <ifocus>$output: false</ifocus> to omit a subtree or entire document from the output.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a:
-                    b: 1
-                    <focus>$output: false</focus>
-                  c:
-                    d: 2
-              - code: |
-                  c:
-                    d: 2
-            operator: "="
-          - items:
-              - code: |
-                  a:
-                    - b: 1
-                    - <focus>$output: false</focus>
-                  c:
-                    - d: 2
-              - code: |
-                  c:
-                    - d: 2
-            operator: "="
-          - items:
-              - code: |
-                  a: 1
-                  <focus>$output: false</focus>
-                  ---
-                  b: 2
-              - code: |
-                  b: 2
-            operator: "="
-    - type: text
-      content: |
-        Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
+            highlights: ["$output: true"]
+        result:
+          code: |
+            - a: 1
+            - b: 2
+    - content: |
+        Multiple instances of <highlight>$output: true</highlight> in a document will generate multiple output documents (delimited with <highlight>---</highlight>).
+    - content: |
+        Use <highlight>$output: false</highlight> to omit a subtree or entire document from the output.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a:
+                b: 1
+                $output: false
+              c:
+                d: 2
+            highlights: ["$output: false"]
+        result:
+          code: |
+            c:
+              d: 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a:
+                - b: 1
+                - $output: false
+              c:
+                - d: 2
+            highlights: ["$output: false"]
+        result:
+          code: |
+            c:
+              - d: 2
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+              $output: false
+              ---
+              b: 2
+            highlights: ["$output: false"]
+        result:
+          code: |
+            b: 2
+    - content: |
+        Combine <highlight>$output</highlight> with <highlight>$replace</highlight> or <highlight>$merge</highlight> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
 
 - id: repeat
   title: $repeat
   items:
-    - type: text
-      content: |
-        <ifocus>$repeat:</ifocus> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <ifocus>$repeat</ifocus> can be used to reference the zero-based repeat index.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: foo
-                  b: <focus>$repeat</focus>
-                  <focus>$repeat: 2</focus>
-              - code: |
-                  a: foo
-                  b: 0
-                  ---
-                  a: foo
-                  b: 1
-            operator: "="
-    - type: text
-      content: |
-        <ifocus>$repeat:</ifocus> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  <focus>$repeat:
-                    a: 2
-                    b: 3</focus>
-                  $value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"
-              - code: |
-                  0,0
-                  ---
-                  0,1
-                  ---
-                  0,2
-                  ---
-                  1,0
-                  ---
-                  1,1
-                  ---
-                  1,2
-            operator: "="
-    - type: text
-      content: |
-        <ifocus>$repeat:</ifocus> can contain a list of values to iterate over:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  <focus>$repeat: [x, y, z]</focus>
-                  a: <focus>$repeat</focus>
-              - code: |
-                  a: x
-                  ---
-                  a: y
-                  ---
-                  a: z
-            operator: "="
-    - type: text
-      content: |
-        <ifocus>$repeat:</ifocus> supports range parameters for numeric sequences:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  <focus>$repeat:
-                    $first: 10
-                    $count: 3</focus>
-                  a: <focus>$repeat</focus>
-              - code: |
-                  a: 10
-                  ---
-                  a: 11
-                  ---
-                  a: 12
-            operator: "="
-    - type: text
-      content: |
-        Range parameters require exactly 2 of <ifocus>$first</ifocus>, <ifocus>$last</ifocus>, and <ifocus>$count</ifocus>. Optional <ifocus>$step</ifocus> defaults to 1.
-    - type: text
-      content: |
-        <ifocus>$repeat:</ifocus> also works at the object level within maps and lists:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a:
-                    $"b{$repeat}":
-                      c: <focus>$repeat</focus>
-                      <focus>$repeat: 3</focus>
-              - code: |
-                  a:
-                    b0:
-                      c: 0
-                    b1:
-                      c: 1
-                    b2:
-                      c: 2
-            operator: "="
-    - type: text
-      content: |
+    - content: |
+        <highlight>$repeat:</highlight> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <highlight>$repeat</highlight> can be used to reference the zero-based repeat index.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: foo
+              b: $repeat
+              $repeat: 2
+            highlights: ["$repeat: 2", "b: $repeat"]
+        result:
+          code: |
+            a: foo
+            b: 0
+            ---
+            a: foo
+            b: 1
+    - content: |
+        <highlight>$repeat:</highlight> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              $repeat:
+                a: 2
+                b: 3
+              $value: $"{$repeat:a},{$repeat:b}"
+            highlights: ["$repeat:", "a: 2", "b: 3", "$repeat:a", "$repeat:b"]
+        result:
+          code: |
+            0,0
+            ---
+            0,1
+            ---
+            0,2
+            ---
+            1,0
+            ---
+            1,1
+            ---
+            1,2
+    - content: |
+        <highlight>$repeat:</highlight> can contain a list of values to iterate over:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              $repeat: [x, y, z]
+              a: $repeat
+            highlights: ["$repeat: [x, y, z]", "a: $repeat"]
+        result:
+          code: |
+            a: x
+            ---
+            a: y
+            ---
+            a: z
+    - content: |
+        <highlight>$repeat:</highlight> supports range parameters for numeric sequences:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              $repeat:
+                $first: 10
+                $count: 3
+              a: $repeat
+            highlights: ["$repeat:", "$first: 10", "$count: 3", "a: $repeat"]
+        result:
+          code: |
+            a: 10
+            ---
+            a: 11
+            ---
+            a: 12
+    - content: |
+        Range parameters require exactly 2 of <highlight>$first</highlight>, <highlight>$last</highlight>, and <highlight>$count</highlight>. Optional <highlight>$step</highlight> defaults to 1.
+    - content: |
+        <highlight>$repeat:</highlight> also works at the object level within maps and lists:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a:
+                $"b{$repeat}":
+                  c: $repeat
+                  $repeat: 3
+            highlights: ["$repeat: 3", "c: $repeat"]
+        result:
+          code: |
+            a:
+              b0:
+                c: 0
+              b1:
+                c: 1
+              b2:
+                c: 2
+    - content: |
         Object-level repeat in lists:
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a:
-                    - b: <focus>$repeat</focus>
-                      <focus>$repeat: [x, y, z]</focus>
-              - code: |
-                  a:
-                    - b: x
-                    - b: y
-                    - b: z
-            operator: "="
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a:
+                - b: $repeat
+                  $repeat: [x, y, z]
+            highlights: ["$repeat: [x, y, z]", "b: $repeat"]
+        result:
+          code: |
+            a:
+              - b: x
+              - b: y
+              - b: z
 
 - id: escape
   title: $$
   items:
-    - type: text
-      content: |
-        <ifocus>$$</ifocus> translates to a literal <ifocus>$</ifocus> in cases where it would otherwise trigger special handling.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: <focus>$$env:foo</focus>
-              - code: |
-                  a: <focus>$env:foo</focus>
-            operator: "="
+    - content: |
+        <highlight>$$</highlight> translates to a literal <highlight>$</highlight> in cases where it would otherwise trigger special handling.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: $$env:foo
+            highlights: ["$$env:foo"]
+        result:
+          code: |
+            a: $env:foo
+          highlights: ["$env:foo"]
 
 - id: toml
   title: TOML
   items:
-    - type: text
-      content: |
-        TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:
-    - type: example
-      example:
-        type: single
+    - content: |
+        TOML doesn't allow unquoted <highlight>$</highlight> in keys, which impacts bkl directives. Work around this by quoting keys:
+    - code:
         code: |
-          <focus>"$parent"</focus> = false
+          "$parent" = false
+        highlights: ["\"$parent\""]
 
 - id: bklb
   title: bklb
   items:
-    - type: text
-      content: |
-        <ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.
-    - type: example
-      example:
-        type: single
+    - content: |
+        <highlight>bklb</highlight> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.
+    - code:
         code: |
-          $ <focus>ln -s ~/go/bin/bklb ~/go/bin/catb</focus>   # catb could be, e.g. kubectlb
+          $ ln -s ~/go/bin/bklb ~/go/bin/catb   # catb could be, e.g. kubectlb
           
           $ cat service.yaml
           addr: 127.0.0.1
@@ -1209,7 +1204,7 @@
           $ cat service.test.toml
           port = 8081
           
-          $ <focus>catb service.test.toml</focus>
+          $ catb service.test.toml
           addr = "127.0.0.1"
           name = "myService"
           port = 8081
@@ -1218,167 +1213,154 @@
           cat: service.test.yaml: No such file or directory
           cat: service.test.json: No such file or directory
           
-          $ <focus>catb service.test.yaml</focus>
+          $ catb service.test.yaml
           addr: 127.0.0.1
           name: myService
           port: 8081
           
-          $ <focus>catb service.test.json</focus>
+          $ catb service.test.json
           {"addr":"127.0.0.1","name":"myService","port":8081}
-    - type: text
-      content: |
-        Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
-    - type: text
-      content: |
-        <ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program so they can coexist in your PATH.
+        highlights: ["ln -s ~/go/bin/bklb ~/go/bin/catb", "catb service.test.toml", "catb service.test.yaml", "catb service.test.json"]
+    - content: |
+        Note that the files mentioned don't have to exist; <highlight>bklb</highlight> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
+    - content: |
+        <highlight>bklb</highlight> takes the name of the program it wraps from its own filename, hence the <highlight>ln -s</highlight> symlink creation in the example above. It trims at most one <highlight>b</highlight> from the end of its name before searching for the wrapped program so they can coexist in your PATH.
 
 - id: bkld
   title: bkld
   items:
-    - type: example
-      example:
-        type: single
+    - code:
         code: |
           $ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;
-    - type: text
-      content: |
-        <ifocus>bkld</ifocus> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  b: $required
-                  c: 3
-              - code: |
-                  a: 1
-                  b: 2
-                  d: 4
-              - code: |
-                  b: 2
-                  c: null
-                  d: 4
-            operator: "?"
-          - items:
-              - code: |
-                  - a: 1
-                  - b: 2
-              - code: |
-                  - a: 1
-                  - c: 3
-              - code: |
-                  - c: 3
-                  - $delete:
-                      b: 2
-            operator: "?"
-          - items:
-              - code: |
-                  - 1
-                  - 2
-              - code: |
-                  - 1
-                  - 3
-              - code: |
-                  - 1
-                  - 3
-                  - $replace: true
-            operator: "?"
+    - content: |
+        <highlight>bkld</highlight> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <highlight><a href="#bkli">bkli</a></highlight>, it automates splitting existing configurations into layers.
+    - example:
+        operation: diff
+        layers:
+          - code: |
+              a: 1
+              b: $required
+              c: 3
+          - code: |
+              a: 1
+              b: 2
+              d: 4
+        result:
+          code: |
+            b: 2
+            c: null
+            d: 4
+    - example:
+        operation: diff
+        layers:
+          - code: |
+              - a: 1
+              - b: 2
+          - code: |
+              - a: 1
+              - c: 3
+        result:
+          code: |
+            - c: 3
+            - $delete:
+                b: 2
+    - example:
+        operation: diff
+        layers:
+          - code: |
+              - 1
+              - 2
+          - code: |
+              - 1
+              - 3
+        result:
+          code: |
+            - 1
+            - 3
+            - $replace: true
 
 - id: bkli
   title: bkli
   items:
-    - type: example
-      example:
-        type: single
+    - code:
         code: |
           $ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...
-    - type: text
-      content: |
-        <ifocus>bkli</ifocus> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.
-    - type: text
-      content: |
-        Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a: 1
-                  b: 2
-                  c: 3
-              - code: |
-                  a: 1
-                  b: 10
-                  d: 4
-              - code: |
-                  a: 1
-                  b: $required
-            operator: "∩"
-          - items:
-              - code: |
-                  - a: 1
-                  - b: 2
-                  - c: 3
-              - code: |
-                  - a: 1
-                  - b: 10
-                  - d: 4
-              - code: |
-                  - a: 1
-            operator: "∩"
+    - content: |
+        <highlight>bkli</highlight> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <highlight><a href="#bkld">bkld</a></highlight>, it automates splitting existing configurations into layers.
+    - content: |
+        Any fields that exist in all upper layers but have different values will be marked <highlight>$required</highlight>.
+    - example:
+        operation: intersect
+        layers:
+          - code: |
+              a: 1
+              b: 2
+              c: 3
+          - code: |
+              a: 1
+              b: 10
+              d: 4
+        result:
+          code: |
+            a: 1
+            b: $required
+    - example:
+        operation: intersect
+        layers:
+          - code: |
+              - a: 1
+              - b: 2
+              - c: 3
+          - code: |
+              - a: 1
+              - b: 10
+              - d: 4
+        result:
+          code: |
+            - a: 1
 
 - id: bklr
   title: bklr
   items:
-    - type: example
-      example:
-        type: single
+    - code:
         code: |
           $ bklr &lt;lower_layer_path&gt;
-    - type: text
-      content: |
-        <ifocus>bklr</ifocus> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
-    - type: example
-      example:
-        type: grid
-        rows:
-          - items:
-              - code: |
-                  a:
-                    b: $required
-                    c: 3
-              - code: |
-                  a:
-                    b: $required
-            operator: "="
-          - items:
-              - code: |
-                  a:
-                    - $required
-                  b:
-                    - 2
-              - code: |
-                  a:
-                    - $required
-            operator: "="
+    - content: |
+        <highlight>bklr</highlight> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a:
+                b: $required
+                c: 3
+        result:
+          code: |
+            a:
+              b: $required
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a:
+                - $required
+              b:
+                - 2
+        result:
+          code: |
+            a:
+              - $required
 
 - id: kubectl-bkl
   title: kubectl bkl
   items:
-    - type: example
-      example:
-        type: single
+    - code:
         code: |
-          $ kubectl <focus>bkl</focus> &lt;kubectl_commands&gt;
-    - type: text
-      content: |
-        <ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
-    - type: example
-      example:
-        type: single
+          $ kubectl bkl &lt;kubectl_commands&gt;
+        highlights: ["bkl"]
+    - content: |
+        <highlight>kubectl bkl</highlight> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
+    - code:
         code: |
           # deploy.dev.yaml and deploy.yaml are bkl layer files
           $ kubectl bkl apply -f deploy.dev.yaml
@@ -1387,12 +1369,9 @@
 - id: docker
   title: Docker
   items:
-    - type: text
-      content: |
-        bkl docker images are available at <ifocus>ghcr.io/gopatchy/bkl:latest</ifocus> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
-    - type: example
-      example:
-        type: single
+    - content: |
+        bkl docker images are available at <highlight>ghcr.io/gopatchy/bkl:latest</highlight> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
+    - code:
         label: Dockerfile
         code: |
           FROM ghcr.io/gopatchy/bkl:latest AS bkl
@@ -1403,37 +1382,32 @@
 - id: diff
   title: diff
   items:
-    - type: text
-      content: |
+    - content: |
         It's easy to see differences between processed bkl files using shell syntax.
-    - type: example
-      example:
-        type: single
+    - code:
         code: |
-          $ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+          $ diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)
           --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
           +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
           @@ -1,3 +1,2 @@
            a: 1
-          <focus>-b: 2</focus>
+          -b: 2
            c: 3
           
-          $ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+          $ diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)
           a: 1                              a: 1
-          b: 2                            <focus>&lt;</focus>
+          b: 2                            &lt;
           c: 3                              c: 3
+        highlights: ["diff -ud --color", "(bkl a.yaml)", "(bkl b.yaml)", "-b: 2", "diff -y --color", "&lt;"]
 
 - id: migrate
   title: Migrate
   items:
-    - type: text
-      content: |
-        Below is an example process for migrating an existing set of configurations to <ifocus>bkl</ifocus>. It contains some Kubernetes-specific items but the use of the <ifocus>bkl*</ifocus> tools applies to any configuration source.
-    - type: text
-      content: |
-        We assume you start with two K8s deployments called <ifocus>deploy-dev</ifocus> and <ifocus>deploy-prod</ifocus> which are similar but not identical.
-    - type: text
-      content: |
+    - content: |
+        Below is an example process for migrating an existing set of configurations to <highlight>bkl</highlight>. It contains some Kubernetes-specific items but the use of the <highlight>bkl*</highlight> tools applies to any configuration source.
+    - content: |
+        We assume you start with two K8s deployments called <highlight>deploy-dev</highlight> and <highlight>deploy-prod</highlight> which are similar but not identical.
+    - content: |
         First, install tools:
         
         <ul>
@@ -1442,76 +1416,62 @@
         <li><a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/">krew</a></li>
         <li><a href="https://github.com/itaysk/kubectl-neat#installation">neat</a></li>
         </ul>
-    - type: text
-      content: |
-        It's possible to export configuration directly from existing templating systems (e.g. <ifocus>kustomize build</ifocus>, <ifocus>helm install --dry-run --debug</ifocus>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
-    - type: example
-      example:
-        type: single
+    - content: |
+        It's possible to export configuration directly from existing templating systems (e.g. <highlight>kustomize build</highlight>, <highlight>helm install --dry-run --debug</highlight>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
+    - code:
         label: Export Existing Config
         code: |
           # "kubectl neat" removes status and default value fields
           $ kubectl neat get -- deploy deploy-dev > deploy-dev-orig.yaml
           $ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml
-    - type: example
-      example:
-        type: single
+    - code:
         label: Generate Base Layer
         code: |
           # See bkli details <a href="#bkli">here</a>
           $ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml
-    - type: example
-      example:
-        type: single
+    - code:
         label: Generate Service Layers
         code: |
           # See bkld details <a href="#bkld">here</a>
           $ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
           $ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml
-    - type: example
-      example:
-        type: single
+    - code:
         label: Check Results
         code: |
           # Should show no diff
           $ kubectl bkl diff -f deploy.dev.yaml
           $ kubectl bkl diff -f deploy.prod.yaml
-    - type: example
-      example:
-        type: single
+    - code:
         label: Clean Up
         code: |
           $ rm deploy-dev-orig.yaml deploy-prod-orig.yaml
-    - type: text
-      content: |
+    - content: |
         You now have 3 bkl files:
         
         <ul>
-        <li><ifocus>deploy.yaml</ifocus> is the base layer containing values common to both deployments</li>
-        <li><ifocus>deploy.dev.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-dev</ifocus></li>
-        <li><ifocus>deploy.prod.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-prod</ifocus></li>
+        <li><highlight>deploy.yaml</highlight> is the base layer containing values common to both deployments</li>
+        <li><highlight>deploy.dev.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-dev</highlight></li>
+        <li><highlight>deploy.prod.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-prod</highlight></li>
         </ul>
-    - type: text
-      content: |
+    - content: |
         The migration process isn't deterministic; there are design and aesthetic considerations. Here are some general tips:
         
         <ul>
         <li>Start with the most similar examples to maximize base layer size</li>
-        <li>Consider intermediate layers that make sense (e.g. <ifocus>deploy.yaml</ifocus> → <ifocus>deploy.frontend.yaml</ifocus> → <ifocus>deploy.frontend.prod.yaml</ifocus>)</li>
+        <li>Consider intermediate layers that make sense (e.g. <highlight>deploy.yaml</highlight> → <highlight>deploy.frontend.yaml</highlight> → <highlight>deploy.frontend.prod.yaml</highlight>)</li>
         <li>Split large configurations into logical subfiles; bkl can merge across file boundaries</li>
-        <li>Iterate by diffing your evaluated layers against production (e.g. <ifocus>kubectl bkl diff -f</ifocus>), making small changes, then diffing again.</li>
+        <li>Iterate by diffing your evaluated layers against production (e.g. <highlight>kubectl bkl diff -f</highlight>), making small changes, then diffing again.</li>
         <li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
         <li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
-        <li>Remove duplication with <ifocus>$merge:</ifocus> but avoid chained merge paths.</li>
-        <li>Avoid using hidden <ifocus>$output: false</ifocus> trees as template variables; prefer overriding values in-place.</li>
-        <li><ifocus>bkld</ifocus> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <ifocus>containers</ifocus>) that could be trivially patched. Use <ifocus>$match:</ifocus> to select the container and override values within it.</li>
+        <li>Remove duplication with <highlight>$merge:</highlight> but avoid chained merge paths.</li>
+        <li>Avoid using hidden <highlight>$output: false</highlight> trees as template variables; prefer overriding values in-place.</li>
+        <li><highlight>bkld</highlight> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <highlight>containers</highlight>) that could be trivially patched. Use <highlight>$match:</highlight> to select the container and override values within it.</li>
         </ul>
 
 - id: comparison
   title: Comparison
   items:
-    - type: text
-      content: |
+    - content: |
         bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:
         
         <ul>

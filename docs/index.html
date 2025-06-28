@@ -206,9 +206,15 @@ doc-grid bkl-code {
 }
 
  
-label + code,
-label + bkl-code {
+label:not(.invisible) + code,
+label:not(.invisible) + bkl-code {
 	border-top-left-radius: 0 !important;
+}
+
+ 
+label.invisible + code,
+label.invisible + bkl-code {
+	border-top-left-radius: 4px !important;
 }
 
 code + p,
@@ -283,7 +289,7 @@ focus, focus > * {
 	color: var(--red6);
 }
 
-ifocus {
+highlight {
 	background: var(--neutral8);
 	color: var(--red6);
 	display: inline-block;
@@ -293,7 +299,7 @@ ifocus {
 	white-space: nowrap;
 }
 
-ifocus * {
+highlight * {
 	color: var(--red6) !important;
 }
 </style>
@@ -396,7 +402,7 @@ class BklCode extends HTMLElement {
     
     const placeholder = '___PLACEHOLDER___';
     const preserved = [];
-    html = html.replace(/<(focus|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
+    html = html.replace(/<(focus|highlight|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
       preserved.push(match);
       return placeholder + (preserved.length - 1) + placeholder;
     });
@@ -509,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	<li><a href="#formats">Formats</a></li>
 
-	<li><a href="#write">Write</a></li>
+	<li><a href="#write">Output</a></li>
 
 	<li><a href="#inputs">Inputs</a></li>
 
@@ -585,66 +591,38 @@ BKL</h1>
 
 
 
+<doc-grid>
+<row>
+<div>
+<label>service.yaml</label>
+<bkl-code>addr: 127.0.0.1
+name: myService
+port: 8080</bkl-code>
+</div>
+<div>
+<label>service.test.toml</label>
+<bkl-code>port = <focus>8081</focus></bkl-code>
+</div>
+</row>
+</doc-grid>
+
 
 
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
-<label>service.yaml</label>
-
-
-<bkl-code>addr: 127.0.0.1
-name: myService
-port: 8080</bkl-code>
-
-</div>
-
-
-
-<div>
-
-<label>service.test.toml</label>
-
-
-<bkl-code>port = <focus>8081</focus></bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
 <label>Run it!</label>
-
-
 <bkl-code>$ bkl service.test.toml
 addr = '127.0.0.1'
 name = 'myService'
 port = <focus>8081</focus></bkl-code>
-
 </div>
-
-</row>
 
 </doc-grid>
 
 
 
-
-<p>bkl knows that <ifocus>service.test.toml</ifocus> inherits from <ifocus>service.yaml</ifocus> by the filename pattern (<a href="#inheritance">override with <ifocus>$parent</ifocus></a>) and uses filename extensions to determine formats.
+<p>bkl knows that <highlight>service.test.toml</highlight> inherits from <highlight>service.yaml</highlight> by the filename pattern (<a href="#inheritance">override with <highlight>$parent</highlight></a>) and uses filename extensions to determine formats.
 </p>
 
 
@@ -656,49 +634,28 @@ port = <focus>8081</focus></bkl-code>
 
 
 
+<doc-grid>
+
+<div>
+<label>Using go</label>
+<bkl-code># Install go from <a href="https://go.dev/dl/">go.dev</a>
+$ go install github.com/gopatchy/bkl/...@latest
+# Verify that ~/go/bin is in your $PATH</bkl-code>
+</div>
+
+</doc-grid>
+
 
 
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
-<label>Using go</label>
-
-
-<bkl-code># Install go from <a href="https://go.dev/dl/">go.dev</a>
-$ go install github.com/gopatchy/bkl/...@latest
-# Verify that ~/go/bin is in your $PATH</bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
 <label>macOS using brew</label>
-
-
 <bkl-code># Install brew from <a href="https://brew.sh/">brew.sh</a>
 $ brew install gopatchy/bkl/bkl</bkl-code>
-
 </div>
 
-</row>
-
 </doc-grid>
-
 
 
 
@@ -714,109 +671,74 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 
 
-<p>Output defaults to the same format as the specified input file. Use <ifocus>-f</ifocus> (or <ifocus>--format</ifocus>) to override.
+<p>Output defaults to the same format as the specified input file. Use <highlight>-f</highlight> (or <highlight>--format</highlight>) to override.
 </p>
-
-
 
 
 
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>YAML</label>
-
-
 <bkl-code>$ bkl <focus>-f yaml</focus> service.test.toml
 addr: 127.0.0.1
 name: myService
 port: 8081</bkl-code>
-
 </div>
 
-</row>
+</doc-grid>
 
 
 
-<row>
-
-
+<doc-grid>
 
 <div>
-
 <label>TOML</label>
-
-
 <bkl-code>$ bkl <focus>-f toml</focus> service.test.toml
 addr = '127.0.0.1'
 name = 'myService'
 port = 8081</bkl-code>
-
 </div>
 
-</row>
+</doc-grid>
 
 
 
-<row>
-
-
+<doc-grid>
 
 <div>
-
 <label>JSON</label>
-
-
 <bkl-code>$ bkl <focus>-f json</focus> service.test.toml
 {"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
-
 </div>
 
-</row>
+</doc-grid>
 
 
 
-<row>
-
-
+<doc-grid>
 
 <div>
-
 <label>JSON (pretty)</label>
-
-
 <bkl-code>$ bkl <focus>-f json-pretty</focus> service.test.toml
 {
   "addr": "127.0.0.1",
   "name": "myService",
   "port": 8081
 }</bkl-code>
-
 </div>
-
-</row>
 
 </doc-grid>
 
 
 
-
-<p><ifocus>jsonl</ifocus> is an alias for <ifocus>json</ifocus> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
+<p><highlight>jsonl</highlight> is an alias for <highlight>json</highlight> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
 </p>
 
 
 
 <p>You can also set the output format implicitly by using a different file extension.
 </p>
-
-
 
 
 
@@ -831,11 +753,10 @@ port: 8081</bkl-code>
 
 
 
-
 </section>
 
 <section id="write">
-<h2><a name="write">Write</a></h2>
+<h2><a name="write">Output</a></h2>
 
 
 
@@ -844,33 +765,18 @@ port: 8081</bkl-code>
 
 
 
-
-
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>File Output</label>
-
-
 <bkl-code>$ bkl <focus>-o out.yaml</focus> service.test.toml</bkl-code>
-
 </div>
-
-</row>
 
 </doc-grid>
 
 
 
-
-<p>Output format is autodetected from output filename (unless specified with <ifocus>-f</ifocus>).
+<p>Output format is autodetected from output filename (unless specified with <highlight>-f</highlight>).
 </p>
 
 
@@ -882,29 +788,14 @@ port: 8081</bkl-code>
 
 
 
-
-
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>Commandline Layering</label>
-
-
 <bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
-
 </div>
 
-</row>
-
 </doc-grid>
-
 
 
 
@@ -913,35 +804,20 @@ port: 8081</bkl-code>
 
 
 
-
-
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>stdin</label>
-
-
 <bkl-code>$ bkl <focus>-- -.yaml</focus> <<'EOF'
 a: 1
 EOF</bkl-code>
-
 </div>
-
-</row>
 
 </doc-grid>
 
 
 
-
-<p>Specifying an input file with the base name <ifocus>-</ifocus> and a valid format extension causes bkl to read that format from standard input. Use <ifocus>--</ifocus> before the filename to avoid it being treated as a flag.
+<p>Specifying an input file with the base name <highlight>-</highlight> and a valid format extension causes bkl to read that format from standard input. Use <highlight>--</highlight> before the filename to avoid it being treated as a flag.
 </p>
 
 
@@ -953,34 +829,19 @@ EOF</bkl-code>
 
 
 
-<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <ifocus>.</ifocus> and treated as an inheritance hierarchy (e.g. <ifocus>a.b.c.yaml</ifocus> inherits from <ifocus>a.b.&lt;ext&gt;</ifocus> inherits from <ifocus>a.&lt;ext&gt;</ifocus>). Parent layers may have any supported file extension.
+<p>Inheritance is determined using filenames by default. After stripping the extension, the remaining filename is split on <highlight>.</highlight> and treated as an inheritance hierarchy (e.g. <highlight>a.b.c.yaml</highlight> inherits from <highlight>a.b.&lt;ext&gt;</highlight> inherits from <highlight>a.&lt;ext&gt;</highlight>). Parent layers may have any supported file extension.
 </p>
-
-
 
 
 
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>Set Parent In File</label>
-
-
 <bkl-code><focus>$parent: a.b</focus>   # inherits from a.b.<ext>, from a.<ext></bkl-code>
-
 </div>
 
-</row>
-
 </doc-grid>
-
 
 
 
@@ -989,114 +850,62 @@ EOF</bkl-code>
 
 
 
-
-
 <doc-grid>
-
-
-
 <row>
-
-
-
 <div>
-
 <label>Parent List</label>
-
-
-<bkl-code><focus>$parent:
-- a
-- b</focus></bkl-code>
-
+<bkl-code><focus>$parent:</focus>
+<focus>- a</focus>
+<focus>- b</focus></bkl-code>
 </div>
-
-
-
 <div>
-
 <label>Parent Wildcard</label>
-
-
 <bkl-code><focus>$parent: a.*</focus></bkl-code>
-
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>Setting <ifocus>$parent</ifocus> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
+<p>Setting <highlight>$parent</highlight> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
 </p>
 
 
 
-<p><ifocus>*</ifocus> does not match <ifocus>.</ifocus>. <ifocus>a.*</ifocus> matches <ifocus>a.b.yaml</ifocus> but not <ifocus>a.b.c.yaml</ifocus>.
+<p><highlight>*</highlight> does not match <highlight>.</highlight>. <highlight>a.*</highlight> matches <highlight>a.b.yaml</highlight> but not <highlight>a.b.c.yaml</highlight>.
 </p>
-
-
 
 
 
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>Set Parent In CLI</label>
-
-
 <bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
-$ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml</bkl-code>
-
+$ bkl -P <focus>a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml</bkl-code>
 </div>
-
-</row>
 
 </doc-grid>
 
 
 
-
-<p>Layer order can be specified with commandline argument order. The <ifocus>-P</ifocus> flag (or <ifocus>--skip-parent</ifocus>) tells bkl to not load parent layers using filenames or <ifocus>$parent</ifocus>.
+<p>Layer order can be specified with commandline argument order. The <highlight>-P</highlight> flag (or <highlight>--skip-parent</highlight>) tells bkl to not load parent layers using filenames or <highlight>$parent</highlight>.
 </p>
-
-
 
 
 
 <doc-grid>
 
-
-
-<row>
-
-
-
 <div>
-
 <label>No Parent</label>
-
-
 <bkl-code><focus>$parent: false</focus>   # no further inheritance</bkl-code>
-
 </div>
-
-</row>
 
 </doc-grid>
 
 
 
-
-<p>Setting <ifocus>$parent</ifocus> to <ifocus>false</ifocus> or <ifocus>null</ifocus> stops any further inheritance regardless of filename structure.
+<p>Setting <highlight>$parent</highlight> to <highlight>false</highlight> or <highlight>null</highlight> stops any further inheritance regardless of filename structure.
 </p>
 
 
@@ -1108,14 +917,13 @@ $ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml</bkl-code>
 
 
 
-<p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <ifocus>---</ifocus> or sometimes <ifocus>+++</ifocus>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
+<p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <highlight>---</highlight> or sometimes <highlight>+++</highlight>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
 </p>
 
 
 
-<p>To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <ifocus>$match</ifocus> allows applying to specific parent documents.
+<p>To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <highlight>$match</highlight> allows applying to specific parent documents.
 </p>
-
 
 
 
@@ -1127,23 +935,17 @@ $ bkl <focus>-P a.b.yaml c.d.yaml</focus>   # a.b.yaml + c.d.yaml</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 ---
 b: 2</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code>c: 3</bkl-code>
-
 </div>
 
 
@@ -1152,63 +954,58 @@ b: 2</bkl-code>
 
 
 <bkl-code>a: 1
-<focus>c: 3</focus>
+<focus><focus>c: 3</focus></focus>
 ---
 b: 2
-<focus>c: 3</focus></bkl-code>
+<focus><focus>c: 3</focus></focus></bkl-code>
 
 </div>
-
 </row>
-
-
-
-<row>
-
-
-
-<div>
-
-
-<bkl-code>a: 1
----
-b: 2</bkl-code>
-
-</div>
-
-<op>&#43;</op>
-
-<div>
-
-
-<bkl-code><focus>$match:
-  b: 2</focus>
-c: 3</bkl-code>
-
-</div>
-
-
-<op>=</op>
-<div>
-
-
-<bkl-code>a: 1
----
-b: 2
-<focus>c: 3</focus></bkl-code>
-
-</div>
-
-</row>
-
 </doc-grid>
 
 
 
 
-<p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <ifocus>$match: {}</ifocus> matches any documents with a map as their root element, regardless of parent.
-</p>
+<doc-grid>
 
+
+
+<row>
+
+
+<div>
+
+<bkl-code>a: 1
+---
+b: 2</bkl-code>
+</div>
+
+<op>+</op>
+<div>
+
+<bkl-code><focus>$match:</focus>
+  <focus>b: 2</focus>
+c: 3</bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>a: 1
+---
+b: 2
+<focus>c: 3</focus></bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+<p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <highlight>$match: {}</highlight> matches any documents with a map as their root element, regardless of parent.
+</p>
 
 
 
@@ -1220,27 +1017,21 @@ b: 2
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 ---
 b: 2
 ---
 a: 1</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
-<bkl-code><focus>$match:
-  a: 1</focus>
+<bkl-code><focus>$match:</focus>
+  <focus>a: 1</focus>
 c: 3</bkl-code>
-
 </div>
 
 
@@ -1249,25 +1040,21 @@ c: 3</bkl-code>
 
 
 <bkl-code>a: 1
-<focus>c: 3</focus>
+<focus><focus>c: 3</focus></focus>
 ---
 b: 2
 ---
 a: 1
-<focus>c: 3</focus></bkl-code>
+<focus><focus>c: 3</focus></focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$invert: true</ifocus> inside a <ifocus>$match</ifocus> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
+<p><highlight>$invert: true</highlight> inside a <highlight>$match</highlight> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
 </p>
-
 
 
 
@@ -1279,26 +1066,20 @@ a: 1
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 ---
 b: 2</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code>$match:
   a: 1
   <focus>$invert: true</focus>
 c: 3</bkl-code>
-
 </div>
 
 
@@ -1312,17 +1093,13 @@ b: 2
 <focus>c: 3</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$match: null</ifocus> forces the updates to apply to a new document.
+<p><highlight>$match: null</highlight> forces the updates to apply to a new document.
 </p>
-
 
 
 
@@ -1334,22 +1111,16 @@ b: 2
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code><focus>$match: null</focus>
 b: 2</bkl-code>
-
 </div>
 
 
@@ -1362,11 +1133,8 @@ b: 2</bkl-code>
 <focus>b: 2</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -1377,9 +1145,8 @@ b: 2</bkl-code>
 
 
 
-<p>Maps are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
+<p>Maps are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
 </p>
-
 
 
 
@@ -1391,21 +1158,15 @@ b: 2</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
 <bkl-code>b: 2</bkl-code>
-
 </div>
 
 
@@ -1417,30 +1178,29 @@ b: 2</bkl-code>
 b: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code>b: 2
 <focus>$replace: true</focus></bkl-code>
-
 </div>
 
 
@@ -1451,31 +1211,30 @@ b: 2</bkl-code>
 <bkl-code>b: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b: 2</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code>c: 3
 <focus>b: $delete</focus></bkl-code>
-
 </div>
 
 
@@ -1487,15 +1246,12 @@ b: 2</bkl-code>
 c: 3</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>bkl returns an error if you use <ifocus>$delete</ifocus>, <ifocus>$replace: true</ifocus>, or a <ifocus>key: value</ifocus> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
+<p>bkl returns an error if you use <highlight>$delete</highlight>, <highlight>$replace: true</highlight>, or a <highlight>key: value</highlight> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 </p>
 
 
@@ -1507,9 +1263,8 @@ c: 3</bkl-code>
 
 
 
-<p>Lists are merged by default. To change that, use <ifocus>$replace: true</ifocus> or remove individual entries with <ifocus>$delete</ifocus>.
+<p>Lists are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
 </p>
-
 
 
 
@@ -1521,21 +1276,15 @@ c: 3</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- 1</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
 <bkl-code>- 2</bkl-code>
-
 </div>
 
 
@@ -1547,30 +1296,29 @@ c: 3</bkl-code>
 - 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- 1</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code>- 2
 - <focus>$replace: true</focus></bkl-code>
-
 </div>
 
 
@@ -1581,32 +1329,31 @@ c: 3</bkl-code>
 <bkl-code>- 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- x: 1
 - x: 2</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
 <bkl-code>- x: 3
-- <focus>$delete:
-    x: 2</focus></bkl-code>
-
+- <focus>$delete:</focus>
+    <focus>x: 2</focus></bkl-code>
 </div>
 
 
@@ -1618,22 +1365,18 @@ c: 3</bkl-code>
 - x: 3</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>bkl returns an error if you use <ifocus>$replace: true</ifocus> or <ifocus>$delete</ifocus> when they don't override a value from a lower layer. This helps keep upper layers minimal.
+<p>bkl returns an error if you use <highlight>$replace: true</highlight> or <highlight>$delete</highlight> when they don't override a value from a lower layer. This helps keep upper layers minimal.
 </p>
 
 
 
-<p>To update a specific list item from a parent layer, use <ifocus>$match</ifocus>. Combine it with <ifocus>$value</ifocus> for scalars.
+<p>To update a specific list item from a parent layer, use <highlight>$match</highlight>. Combine it with <highlight>$value</highlight> for scalars.
 </p>
-
 
 
 
@@ -1645,24 +1388,18 @@ c: 3</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- a: 1
 - b: 2</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
-<bkl-code>- <focus>$match:
-    b: 2</focus>
+<bkl-code>- <focus>$match:</focus>
+    <focus>b: 2</focus>
   b: 10</bkl-code>
-
 </div>
 
 
@@ -1674,31 +1411,30 @@ c: 3</bkl-code>
 - b: 10</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- 1
 - 2</bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
-<bkl-code>- <focus>$match: 2
-  $value: 10</focus></bkl-code>
-
+<bkl-code>- <focus>$match: 2</focus>
+  <focus>$value: 10</focus></bkl-code>
 </div>
 
 
@@ -1710,11 +1446,8 @@ c: 3</bkl-code>
 - 10</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -1725,9 +1458,8 @@ c: 3</bkl-code>
 
 
 
-<p>Use <ifocus>$""</ifocus> to interpolate format strings with <a href="#merge"><ifocus>$merge</ifocus></a>-style references.
+<p>Use <highlight>$""</highlight> to interpolate format strings with <a href="#merge"><highlight>$merge</highlight></a>-style references.
 </p>
-
 
 
 
@@ -1739,19 +1471,16 @@ c: 3</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b:
   c: foo
 d: <focus>$"{b.c} bar {a} 2"</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -1761,11 +1490,8 @@ b:
 d: <focus>foo bar 1 2</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -1776,9 +1502,8 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 
 
 
-<p><ifocus>$decode</ifocus> transforms a string into a tree by parsing standard formats.
+<p><highlight>$decode</highlight> transforms a string into a tree by parsing standard formats.
 </p>
-
 
 
 
@@ -1790,29 +1515,23 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>$value: |
   <focus>{"a":1}</focus>
 <focus>$decode: json</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code><focus>a: 1</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -1823,9 +1542,8 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 
 
 
-<p>Use <ifocus>$env:</ifocus> to substitute environment variables. This is supported in keys and values.
+<p>Use <highlight>$env:</highlight> to substitute environment variables. This is supported in keys and values.
 </p>
-
 
 
 
@@ -1837,57 +1555,53 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code># export FOO=test
 <focus>"$env:FOO"</focus>: 1</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code><focus>test</focus>: 1</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code># export FOO=test
 a: <focus>$env:FOO</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>a: <focus>test</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>Note that all <ifocus>$env:</ifocus> substitutions result in string values even if the substituted value is <ifocus>true</ifocus>, <ifocus>false</ifocus>, <ifocus>null</ifocus>, or all digits.
+<p>Note that all <highlight>$env:</highlight> substitutions result in string values even if the substituted value is <highlight>true</highlight>, <highlight>false</highlight>, <highlight>null</highlight>, or all digits.
 </p>
 
 
@@ -1899,9 +1613,8 @@ a: <focus>$env:FOO</focus></bkl-code>
 
 
 
-<p><ifocus>$encode</ifocus> transforms the subtree into the specified format.
+<p><highlight>$encode</highlight> transforms the subtree into the specified format.
 </p>
-
 
 
 
@@ -1913,19 +1626,16 @@ a: <focus>$env:FOO</focus></bkl-code>
 <row>
 
 
-
 <div>
 
 <label>base64</label>
 
-
 <bkl-code>$value: a
 <focus>$encode: base64</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 <label class="invisible">invisible</label>
@@ -1934,29 +1644,31 @@ a: <focus>$env:FOO</focus></bkl-code>
 <bkl-code>YQ==</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
 
 <label>flags</label>
-
 
 <bkl-code>a: 1
 b: 2
 <focus>$encode: flags</focus>
 # [tolist:=, prefix:--]</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 <label class="invisible">invisible</label>
@@ -1966,19 +1678,22 @@ b: 2
 - --b=2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
 
 <label>flatten</label>
-
 
 <bkl-code>- - a
   - b
@@ -1986,11 +1701,10 @@ b: 2
   - 4
 - e
 - <focus>$encode: flatten</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 <label class="invisible">invisible</label>
@@ -2003,207 +1717,8 @@ b: 2
 - e</bkl-code>
 
 </div>
-
 </row>
-
-
-
-<row>
-
-
-
-<div>
-
-<label>join</label>
-
-
-<bkl-code>$value: [a, b]
-<focus>$encode: join:/</focus></bkl-code>
-
-</div>
-
-<op>=</op>
-
-<div>
-
-<label class="invisible">invisible</label>
-
-
-<bkl-code>a/b</bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
-<label>json</label>
-
-
-<bkl-code>a: 1
-b: 2
-<focus>$encode: json</focus></bkl-code>
-
-</div>
-
-<op>=</op>
-
-<div>
-
-<label class="invisible">invisible</label>
-
-
-<bkl-code>|
-  {"a":1,"b":2}</bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
-<label>json (list)</label>
-
-
-<bkl-code>- a: 1
-- b: 2
-- <focus>$encode: json</focus></bkl-code>
-
-</div>
-
-<op>=</op>
-
-<div>
-
-<label class="invisible">invisible</label>
-
-
-<bkl-code>|
-  [{"a":1},{"b":2}]</bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
-<label>prefix</label>
-
-
-<bkl-code>- a
-- 2
-- <focus>$encode: prefix:X</focus></bkl-code>
-
-</div>
-
-<op>=</op>
-
-<div>
-
-<label class="invisible">invisible</label>
-
-
-<bkl-code>- Xa
-- X2</bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
-<label>tolist</label>
-
-
-<bkl-code>a: 1
-b: 2
-<focus>$encode: tolist:=</focus></bkl-code>
-
-</div>
-
-<op>=</op>
-
-<div>
-
-<label class="invisible">invisible</label>
-
-
-<bkl-code>- a=1
-- b=2</bkl-code>
-
-</div>
-
-</row>
-
-
-
-<row>
-
-
-
-<div>
-
-<label>Stacking</label>
-
-
-<bkl-code>a: 1
-b: 2
-<focus>$encode: [tolist:=, "join:,"]</focus></bkl-code>
-
-</div>
-
-<op>=</op>
-
-<div>
-
-<label class="invisible">invisible</label>
-
-
-<bkl-code>a=1,b=2</bkl-code>
-
-</div>
-
-</row>
-
 </doc-grid>
-
-
-
-
-</section>
-
-<section id="required">
-<h2><a name="required">$required</a></h2>
-
-
-
-<p>Use <ifocus>$required</ifocus> in lower layers to force upper layers to replace the value.
-</p>
-
 
 
 
@@ -2215,22 +1730,223 @@ b: 2
 <row>
 
 
+<div>
+
+<label>join</label>
+
+<bkl-code>$value: [a, b]
+<focus>$encode: join:/</focus></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>a/b</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
 
 <div>
 
+<label>json</label>
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: json</focus></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>|
+  {"a":1,"b":2}</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
+<label>json (list)</label>
+
+<bkl-code>- a: 1
+- b: 2
+- <focus>$encode: json</focus></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>|
+  [{"a":1},{"b":2}]</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
+<label>prefix</label>
+
+<bkl-code>- a
+- 2
+- <focus>$encode: prefix:X</focus></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- Xa
+- X2</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
+<label>tolist</label>
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: tolist:=</focus></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- a=1
+- b=2</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
+<label>Stacking</label>
+
+<bkl-code>a: 1
+b: 2
+<focus>$encode: [tolist:=, "join:,"]</focus></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>a=1,b=2</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+</section>
+
+<section id="required">
+<h2><a name="required">$required</a></h2>
+
+
+
+<p>Use <highlight>$required</highlight> in lower layers to force upper layers to replace the value.
+</p>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
 
 <bkl-code>a: 1
 <focus>b: $required</focus></bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
 <bkl-code>c: 3</bkl-code>
-
 </div>
 
 
@@ -2241,31 +1957,30 @@ b: 2
 <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 <focus>b: $required</focus></bkl-code>
-
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
-
 
 <bkl-code><focus>b: 2</focus>
 c: 3</bkl-code>
-
 </div>
 
 
@@ -2278,31 +1993,30 @@ b: 2
 c: 3</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
-<focus>b:
-  - $required</focus></bkl-code>
-
+<focus>b:</focus>
+  <focus>- $required</focus></bkl-code>
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
 <bkl-code>c: 3</bkl-code>
-
 </div>
 
 
@@ -2313,33 +2027,32 @@ c: 3</bkl-code>
 <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
-<focus>b:
-  - $required</focus></bkl-code>
-
+<focus>b:</focus>
+  <focus>- $required</focus></bkl-code>
 </div>
 
-<op>&#43;</op>
-
+<op>+</op>
 <div>
 
-
-<bkl-code><focus>b:
-  - 2</focus>
+<bkl-code><focus>b:</focus>
+  <focus>- 2</focus>
 c: 3</bkl-code>
-
 </div>
 
 
@@ -2353,11 +2066,8 @@ b:
 c: 3</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -2368,9 +2078,8 @@ c: 3</bkl-code>
 
 
 
-<p>Use <ifocus>$merge</ifocus> to merge the contents one subtree or scalar value into another.
+<p>Use <highlight>$merge</highlight> to merge the contents one subtree or scalar value into another.
 </p>
-
 
 
 
@@ -2382,9 +2091,7 @@ c: 3</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
@@ -2392,33 +2099,35 @@ c: 3</bkl-code>
 zig:
   b: 2
   <focus>$merge: foo.bar</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>foo:
   bar:
-    a: 1
+    <focus>a: 1</focus>
 zig:
   <focus>a: 1</focus>
   b: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
@@ -2426,33 +2135,35 @@ zig:
 zig:
   - b: 2
   - <focus>$merge: foo.bar</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>foo:
   bar:
-    - a: 1
+    - <focus>a: 1</focus>
 zig:
   - b: 2
   - <focus>a: 1</focus></bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
@@ -2460,33 +2171,28 @@ zig:
 zig:
   b: 2
   c: <focus>$merge:foo.bar.a</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>foo:
   bar:
-    a: 1
+    a: <focus>1</focus>
 zig:
   b: 2
   c: <focus>1</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>You can also merge across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:
+<p>You can also merge across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
 </p>
-
 
 
 
@@ -2498,81 +2204,76 @@ zig:
 <row>
 
 
-
 <div>
 
-
-<bkl-code>a: 1
+<bkl-code><focus>a: 1</focus>
 b: 2
 ---
 c: 3
-<focus>$merge:
-  $match:
-    a: 1</focus></bkl-code>
-
+<focus>$merge:</focus>
+  <focus>$match:</focus>
+    <focus>a: 1</focus></bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
-<bkl-code>a: 1
-b: 2
+<bkl-code><focus>a: 1</focus>
+<focus>b: 2</focus>
 ---
-<focus>a: 1
-b: 2</focus>
+<focus>a: 1</focus>
+<focus>b: 2</focus>
 c: 3</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
 
-
-<bkl-code>a: 1
+<bkl-code><focus>a: 1</focus>
 b:
   c: 3
 ---
 d: 4
-<focus>$merge:
-  $match:
-    a: 1
-  $path: b</focus></bkl-code>
-
+<focus>$merge:</focus>
+  <focus>$match:</focus>
+    <focus>a: 1</focus>
+  <focus>$path: b</focus></bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>a: 1
 b:
-  c: 3
+  <focus>c: 3</focus>
 ---
 <focus>c: 3</focus>
 d: 4</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$merge</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:
+<p><highlight>$merge</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
 </p>
-
 
 
 
@@ -2584,42 +2285,42 @@ d: 4</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b: 2
 ---
 c: 3
 <focus>$merge: <value>[{a: 1}]</value></focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
-<bkl-code>a: 1
-b: 2
+<bkl-code><focus>a: 1</focus>
+<focus>b: 2</focus>
 ---
-<focus>a: 1
-b: 2</focus>
+<focus>a: 1</focus>
+<focus>b: 2</focus>
 c: 3</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b:
@@ -2627,27 +2328,23 @@ b:
 ---
 d: 4
 <focus>$merge: <value>[{a: 1}, b]</value></focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>a: 1
 b:
-  c: 3
+  <focus>c: 3</focus>
 ---
 <focus>c: 3</focus>
 d: 4</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -2658,9 +2355,8 @@ d: 4</bkl-code>
 
 
 
-<p>Use <ifocus>$replace</ifocus> to merge the contents of one subtree or scalar value with another.
+<p>Use <highlight>$replace</highlight> to merge the contents of one subtree or scalar value with another.
 </p>
-
 
 
 
@@ -2672,9 +2368,7 @@ d: 4</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
@@ -2682,32 +2376,34 @@ d: 4</bkl-code>
 zig:
   b: 2
   <focus>$replace: foo.bar</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>foo:
   bar:
-    a: 1
+    <focus>a: 1</focus>
 zig:
   <focus>a: 1</focus></bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
@@ -2715,32 +2411,34 @@ zig:
 zig:
   - b: 2
   - <focus>$replace: foo.bar</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>foo:
   bar:
-    - a: 1
+    - <focus>a: 1</focus>
 zig:
   - <focus>a: 1</focus></bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
@@ -2748,38 +2446,33 @@ zig:
 zig:
   b: 2
   c: <focus>$replace:foo.bar.a</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>foo:
   bar:
-    a: 1
+    a: <focus>1</focus>
 zig:
   b: 2
   c: <focus>1</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>Note that <ifocus>$merge</ifocus> and <ifocus>$replace</ifocus> are equivalent for scalar values.
+<p>Note that <highlight>$merge</highlight> and <highlight>$replace</highlight> are equivalent for scalar values.
 </p>
 
 
 
-<p>You can also replace across documents using <ifocus>$match</ifocus> and optionally <ifocus>$path</ifocus>:
+<p>You can also replace across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
 </p>
-
 
 
 
@@ -2791,58 +2484,57 @@ zig:
 <row>
 
 
-
 <div>
 
-
-<bkl-code>a: 1
+<bkl-code><focus>a: 1</focus>
 b: 2
 ---
 c: 3
-<focus>$replace:
-  $match:
-    a: 1</focus></bkl-code>
-
+<focus>$replace:</focus>
+  <focus>$match:</focus>
+    <focus>a: 1</focus></bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
-<bkl-code>a: 1
-b: 2
+<bkl-code><focus>a: 1</focus>
+<focus>b: 2</focus>
 ---
-<focus>a: 1
-b: 2</focus></bkl-code>
+<focus>a: 1</focus>
+<focus>b: 2</focus></bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
 
-
-<bkl-code>a: 1
+<bkl-code><focus>a: 1</focus>
 b:
   c: 3
 ---
 d: 4
-<focus>$replace:
-  $match:
-    a: 1
-  $path: b</focus></bkl-code>
-
+<focus>$replace:</focus>
+  <focus>$match:</focus>
+    <focus>a: 1</focus>
+  <focus>$path: b</focus></bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -2850,21 +2542,16 @@ d: 4
 b:
   c: 3
 ---
-<focus>c: 3</focus>
-d: 4</bkl-code>
+c: 3</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$replace</ifocus> also supports a shorthand syntax equivalent to <ifocus>$match</ifocus> and <ifocus>$path</ifocus>:
+<p><highlight>$replace</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
 </p>
-
 
 
 
@@ -2876,41 +2563,41 @@ d: 4</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b: 2
 ---
 c: 3
 <focus>$replace: <value>[{a: 1}]</value></focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
-<bkl-code>a: 1
-b: 2
+<bkl-code><focus>a: 1</focus>
+<focus>b: 2</focus>
 ---
-<focus>a: 1
-b: 2</focus></bkl-code>
+<focus>a: 1</focus>
+<focus>b: 2</focus></bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b:
@@ -2918,27 +2605,22 @@ b:
 ---
 d: 4
 <focus>$replace: <value>[{a: 1}, b]</value></focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>a: 1
 b:
-  c: 3
+  <focus>c: 3</focus>
 ---
-<focus>c: 3</focus>
-d: 4</bkl-code>
+<focus>c: 3</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -2949,9 +2631,8 @@ d: 4</bkl-code>
 
 
 
-<p>Use <ifocus>$output: true</ifocus> to select a subtree for output instead of the document root.
+<p>Use <highlight>$output: true</highlight> to select a subtree for output instead of the document root.
 </p>
-
 
 
 
@@ -2963,20 +2644,17 @@ d: 4</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
     <focus>$output: true</focus>
     a: 1
     b: 2</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -2984,28 +2662,30 @@ d: 4</bkl-code>
 b: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>foo:
   bar:
     - <focus>$output: true</focus>
     - a: 1
     - b: 2</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3013,22 +2693,18 @@ b: 2</bkl-code>
 - b: 2</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>Multiple instances of <ifocus>$output: true</ifocus> in a document will generate multiple output documents (delimited with <ifocus>---</ifocus>).
+<p>Multiple instances of <highlight>$output: true</highlight> in a document will generate multiple output documents (delimited with <highlight>---</highlight>).
 </p>
 
 
 
-<p>Use <ifocus>$output: false</ifocus> to omit a subtree or entire document from the output.
+<p>Use <highlight>$output: false</highlight> to omit a subtree or entire document from the output.
 </p>
-
 
 
 
@@ -3040,20 +2716,17 @@ b: 2</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a:
   b: 1
   <focus>$output: false</focus>
 c:
   d: 2</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3061,28 +2734,30 @@ c:
   d: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a:
   - b: 1
   - <focus>$output: false</focus>
 c:
   - d: 2</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3090,42 +2765,41 @@ c:
   - d: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 <focus>$output: false</focus>
 ---
 b: 2</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>b: 2</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>Combine <ifocus>$output</ifocus> with <ifocus>$replace</ifocus> or <ifocus>$merge</ifocus> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
+<p>Combine <highlight>$output</highlight> with <highlight>$replace</highlight> or <highlight>$merge</highlight> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
 </p>
 
 
@@ -3137,9 +2811,8 @@ b: 2</bkl-code>
 
 
 
-<p><ifocus>$repeat:</ifocus> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <ifocus>$repeat</ifocus> can be used to reference the zero-based repeat index.
+<p><highlight>$repeat:</highlight> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <highlight>$repeat</highlight> can be used to reference the zero-based repeat index.
 </p>
-
 
 
 
@@ -3151,18 +2824,15 @@ b: 2</bkl-code>
 <row>
 
 
-
 <div>
 
-
 <bkl-code>a: foo
-b: <focus>$repeat</focus>
+<focus>b: $repeat</focus>
 <focus>$repeat: 2</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3173,17 +2843,13 @@ a: foo
 b: 1</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$repeat:</ifocus> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
+<p><highlight>$repeat:</highlight> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
 </p>
-
 
 
 
@@ -3195,19 +2861,16 @@ b: 1</bkl-code>
 <row>
 
 
-
 <div>
 
-
-<bkl-code><focus>$repeat:
-  a: 2
-  b: 3</focus>
-$value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</bkl-code>
-
+<bkl-code><focus>$repeat:</focus>
+  <focus>a: 2</focus>
+  <focus>b: 3</focus>
+$value: $"{<focus>$repeat:</focus>a},{<focus>$repeat:</focus>b}"</bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3224,17 +2887,13 @@ $value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</bkl-code>
 1,2</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$repeat:</ifocus> can contain a list of values to iterate over:
+<p><highlight>$repeat:</highlight> can contain a list of values to iterate over:
 </p>
-
 
 
 
@@ -3246,17 +2905,14 @@ $value: $"{<focus>$repeat:a</focus>},{<focus>$repeat:b</focus>}"</bkl-code>
 <row>
 
 
-
 <div>
 
-
 <bkl-code><focus>$repeat: [x, y, z]</focus>
-a: <focus>$repeat</focus></bkl-code>
-
+<focus>a: $repeat</focus></bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3267,17 +2923,13 @@ a: y
 a: z</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p><ifocus>$repeat:</ifocus> supports range parameters for numeric sequences:
+<p><highlight>$repeat:</highlight> supports range parameters for numeric sequences:
 </p>
-
 
 
 
@@ -3289,19 +2941,16 @@ a: z</bkl-code>
 <row>
 
 
-
 <div>
 
-
-<bkl-code><focus>$repeat:
-  $first: 10
-  $count: 3</focus>
-a: <focus>$repeat</focus></bkl-code>
-
+<bkl-code><focus>$repeat:</focus>
+  <focus>$first: 10</focus>
+  <focus>$count: 3</focus>
+<focus>a: $repeat</focus></bkl-code>
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3312,22 +2961,18 @@ a: 11
 a: 12</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
 
 
 
-
-<p>Range parameters require exactly 2 of <ifocus>$first</ifocus>, <ifocus>$last</ifocus>, and <ifocus>$count</ifocus>. Optional <ifocus>$step</ifocus> defaults to 1.
+<p>Range parameters require exactly 2 of <highlight>$first</highlight>, <highlight>$last</highlight>, and <highlight>$count</highlight>. Optional <highlight>$step</highlight> defaults to 1.
 </p>
 
 
 
-<p><ifocus>$repeat:</ifocus> also works at the object level within maps and lists:
+<p><highlight>$repeat:</highlight> also works at the object level within maps and lists:
 </p>
-
 
 
 
@@ -3339,19 +2984,16 @@ a: 12</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a:
   $"b{$repeat}":
-    c: <focus>$repeat</focus>
+    <focus>c: $repeat</focus>
     <focus>$repeat: 3</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3364,17 +3006,13 @@ a: 12</bkl-code>
     c: 2</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
 <p>Object-level repeat in lists:
 </p>
-
 
 
 
@@ -3386,18 +3024,15 @@ a: 12</bkl-code>
 <row>
 
 
-
 <div>
 
-
 <bkl-code>a:
-  - b: <focus>$repeat</focus>
+  - <focus>b: $repeat</focus>
     <focus>$repeat: [x, y, z]</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3407,11 +3042,8 @@ a: 12</bkl-code>
   - b: z</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -3422,9 +3054,8 @@ a: 12</bkl-code>
 
 
 
-<p><ifocus>$$</ifocus> translates to a literal <ifocus>$</ifocus> in cases where it would otherwise trigger special handling.
+<p><highlight>$$</highlight> translates to a literal <highlight>$</highlight> in cases where it would otherwise trigger special handling.
 </p>
-
 
 
 
@@ -3436,27 +3067,21 @@ a: 12</bkl-code>
 <row>
 
 
-
 <div>
 
-
 <bkl-code>a: <focus>$$env:foo</focus></bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
 <bkl-code>a: <focus>$env:foo</focus></bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -3467,10 +3092,8 @@ a: 12</bkl-code>
 
 
 
-<p>TOML doesn't allow unquoted <ifocus>$</ifocus> in keys, which impacts bkl directives. Work around this by quoting keys:
+<p>TOML doesn't allow unquoted <highlight>$</highlight> in keys, which impacts bkl directives. Work around this by quoting keys:
 </p>
-
-
 
 
 
@@ -3482,7 +3105,6 @@ a: 12</bkl-code>
 
 
 
-
 </section>
 
 <section id="bklb">
@@ -3490,10 +3112,8 @@ a: 12</bkl-code>
 
 
 
-<p><ifocus>bklb</ifocus> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.
+<p><highlight>bklb</highlight> is a wrapper for CLI programs that take configuration files as commandline arguments but do not support bkl format. It transparently merges layers, translates formats, writes to temporary files, alters the commandline arguments, then execs the wrapped program.
 </p>
-
-
 
 
 
@@ -3530,13 +3150,12 @@ $ <focus>catb service.test.json</focus>
 
 
 
-
-<p>Note that the files mentioned don't have to exist; <ifocus>bklb</ifocus> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
+<p>Note that the files mentioned don't have to exist; <highlight>bklb</highlight> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
 </p>
 
 
 
-<p><ifocus>bklb</ifocus> takes the name of the program it wraps from its own filename, hence the <ifocus>ln -s</ifocus> symlink creation in the example above. It trims at most one <ifocus>b</ifocus> from the end of its name before searching for the wrapped program so they can coexist in your PATH.
+<p><highlight>bklb</highlight> takes the name of the program it wraps from its own filename, hence the <highlight>ln -s</highlight> symlink creation in the example above. It trims at most one <highlight>b</highlight> from the end of its name before searching for the wrapped program so they can coexist in your PATH.
 </p>
 
 
@@ -3548,8 +3167,6 @@ $ <focus>catb service.test.json</focus>
 
 
 
-
-
 <doc-grid>
 
 <bkl-code>$ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;</bkl-code>
@@ -3558,10 +3175,8 @@ $ <focus>catb service.test.json</focus>
 
 
 
-
-<p><ifocus>bkld</ifocus> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <ifocus><a href="#bkli">bkli</a></ifocus>, it automates splitting existing configurations into layers.
+<p><highlight>bkld</highlight> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <highlight><a href="#bkli">bkli</a></highlight>, it automates splitting existing configurations into layers.
 </p>
-
 
 
 
@@ -3573,25 +3188,19 @@ $ <focus>catb service.test.json</focus>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b: $required
 c: 3</bkl-code>
-
 </div>
 
 <op>?</op>
-
 <div>
-
 
 <bkl-code>a: 1
 b: 2
 d: 4</bkl-code>
-
 </div>
 
 
@@ -3604,31 +3213,30 @@ c: null
 d: 4</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- a: 1
 - b: 2</bkl-code>
-
 </div>
 
 <op>?</op>
-
 <div>
-
 
 <bkl-code>- a: 1
 - c: 3</bkl-code>
-
 </div>
 
 
@@ -3641,31 +3249,30 @@ d: 4</bkl-code>
     b: 2</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- 1
 - 2</bkl-code>
-
 </div>
 
 <op>?</op>
-
 <div>
-
 
 <bkl-code>- 1
 - 3</bkl-code>
-
 </div>
 
 
@@ -3678,11 +3285,8 @@ d: 4</bkl-code>
 - $replace: true</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -3690,8 +3294,6 @@ d: 4</bkl-code>
 
 <section id="bkli">
 <h2><a name="bkli">bkli</a></h2>
-
-
 
 
 
@@ -3703,15 +3305,13 @@ d: 4</bkl-code>
 
 
 
-
-<p><ifocus>bkli</ifocus> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <ifocus><a href="#bkld">bkld</a></ifocus>, it automates splitting existing configurations into layers.
+<p><highlight>bkli</highlight> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <highlight><a href="#bkld">bkld</a></highlight>, it automates splitting existing configurations into layers.
 </p>
 
 
 
-<p>Any fields that exist in all upper layers but have different values will be marked <ifocus>$required</ifocus>.
+<p>Any fields that exist in all upper layers but have different values will be marked <highlight>$required</highlight>.
 </p>
-
 
 
 
@@ -3723,25 +3323,19 @@ d: 4</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a: 1
 b: 2
 c: 3</bkl-code>
-
 </div>
 
 <op>∩</op>
-
 <div>
-
 
 <bkl-code>a: 1
 b: 10
 d: 4</bkl-code>
-
 </div>
 
 
@@ -3753,33 +3347,32 @@ d: 4</bkl-code>
 b: $required</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>- a: 1
 - b: 2
 - c: 3</bkl-code>
-
 </div>
 
 <op>∩</op>
-
 <div>
-
 
 <bkl-code>- a: 1
 - b: 10
 - d: 4</bkl-code>
-
 </div>
 
 
@@ -3790,11 +3383,8 @@ b: $required</bkl-code>
 <bkl-code>- a: 1</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -3802,8 +3392,6 @@ b: $required</bkl-code>
 
 <section id="bklr">
 <h2><a name="bklr">bklr</a></h2>
-
-
 
 
 
@@ -3815,10 +3403,8 @@ b: $required</bkl-code>
 
 
 
-
-<p><ifocus>bklr</ifocus> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
+<p><highlight>bklr</highlight> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
 </p>
-
 
 
 
@@ -3830,18 +3416,15 @@ b: $required</bkl-code>
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a:
   b: $required
   c: 3</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3849,27 +3432,29 @@ b: $required</bkl-code>
   b: $required</bkl-code>
 
 </div>
-
 </row>
+</doc-grid>
+
+
+
+
+<doc-grid>
 
 
 
 <row>
 
 
-
 <div>
-
 
 <bkl-code>a:
   - $required
 b:
   - 2</bkl-code>
-
 </div>
 
-<op>=</op>
 
+<op>=</op>
 <div>
 
 
@@ -3877,11 +3462,8 @@ b:
   - $required</bkl-code>
 
 </div>
-
 </row>
-
 </doc-grid>
-
 
 
 
@@ -3889,8 +3471,6 @@ b:
 
 <section id="kubectl-bkl">
 <h2><a name="kubectl-bkl">kubectl bkl</a></h2>
-
-
 
 
 
@@ -3902,11 +3482,8 @@ b:
 
 
 
-
-<p><ifocus>kubectl bkl</ifocus> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
+<p><highlight>kubectl bkl</highlight> is a kubectl plugin that wraps all the normal kubectl commands by evaluating any input files as bkl layers and passing the output to kubectl.
 </p>
-
-
 
 
 
@@ -3920,7 +3497,6 @@ deployment.apps/deploy-dev unchanged</bkl-code>
 
 
 
-
 </section>
 
 <section id="docker">
@@ -3928,10 +3504,8 @@ deployment.apps/deploy-dev unchanged</bkl-code>
 
 
 
-<p>bkl docker images are available at <ifocus>ghcr.io/gopatchy/bkl:latest</ifocus> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
+<p>bkl docker images are available at <highlight>ghcr.io/gopatchy/bkl:latest</highlight> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
 </p>
-
-
 
 
 
@@ -3949,7 +3523,6 @@ COPY --from=bkl /bin /bin</bkl-code>
 
 
 
-
 </section>
 
 <section id="diff">
@@ -3962,11 +3535,9 @@ COPY --from=bkl /bin /bin</bkl-code>
 
 
 
-
-
 <doc-grid>
 
-<bkl-code>$ <focus>diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+<bkl-code>$ <focus>diff -ud --color</focus> <focus>&lt;</focus><focus>(bkl a.yaml)</focus> <focus>&lt;</focus><focus>(bkl b.yaml)</focus>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
 @@ -1,3 +1,2 @@
@@ -3974,13 +3545,12 @@ COPY --from=bkl /bin /bin</bkl-code>
 <focus>-b: 2</focus>
  c: 3
 
-$ <focus>diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)</focus>
+$ <focus>diff -y --color</focus> <focus>&lt;</focus><focus>(bkl a.yaml)</focus> <focus>&lt;</focus><focus>(bkl b.yaml)</focus>
 a: 1                              a: 1
 b: 2                            <focus>&lt;</focus>
 c: 3                              c: 3</bkl-code>
 
 </doc-grid>
-
 
 
 
@@ -3991,12 +3561,12 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<p>Below is an example process for migrating an existing set of configurations to <ifocus>bkl</ifocus>. It contains some Kubernetes-specific items but the use of the <ifocus>bkl*</ifocus> tools applies to any configuration source.
+<p>Below is an example process for migrating an existing set of configurations to <highlight>bkl</highlight>. It contains some Kubernetes-specific items but the use of the <highlight>bkl*</highlight> tools applies to any configuration source.
 </p>
 
 
 
-<p>We assume you start with two K8s deployments called <ifocus>deploy-dev</ifocus> and <ifocus>deploy-prod</ifocus> which are similar but not identical.
+<p>We assume you start with two K8s deployments called <highlight>deploy-dev</highlight> and <highlight>deploy-prod</highlight> which are similar but not identical.
 </p>
 
 
@@ -4013,10 +3583,8 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<p>It's possible to export configuration directly from existing templating systems (e.g. <ifocus>kustomize build</ifocus>, <ifocus>helm install --dry-run --debug</ifocus>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
+<p>It's possible to export configuration directly from existing templating systems (e.g. <highlight>kustomize build</highlight>, <highlight>helm install --dry-run --debug</highlight>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
 </p>
-
-
 
 
 
@@ -4033,9 +3601,6 @@ $ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml</bkl-code>
 
 
 
-
-
-
 <doc-grid>
 
 <div>
@@ -4045,9 +3610,6 @@ $ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
 </div>
 
 </doc-grid>
-
-
-
 
 
 
@@ -4064,9 +3626,6 @@ $ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml</bkl-code>
 
 
 
-
-
-
 <doc-grid>
 
 <div>
@@ -4077,9 +3636,6 @@ $ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
 </div>
 
 </doc-grid>
-
-
-
 
 
 
@@ -4094,13 +3650,12 @@ $ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
 
 
 
-
 <p>You now have 3 bkl files:
 
 <ul>
-<li><ifocus>deploy.yaml</ifocus> is the base layer containing values common to both deployments</li>
-<li><ifocus>deploy.dev.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-dev</ifocus></li>
-<li><ifocus>deploy.prod.yaml</ifocus> is the upper layer containing values specific to <ifocus>deploy-prod</ifocus></li>
+<li><highlight>deploy.yaml</highlight> is the base layer containing values common to both deployments</li>
+<li><highlight>deploy.dev.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-dev</highlight></li>
+<li><highlight>deploy.prod.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-prod</highlight></li>
 </ul>
 </p>
 
@@ -4110,14 +3665,14 @@ $ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
 
 <ul>
 <li>Start with the most similar examples to maximize base layer size</li>
-<li>Consider intermediate layers that make sense (e.g. <ifocus>deploy.yaml</ifocus> → <ifocus>deploy.frontend.yaml</ifocus> → <ifocus>deploy.frontend.prod.yaml</ifocus>)</li>
+<li>Consider intermediate layers that make sense (e.g. <highlight>deploy.yaml</highlight> → <highlight>deploy.frontend.yaml</highlight> → <highlight>deploy.frontend.prod.yaml</highlight>)</li>
 <li>Split large configurations into logical subfiles; bkl can merge across file boundaries</li>
-<li>Iterate by diffing your evaluated layers against production (e.g. <ifocus>kubectl bkl diff -f</ifocus>), making small changes, then diffing again.</li>
+<li>Iterate by diffing your evaluated layers against production (e.g. <highlight>kubectl bkl diff -f</highlight>), making small changes, then diffing again.</li>
 <li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
 <li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
-<li>Remove duplication with <ifocus>$merge:</ifocus> but avoid chained merge paths.</li>
-<li>Avoid using hidden <ifocus>$output: false</ifocus> trees as template variables; prefer overriding values in-place.</li>
-<li><ifocus>bkld</ifocus> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <ifocus>containers</ifocus>) that could be trivially patched. Use <ifocus>$match:</ifocus> to select the container and override values within it.</li>
+<li>Remove duplication with <highlight>$merge:</highlight> but avoid chained merge paths.</li>
+<li>Avoid using hidden <highlight>$output: false</highlight> trees as template variables; prefer overriding values in-place.</li>
+<li><highlight>bkld</highlight> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <highlight>containers</highlight>) that could be trivially patched. Use <highlight>$match:</highlight> to select the container and override values within it.</li>
 </ul>
 </p>
 
@@ -4141,8 +3696,7 @@ $ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
 <li>File composition should be accomplished without meta configuration (e.g. manifest files).</li>
 <li>Templating/layering behavior should be intuitive and produce expected results.</li>
 <li>Documentation and examples should be excellent.</li>
-</ul>
-</p>
+</ul></p>
 
 
 

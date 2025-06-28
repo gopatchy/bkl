@@ -206,9 +206,15 @@ doc-grid bkl-code {
 }
 
 /* Fix top-left corner when label is present */
-label + code,
-label + bkl-code {
+label:not(.invisible) + code,
+label:not(.invisible) + bkl-code {
 	border-top-left-radius: 0 !important;
+}
+
+/* Keep rounded corners for invisible labels */
+label.invisible + code,
+label.invisible + bkl-code {
+	border-top-left-radius: 4px !important;
 }
 
 code + p,
@@ -283,7 +289,7 @@ focus, focus > * {
 	color: var(--red6);
 }
 
-ifocus {
+highlight {
 	background: var(--neutral8);
 	color: var(--red6);
 	display: inline-block;
@@ -293,7 +299,7 @@ ifocus {
 	white-space: nowrap;
 }
 
-ifocus * {
+highlight * {
 	color: var(--red6) !important;
 }
 </style>
@@ -396,7 +402,7 @@ class BklCode extends HTMLElement {
     // Preserve existing HTML tags first (like focus tags)
     const placeholder = '___PLACEHOLDER___';
     const preserved = [];
-    html = html.replace(/<(focus|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
+    html = html.replace(/<(focus|highlight|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
       preserved.push(match);
       return placeholder + (preserved.length - 1) + placeholder;
     });
@@ -526,45 +532,62 @@ BKL</h1>
 <h2><a name="{{.ID}}">{{.Title}}</a></h2>
 
 {{range $item := .Items}}
-{{if eq $item.Type "text"}}
+{{if $item.Content}}
 <p>{{$item.Content | formatContent}}</p>
-{{else if eq $item.Type "example"}}
-{{$example := $item.Example}}
-{{if eq $example.Type "grid"}}
+{{else if $item.SideBySide}}
 <doc-grid>
-{{range $rowIndex, $row := $example.Rows}}
-{{$hasLabels := false}}
-{{range $item := $row.Items}}{{if $item.Label}}{{$hasLabels = true}}{{end}}{{end}}
 <row>
-{{range $itemIndex, $item := $row.Items}}
-{{if eq $itemIndex 1}}{{if $row.Operator}}<op>{{$row.Operator}}</op>{{end}}{{end}}
-{{if eq $itemIndex 2}}<op>=</op>{{end}}
+<div>
+<label>{{$item.SideBySide.Left.Label}}</label>
+<bkl-code>{{$item.SideBySide.Left | formatLayer}}</bkl-code>
+</div>
+<div>
+<label>{{$item.SideBySide.Right.Label}}</label>
+<bkl-code>{{$item.SideBySide.Right | formatLayer}}</bkl-code>
+</div>
+</row>
+</doc-grid>
+{{else if $item.Code}}
+<doc-grid>
+{{if $item.Code.Label}}
+<div>
+<label{{if eq $item.Code.Label "invisible"}} class="invisible"{{end}}>{{$item.Code.Label}}</label>
+<bkl-code>{{$item.Code | formatLayer}}</bkl-code>
+</div>
+{{else}}
+<bkl-code>{{$item.Code | formatLayer}}</bkl-code>
+{{end}}
+</doc-grid>
+{{else if $item.Example}}
+{{$example := $item.Example}}
+<doc-grid>
+{{$hasLabels := false}}
+{{range $layer := $example.Layers}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
+{{if $example.Result.Label}}{{$hasLabels = true}}{{end}}
+<row>
+{{range $layerIndex, $layer := $example.Layers}}
+{{if eq $layerIndex 1}}{{if eq $example.Operation "evaluate"}}<op>+</op>{{else if eq $example.Operation "diff"}}<op>?</op>{{else if eq $example.Operation "intersect"}}<op>∩</op>{{end}}{{end}}
 <div>
 {{if $hasLabels}}
-{{if $item.Label}}<label>{{$item.Label}}</label>{{else}}<label class="invisible">invisible</label>{{end}}
+{{if $layer.Label}}<label>{{$layer.Label}}</label>{{else}}<label class="invisible">invisible</label>{{end}}
 {{end}}
-{{if eq ($item | formatCode) "Error"}}
+<bkl-code>{{$layer | formatLayer}}</bkl-code>
+</div>
+{{end}}
+{{if and (eq (len $example.Layers) 1) (ne $example.Operation "evaluate")}}<op>{{if eq $example.Operation "diff"}}?{{else if eq $example.Operation "intersect"}}∩{{end}}</op>{{end}}
+<op>=</op>
+<div>
+{{if $hasLabels}}
+{{if $example.Result.Label}}<label>{{$example.Result.Label}}</label>{{else}}<label class="invisible">invisible</label>{{end}}
+{{end}}
+{{if eq ($example.Result | formatLayer) "Error"}}
 <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
 {{else}}
-<bkl-code>{{$item | formatCode}}</bkl-code>
+<bkl-code>{{$example.Result | formatLayer}}</bkl-code>
 {{end}}
 </div>
-{{end}}
 </row>
-{{end}}
 </doc-grid>
-{{else if eq $example.Type "single"}}
-<doc-grid>
-{{if $example.Label}}
-<div>
-<label{{if eq $example.Label "invisible"}} class="invisible"{{end}}>{{$example.Label}}</label>
-<bkl-code>{{$example | formatExample}}</bkl-code>
-</div>
-{{else}}
-<bkl-code>{{$example | formatExample}}</bkl-code>
-{{end}}
-</doc-grid>
-{{end}}
 {{end}}
 {{end}}
 

@@ -62,8 +62,7 @@ func main() {
 	tmpl := template.Must(template.New("html").Funcs(template.FuncMap{
 		"formatContent": formatContent,
 		"formatNote":    formatNote,
-		"formatCode":    formatCode,
-		"formatExample": formatExample,
+		"formatLayer":   formatLayer,
 		"trimSpace":     strings.TrimSpace,
 		"safeURL":       func(s string) template.URL { return template.URL(s) },
 	}).Parse(string(templateContent)))
@@ -109,22 +108,11 @@ func formatNote(note string) template.HTML {
 	return template.HTML(note)
 }
 
-func formatCode(item bkl.DocGridItem) template.HTML {
-	code := strings.TrimSpace(item.Code)
+func formatLayer(layer bkl.DocLayer) template.HTML {
+	code := strings.TrimSpace(layer.Code)
 
 	// Apply highlights
-	for _, highlight := range item.Highlights {
-		code = strings.ReplaceAll(code, highlight, "<focus>"+highlight+"</focus>")
-	}
-
-	return template.HTML(code)
-}
-
-func formatExample(example bkl.DocExample) template.HTML {
-	code := strings.TrimSpace(example.Code)
-
-	// Apply highlights
-	for _, highlight := range example.Highlights {
+	for _, highlight := range layer.Highlights {
 		code = strings.ReplaceAll(code, highlight, "<focus>"+highlight+"</focus>")
 	}
 

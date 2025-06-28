@@ -33,28 +33,27 @@ type DocSection struct {
 }
 
 type DocItem struct {
-	Type    string     `yaml:"type"`
-	Content string     `yaml:"content"`
-	Example DocExample `yaml:"example"`
+	Content    string         `yaml:"content,omitempty"`
+	Example    *DocExample    `yaml:"example,omitempty"`
+	Code       *DocLayer      `yaml:"code,omitempty"` // For simple code examples
+	SideBySide *DocSideBySide `yaml:"side_by_side,omitempty"` // For special two-column layout
+}
+
+type DocSideBySide struct {
+	Left  DocLayer `yaml:"left"`
+	Right DocLayer `yaml:"right"`
 }
 
 type DocExample struct {
-	Type       string   `yaml:"type"`
-	Label      string   `yaml:"label"`
-	Code       string   `yaml:"code"`
-	Rows       []DocRow `yaml:"rows"`
-	Highlights []string `yaml:"highlights"`
+	Operation string     `yaml:"operation,omitempty"` // "evaluate", "diff", "intersect", "required"
+	Layers    []DocLayer `yaml:"layers,omitempty"`
+	Result    DocLayer   `yaml:"result,omitempty"`
 }
 
-type DocRow struct {
-	Items    []DocGridItem `yaml:"items"`
-	Operator string        `yaml:"operator"`
-}
-
-type DocGridItem struct {
-	Label      string   `yaml:"label"`
+type DocLayer struct {
+	Label      string   `yaml:"label,omitempty"`
 	Code       string   `yaml:"code"`
-	Highlights []string `yaml:"highlights"`
+	Highlights []string `yaml:"highlights,omitempty"`
 }
 
 func GetTests() (map[string]*TestCase, error) {
