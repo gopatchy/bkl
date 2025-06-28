@@ -309,8 +309,6 @@ class DocGrid extends HTMLElement {
     this.style.flexDirection = 'column';
     this.style.gap = '15px';
     
-    // Force initialization after a delay as well
-    setTimeout(() => this.initializeGrid(), 0);
     this.initializeGrid();
   }
   
@@ -384,62 +382,64 @@ class DocGrid extends HTMLElement {
 
 class BklCode extends HTMLElement {
   connectedCallback() {
-    this.highlight();
-  }
-  
-  constructor() {
-    super();
-    // Try highlighting after a small delay as well
-    setTimeout(() => this.highlight(), 100);
+    if (this.innerHTML.length > 0) {
+      this.highlight();
+    } else {
+      const observer = new MutationObserver((mutations) => {
+        if (this.innerHTML.length > 0) {
+          observer.disconnect();
+          this.highlight();
+        }
+      });
+      
+      observer.observe(this, { childList: true, subtree: true });
+    }
   }
   
   highlight() {
-    // Get the raw HTML content
+    let languages = [];
+    if (this.dataset.languages) {
+      try {
+        languages = JSON.parse(this.dataset.languages);
+      } catch (e) {
+        console.warn('Failed to parse languages data:', e);
+      }
+    }
+    
     let html = this.innerHTML;
     
-    // List of tags to remove and track
     const tagsToRemove = ['<highlight>', '</highlight>'];
     
-    // Step 1: Find all tag locations
-    const removals = []; // List of {pos, tag} to remove
+    const removals = [];
     
     for (const tag of tagsToRemove) {
       let pos = 0;
       while ((pos = html.indexOf(tag, pos)) !== -1) {
         removals.push({pos: pos, tag: tag});
-        pos += tag.length; // Move past this occurrence to find the next one
+        pos += tag.length;
       }
     }
     
-    // Sort by position
     removals.sort((a, b) => a.pos - b.pos);
     
-    // Step 2: Remove tags and build insertion list
-    const insertions = []; // List of {pos, text} to insert later
+    const insertions = []; 
     let cleanText = '';
     let htmlPos = 0;
     let cleanPos = 0;
     
     for (const removal of removals) {
-      // Add text before this tag
       cleanText += html.substring(htmlPos, removal.pos);
       cleanPos += removal.pos - htmlPos;
       
-      // Track where to reinsert this tag
       insertions.push({pos: cleanPos, text: removal.tag});
       
-      // Skip past the tag
       htmlPos = removal.pos + removal.tag.length;
     }
     
-    // Add any remaining text
     cleanText += html.substring(htmlPos);
     
-    // Step 3: TODO - Add syntax highlighting here
-    // For now, just testing the tag removal/reinsertion
+    this.applySyntaxHighlighting(cleanText, languages, insertions);
     
-    // Step 4: Rebuild with all insertions
-    // Sort insertions by position (descending) so we can insert from end to start
     insertions.sort((a, b) => b.pos - a.pos);
     
     let result = cleanText;
@@ -449,23 +449,90 @@ class BklCode extends HTMLElement {
     
     this.innerHTML = result;
   }
+  
+  applySyntaxHighlighting(text, languages, insertions) {
+    let pos = 0;
+    let lineNum = 0;
+    let nextLangIndex = 1;
+    let chunkStart = 0;
+    
+    while (pos < text.length) {
+      if (nextLangIndex < languages.length && languages[nextLangIndex][0] === lineNum) {
+        const chunkText = text.substring(chunkStart, pos);
+        const chunkLang = languages[nextLangIndex - 1][1];
+        this.highlightChunk(chunkText, chunkLang, chunkStart, insertions);
+        
+        chunkStart = pos;
+        nextLangIndex++;
+      }
+      
+      const nextNewline = text.indexOf('\n', pos);
+      if (nextNewline === -1) {
+        break;
+      }
+      
+      pos = nextNewline + 1;
+      lineNum++;
+    }
+    
+    if (chunkStart < text.length) {
+      const chunkText = text.substring(chunkStart);
+      const chunkLang = languages[nextLangIndex - 1][1];
+      this.highlightChunk(chunkText, chunkLang, chunkStart, insertions);
+    }
+  }
+  
+  highlightChunk(text, language, startOffset, insertions) {
+    switch (language) {
+      case 'yaml':
+        this.highlightYaml(text, startOffset, insertions);
+        break;
+      case 'toml':
+        this.highlightToml(text, startOffset, insertions);
+        break;
+      case 'json':
+        this.highlightJson(text, startOffset, insertions);
+        break;
+      case 'shell':
+        this.highlightShell(text, startOffset, insertions);
+        break;
+      case 'dockerfile':
+        this.highlightDockerfile(text, startOffset, insertions);
+        break;
+      case 'diff':
+        this.highlightDiff(text, startOffset, insertions);
+        break;
+    }
+  }
+  
+  // Language-specific highlighting functions
+  highlightYaml(text, startOffset, insertions) {
+    // TODO: Implement YAML syntax highlighting
+  }
+  
+  highlightToml(text, startOffset, insertions) {
+    // TODO: Implement TOML syntax highlighting
+  }
+  
+  highlightJson(text, startOffset, insertions) {
+    // TODO: Implement JSON syntax highlighting
+  }
+  
+  highlightShell(text, startOffset, insertions) {
+    // TODO: Implement Shell syntax highlighting
+  }
+  
+  highlightDockerfile(text, startOffset, insertions) {
+    // TODO: Implement Dockerfile syntax highlighting
+  }
+  
+  highlightDiff(text, startOffset, insertions) {
+    // TODO: Implement Diff syntax highlighting
+  }
 }
 
 customElements.define('doc-grid', DocGrid);
 customElements.define('bkl-code', BklCode);
-
-// Also try to highlight any bkl-code elements after page load
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    document.querySelectorAll('bkl-code').forEach(el => {
-      if (el.highlight) el.highlight();
-    });
-    // Also reinitialize doc-grid elements
-    document.querySelectorAll('doc-grid').forEach(el => {
-      if (el.initializeGrid) el.initializeGrid();
-    });
-  }, 100);
-});
 </script>
 </head>
 <body>
@@ -503,11 +570,11 @@ BKL</h1>
 <row>
 <div>
 <label>{{$item.SideBySide.Left.Label}}</label>
-<bkl-code>{{$item.SideBySide.Left | formatLayer}}</bkl-code>
+<bkl-code data-languages='{{getLanguages $item.SideBySide.Left}}'>{{$item.SideBySide.Left | formatLayer}}</bkl-code>
 </div>
 <div>
 <label>{{$item.SideBySide.Right.Label}}</label>
-<bkl-code>{{$item.SideBySide.Right | formatLayer}}</bkl-code>
+<bkl-code data-languages='{{getLanguages $item.SideBySide.Right}}'>{{$item.SideBySide.Right | formatLayer}}</bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -516,10 +583,10 @@ BKL</h1>
 {{if $item.Code.Label}}
 <div>
 <label{{if eq $item.Code.Label "invisible"}} class="invisible"{{end}}>{{$item.Code.Label}}</label>
-<bkl-code>{{$item.Code | formatLayer}}</bkl-code>
+<bkl-code data-languages='{{getLanguages $item.Code}}'>{{$item.Code | formatLayer}}</bkl-code>
 </div>
 {{else}}
-<bkl-code>{{$item.Code | formatLayer}}</bkl-code>
+<bkl-code data-languages='{{getLanguages $item.Code}}'>{{$item.Code | formatLayer}}</bkl-code>
 {{end}}
 </doc-grid>
 {{else if $item.Example}}
@@ -535,7 +602,7 @@ BKL</h1>
 {{if $hasLabels}}
 {{if $layer.Label}}<label>{{$layer.Label}}</label>{{else}}<label class="invisible">invisible</label>{{end}}
 {{end}}
-<bkl-code>{{$layer | formatLayer}}</bkl-code>
+<bkl-code data-languages='{{getLanguages $layer}}'>{{$layer | formatLayer}}</bkl-code>
 </div>
 {{end}}
 {{if and (eq (len $example.Layers) 1) (ne $example.Operation "evaluate")}}<op>{{if eq $example.Operation "diff"}}?{{else if eq $example.Operation "intersect"}}∩{{end}}</op>{{end}}
@@ -547,7 +614,7 @@ BKL</h1>
 {{if eq ($example.Result | formatLayer) "Error"}}
 <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
 {{else}}
-<bkl-code>{{$example.Result | formatLayer}}</bkl-code>
+<bkl-code data-languages='{{getLanguages $example.Result}}'>{{$example.Result | formatLayer}}</bkl-code>
 {{end}}
 </div>
 </row>

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -65,6 +66,17 @@ func main() {
 		"formatLayer":   formatLayer,
 		"trimSpace":     strings.TrimSpace,
 		"safeURL":       func(s string) template.URL { return template.URL(s) },
+		"jsonEncode": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
+		"getLanguages": func(layer bkl.DocLayer) string {
+			if layer.Languages == nil || len(layer.Languages) == 0 {
+				return "[]"
+			}
+			b, _ := json.Marshal(layer.Languages)
+			return string(b)
+		},
 	}).Parse(string(templateContent)))
 
 	templateData := TemplateData{

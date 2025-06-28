@@ -643,10 +643,12 @@
               - 2
               - $encode: prefix:X
             highlights: ["$encode: prefix:X"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - Xa
             - X2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -656,10 +658,12 @@
               b: 2
               $encode: tolist:=
             highlights: ["$encode: tolist:="]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - a=1
             - b=2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
