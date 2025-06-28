@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/gopatchy/bkl/wrapper"
+	"github.com/gopatchy/bkl/pkg/wrapper"
 )
 
 func main() {
