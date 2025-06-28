@@ -1,10 +1,10 @@
-package bkl
+package output
 
 import (
 	"strings"
 )
 
-func finalizeOutput(obj any) any {
+func FinalizeOutput(obj any) any {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		return finalizeMap(obj2)
@@ -23,7 +23,7 @@ func finalizeOutput(obj any) any {
 func finalizeMap(obj map[string]any) map[string]any {
 	newObj := make(map[string]any, len(obj))
 	for k, v := range obj {
-		newObj[finalizeString(k)] = finalizeOutput(v)
+		newObj[finalizeString(k)] = FinalizeOutput(v)
 	}
 
 	return newObj
@@ -32,7 +32,7 @@ func finalizeMap(obj map[string]any) map[string]any {
 func finalizeList(obj []any) []any {
 	newList := make([]any, len(obj))
 	for idx, v := range obj {
-		newList[idx] = finalizeOutput(v)
+		newList[idx] = FinalizeOutput(v)
 	}
 
 	return newList

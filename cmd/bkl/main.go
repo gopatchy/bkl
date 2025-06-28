@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl"
+	"github.com/gopatchy/bkl/pkg/log"
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/exp/constraints"
 )
@@ -68,7 +69,7 @@ Related tools:
 	}
 
 	if opts.Verbose {
-		bkl.Debug = true
+		log.Debug = true
 	}
 
 	files := make([]string, len(opts.Positional.InputPaths))

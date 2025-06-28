@@ -1,8 +1,8 @@
-package bkl
+package output
 
 import "github.com/gopatchy/bkl/internal/utils"
 
-func findOutputs(obj any) (any, []any, error) {
+func FindOutputs(obj any) (any, []any, error) {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		return findOutputsMap(obj2)
@@ -25,7 +25,7 @@ func findOutputsMap(obj map[string]any) (any, []any, error) {
 	}
 
 	for k, v := range utils.SortedMap(obj) {
-		vNew, subOuts, err := findOutputs(v)
+		vNew, subOuts, err := FindOutputs(v)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -47,7 +47,7 @@ func findOutputsList(obj []any) (any, []any, error) {
 	}
 
 	for _, v := range obj {
-		vNew, subOuts, err := findOutputs(v)
+		vNew, subOuts, err := FindOutputs(v)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -63,7 +63,7 @@ func findOutputsList(obj []any) (any, []any, error) {
 	return ret, outs, nil
 }
 
-func filterOutput(obj any) (any, bool, error) {
+func FilterOutput(obj any) (any, bool, error) {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		return filterOutputMap(obj2)
@@ -83,7 +83,7 @@ func filterOutputMap(obj map[string]any) (any, bool, error) {
 	}
 
 	filtered, err := utils.FilterMap(obj, func(k string, v any) (map[string]any, error) {
-		v2, include, err := filterOutput(v)
+		v2, include, err := FilterOutput(v)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +109,7 @@ func filterOutputList(obj []any) (any, bool, error) {
 	}
 
 	filtered, err := utils.FilterList(obj, func(v any) ([]any, error) {
-		v2, include, err := filterOutput(v)
+		v2, include, err := FilterOutput(v)
 		if err != nil {
 			return nil, err
 		}

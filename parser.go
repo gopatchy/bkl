@@ -16,13 +16,12 @@ import (
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
+	"github.com/gopatchy/bkl/internal/output"
 	"github.com/gopatchy/bkl/internal/process"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
+	"github.com/gopatchy/bkl/pkg/log"
 )
-
-// Debug controls debug log output to stderr for all bkl operations.
-var Debug = os.Getenv("BKL_DEBUG") != ""
 
 // A bkl reads input documents, merges layers, and generates outputs.
 //
@@ -196,10 +195,10 @@ func (b *bkl) mergeFiles(fx fs.FS, files []string, ft *format.Format, env map[st
 // mergeFile applies an already-parsed file object into the [bkl]'s
 // document state.
 func (b *bkl) mergeFileObj(f *file.File) error {
-	debugLog("[%s] merging", f)
+	log.Debugf("[%s] merging", f)
 
 	for _, doc := range f.Docs {
-		debugLog("[%s] merging", doc)
+		log.Debugf("[%s] merging", doc)
 
 		err := b.mergeDocument(doc)
 		if err != nil {
@@ -221,7 +220,7 @@ func (b *bkl) outputDocument(doc *document.Document, env map[string]string) ([]a
 	outs := []any{}
 
 	for _, d := range docs {
-		obj, out, err := findOutputs(d.Data)
+		obj, out, err := output.FindOutputs(d.Data)
 		if err != nil {
 			return nil, err
 		}
@@ -234,7 +233,7 @@ func (b *bkl) outputDocument(doc *document.Document, env map[string]string) ([]a
 	}
 
 	return utils.FilterList(outs, func(v any) ([]any, error) {
-		v2, include, err := filterOutput(v)
+		v2, include, err := output.FilterOutput(v)
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +247,7 @@ func (b *bkl) outputDocument(doc *document.Document, env map[string]string) ([]a
 			return nil, err
 		}
 
-		return []any{finalizeOutput(v2)}, nil
+		return []any{output.FinalizeOutput(v2)}, nil
 	})
 }
 
