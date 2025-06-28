@@ -376,39 +376,48 @@
         layers:
           - code: |
               - 1
+            languages: [[0, "yaml"]]
           - code: |
               - 2
+            languages: [[0, "yaml"]]
         result:
           code: |
             - 1
             - 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
           - code: |
               - 1
+            languages: [[0, "yaml"]]
           - code: |
               - 2
               - $replace: true
             highlights: ["$replace: true"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
           - code: |
               - x: 1
               - x: 2
+            languages: [[0, "yaml"]]
           - code: |
               - x: 3
               - $delete:
                   x: 2
             highlights: ["$delete:", "x: 2"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - x: 1
             - x: 3
+          languages: [[0, "yaml"]]
     - content: |
         bkl returns an error if you use <highlight>$replace: true</highlight> or <highlight>$delete</highlight> when they don't override a value from a lower layer. This helps keep upper layers minimal.
     - content: |
@@ -419,29 +428,35 @@
           - code: |
               - a: 1
               - b: 2
+            languages: [[0, "yaml"]]
           - code: |
               - $match:
                   b: 2
                 b: 10
             highlights: ["$match:", "b: 2"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - a: 1
             - b: 10
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
           - code: |
               - 1
               - 2
+            languages: [[0, "yaml"]]
           - code: |
               - $match: 2
                 $value: 10
             highlights: ["$match: 2", "$value: 10"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - 1
             - 10
+          languages: [[0, "yaml"]]
 
 - id: interp
   title: $""
@@ -457,12 +472,14 @@
                 c: foo
               d: $"{b.c} bar {a} 2"
             highlights: ["$\"{b.c} bar {a} 2\""]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             b:
               c: foo
             d: foo bar 1 2
+          languages: [[0, "yaml"]]
           highlights: ["foo bar 1 2"]
 
 - id: decode
@@ -478,10 +495,12 @@
                 {"a":1}
               $decode: json
             highlights: ["{\"a\":1}", "$decode: json"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
           highlights: ["a: 1"]
+          languages: [[0, "yaml"]]
 
 - id: env
   title: $env
@@ -495,10 +514,12 @@
               # export FOO=test
               "$env:FOO": 1
             highlights: ["\"$env:FOO\""]
+            languages: [[0, "yaml"]]
         result:
           code: |
             test: 1
           highlights: ["test"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -506,10 +527,12 @@
               # export FOO=test
               a: $env:FOO
             highlights: ["$env:FOO"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: test
           highlights: ["test"]
+          languages: [[0, "yaml"]]
     - content: |
         Note that all <highlight>$env:</highlight> substitutions result in string values even if the substituted value is <highlight>true</highlight>, <highlight>false</highlight>, <highlight>null</highlight>, or all digits.
 
@@ -526,9 +549,11 @@
               $value: a
               $encode: base64
             highlights: ["$encode: base64"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             YQ==
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -539,10 +564,12 @@
               $encode: flags
               # [tolist:=, prefix:--]
             highlights: ["$encode: flags"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - --a=1
             - --b=2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -555,6 +582,7 @@
               - e
               - $encode: flatten
             highlights: ["$encode: flatten"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             - a
@@ -562,6 +590,7 @@
             - c
             - 4
             - e
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -570,9 +599,11 @@
               $value: [a, b]
               $encode: join:/
             highlights: ["$encode: join:/"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a/b
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -582,10 +613,12 @@
               b: 2
               $encode: json
             highlights: ["$encode: json"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             |
               {"a":1,"b":2}
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -595,10 +628,12 @@
               - b: 2
               - $encode: json
             highlights: ["$encode: json"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             |
               [{"a":1},{"b":2}]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -634,9 +669,11 @@
               b: 2
               $encode: [tolist:=, "join:,"]
             highlights: ["$encode: [tolist:=, \"join:,\"]"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a=1,b=2
+          languages: [[0, "yaml"]]
 
 - id: required
   title: $required
@@ -650,8 +687,10 @@
               a: 1
               b: $required
             highlights: ["b: $required"]
+            languages: [[0, "yaml"]]
           - code: |
               c: 3
+            languages: [[0, "yaml"]]
         result:
           code: |
             Error
@@ -662,15 +701,18 @@
               a: 1
               b: $required
             highlights: ["b: $required"]
+            languages: [[0, "yaml"]]
           - code: |
               b: 2
               c: 3
             highlights: ["b: 2"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             b: 2
             c: 3
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -679,8 +721,10 @@
               b:
                 - $required
             highlights: ["b:", "- $required"]
+            languages: [[0, "yaml"]]
           - code: |
               c: 3
+            languages: [[0, "yaml"]]
         result:
           code: |
             Error
@@ -692,17 +736,20 @@
               b:
                 - $required
             highlights: ["b:", "- $required"]
+            languages: [[0, "yaml"]]
           - code: |
               b:
                 - 2
               c: 3
             highlights: ["b:", "- 2"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             b:
               - 2
             c: 3
+          languages: [[0, "yaml"]]
 
 - id: merge
   title: $merge
