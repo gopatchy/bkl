@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"unicode"
 
+	"github.com/gopatchy/bkl/pkg/errors"
 	"golang.org/x/exp/utf8string"
 )
 
@@ -52,12 +53,12 @@ func validateList(obj []any) error {
 
 func validateString(obj string) error {
 	if obj == "$required" {
-		return ErrRequiredField
+		return errors.ErrRequiredField
 	}
 
 	us := utf8string.NewString(obj)
 	if us.RuneCount() >= 2 && us.At(0) == '$' && unicode.IsLower(us.At(1)) {
-		return fmt.Errorf("%s: %w", obj, ErrInvalidDirective)
+		return fmt.Errorf("%s: %w", obj, errors.ErrInvalidDirective)
 	}
 
 	return nil

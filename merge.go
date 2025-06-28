@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 func mergeDocs(doc, patch *document.Document) error {
@@ -37,7 +38,7 @@ func merge(dst any, src any) (any, error) {
 
 	default:
 		if src == dst {
-			return nil, fmt.Errorf("%#v: %w", src, ErrUselessOverride)
+			return nil, fmt.Errorf("%#v: %w", src, errors.ErrUselessOverride)
 		}
 
 		return src, nil
@@ -66,7 +67,7 @@ func mergeMapMap(dst map[string]any, src map[string]any) (map[string]any, error)
 
 		if utils.ToString(v) == "$delete" {
 			if !found {
-				return nil, fmt.Errorf("%s=null: %w", k, ErrUselessOverride)
+				return nil, fmt.Errorf("%s=null: %w", k, errors.ErrUselessOverride)
 			}
 
 			delete(dst, k)
@@ -130,7 +131,7 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 		found, del, vMap := utils.PopMapValue(vMap, "$delete")
 		if found {
 			if len(vMap) > 0 {
-				return nil, fmt.Errorf("%#v: %w", vMap, ErrExtraKeys)
+				return nil, fmt.Errorf("%#v: %w", vMap, errors.ErrExtraKeys)
 			}
 
 			dst, err = mergeListDelete(dst, del)
@@ -175,7 +176,7 @@ func mergeListDelete(obj []any, del any) ([]any, error) {
 	}
 
 	if !deleted {
-		return nil, fmt.Errorf("$delete: %#v: %w", del, ErrUselessOverride)
+		return nil, fmt.Errorf("$delete: %#v: %w", del, errors.ErrUselessOverride)
 	}
 
 	return obj, nil
@@ -187,7 +188,7 @@ func mergeListMatch(obj []any, m any, v map[string]any) ([]any, error) {
 	found, v2, v := utils.PopMapValue(v, "$value")
 	if found {
 		if len(v) > 0 {
-			return nil, fmt.Errorf("%#v: %w", v, ErrExtraKeys)
+			return nil, fmt.Errorf("%#v: %w", v, errors.ErrExtraKeys)
 		}
 
 		val = v2
@@ -214,7 +215,7 @@ func mergeListMatch(obj []any, m any, v map[string]any) ([]any, error) {
 	}
 
 	if !found {
-		return nil, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+		return nil, fmt.Errorf("%#v: %w", m, errors.ErrNoMatchFound)
 	}
 
 	return obj, nil

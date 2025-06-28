@@ -12,6 +12,7 @@ import (
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 type file struct {
@@ -86,7 +87,7 @@ func loadFileAndParents(fsys *fsys.FS, path string, child *file) ([]*file, error
 
 func loadFileAndParentsInt(fsys *fsys.FS, path string, child *file, stack []string) ([]*file, error) {
 	if slices.Contains(stack, path) {
-		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), ErrCircularRef)
+		return nil, fmt.Errorf("%s: %w", strings.Join(append(stack, path), " -> "), errors.ErrCircularRef)
 	}
 
 	f, err := loadFile(fsys, path, child)
@@ -161,14 +162,14 @@ func (f *file) parentsFromDirective(fsys *fsys.FS) ([]string, error) {
 		case []any:
 			val3, err := utils.ToStringList(val2)
 			if err != nil {
-				return nil, fmt.Errorf("$parent=%#v: %w", val2, ErrInvalidParent)
+				return nil, fmt.Errorf("$parent=%#v: %w", val2, errors.ErrInvalidParent)
 			}
 
 			parents = append(parents, val3...)
 
 		case bool:
 			if val2 {
-				return nil, fmt.Errorf("$parent=true: %w", ErrInvalidParent)
+				return nil, fmt.Errorf("$parent=true: %w", errors.ErrInvalidParent)
 			}
 
 			noParent = true
@@ -180,7 +181,7 @@ func (f *file) parentsFromDirective(fsys *fsys.FS) ([]string, error) {
 
 	if noParent {
 		if len(parents) > 0 {
-			return nil, fmt.Errorf("$parent=false and $parent=<string> in same file: %w", ErrConflictingParent)
+			return nil, fmt.Errorf("$parent=false and $parent=<string> in same file: %w", errors.ErrConflictingParent)
 		}
 
 		return []string{}, nil
@@ -206,7 +207,7 @@ func (f *file) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
 
 	switch {
 	case len(parts) < 2:
-		return nil, fmt.Errorf("[%s] %w", f.path, ErrInvalidFilename)
+		return nil, fmt.Errorf("[%s] %w", f.path, errors.ErrInvalidFilename)
 
 	case len(parts) == 2:
 		return []string{}, nil
@@ -216,7 +217,7 @@ func (f *file) parentsFromFilename(fsys *fsys.FS) ([]string, error) {
 
 		extPath := fsys.FindFile(layerPath)
 		if extPath == "" {
-			return nil, fmt.Errorf("[%s]: %w", layerPath, ErrMissingFile)
+			return nil, fmt.Errorf("[%s]: %w", layerPath, errors.ErrMissingFile)
 		}
 
 		return []string{extPath}, nil
@@ -235,7 +236,7 @@ func (f *file) toAbsolutePaths(fsys *fsys.FS, paths []string) ([]string, error) 
 		}
 
 		if len(matches) == 0 {
-			return nil, fmt.Errorf("%s: %w", path, ErrMissingFile)
+			return nil, fmt.Errorf("%s: %w", path, errors.ErrMissingFile)
 		}
 
 		ret = append(ret, matches...)

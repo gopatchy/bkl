@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"github.com/gopatchy/bkl/pkg/errors"
 	"fmt"
 	"maps"
 )
@@ -33,5 +34,5 @@ func (ec *evalContext) getVar(name string) (any, error) {
 		return v, nil
 	}
 
-	return nil, fmt.Errorf("%s: %w", name, ErrVariableNotFound)
+	return nil, fmt.Errorf("%s: %w", name, errors.ErrVariableNotFound)
 }

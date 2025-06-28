@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 func repeatDoc(doc *document.Document, ec *evalContext) ([]*document.Document, []*evalContext, error) {
@@ -85,25 +86,25 @@ func repeatGetRangeParamValues(rs map[string]any) ([]any, error) {
 	}
 
 	if step == 0 {
-		return nil, fmt.Errorf("$step cannot be 0 (%w)", ErrInvalidRepeat)
+		return nil, fmt.Errorf("$step cannot be 0 (%w)", errors.ErrInvalidRepeat)
 	}
 
 	if hasCount && count <= 0 {
-		return nil, fmt.Errorf("$count=%d must be positive (%w)", count, ErrInvalidRepeat)
+		return nil, fmt.Errorf("$count=%d must be positive (%w)", count, errors.ErrInvalidRepeat)
 	}
 
 	if hasFirst && hasLast && hasCount {
-		return nil, fmt.Errorf("cannot specify all of $first, $last, and $count (%w)", ErrInvalidRepeat)
+		return nil, fmt.Errorf("cannot specify all of $first, $last, and $count (%w)", errors.ErrInvalidRepeat)
 	} else if hasFirst && hasLast {
 		if (last-first)%step != 0 {
-			return nil, fmt.Errorf("$last=%d - $first=%d must be divisible by $step=%d (%w)", last, first, step, ErrInvalidRepeat)
+			return nil, fmt.Errorf("$last=%d - $first=%d must be divisible by $step=%d (%w)", last, first, step, errors.ErrInvalidRepeat)
 		}
 	} else if hasFirst && hasCount {
 		last = first + (count-1)*step
 	} else if hasLast && hasCount {
 		first = last - (count-1)*step
 	} else {
-		return nil, fmt.Errorf("must specify exactly 2 of $first, $last, $count (%w)", ErrInvalidRepeat)
+		return nil, fmt.Errorf("must specify exactly 2 of $first, $last, $count (%w)", errors.ErrInvalidRepeat)
 	}
 
 	var values []any
@@ -152,7 +153,7 @@ func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 		return repeatGenerateContextsFromMap(ec, r2)
 
 	default:
-		return nil, fmt.Errorf("$repeat: %T (%w)", r, ErrInvalidType)
+		return nil, fmt.Errorf("$repeat: %T (%w)", r, errors.ErrInvalidType)
 	}
 }
 
@@ -186,11 +187,11 @@ func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalC
 					return nil, err
 				}
 			} else {
-				return nil, fmt.Errorf("%s: map must contain range parameters ($first, $last, $count, $step) (%w)", name, ErrInvalidRepeat)
+				return nil, fmt.Errorf("%s: map must contain range parameters ($first, $last, $count, $step) (%w)", name, errors.ErrInvalidRepeat)
 			}
 
 		default:
-			return nil, fmt.Errorf("%s: %T (%w)", name, value, ErrInvalidRepeat)
+			return nil, fmt.Errorf("%s: %T (%w)", name, value, errors.ErrInvalidRepeat)
 		}
 
 		for _, ctx := range contexts {

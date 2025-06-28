@@ -16,6 +16,7 @@ import (
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 // Debug controls debug log output to stderr for all bkl operations.
@@ -137,7 +138,7 @@ func (b *bkl) mergePatchMatch(patch *document.Document) (bool, error) {
 
 	docs := b.findMatches(patch, m)
 	if len(docs) == 0 {
-		return true, fmt.Errorf("%#v: %w", m, ErrNoMatchFound)
+		return true, fmt.Errorf("%#v: %w", m, errors.ErrNoMatchFound)
 	}
 
 	for _, doc := range docs {
@@ -439,7 +440,7 @@ func fileMatch(fx fs.FS, path string) (string, string, error) {
 	realPath := fileSystem.FindFile(withoutExt)
 
 	if realPath == "" {
-		return "", "", fmt.Errorf("%s.*: %w", withoutExt, ErrMissingFile)
+		return "", "", fmt.Errorf("%s.*: %w", withoutExt, errors.ErrMissingFile)
 	}
 
 	return realPath, formatName, nil

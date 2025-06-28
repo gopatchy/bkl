@@ -11,13 +11,14 @@ import (
 
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 func process2(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, depth int) (any, error) {
 	depth++
 
 	if depth > 1000 {
-		return nil, fmt.Errorf("%#v: %w", obj, ErrCircularRef)
+		return nil, fmt.Errorf("%#v: %w", obj, errors.ErrCircularRef)
 	}
 
 	switch obj2 := obj.(type) {
@@ -60,7 +61,7 @@ func process2Map(obj map[string]any, mergeFrom *document.Document, mergeFromDocs
 
 	if found, v, obj := utils.PopMapValue(obj, "$value"); found {
 		if len(obj) != 0 {
-			return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
+			return nil, fmt.Errorf("$value: %#v (%w)", obj, errors.ErrExtraKeys)
 		}
 
 		return process2MapValue(obj, mergeFrom, mergeFromDocs, ec, v, depth)
@@ -117,7 +118,7 @@ func process2EncodeAny(obj any, mergeFrom *document.Document, mergeFromDocs []*d
 		return obj, nil
 
 	default:
-		return nil, fmt.Errorf("$encode: %T: %w", v, ErrInvalidType)
+		return nil, fmt.Errorf("$encode: %T: %w", v, errors.ErrInvalidType)
 	}
 }
 
@@ -128,7 +129,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 	switch cmd {
 	case "base64":
 		if len(parts) != 1 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		obj2 := fmt.Sprintf("%v", obj)
@@ -139,12 +140,12 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 
 	case "flatten":
 		if len(parts) != 1 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		obj2, ok := obj.([]any)
 		if !ok {
-			return nil, fmt.Errorf("$encode: %s of non-list %T: %w", v, obj, ErrInvalidType)
+			return nil, fmt.Errorf("$encode: %s of non-list %T: %w", v, obj, errors.ErrInvalidType)
 		}
 
 		ret := []any{}
@@ -167,7 +168,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 		if len(parts) == 2 {
 			delim = parts[1]
 		} else if len(parts) != 1 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		strs, err := utils.ToStringListPermissive(obj)
@@ -179,7 +180,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 
 	case "prefix":
 		if len(parts) != 2 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		prefix := parts[1]
@@ -199,7 +200,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 
 	case "sha256":
 		if len(parts) != 1 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		sh := sha256.New()
@@ -208,7 +209,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 
 	case "tolist":
 		if len(parts) != 2 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		delim := parts[1]
@@ -222,19 +223,19 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 
 	case "values":
 		if len(parts) != 1 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		obj2, ok := obj.(map[string]any)
 		if !ok {
-			return nil, fmt.Errorf("$encode: %s: %w (%T)", v, ErrInvalidType, obj)
+			return nil, fmt.Errorf("$encode: %s: %w (%T)", v, errors.ErrInvalidType, obj)
 		}
 
 		return process2ValuesMap(obj2)
 
 	default:
 		if len(parts) != 1 {
-			return nil, fmt.Errorf("$encode: %s: %w", v, ErrInvalidArguments)
+			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
 		ft, err := format.Get(cmd)
@@ -257,7 +258,7 @@ func process2Decode(obj any, mergeFrom *document.Document, mergeFromDocs []*docu
 		return process2DecodeString(obj, mergeFrom, mergeFromDocs, ec, v2, depth)
 
 	default:
-		return nil, fmt.Errorf("$decode: %T: %w", v, ErrInvalidType)
+		return nil, fmt.Errorf("$decode: %T: %w", v, errors.ErrInvalidType)
 	}
 }
 
@@ -267,23 +268,23 @@ func process2DecodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 		return process2DecodeStringMap(obj2, mergeFrom, mergeFromDocs, ec, v, depth)
 
 	default:
-		return nil, fmt.Errorf("$decode: %T: %w", obj, ErrInvalidType)
+		return nil, fmt.Errorf("$decode: %T: %w", obj, errors.ErrInvalidType)
 	}
 }
 
 func process2DecodeStringMap(obj map[string]any, mergeFrom *document.Document, mergeFromDocs []*document.Document, ec *evalContext, v string, depth int) (any, error) {
 	found, val, obj := utils.PopMapValue(obj, "$value")
 	if !found {
-		return nil, fmt.Errorf("$decode: missing $value in %#v (%w)", obj, ErrInvalidType)
+		return nil, fmt.Errorf("$decode: missing $value in %#v (%w)", obj, errors.ErrInvalidType)
 	}
 
 	val2, ok := val.(string)
 	if !ok {
-		return nil, fmt.Errorf("$value: %T (%w)", val, ErrInvalidType)
+		return nil, fmt.Errorf("$value: %T (%w)", val, errors.ErrInvalidType)
 	}
 
 	if len(obj) != 0 {
-		return nil, fmt.Errorf("$value: %#v (%w)", obj, ErrExtraKeys)
+		return nil, fmt.Errorf("$value: %#v (%w)", obj, errors.ErrExtraKeys)
 	}
 
 	ft, err := format.Get(v)
@@ -297,7 +298,7 @@ func process2DecodeStringMap(obj map[string]any, mergeFrom *document.Document, m
 	}
 
 	if len(decs) != 1 {
-		return nil, fmt.Errorf("%#v (%w)", val2, ErrUnmarshal)
+		return nil, fmt.Errorf("%#v (%w)", val2, errors.ErrUnmarshal)
 	}
 
 	// First normalize the decoded value
@@ -327,7 +328,7 @@ func process2ToListList(obj []any, delim string) ([]any, error) {
 func process2ToListMap(obj any, delim string) ([]any, error) {
 	obj2, ok := obj.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("$encode: tolist of non-map %#v: %w", obj, ErrInvalidType)
+		return nil, fmt.Errorf("$encode: tolist of non-map %#v: %w", obj, errors.ErrInvalidType)
 	}
 
 	ret := []any{}

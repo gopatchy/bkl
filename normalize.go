@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 func normalize(obj any) (any, error) {
 	switch obj2 := obj.(type) {
 	case map[any]any:
-		return nil, fmt.Errorf("numeric keys not supported (%w)", ErrInvalidType)
+		return nil, fmt.Errorf("numeric keys not supported (%w)", errors.ErrInvalidType)
 
 	case map[string]any:
 		return normalizeMap(obj2)

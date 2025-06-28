@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,7 +37,7 @@ func get(doc *document.Document, docs []*document.Document, m any) (any, error) 
 		return getCross(docs, m2)
 
 	default:
-		return nil, fmt.Errorf("%T as reference: %w", m, ErrInvalidType)
+		return nil, fmt.Errorf("%T as reference: %w", m, errors.ErrInvalidType)
 	}
 }
 
@@ -86,7 +87,7 @@ func getPathFromString(obj any, docs []*document.Document, path string) (any, er
 		return getPathFromList(obj, docs, path3)
 
 	default:
-		return nil, fmt.Errorf("%T as reference: %w", path2, ErrInvalidType)
+		return nil, fmt.Errorf("%T as reference: %w", path2, errors.ErrInvalidType)
 	}
 }
 
@@ -99,20 +100,20 @@ func getPath(obj any, parts []string) (any, error) {
 	case map[string]any:
 		val, found := obj2[parts[0]]
 		if !found {
-			return nil, fmt.Errorf("%v: %w", parts, ErrRefNotFound)
+			return nil, fmt.Errorf("%v: %w", parts, errors.ErrRefNotFound)
 		}
 
 		return getPath(val, parts[1:])
 
 	default:
-		return nil, fmt.Errorf("%v: %w", parts, ErrRefNotFound)
+		return nil, fmt.Errorf("%v: %w", parts, errors.ErrRefNotFound)
 	}
 }
 
 func getCross(docs []*document.Document, conf map[string]any) (any, error) {
 	found, pat, _ := utils.PopMapValue(conf, "$match")
 	if !found {
-		return nil, fmt.Errorf("%#v: %w", conf, ErrMissingMatch)
+		return nil, fmt.Errorf("%#v: %w", conf, errors.ErrMissingMatch)
 	}
 
 	doc, err := getCrossDoc(docs, pat)
@@ -134,7 +135,7 @@ func getCrossDoc(docs []*document.Document, pat any) (*document.Document, error)
 	for _, doc := range docs {
 		if matchDoc(doc, pat) {
 			if ret != nil {
-				return nil, fmt.Errorf("%#v: %w", pat, ErrMultiMatch)
+				return nil, fmt.Errorf("%#v: %w", pat, errors.ErrMultiMatch)
 			}
 
 			ret = doc
@@ -142,7 +143,7 @@ func getCrossDoc(docs []*document.Document, pat any) (*document.Document, error)
 	}
 
 	if ret == nil {
-		return nil, fmt.Errorf("%#v: %w", pat, ErrNoMatchFound)
+		return nil, fmt.Errorf("%#v: %w", pat, errors.ErrNoMatchFound)
 	}
 
 	return ret, nil

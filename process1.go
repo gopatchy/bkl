@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/utils"
+	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 func process1(obj any, mergeFrom *document.Document, mergeFromDocs []*document.Document, depth int) (any, error) {
 	depth++
 
 	if depth > 1000 {
-		return nil, fmt.Errorf("%#v: %w", obj, ErrCircularRef)
+		return nil, fmt.Errorf("%#v: %w", obj, errors.ErrCircularRef)
 	}
 
 	switch obj2 := obj.(type) {
