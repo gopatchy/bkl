@@ -1,4 +1,4 @@
-package bkl
+package process
 
 import (
 	"crypto/sha256"
@@ -93,7 +93,7 @@ func process2Encode(obj any, mergeFrom *document.Document, mergeFromDocs []*docu
 		return nil, err
 	}
 
-	err = validate(obj2)
+	err = Validate(obj2)
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,8 @@
-package bkl
+package process
 
 import "github.com/gopatchy/bkl/internal/document"
 
-func processDocument(d *document.Document, mergeFromDocs []*document.Document, env map[string]string) ([]*document.Document, error) {
+func Document(d *document.Document, mergeFromDocs []*document.Document, env map[string]string) ([]*document.Document, error) {
 	var err error
 
 	ec := newEvalContext(env)

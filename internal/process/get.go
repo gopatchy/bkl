@@ -1,4 +1,4 @@
-package bkl
+package process
 
 import (
 	"fmt"
@@ -134,7 +134,7 @@ func getCrossDoc(docs []*document.Document, pat any) (*document.Document, error)
 	var ret *document.Document
 
 	for _, doc := range docs {
-		if matchDoc(doc, pat) {
+		if MatchDoc(doc, pat) {
 			if ret != nil {
 				return nil, fmt.Errorf("%#v: %w", pat, errors.ErrMultiMatch)
 			}

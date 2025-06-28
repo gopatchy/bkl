@@ -1,4 +1,4 @@
-package bkl
+package process
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/exp/utf8string"
 )
 
-func validate(obj any) error {
+func Validate(obj any) error {
 	switch obj2 := obj.(type) {
 	case map[string]any:
 		return validateMap(obj2)
@@ -26,12 +26,12 @@ func validate(obj any) error {
 
 func validateMap(obj map[string]any) error {
 	for k, v := range obj {
-		err := validate(k)
+		err := Validate(k)
 		if err != nil {
 			return fmt.Errorf("%s: %w", k, err)
 		}
 
-		err = validate(v)
+		err = Validate(v)
 		if err != nil {
 			return fmt.Errorf("%s: %w", k, err)
 		}
@@ -42,7 +42,7 @@ func validateMap(obj map[string]any) error {
 
 func validateList(obj []any) error {
 	for _, v := range obj {
-		err := validate(v)
+		err := Validate(v)
 		if err != nil {
 			return err
 		}

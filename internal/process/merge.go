@@ -1,4 +1,4 @@
-package bkl
+package process
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/gopatchy/bkl/pkg/errors"
 )
 
-func mergeDocs(doc, patch *document.Document) error {
+func MergeDocs(doc, patch *document.Document) error {
 	// If patch document is completely empty (nil), it's a no-op
 	if patch.Data == nil {
 		return nil
