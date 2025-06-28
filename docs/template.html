@@ -394,94 +394,60 @@ class BklCode extends HTMLElement {
   }
   
   highlight() {
-    // Get the raw text content
+    // Get the raw HTML content
     let html = this.innerHTML;
     
-    // Preserve existing HTML tags first (like highlight tags)
-    const placeholder = '___PLACEHOLDER___';
-    const preserved = [];
-    html = html.replace(/<(highlight|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
-      preserved.push(match);
-      return placeholder + (preserved.length - 1) + placeholder;
-    });
+    // List of tags to remove and track
+    const tagsToRemove = ['<highlight>', '</highlight>'];
     
-    const lines = html.split('\n');
-    const highlightedLines = [];
+    // Step 1: Find all tag locations
+    const removals = []; // List of {pos, tag} to remove
     
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-      
-      if (line.match(/^\s*\$/)) {
-        line = line.replace(/^(\s*)\$\s/, '$1<prompt>$ </prompt>');
-        line = line.replace(/(<prompt>\$ <\/prompt>)(\w+)/, '$1<cmd>$2</cmd>');
-        line = line.replace(/\s(--?\w[\w-]*)/g, ' <flag>$1</flag>');
-        line = line.replace(/(<cmd>\w+<\/cmd>|<flag>[\w-]+<\/flag>)(\s+)([^\s<>]+)/g, (match, prev, space, arg) => {
-          if (arg.match(/^--?/)) return match;
-          return prev + space + '<string>' + arg + '</string>';
-        });
-        highlightedLines.push(line);
-      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s+=\s+/)) {
-        line = line.replace(/^(\s*)(\[[\w.]+\])(\s*)$/, '$1<key>$2</key>$3');
-        line = line.replace(/^(\s*)(\w+)\s*=/, '$1<key>$2</key> =');
-        line = line.replace(/=\s*"([^"]+)"/g, '= "<string>$1</string>"');
-        line = line.replace(/=\s*'([^']+)'/g, '= \'<string>$1</string>\'');
-        line = line.replace(/=\s*(true|false|null)\b/g, '= <bool>$1</bool>');
-        line = line.replace(/=\s*(-?\d+(?:\.\d+)?)\s*$/g, '= <number>$1</number>');
-        line = line.replace(/=\s*([^"'\s<>][^<>]*)$/g, (match, value) => {
-          if (value.match(/^<(string|number|bool)/)) return match;
-          return '= <string>' + value.trim() + '</string>';
-        });
-        highlightedLines.push(line);
-      } else if (line.match(/^\s*\w+:/) || line.match(/^\s*-\s/)) {
-        line = line.replace(/^(\s*)(\w+):/, '$1<key>$2</key>:');
-        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
-        line = line.replace(/:\s*'([^']+)'/g, ': \'<string>$1</string>\'');
-        line = line.replace(/:\s*(true|false|null)\b/g, ': <bool>$1</bool>');
-        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)\s*$/g, ': <number>$1</number>');
-        line = line.replace(/:\s*([^\s<>][^<>]*)$/g, (match, value) => {
-          if (value.match(/^<(string|number|bool)/)) return match;
-          return ': <string>' + value.trim() + '</string>';
-        });
-        line = line.replace(/^(\s*)-\s+(.+)$/, (match, indent, value) => {
-          if (value.match(/^<(string|number|bool)/)) {
-            return indent + '- ' + value;
-          }
-          if (value.match(/^-?\d+(?:\.\d+)?$/)) {
-            return indent + '- <number>' + value + '</number>';
-          }
-          if (value.match(/^(true|false|null)$/)) {
-            return indent + '- <bool>' + value + '</bool>';
-          }
-          return indent + '- <string>' + value + '</string>';
-        });
-        highlightedLines.push(line);
-      } else if (line.match(/^\s*"?\w+"?\s*:/) || line.match(/^\s*[{}[\],]?\s*$/)) {
-        line = line.replace(/^(\s*)"(\w+)"(\s*):/, '$1"<key>$2</key>"$3:');
-        line = line.replace(/^(\s*)(\w+)(\s*):/, '$1<key>$2</key>$3:');
-        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
-        line = line.replace(/:\s*(true|false|null)([,\s}]|$)/g, ': <bool>$1</bool>$2');
-        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)([,\s}]|$)/g, ': <number>$1</number>$2');
-        highlightedLines.push(line);
-      } else {
-        highlightedLines.push(line);
+    for (const tag of tagsToRemove) {
+      let pos = 0;
+      while ((pos = html.indexOf(tag, pos)) !== -1) {
+        removals.push({pos: pos, tag: tag});
+        pos += tag.length; // Move past this occurrence to find the next one
       }
     }
     
-    html = highlightedLines.join('\n');
+    // Sort by position
+    removals.sort((a, b) => a.pos - b.pos);
     
-    html = html.replace(/\$(env|merge|replace|match|output|repeat|decode|encode|delete|required|parent|value|path|invert|first|last|count|step)(?::[\w.]+)?/g, (match) => {
-      return '<highlight>' + match + '</highlight>';
-    });
+    // Step 2: Remove tags and build insertion list
+    const insertions = []; // List of {pos, text} to insert later
+    let cleanText = '';
+    let htmlPos = 0;
+    let cleanPos = 0;
     
-    html = html.replace(/\$"[^"]+"/g, (match) => {
-      return '<highlight>' + match + '</highlight>';
-    });
+    for (const removal of removals) {
+      // Add text before this tag
+      cleanText += html.substring(htmlPos, removal.pos);
+      cleanPos += removal.pos - htmlPos;
+      
+      // Track where to reinsert this tag
+      insertions.push({pos: cleanPos, text: removal.tag});
+      
+      // Skip past the tag
+      htmlPos = removal.pos + removal.tag.length;
+    }
     
-    html = html.replace(new RegExp(placeholder + '(\\d+)' + placeholder, 'g'), (match, index) => {
-      return preserved[parseInt(index)];
-    });
+    // Add any remaining text
+    cleanText += html.substring(htmlPos);
     
-    this.innerHTML = html;
+    // Step 3: TODO - Add syntax highlighting here
+    // For now, just testing the tag removal/reinsertion
+    
+    // Step 4: Rebuild with all insertions
+    // Sort insertions by position (descending) so we can insert from end to start
+    insertions.sort((a, b) => b.pos - a.pos);
+    
+    let result = cleanText;
+    for (const insertion of insertions) {
+      result = result.substring(0, insertion.pos) + insertion.text + result.substring(insertion.pos);
+    }
+    
+    this.innerHTML = result;
   }
 }
 

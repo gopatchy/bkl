@@ -398,90 +398,56 @@ class BklCode extends HTMLElement {
     let html = this.innerHTML;
     
     
-    const placeholder = '___PLACEHOLDER___';
-    const preserved = [];
-    html = html.replace(/<(highlight|key|string|number|bool|prompt|cmd|flag)>[\s\S]*?<\/\1>/g, (match) => {
-      preserved.push(match);
-      return placeholder + (preserved.length - 1) + placeholder;
-    });
+    const tagsToRemove = ['<highlight>', '</highlight>'];
     
-    const lines = html.split('\n');
-    const highlightedLines = [];
     
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-      
-      if (line.match(/^\s*\$/)) {
-        line = line.replace(/^(\s*)\$\s/, '$1<prompt>$ </prompt>');
-        line = line.replace(/(<prompt>\$ <\/prompt>)(\w+)/, '$1<cmd>$2</cmd>');
-        line = line.replace(/\s(--?\w[\w-]*)/g, ' <flag>$1</flag>');
-        line = line.replace(/(<cmd>\w+<\/cmd>|<flag>[\w-]+<\/flag>)(\s+)([^\s<>]+)/g, (match, prev, space, arg) => {
-          if (arg.match(/^--?/)) return match;
-          return prev + space + '<string>' + arg + '</string>';
-        });
-        highlightedLines.push(line);
-      } else if (line.match(/^\s*(\w+|\[[\w.]+\])\s+=\s+/)) {
-        line = line.replace(/^(\s*)(\[[\w.]+\])(\s*)$/, '$1<key>$2</key>$3');
-        line = line.replace(/^(\s*)(\w+)\s*=/, '$1<key>$2</key> =');
-        line = line.replace(/=\s*"([^"]+)"/g, '= "<string>$1</string>"');
-        line = line.replace(/=\s*'([^']+)'/g, '= \'<string>$1</string>\'');
-        line = line.replace(/=\s*(true|false|null)\b/g, '= <bool>$1</bool>');
-        line = line.replace(/=\s*(-?\d+(?:\.\d+)?)\s*$/g, '= <number>$1</number>');
-        line = line.replace(/=\s*([^"'\s<>][^<>]*)$/g, (match, value) => {
-          if (value.match(/^<(string|number|bool)/)) return match;
-          return '= <string>' + value.trim() + '</string>';
-        });
-        highlightedLines.push(line);
-      } else if (line.match(/^\s*\w+:/) || line.match(/^\s*-\s/)) {
-        line = line.replace(/^(\s*)(\w+):/, '$1<key>$2</key>:');
-        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
-        line = line.replace(/:\s*'([^']+)'/g, ': \'<string>$1</string>\'');
-        line = line.replace(/:\s*(true|false|null)\b/g, ': <bool>$1</bool>');
-        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)\s*$/g, ': <number>$1</number>');
-        line = line.replace(/:\s*([^\s<>][^<>]*)$/g, (match, value) => {
-          if (value.match(/^<(string|number|bool)/)) return match;
-          return ': <string>' + value.trim() + '</string>';
-        });
-        line = line.replace(/^(\s*)-\s+(.+)$/, (match, indent, value) => {
-          if (value.match(/^<(string|number|bool)/)) {
-            return indent + '- ' + value;
-          }
-          if (value.match(/^-?\d+(?:\.\d+)?$/)) {
-            return indent + '- <number>' + value + '</number>';
-          }
-          if (value.match(/^(true|false|null)$/)) {
-            return indent + '- <bool>' + value + '</bool>';
-          }
-          return indent + '- <string>' + value + '</string>';
-        });
-        highlightedLines.push(line);
-      } else if (line.match(/^\s*"?\w+"?\s*:/) || line.match(/^\s*[{}[\],]?\s*$/)) {
-        line = line.replace(/^(\s*)"(\w+)"(\s*):/, '$1"<key>$2</key>"$3:');
-        line = line.replace(/^(\s*)(\w+)(\s*):/, '$1<key>$2</key>$3:');
-        line = line.replace(/:\s*"([^"]+)"/g, ': "<string>$1</string>"');
-        line = line.replace(/:\s*(true|false|null)([,\s}]|$)/g, ': <bool>$1</bool>$2');
-        line = line.replace(/:\s*(-?\d+(?:\.\d+)?)([,\s}]|$)/g, ': <number>$1</number>$2');
-        highlightedLines.push(line);
-      } else {
-        highlightedLines.push(line);
+    const removals = []; 
+    
+    for (const tag of tagsToRemove) {
+      let pos = 0;
+      while ((pos = html.indexOf(tag, pos)) !== -1) {
+        removals.push({pos: pos, tag: tag});
+        pos += tag.length;
       }
     }
     
-    html = highlightedLines.join('\n');
     
-    html = html.replace(/\$(env|merge|replace|match|output|repeat|decode|encode|delete|required|parent|value|path|invert|first|last|count|step)(?::[\w.]+)?/g, (match) => {
-      return '<highlight>' + match + '</highlight>';
-    });
+    removals.sort((a, b) => a.pos - b.pos);
     
-    html = html.replace(/\$"[^"]+"/g, (match) => {
-      return '<highlight>' + match + '</highlight>';
-    });
     
-    html = html.replace(new RegExp(placeholder + '(\\d+)' + placeholder, 'g'), (match, index) => {
-      return preserved[parseInt(index)];
-    });
+    const insertions = []; 
+    let cleanText = '';
+    let htmlPos = 0;
+    let cleanPos = 0;
     
-    this.innerHTML = html;
+    for (const removal of removals) {
+      
+      cleanText += html.substring(htmlPos, removal.pos);
+      cleanPos += removal.pos - htmlPos;
+      
+      
+      insertions.push({pos: cleanPos, text: removal.tag});
+      
+      
+      htmlPos = removal.pos + removal.tag.length;
+    }
+    
+    
+    cleanText += html.substring(htmlPos);
+    
+    
+    
+    
+    
+    
+    insertions.sort((a, b) => b.pos - a.pos);
+    
+    let result = cleanText;
+    for (const insertion of insertions) {
+      result = result.substring(0, insertion.pos) + insertion.text + result.substring(insertion.pos);
+    }
+    
+    this.innerHTML = result;
   }
 }
 
@@ -599,7 +565,7 @@ port: 8080</bkl-code>
 </div>
 <div>
 <label>service.test.toml</label>
-<bkl-code>port = <focus>8081</focus></bkl-code>
+<bkl-code>port = <highlight>8081</highlight></bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -613,7 +579,7 @@ port: 8080</bkl-code>
 <bkl-code>$ bkl service.test.toml
 addr = '127.0.0.1'
 name = 'myService'
-port = <focus>8081</focus></bkl-code>
+port = <highlight>8081</highlight></bkl-code>
 </div>
 
 </doc-grid>
@@ -678,7 +644,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>YAML</label>
-<bkl-code>$ bkl <focus>-f yaml</focus> service.test.toml
+<bkl-code>$ bkl <highlight>-f yaml</highlight> service.test.toml
 addr: 127.0.0.1
 name: myService
 port: 8081</bkl-code>
@@ -692,7 +658,7 @@ port: 8081</bkl-code>
 
 <div>
 <label>TOML</label>
-<bkl-code>$ bkl <focus>-f toml</focus> service.test.toml
+<bkl-code>$ bkl <highlight>-f toml</highlight> service.test.toml
 addr = '127.0.0.1'
 name = 'myService'
 port = 8081</bkl-code>
@@ -706,7 +672,7 @@ port = 8081</bkl-code>
 
 <div>
 <label>JSON</label>
-<bkl-code>$ bkl <focus>-f json</focus> service.test.toml
+<bkl-code>$ bkl <highlight>-f json</highlight> service.test.toml
 {"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
 </div>
 
@@ -718,7 +684,7 @@ port = 8081</bkl-code>
 
 <div>
 <label>JSON (pretty)</label>
-<bkl-code>$ bkl <focus>-f json-pretty</focus> service.test.toml
+<bkl-code>$ bkl <highlight>-f json-pretty</highlight> service.test.toml
 {
   "addr": "127.0.0.1",
   "name": "myService",
@@ -742,7 +708,7 @@ port = 8081</bkl-code>
 
 <doc-grid>
 
-<bkl-code>$ bkl service.test.<focus>yaml</focus>   # real file is service.test.<focus>toml</focus>
+<bkl-code>$ bkl service.test.<highlight>yaml</highlight>   # real file is service.test.<highlight>toml</highlight>
 addr: 127.0.0.1
 name: myService
 port: 8081</bkl-code>
@@ -767,7 +733,7 @@ port: 8081</bkl-code>
 
 <div>
 <label>File Output</label>
-<bkl-code>$ bkl <focus>-o out.yaml</focus> service.test.toml</bkl-code>
+<bkl-code>$ bkl <highlight>-o out.yaml</highlight> service.test.toml</bkl-code>
 </div>
 
 </doc-grid>
@@ -790,7 +756,7 @@ port: 8081</bkl-code>
 
 <div>
 <label>Commandline Layering</label>
-<bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+<bkl-code>$ bkl <highlight>a.b.yaml c.d.yaml</highlight>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
 </div>
 
 </doc-grid>
@@ -806,7 +772,7 @@ port: 8081</bkl-code>
 
 <div>
 <label>stdin</label>
-<bkl-code>$ bkl <focus>-- -.yaml</focus> <<'EOF'
+<bkl-code>$ bkl <highlight>-- -.yaml</highlight> <<'EOF'
 a: 1
 EOF</bkl-code>
 </div>
@@ -836,7 +802,7 @@ EOF</bkl-code>
 
 <div>
 <label>Set Parent In File</label>
-<bkl-code><focus>$parent: a.b</focus>   # inherits from a.b.<ext>, from a.<ext></bkl-code>
+<bkl-code><highlight>$parent: a.b</highlight>   # inherits from a.b.<ext>, from a.<ext></bkl-code>
 </div>
 
 </doc-grid>
@@ -852,13 +818,13 @@ EOF</bkl-code>
 <row>
 <div>
 <label>Parent List</label>
-<bkl-code><focus>$parent:</focus>
-<focus>- a</focus>
-<focus>- b</focus></bkl-code>
+<bkl-code><highlight>$parent:</highlight>
+<highlight>- a</highlight>
+<highlight>- b</highlight></bkl-code>
 </div>
 <div>
 <label>Parent Wildcard</label>
-<bkl-code><focus>$parent: a.*</focus></bkl-code>
+<bkl-code><highlight>$parent: a.*</highlight></bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -879,7 +845,7 @@ EOF</bkl-code>
 
 <div>
 <label>Set Parent In CLI</label>
-<bkl-code>$ bkl <focus>a.b.yaml c.d.yaml</focus>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+<bkl-code>$ bkl <highlight>a.b.yaml c.d.yaml</highlight>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
 </div>
 
 </doc-grid>
@@ -895,7 +861,7 @@ EOF</bkl-code>
 
 <div>
 <label>No Parent</label>
-<bkl-code><focus>$parent: false</focus>   # no further inheritance</bkl-code>
+<bkl-code><highlight>$parent: false</highlight>   # no further inheritance</bkl-code>
 </div>
 
 </doc-grid>
@@ -951,10 +917,10 @@ b: 2</bkl-code>
 
 
 <bkl-code>a: 1
-<focus><focus>c: 3</focus></focus>
+<highlight><highlight>c: 3</highlight></highlight>
 ---
 b: 2
-<focus><focus>c: 3</focus></focus></bkl-code>
+<highlight><highlight>c: 3</highlight></highlight></bkl-code>
 
 </div>
 </row>
@@ -980,8 +946,8 @@ b: 2</bkl-code>
 <op>+</op>
 <div>
 
-<bkl-code><focus>$match:</focus>
-  <focus>b: 2</focus>
+<bkl-code><highlight>$match:</highlight>
+  <highlight>b: 2</highlight>
 c: 3</bkl-code>
 </div>
 
@@ -993,7 +959,7 @@ c: 3</bkl-code>
 <bkl-code>a: 1
 ---
 b: 2
-<focus>c: 3</focus></bkl-code>
+<highlight>c: 3</highlight></bkl-code>
 
 </div>
 </row>
@@ -1026,8 +992,8 @@ a: 1</bkl-code>
 <op>+</op>
 <div>
 
-<bkl-code><focus>$match:</focus>
-  <focus>a: 1</focus>
+<bkl-code><highlight>$match:</highlight>
+  <highlight>a: 1</highlight>
 c: 3</bkl-code>
 </div>
 
@@ -1037,12 +1003,12 @@ c: 3</bkl-code>
 
 
 <bkl-code>a: 1
-<focus><focus>c: 3</focus></focus>
+<highlight><highlight>c: 3</highlight></highlight>
 ---
 b: 2
 ---
 a: 1
-<focus><focus>c: 3</focus></focus></bkl-code>
+<highlight><highlight>c: 3</highlight></highlight></bkl-code>
 
 </div>
 </row>
@@ -1073,9 +1039,9 @@ b: 2</bkl-code>
 <op>+</op>
 <div>
 
-<bkl-code>$match:
+<bkl-code><highlight>$match:</highlight>
   a: 1
-  <focus>$invert: true</focus>
+  <highlight>$invert: true</highlight>
 c: 3</bkl-code>
 </div>
 
@@ -1087,7 +1053,7 @@ c: 3</bkl-code>
 <bkl-code>a: 1
 ---
 b: 2
-<focus>c: 3</focus></bkl-code>
+<highlight>c: 3</highlight></bkl-code>
 
 </div>
 </row>
@@ -1116,7 +1082,7 @@ b: 2
 <op>+</op>
 <div>
 
-<bkl-code><focus>$match: null</focus>
+<bkl-code><highlight>$match: null</highlight>
 b: 2</bkl-code>
 </div>
 
@@ -1127,7 +1093,7 @@ b: 2</bkl-code>
 
 <bkl-code>a: 1
 ---
-<focus>b: 2</focus></bkl-code>
+<highlight>b: 2</highlight></bkl-code>
 
 </div>
 </row>
@@ -1197,7 +1163,7 @@ b: 2</bkl-code>
 <div>
 
 <bkl-code>b: 2
-<focus>$replace: true</focus></bkl-code>
+<highlight>$replace: true</highlight></bkl-code>
 </div>
 
 
@@ -1231,7 +1197,7 @@ b: 2</bkl-code>
 <div>
 
 <bkl-code>c: 3
-<focus>b: $delete</focus></bkl-code>
+<highlight>b: $delete</highlight></bkl-code>
 </div>
 
 
@@ -1315,7 +1281,7 @@ c: 3</bkl-code>
 <div>
 
 <bkl-code>- 2
-- <focus>$replace: true</focus></bkl-code>
+- <highlight>$replace: true</highlight></bkl-code>
 </div>
 
 
@@ -1349,8 +1315,8 @@ c: 3</bkl-code>
 <div>
 
 <bkl-code>- x: 3
-- <focus>$delete:</focus>
-    <focus>x: 2</focus></bkl-code>
+- <highlight>$delete:</highlight>
+    <highlight>x: 2</highlight></bkl-code>
 </div>
 
 
@@ -1394,8 +1360,8 @@ c: 3</bkl-code>
 <op>+</op>
 <div>
 
-<bkl-code>- <focus>$match:</focus>
-    <focus>b: 2</focus>
+<bkl-code>- <highlight>$match:</highlight>
+    <highlight>b: 2</highlight>
   b: 10</bkl-code>
 </div>
 
@@ -1430,8 +1396,8 @@ c: 3</bkl-code>
 <op>+</op>
 <div>
 
-<bkl-code>- <focus>$match: 2</focus>
-  <focus>$value: 10</focus></bkl-code>
+<bkl-code>- <highlight>$match: 2</highlight>
+  <highlight>$value: 10</highlight></bkl-code>
 </div>
 
 
@@ -1473,7 +1439,7 @@ c: 3</bkl-code>
 <bkl-code>a: 1
 b:
   c: foo
-d: <focus>$"{b.c} bar {a} 2"</focus></bkl-code>
+d: <highlight>$"{b.c} bar {a} 2"</highlight></bkl-code>
 </div>
 
 
@@ -1484,7 +1450,7 @@ d: <focus>$"{b.c} bar {a} 2"</focus></bkl-code>
 <bkl-code>a: 1
 b:
   c: foo
-d: <focus>foo bar 1 2</focus></bkl-code>
+d: <highlight>foo bar 1 2</highlight></bkl-code>
 
 </div>
 </row>
@@ -1515,8 +1481,8 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <div>
 
 <bkl-code>$value: |
-  <focus>{"a":1}</focus>
-<focus>$decode: json</focus></bkl-code>
+  <highlight>{"a":1}</highlight>
+<highlight>$decode: json</highlight></bkl-code>
 </div>
 
 
@@ -1524,7 +1490,7 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <div>
 
 
-<bkl-code><focus>a: 1</focus></bkl-code>
+<bkl-code><highlight>a: 1</highlight></bkl-code>
 
 </div>
 </row>
@@ -1555,7 +1521,7 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <div>
 
 <bkl-code># export FOO=test
-<focus>"$env:FOO"</focus>: 1</bkl-code>
+<highlight>"$env:FOO"</highlight>: 1</bkl-code>
 </div>
 
 
@@ -1563,7 +1529,7 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <div>
 
 
-<bkl-code><focus>test</focus>: 1</bkl-code>
+<bkl-code><highlight>test</highlight>: 1</bkl-code>
 
 </div>
 </row>
@@ -1582,7 +1548,7 @@ d: <focus>foo bar 1 2</focus></bkl-code>
 <div>
 
 <bkl-code># export FOO=test
-a: <focus>$env:FOO</focus></bkl-code>
+a: <highlight>$env:FOO</highlight></bkl-code>
 </div>
 
 
@@ -1590,7 +1556,7 @@ a: <focus>$env:FOO</focus></bkl-code>
 <div>
 
 
-<bkl-code>a: <focus>test</focus></bkl-code>
+<bkl-code>a: <highlight>test</highlight></bkl-code>
 
 </div>
 </row>
@@ -1628,7 +1594,7 @@ a: <focus>$env:FOO</focus></bkl-code>
 <label>base64</label>
 
 <bkl-code>$value: a
-<focus>$encode: base64</focus></bkl-code>
+<highlight>$encode: base64</highlight></bkl-code>
 </div>
 
 
@@ -1660,7 +1626,7 @@ a: <focus>$env:FOO</focus></bkl-code>
 
 <bkl-code>a: 1
 b: 2
-<focus>$encode: flags</focus>
+<highlight>$encode: flags</highlight>
 # [tolist:=, prefix:--]</bkl-code>
 </div>
 
@@ -1697,7 +1663,7 @@ b: 2
 - - c
   - 4
 - e
-- <focus>$encode: flatten</focus></bkl-code>
+- <highlight>$encode: flatten</highlight></bkl-code>
 </div>
 
 
@@ -1732,7 +1698,7 @@ b: 2
 <label>join</label>
 
 <bkl-code>$value: [a, b]
-<focus>$encode: join:/</focus></bkl-code>
+<highlight>$encode: join:/</highlight></bkl-code>
 </div>
 
 
@@ -1764,7 +1730,7 @@ b: 2
 
 <bkl-code>a: 1
 b: 2
-<focus>$encode: json</focus></bkl-code>
+<highlight>$encode: json</highlight></bkl-code>
 </div>
 
 
@@ -1797,7 +1763,7 @@ b: 2
 
 <bkl-code>- a: 1
 - b: 2
-- <focus>$encode: json</focus></bkl-code>
+- <highlight>$encode: json</highlight></bkl-code>
 </div>
 
 
@@ -1830,7 +1796,7 @@ b: 2
 
 <bkl-code>- a
 - 2
-- <focus>$encode: prefix:X</focus></bkl-code>
+- <highlight>$encode: prefix:X</highlight></bkl-code>
 </div>
 
 
@@ -1863,7 +1829,7 @@ b: 2
 
 <bkl-code>a: 1
 b: 2
-<focus>$encode: tolist:=</focus></bkl-code>
+<highlight>$encode: tolist:=</highlight></bkl-code>
 </div>
 
 
@@ -1896,7 +1862,7 @@ b: 2
 
 <bkl-code>a: 1
 b: 2
-<focus>$encode: [tolist:=, "join:,"]</focus></bkl-code>
+<highlight>$encode: [tolist:=, "join:,"]</highlight></bkl-code>
 </div>
 
 
@@ -1937,7 +1903,7 @@ b: 2
 <div>
 
 <bkl-code>a: 1
-<focus>b: $required</focus></bkl-code>
+<highlight>b: $required</highlight></bkl-code>
 </div>
 
 <op>+</op>
@@ -1970,13 +1936,13 @@ b: 2
 <div>
 
 <bkl-code>a: 1
-<focus>b: $required</focus></bkl-code>
+<highlight>b: $required</highlight></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code><focus>b: 2</focus>
+<bkl-code><highlight>b: 2</highlight>
 c: 3</bkl-code>
 </div>
 
@@ -2006,8 +1972,8 @@ c: 3</bkl-code>
 <div>
 
 <bkl-code>a: 1
-<focus>b:</focus>
-  <focus>- $required</focus></bkl-code>
+<highlight>b:</highlight>
+  <highlight>- $required</highlight></bkl-code>
 </div>
 
 <op>+</op>
@@ -2040,15 +2006,15 @@ c: 3</bkl-code>
 <div>
 
 <bkl-code>a: 1
-<focus>b:</focus>
-  <focus>- $required</focus></bkl-code>
+<highlight>b:</highlight>
+  <highlight>- $required</highlight></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code><focus>b:</focus>
-  <focus>- 2</focus>
+<bkl-code><highlight>b:</highlight>
+  <highlight>- 2</highlight>
 c: 3</bkl-code>
 </div>
 
@@ -2095,7 +2061,7 @@ c: 3</bkl-code>
     a: 1
 zig:
   b: 2
-  <focus>$merge: foo.bar</focus></bkl-code>
+  <highlight>$merge: foo.bar</highlight></bkl-code>
 </div>
 
 
@@ -2105,9 +2071,9 @@ zig:
 
 <bkl-code>foo:
   bar:
-    <focus>a: 1</focus>
+    <highlight>a: 1</highlight>
 zig:
-  <focus>a: 1</focus>
+  <highlight>a: 1</highlight>
   b: 2</bkl-code>
 
 </div>
@@ -2131,7 +2097,7 @@ zig:
     - a: 1
 zig:
   - b: 2
-  - <focus>$merge: foo.bar</focus></bkl-code>
+  - <highlight>$merge: foo.bar</highlight></bkl-code>
 </div>
 
 
@@ -2141,10 +2107,10 @@ zig:
 
 <bkl-code>foo:
   bar:
-    - <focus>a: 1</focus>
+    - <highlight>a: 1</highlight>
 zig:
   - b: 2
-  - <focus>a: 1</focus></bkl-code>
+  - <highlight>a: 1</highlight></bkl-code>
 
 </div>
 </row>
@@ -2167,7 +2133,7 @@ zig:
     a: 1
 zig:
   b: 2
-  c: <focus>$merge:foo.bar.a</focus></bkl-code>
+  c: <highlight>$merge:foo.bar.a</highlight></bkl-code>
 </div>
 
 
@@ -2177,10 +2143,10 @@ zig:
 
 <bkl-code>foo:
   bar:
-    a: <focus>1</focus>
+    a: <highlight>1</highlight>
 zig:
   b: 2
-  c: <focus>1</focus></bkl-code>
+  c: <highlight>1</highlight></bkl-code>
 
 </div>
 </row>
@@ -2203,13 +2169,13 @@ zig:
 
 <div>
 
-<bkl-code><focus>a: 1</focus>
+<bkl-code><highlight>a: 1</highlight>
 b: 2
 ---
 c: 3
-<focus>$merge:</focus>
-  <focus>$match:</focus>
-    <focus>a: 1</focus></bkl-code>
+<highlight>$merge:</highlight>
+  <highlight>$match:</highlight>
+    <highlight>a: 1</highlight></bkl-code>
 </div>
 
 
@@ -2217,11 +2183,11 @@ c: 3
 <div>
 
 
-<bkl-code><focus>a: 1</focus>
-<focus>b: 2</focus>
+<bkl-code><highlight>a: 1</highlight>
+<highlight>b: 2</highlight>
 ---
-<focus>a: 1</focus>
-<focus>b: 2</focus>
+<highlight>a: 1</highlight>
+<highlight>b: 2</highlight>
 c: 3</bkl-code>
 
 </div>
@@ -2240,15 +2206,15 @@ c: 3</bkl-code>
 
 <div>
 
-<bkl-code><focus>a: 1</focus>
+<bkl-code><highlight>a: 1</highlight>
 b:
   c: 3
 ---
 d: 4
-<focus>$merge:</focus>
-  <focus>$match:</focus>
-    <focus>a: 1</focus>
-  <focus>$path: b</focus></bkl-code>
+<highlight>$merge:</highlight>
+  <highlight>$match:</highlight>
+    <highlight>a: 1</highlight>
+  <highlight>$path: b</highlight></bkl-code>
 </div>
 
 
@@ -2258,9 +2224,9 @@ d: 4
 
 <bkl-code>a: 1
 b:
-  <focus>c: 3</focus>
+  <highlight>c: 3</highlight>
 ---
-<focus>c: 3</focus>
+<highlight>c: 3</highlight>
 d: 4</bkl-code>
 
 </div>
@@ -2288,7 +2254,7 @@ d: 4</bkl-code>
 b: 2
 ---
 c: 3
-<focus>$merge: <value>[{a: 1}]</value></focus></bkl-code>
+<highlight>$merge: <value>[{a: 1}]</value></highlight></bkl-code>
 </div>
 
 
@@ -2296,11 +2262,11 @@ c: 3
 <div>
 
 
-<bkl-code><focus>a: 1</focus>
-<focus>b: 2</focus>
+<bkl-code><highlight>a: 1</highlight>
+<highlight>b: 2</highlight>
 ---
-<focus>a: 1</focus>
-<focus>b: 2</focus>
+<highlight>a: 1</highlight>
+<highlight>b: 2</highlight>
 c: 3</bkl-code>
 
 </div>
@@ -2324,7 +2290,7 @@ b:
   c: 3
 ---
 d: 4
-<focus>$merge: <value>[{a: 1}, b]</value></focus></bkl-code>
+<highlight>$merge: <value>[{a: 1}, b]</value></highlight></bkl-code>
 </div>
 
 
@@ -2334,9 +2300,9 @@ d: 4
 
 <bkl-code>a: 1
 b:
-  <focus>c: 3</focus>
+  <highlight>c: 3</highlight>
 ---
-<focus>c: 3</focus>
+<highlight>c: 3</highlight>
 d: 4</bkl-code>
 
 </div>
@@ -2372,7 +2338,7 @@ d: 4</bkl-code>
     a: 1
 zig:
   b: 2
-  <focus>$replace: foo.bar</focus></bkl-code>
+  <highlight>$replace: foo.bar</highlight></bkl-code>
 </div>
 
 
@@ -2382,9 +2348,9 @@ zig:
 
 <bkl-code>foo:
   bar:
-    <focus>a: 1</focus>
+    <highlight>a: 1</highlight>
 zig:
-  <focus>a: 1</focus></bkl-code>
+  <highlight>a: 1</highlight></bkl-code>
 
 </div>
 </row>
@@ -2407,7 +2373,7 @@ zig:
     - a: 1
 zig:
   - b: 2
-  - <focus>$replace: foo.bar</focus></bkl-code>
+  - <highlight>$replace: foo.bar</highlight></bkl-code>
 </div>
 
 
@@ -2417,9 +2383,9 @@ zig:
 
 <bkl-code>foo:
   bar:
-    - <focus>a: 1</focus>
+    - <highlight>a: 1</highlight>
 zig:
-  - <focus>a: 1</focus></bkl-code>
+  - <highlight>a: 1</highlight></bkl-code>
 
 </div>
 </row>
@@ -2442,7 +2408,7 @@ zig:
     a: 1
 zig:
   b: 2
-  c: <focus>$replace:foo.bar.a</focus></bkl-code>
+  c: <highlight>$replace:foo.bar.a</highlight></bkl-code>
 </div>
 
 
@@ -2452,10 +2418,10 @@ zig:
 
 <bkl-code>foo:
   bar:
-    a: <focus>1</focus>
+    a: <highlight>1</highlight>
 zig:
   b: 2
-  c: <focus>1</focus></bkl-code>
+  c: <highlight>1</highlight></bkl-code>
 
 </div>
 </row>
@@ -2483,13 +2449,13 @@ zig:
 
 <div>
 
-<bkl-code><focus>a: 1</focus>
+<bkl-code><highlight>a: 1</highlight>
 b: 2
 ---
 c: 3
-<focus>$replace:</focus>
-  <focus>$match:</focus>
-    <focus>a: 1</focus></bkl-code>
+<highlight>$replace:</highlight>
+  <highlight>$match:</highlight>
+    <highlight>a: 1</highlight></bkl-code>
 </div>
 
 
@@ -2497,11 +2463,11 @@ c: 3
 <div>
 
 
-<bkl-code><focus>a: 1</focus>
-<focus>b: 2</focus>
+<bkl-code><highlight>a: 1</highlight>
+<highlight>b: 2</highlight>
 ---
-<focus>a: 1</focus>
-<focus>b: 2</focus></bkl-code>
+<highlight>a: 1</highlight>
+<highlight>b: 2</highlight></bkl-code>
 
 </div>
 </row>
@@ -2519,15 +2485,15 @@ c: 3
 
 <div>
 
-<bkl-code><focus>a: 1</focus>
+<bkl-code><highlight>a: 1</highlight>
 b:
   c: 3
 ---
 d: 4
-<focus>$replace:</focus>
-  <focus>$match:</focus>
-    <focus>a: 1</focus>
-  <focus>$path: b</focus></bkl-code>
+<highlight>$replace:</highlight>
+  <highlight>$match:</highlight>
+    <highlight>a: 1</highlight>
+  <highlight>$path: b</highlight></bkl-code>
 </div>
 
 
@@ -2566,7 +2532,7 @@ c: 3</bkl-code>
 b: 2
 ---
 c: 3
-<focus>$replace: <value>[{a: 1}]</value></focus></bkl-code>
+<highlight>$replace: <value>[{a: 1}]</value></highlight></bkl-code>
 </div>
 
 
@@ -2574,11 +2540,11 @@ c: 3
 <div>
 
 
-<bkl-code><focus>a: 1</focus>
-<focus>b: 2</focus>
+<bkl-code><highlight>a: 1</highlight>
+<highlight>b: 2</highlight>
 ---
-<focus>a: 1</focus>
-<focus>b: 2</focus></bkl-code>
+<highlight>a: 1</highlight>
+<highlight>b: 2</highlight></bkl-code>
 
 </div>
 </row>
@@ -2601,7 +2567,7 @@ b:
   c: 3
 ---
 d: 4
-<focus>$replace: <value>[{a: 1}, b]</value></focus></bkl-code>
+<highlight>$replace: <value>[{a: 1}, b]</value></highlight></bkl-code>
 </div>
 
 
@@ -2611,9 +2577,9 @@ d: 4
 
 <bkl-code>a: 1
 b:
-  <focus>c: 3</focus>
+  <highlight>c: 3</highlight>
 ---
-<focus>c: 3</focus></bkl-code>
+<highlight>c: 3</highlight></bkl-code>
 
 </div>
 </row>
@@ -2645,7 +2611,7 @@ b:
 
 <bkl-code>foo:
   bar:
-    <focus>$output: true</focus>
+    <highlight>$output: true</highlight>
     a: 1
     b: 2</bkl-code>
 </div>
@@ -2676,7 +2642,7 @@ b: 2</bkl-code>
 
 <bkl-code>foo:
   bar:
-    - <focus>$output: true</focus>
+    - <highlight>$output: true</highlight>
     - a: 1
     - b: 2</bkl-code>
 </div>
@@ -2717,7 +2683,7 @@ b: 2</bkl-code>
 
 <bkl-code>a:
   b: 1
-  <focus>$output: false</focus>
+  <highlight>$output: false</highlight>
 c:
   d: 2</bkl-code>
 </div>
@@ -2748,7 +2714,7 @@ c:
 
 <bkl-code>a:
   - b: 1
-  - <focus>$output: false</focus>
+  - <highlight>$output: false</highlight>
 c:
   - d: 2</bkl-code>
 </div>
@@ -2778,7 +2744,7 @@ c:
 <div>
 
 <bkl-code>a: 1
-<focus>$output: false</focus>
+<highlight>$output: false</highlight>
 ---
 b: 2</bkl-code>
 </div>
@@ -2824,8 +2790,8 @@ b: 2</bkl-code>
 <div>
 
 <bkl-code>a: foo
-<focus>b: $repeat</focus>
-<focus>$repeat: 2</focus></bkl-code>
+<highlight>b: $repeat</highlight>
+<highlight>$repeat: 2</highlight></bkl-code>
 </div>
 
 
@@ -2860,10 +2826,10 @@ b: 1</bkl-code>
 
 <div>
 
-<bkl-code><focus>$repeat:</focus>
-  <focus>a: 2</focus>
-  <focus>b: 3</focus>
-$value: $"{<focus>$repeat:</focus>a},{<focus>$repeat:</focus>b}"</bkl-code>
+<bkl-code><highlight>$repeat:</highlight>
+  <highlight>a: 2</highlight>
+  <highlight>b: 3</highlight>
+$value: $"{<highlight>$repeat:</highlight>a},{<highlight>$repeat:</highlight>b}"</bkl-code>
 </div>
 
 
@@ -2904,8 +2870,8 @@ $value: $"{<focus>$repeat:</focus>a},{<focus>$repeat:</focus>b}"</bkl-code>
 
 <div>
 
-<bkl-code><focus>$repeat: [x, y, z]</focus>
-<focus>a: $repeat</focus></bkl-code>
+<bkl-code><highlight>$repeat: [x, y, z]</highlight>
+<highlight>a: $repeat</highlight></bkl-code>
 </div>
 
 
@@ -2940,10 +2906,10 @@ a: z</bkl-code>
 
 <div>
 
-<bkl-code><focus>$repeat:</focus>
-  <focus>$first: 10</focus>
-  <focus>$count: 3</focus>
-<focus>a: $repeat</focus></bkl-code>
+<bkl-code><highlight>$repeat:</highlight>
+  <highlight>$first: 10</highlight>
+  <highlight>$count: 3</highlight>
+<highlight>a: $repeat</highlight></bkl-code>
 </div>
 
 
@@ -2985,8 +2951,8 @@ a: 12</bkl-code>
 
 <bkl-code>a:
   $"b{$repeat}":
-    <focus>c: $repeat</focus>
-    <focus>$repeat: 3</focus></bkl-code>
+    <highlight>c: $repeat</highlight>
+    <highlight>$repeat: 3</highlight></bkl-code>
 </div>
 
 
@@ -3024,8 +2990,8 @@ a: 12</bkl-code>
 <div>
 
 <bkl-code>a:
-  - <focus>b: $repeat</focus>
-    <focus>$repeat: [x, y, z]</focus></bkl-code>
+  - <highlight>b: $repeat</highlight>
+    <highlight>$repeat: [x, y, z]</highlight></bkl-code>
 </div>
 
 
@@ -3066,7 +3032,7 @@ a: 12</bkl-code>
 
 <div>
 
-<bkl-code>a: <focus>$$env:foo</focus></bkl-code>
+<bkl-code>a: <highlight>$$env:foo</highlight></bkl-code>
 </div>
 
 
@@ -3074,7 +3040,7 @@ a: 12</bkl-code>
 <div>
 
 
-<bkl-code>a: <focus>$env:foo</focus></bkl-code>
+<bkl-code>a: <highlight>$env:foo</highlight></bkl-code>
 
 </div>
 </row>
@@ -3096,7 +3062,7 @@ a: 12</bkl-code>
 
 <doc-grid>
 
-<bkl-code><focus>"$parent"</focus> = false</bkl-code>
+<bkl-code><highlight>"$parent"</highlight> = false</bkl-code>
 
 </doc-grid>
 
@@ -3116,7 +3082,7 @@ a: 12</bkl-code>
 
 <doc-grid>
 
-<bkl-code>$ <focus>ln -s ~/go/bin/bklb ~/go/bin/catb</focus>   # catb could be, e.g. kubectlb
+<bkl-code>$ <highlight>ln -s ~/go/bin/bklb ~/go/bin/catb</highlight>   # catb could be, e.g. kubectlb
 
 $ cat service.yaml
 addr: 127.0.0.1
@@ -3126,7 +3092,7 @@ port: 8080
 $ cat service.test.toml
 port = 8081
 
-$ <focus>catb service.test.toml</focus>
+$ <highlight>catb service.test.toml</highlight>
 addr = "127.0.0.1"
 name = "myService"
 port = 8081
@@ -3135,12 +3101,12 @@ $ cat service.test.yaml service.test.json
 cat: service.test.yaml: No such file or directory
 cat: service.test.json: No such file or directory
 
-$ <focus>catb service.test.yaml</focus>
+$ <highlight>catb service.test.yaml</highlight>
 addr: 127.0.0.1
 name: myService
 port: 8081
 
-$ <focus>catb service.test.json</focus>
+$ <highlight>catb service.test.json</highlight>
 {"addr":"127.0.0.1","name":"myService","port":8081}</bkl-code>
 
 </doc-grid>
@@ -3473,7 +3439,7 @@ b:
 
 <doc-grid>
 
-<bkl-code>$ kubectl <focus>bkl</focus> &lt;kubectl_commands&gt;</bkl-code>
+<bkl-code>$ kubectl <highlight>bkl</highlight> &lt;kubectl_commands&gt;</bkl-code>
 
 </doc-grid>
 
@@ -3534,17 +3500,17 @@ COPY --from=bkl /bin /bin</bkl-code>
 
 <doc-grid>
 
-<bkl-code>$ <focus>diff -ud --color</focus> <focus>&lt;</focus><focus>(bkl a.yaml)</focus> <focus>&lt;</focus><focus>(bkl b.yaml)</focus>
+<bkl-code>$ <highlight>diff -ud --color</highlight> <highlight>&lt;</highlight><highlight>(bkl a.yaml)</highlight> <highlight>&lt;</highlight><highlight>(bkl b.yaml)</highlight>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
 @@ -1,3 +1,2 @@
  a: 1
-<focus>-b: 2</focus>
+<highlight>-b: 2</highlight>
  c: 3
 
-$ <focus>diff -y --color</focus> <focus>&lt;</focus><focus>(bkl a.yaml)</focus> <focus>&lt;</focus><focus>(bkl b.yaml)</focus>
+$ <highlight>diff -y --color</highlight> <highlight>&lt;</highlight><highlight>(bkl a.yaml)</highlight> <highlight>&lt;</highlight><highlight>(bkl b.yaml)</highlight>
 a: 1                              a: 1
-b: 2                            <focus>&lt;</focus>
+b: 2                            <highlight>&lt;</highlight>
 c: 3                              c: 3</bkl-code>
 
 </doc-grid>

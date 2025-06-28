@@ -93,17 +93,17 @@ func main() {
 }
 
 func formatContent(content string) template.HTML {
-	// Replace `text` with <ifocus>text</ifocus>
+	// Replace `text` with <highlight>text</highlight>
 	backtickRegex := regexp.MustCompile("`([^`]+)`")
-	content = backtickRegex.ReplaceAllString(content, "<ifocus>$1</ifocus>")
+	content = backtickRegex.ReplaceAllString(content, "<highlight>$1</highlight>")
 
 	return template.HTML(content)
 }
 
 func formatNote(note string) template.HTML {
-	// Replace `text` with <ifocus>text</ifocus>
+	// Replace `text` with <highlight>text</highlight>
 	backtickRegex := regexp.MustCompile("`([^`]+)`")
-	note = backtickRegex.ReplaceAllString(note, "<ifocus>$1</ifocus>")
+	note = backtickRegex.ReplaceAllString(note, "<highlight>$1</highlight>")
 
 	return template.HTML(note)
 }
@@ -113,7 +113,7 @@ func formatLayer(layer bkl.DocLayer) template.HTML {
 
 	// Apply highlights
 	for _, highlight := range layer.Highlights {
-		code = strings.ReplaceAll(code, highlight, "<focus>"+highlight+"</focus>")
+		code = strings.ReplaceAll(code, highlight, "<highlight>"+highlight+"</highlight>")
 	}
 
 	return template.HTML(code)

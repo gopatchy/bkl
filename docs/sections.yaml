@@ -253,7 +253,7 @@
                 a: 1
                 $invert: true
               c: 3
-            highlights: ["$invert: true"]
+            highlights: ["$match:", "$invert: true"]
         result:
           code: |
             a: 1
