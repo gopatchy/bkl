@@ -17,7 +17,9 @@ func tomlMarshalStream(vs []any) ([]byte, error) {
 		first = false
 
 		if !first2 {
-			buf.Write([]byte("---\n"))
+			if _, err := buf.Write([]byte("---\n")); err != nil {
+				return nil, err
+			}
 		}
 
 		err := enc.Encode(v)
