@@ -51,9 +51,10 @@ type DocExample struct {
 }
 
 type DocLayer struct {
-	Label      string   `yaml:"label,omitempty"`
-	Code       string   `yaml:"code"`
-	Highlights []string `yaml:"highlights,omitempty"`
+	Label      string      `yaml:"label,omitempty"`
+	Code       string      `yaml:"code"`
+	Highlights []string    `yaml:"highlights,omitempty"`
+	Languages  [][]any     `yaml:"languages,omitempty"` // List of [line, language] pairs
 }
 
 func GetTests() (map[string]*TestCase, error) {

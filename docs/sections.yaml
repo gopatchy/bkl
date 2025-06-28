@@ -11,11 +11,13 @@
             addr: 127.0.0.1
             name: myService
             port: 8080
+          languages: [[0, "yaml"]]
         right:
           label: service.test.toml
           code: |
             port = 8081
           highlights: ["8081"]
+          languages: [[0, "toml"]]
     - code:
         label: "Run it!"
         code: |
@@ -24,6 +26,7 @@
           name = 'myService'
           port = 8081
         highlights: ["8081"]
+        languages: [[0, "shell"], [1, "toml"]]
     - content: |
         bkl knows that <highlight>service.test.toml</highlight> inherits from <highlight>service.yaml</highlight> by the filename pattern (<a href="#inheritance">override with <highlight>$parent</highlight></a>) and uses filename extensions to determine formats.
 
@@ -36,11 +39,13 @@
           # Install go from <a href="https://go.dev/dl/">go.dev</a>
           $ go install github.com/gopatchy/bkl/...@latest
           # Verify that ~/go/bin is in your $PATH
+        languages: [[0, "shell"]]
     - code:
         label: macOS using brew
         code: |
           # Install brew from <a href="https://brew.sh/">brew.sh</a>
           $ brew install gopatchy/bkl/bkl
+        languages: [[0, "shell"]]
     - content: |
         You can also download binaries directly <a href="https://github.com/gopatchy/bkl/releases">here</a>.
 
@@ -57,6 +62,7 @@
           name: myService
           port: 8081
         highlights: ["-f yaml"]
+        languages: [[0, "shell"], [1, "yaml"]]
     - code:
         label: TOML
         code: |
@@ -65,12 +71,14 @@
           name = 'myService'
           port = 8081
         highlights: ["-f toml"]
+        languages: [[0, "shell"], [1, "toml"]]
     - code:
         label: JSON
         code: |
           $ bkl -f json service.test.toml
           {"addr":"127.0.0.1","name":"myService","port":8081}
         highlights: ["-f json"]
+        languages: [[0, "shell"], [1, "json"]]
     - code:
         label: JSON (pretty)
         code: |
@@ -81,6 +89,7 @@
             "port": 8081
           }
         highlights: ["-f json-pretty"]
+        languages: [[0, "shell"], [1, "json"]]
     - content: |
         <highlight>jsonl</highlight> is an alias for <highlight>json</highlight> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
     - content: |
@@ -92,6 +101,7 @@
           name: myService
           port: 8081
         highlights: ["yaml", "toml"]
+        languages: [[0, "shell"], [1, "yaml"]]
 
 - id: write
   title: Output
@@ -103,6 +113,7 @@
         code: |
           $ bkl -o out.yaml service.test.toml
         highlights: ["-o out.yaml"]
+        languages: [[0, "shell"]]
     - content: |
         Output format is autodetected from output filename (unless specified with <highlight>-f</highlight>).
 
@@ -114,6 +125,7 @@
         code: |
           $ bkl a.b.yaml c.d.yaml   # a.yaml + a.b.yaml + c.yaml + c.d.yaml
         highlights: ["a.b.yaml c.d.yaml"]
+        languages: [[0, "shell"]]
     - content: |
         Specifying multiple input files merges all layers in order.
     - code:
@@ -123,6 +135,7 @@
           a: 1
           EOF
         highlights: ["-- -.yaml"]
+        languages: [[0, "shell"], [1, "yaml"]]
     - content: |
         Specifying an input file with the base name <highlight>-</highlight> and a valid format extension causes bkl to read that format from standard input. Use <highlight>--</highlight> before the filename to avoid it being treated as a flag.
 
@@ -136,6 +149,7 @@
         code: |
           $parent: a.b   # inherits from a.b.<ext>, from a.<ext>
         highlights: ["$parent: a.b"]
+        languages: [[0, "yaml"]]
     - content: |
         bkl will check for all supported endings of a manually-specified parent file and will still evaluate layers under the parent in the normal order.
     - side_by_side:
@@ -146,11 +160,13 @@
             - a
             - b
           highlights: ["$parent:", "- a", "- b"]
+          languages: [[0, "yaml"]]
         right:
           label: Parent Wildcard
           code: |
             $parent: a.*
           highlights: ["$parent: a.*"]
+          languages: [[0, "yaml"]]
     - content: |
         Setting <highlight>$parent</highlight> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
     - content: |
@@ -160,6 +176,7 @@
         code: |
           $ bkl a.b.yaml c.d.yaml      # a.yaml + a.b.yaml + c.yaml + c.d.yaml
         highlights: ["a.b.yaml c.d.yaml"]
+        languages: [[0, "shell"]]
     - content: |
         Layer order can be specified with commandline argument order.
     - code:
@@ -167,6 +184,7 @@
         code: |
           $parent: false   # no further inheritance
         highlights: ["$parent: false"]
+        languages: [[0, "yaml"]]
     - content: |
         Setting <highlight>$parent</highlight> to <highlight>false</highlight> or <highlight>null</highlight> stops any further inheritance regardless of filename structure.
 
@@ -184,8 +202,10 @@
               a: 1
               ---
               b: 2
+            languages: [[0, "yaml"]]
           - code: |
               c: 3
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -193,6 +213,7 @@
             ---
             b: 2
             c: 3
+          languages: [[0, "yaml"]]
           highlights: ["c: 3", "c: 3"]
     - example:
         operation: evaluate
@@ -201,11 +222,13 @@
               a: 1
               ---
               b: 2
+            languages: [[0, "yaml"]]
           - code: |
               $match:
                 b: 2
               c: 3
             highlights: ["$match:", "b: 2"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -213,6 +236,7 @@
             b: 2
             c: 3
           highlights: ["c: 3"]
+          languages: [[0, "yaml"]]
     - content: |
         The supplied pattern can match multiple documents and the updates will be applied to all of them. <highlight>$match: {}</highlight> matches any documents with a map as their root element, regardless of parent.
     - example:
@@ -224,11 +248,13 @@
               b: 2
               ---
               a: 1
+            languages: [[0, "yaml"]]
           - code: |
               $match:
                 a: 1
               c: 3
             highlights: ["$match:", "a: 1"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -239,6 +265,7 @@
             a: 1
             c: 3
           highlights: ["c: 3", "c: 3"]
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$invert: true</highlight> inside a <highlight>$match</highlight> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
     - example:
@@ -248,12 +275,14 @@
               a: 1
               ---
               b: 2
+            languages: [[0, "yaml"]]
           - code: |
               $match:
                 a: 1
                 $invert: true
               c: 3
             highlights: ["$match:", "$invert: true"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -261,6 +290,7 @@
             b: 2
             c: 3
           highlights: ["c: 3"]
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$match: null</highlight> forces the updates to apply to a new document.
     - example:
@@ -268,16 +298,19 @@
         layers:
           - code: |
               a: 1
+            languages: [[0, "yaml"]]
           - code: |
               $match: null
               b: 2
             highlights: ["$match: null"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             ---
             b: 2
           highlights: ["b: 2"]
+          languages: [[0, "yaml"]]
 
 - id: maps
   title: Maps
@@ -289,38 +322,47 @@
         layers:
           - code: |
               a: 1
+            languages: [[0, "yaml"]]
           - code: |
               b: 2
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             b: 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
           - code: |
               a: 1
+            languages: [[0, "yaml"]]
           - code: |
               b: 2
               $replace: true
             highlights: ["$replace: true"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             b: 2
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
           - code: |
               a: 1
               b: 2
+            languages: [[0, "yaml"]]
           - code: |
               c: 3
               b: $delete
             highlights: ["b: $delete"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
             c: 3
+          languages: [[0, "yaml"]]
     - content: |
         bkl returns an error if you use <highlight>$delete</highlight>, <highlight>$replace: true</highlight>, or a <highlight>key: value</highlight> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 
