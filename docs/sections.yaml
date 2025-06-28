@@ -767,6 +767,7 @@
                 b: 2
                 $merge: foo.bar
             highlights: ["$merge: foo.bar"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             foo:
@@ -776,6 +777,7 @@
               a: 1
               b: 2
           highlights: ["a: 1"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -787,6 +789,7 @@
                 - b: 2
                 - $merge: foo.bar
             highlights: ["$merge: foo.bar"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             foo:
@@ -796,6 +799,7 @@
               - b: 2
               - a: 1
           highlights: ["a: 1"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -807,6 +811,7 @@
                 b: 2
                 c: $merge:foo.bar.a
             highlights: ["$merge:foo.bar.a"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             foo:
@@ -816,6 +821,7 @@
               b: 2
               c: 1
           highlights: ["1"]
+          languages: [[0, "yaml"]]
     - content: |
         You can also merge across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
     - example:
@@ -830,6 +836,7 @@
                 $match:
                   a: 1
             highlights: ["$merge:", "$match:", "a: 1"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -839,6 +846,7 @@
             b: 2
             c: 3
           highlights: ["a: 1", "b: 2"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -853,6 +861,7 @@
                   a: 1
                 $path: b
             highlights: ["$merge:", "$match:", "a: 1", "$path: b"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -862,6 +871,7 @@
             c: 3
             d: 4
           highlights: ["c: 3"]
+          languages: [[0, "yaml"]]
     - content: |
         <highlight>$merge</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
     - example:
@@ -874,6 +884,7 @@
               c: 3
               $merge: <value>[{a: 1}]</value>
             highlights: ["$merge: <value>[{a: 1}]</value>"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -883,6 +894,7 @@
             b: 2
             c: 3
           highlights: ["a: 1", "b: 2"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -894,6 +906,7 @@
               d: 4
               $merge: <value>[{a: 1}, b]</value>
             highlights: ["$merge: <value>[{a: 1}, b]</value>"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
@@ -903,6 +916,7 @@
             c: 3
             d: 4
           highlights: ["c: 3"]
+          languages: [[0, "yaml"]]
 
 - id: replace
   title: $replace
@@ -920,6 +934,7 @@
                 b: 2
                 $replace: foo.bar
             highlights: ["$replace: foo.bar"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             foo:
@@ -928,6 +943,7 @@
             zig:
               a: 1
           highlights: ["a: 1"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -939,6 +955,7 @@
                 - b: 2
                 - $replace: foo.bar
             highlights: ["$replace: foo.bar"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             foo:
@@ -947,6 +964,7 @@
             zig:
               - a: 1
           highlights: ["a: 1"]
+          languages: [[0, "yaml"]]
     - example:
         operation: evaluate
         layers:
@@ -958,6 +976,7 @@
                 b: 2
                 c: $replace:foo.bar.a
             highlights: ["$replace:foo.bar.a"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             foo:
@@ -967,6 +986,7 @@
               b: 2
               c: 1
           highlights: ["1"]
+          languages: [[0, "yaml"]]
     - content: |
         Note that <highlight>$merge</highlight> and <highlight>$replace</highlight> are equivalent for scalar values.
     - content: |
@@ -983,6 +1003,7 @@
                 $match:
                   a: 1
             highlights: ["$replace:", "$match:", "a: 1"]
+            languages: [[0, "yaml"]]
         result:
           code: |
             a: 1
