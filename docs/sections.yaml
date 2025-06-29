@@ -1356,26 +1356,6 @@
         highlights: ["\"$parent\""]
         languages: [[0, "toml"]]
 
-- id: errors
-  title: Errors
-  items:
-    - content: |
-        bkl helps maintain clean layers by reporting errors for unused directives:
-    - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-            languages: [[0, "yaml"]]
-          - code: |
-              b: 2
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            Error: key not found in parent
-    - content: |
-        This ensures upper layers only contain overrides, not new values. Use the base layer for shared configuration.
-
 - id: bklb
   title: bklb
   items:
