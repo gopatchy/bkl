@@ -1,6 +1,6 @@
 go := env_var_or_default('GOCMD', 'go')
 
-default: tidy test
+default: tidy test docs
 
 tidy:
 	{{go}} mod tidy

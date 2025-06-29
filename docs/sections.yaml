@@ -1228,17 +1228,17 @@
         operation: evaluate
         layers:
           - code: |
-              $repeat: [x, y, z]
+              $repeat: [foo, bar, baz]
               a: $repeat
-            highlights: ["$repeat: [x, y, z]", "a: $repeat"]
+            highlights: ["$repeat: [foo, bar, baz]", "a: $repeat"]
             languages: [[0, "yaml"]]
         result:
           code: |
-            a: x
+            a: foo
             ---
-            a: y
+            a: bar
             ---
-            a: z
+            a: baz
           languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> supports range parameters for numeric sequences:
@@ -1292,15 +1292,15 @@
           - code: |
               a:
                 - b: $repeat
-                  $repeat: [x, y, z]
-            highlights: ["$repeat: [x, y, z]", "b: $repeat"]
+                  $repeat: [foo, bar, baz]
+            highlights: ["$repeat: [foo, bar, baz]", "b: $repeat"]
             languages: [[0, "yaml"]]
         result:
           code: |
             a:
-              - b: x
-              - b: y
-              - b: z
+              - b: foo
+              - b: bar
+              - b: baz
           languages: [[0, "yaml"]]
 
 - id: escape
