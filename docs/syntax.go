@@ -14,6 +14,63 @@ type insertion struct {
 	priority int
 }
 
+// YAML state machine states
+type yamlState int
+
+const (
+	yamlLineStart yamlState = iota
+	yamlMaybeDash
+	yamlListValue
+	yamlKeyOrScalar
+	yamlColonFound
+	yamlAfterColon
+	yamlScalar
+	yamlString
+	yamlAfterString
+	yamlComment
+)
+
+// TOML state machine states
+type tomlState int
+
+const (
+	tomlLineStart tomlState = iota
+	tomlSection
+	tomlAfterSection
+	tomlKey
+	tomlKeyString
+	tomlAfterKeyString
+	tomlBeforeEquals
+	tomlAfterEquals
+	tomlValueString
+	tomlBareString
+	tomlNumber
+	tomlBoolean
+	tomlArray
+	tomlInlineTable
+	tomlAfterComma
+	tomlAfterValue
+	tomlInValue
+	tomlComment
+)
+
+// JSON state machine states
+type jsonState int
+
+const (
+	jsonValue jsonState = iota
+	jsonObjectStart
+	jsonObjectKey
+	jsonAfterKey
+	jsonString
+	jsonNumber
+	jsonKeyword
+	jsonAfterValue
+	jsonExpectKey
+	jsonError
+	jsonDone
+)
+
 type syntaxHighlighter struct {
 	text       string
 	offset     int
@@ -39,7 +96,7 @@ func highlightYAML(text string, offset int) []insertion {
 		offset: offset,
 	}
 
-	state := "lineStart"
+	state := yamlLineStart
 	tokenStart := 0
 	quoteChar := byte(0)
 	escapeNext := false
@@ -48,54 +105,54 @@ func highlightYAML(text string, offset int) []insertion {
 		ch := text[pos]
 
 		switch state {
-		case "lineStart":
+		case yamlLineStart:
 			if ch == ' ' || ch == '\t' {
 				// Skip indentation
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = yamlComment
 			} else if ch == '-' {
-				state = "maybeDash"
+				state = yamlMaybeDash
 			} else if ch == '\n' {
 				// Stay in lineStart
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "string"
+				state = yamlString
 			} else {
 				tokenStart = pos
-				state = "keyOrScalar"
+				state = yamlKeyOrScalar
 			}
 
-		case "maybeDash":
+		case yamlMaybeDash:
 			if ch == ' ' || ch == '\n' {
-				state = "listValue"
+				state = yamlListValue
 			} else {
 				// It wasn't a list marker, treat dash as start of key
 				tokenStart = pos - 1
-				state = "keyOrScalar"
+				state = yamlKeyOrScalar
 			}
 
-		case "listValue":
+		case yamlListValue:
 			if ch == ' ' || ch == '\t' {
 				// Skip spaces after dash
 			} else if ch == '\n' {
-				state = "lineStart"
+				state = yamlLineStart
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = yamlComment
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "string"
+				state = yamlString
 			} else {
 				tokenStart = pos
-				state = "keyOrScalar"
+				state = yamlKeyOrScalar
 			}
 
-		case "keyOrScalar":
+		case yamlKeyOrScalar:
 			if ch == ':' {
-				state = "colonFound"
+				state = yamlColonFound
 			} else if ch == '\n' {
 				// It was just a scalar value
 				value := strings.TrimSpace(text[tokenStart:pos])
@@ -106,40 +163,40 @@ func highlightYAML(text string, offset int) []insertion {
 				} else if len(value) > 0 {
 					h.addToken("string", tokenStart, tokenStart+len(value))
 				}
-				state = "lineStart"
+				state = yamlLineStart
 			}
 
-		case "colonFound":
+		case yamlColonFound:
 			if ch == ' ' || ch == '\n' || ch == '\t' {
 				// It's a key
 				h.addToken("key", tokenStart, pos-1)
-				state = "afterColon"
+				state = yamlAfterColon
 				if ch == '\n' {
-					state = "lineStart"
+					state = yamlLineStart
 				}
 			} else {
 				// Colon wasn't a key separator, continue as scalar
-				state = "scalar"
+				state = yamlScalar
 			}
 
-		case "afterColon":
+		case yamlAfterColon:
 			if ch == ' ' || ch == '\t' {
 				// Skip spaces after colon
 			} else if ch == '\n' {
-				state = "lineStart"
+				state = yamlLineStart
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = yamlComment
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "string"
+				state = yamlString
 			} else {
 				tokenStart = pos
-				state = "scalar"
+				state = yamlScalar
 			}
 
-		case "scalar":
+		case yamlScalar:
 			if ch == '\n' || ch == '#' {
 				value := strings.TrimSpace(text[tokenStart:pos])
 				if value == "true" || value == "false" {
@@ -151,53 +208,53 @@ func highlightYAML(text string, offset int) []insertion {
 				}
 
 				if ch == '\n' {
-					state = "lineStart"
+					state = yamlLineStart
 				} else {
 					tokenStart = pos
-					state = "comment"
+					state = yamlComment
 				}
 			}
 
-		case "string":
+		case yamlString:
 			if escapeNext {
 				escapeNext = false
 			} else if ch == '\\' && quoteChar == '"' {
 				escapeNext = true
 			} else if ch == quoteChar {
 				h.addToken("string", tokenStart, pos+1)
-				state = "afterString"
+				state = yamlAfterString
 			} else if ch == '\n' && quoteChar == '\'' {
 				// Single-quoted strings don't support multi-line in our simplified parser
 				h.addToken("string", tokenStart, pos)
-				state = "lineStart"
+				state = yamlLineStart
 			}
 
-		case "afterString":
+		case yamlAfterString:
 			if ch == '\n' {
-				state = "lineStart"
+				state = yamlLineStart
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = yamlComment
 			} else if ch != ' ' && ch != '\t' {
 				// More content after string
-				state = "scalar"
+				state = yamlScalar
 			}
 
-		case "comment":
+		case yamlComment:
 			if ch == '\n' {
 				h.addToken("comment", tokenStart, pos)
-				state = "lineStart"
+				state = yamlLineStart
 			}
 		}
 	}
 
 	// Handle any remaining tokens at end of text
 	switch state {
-	case "comment":
+	case yamlComment:
 		h.addToken("comment", tokenStart, len(text))
-	case "string":
+	case yamlString:
 		h.addToken("string", tokenStart, len(text))
-	case "scalar", "keyOrScalar":
+	case yamlScalar, yamlKeyOrScalar:
 		value := strings.TrimSpace(text[tokenStart:])
 		if value == "true" || value == "false" {
 			h.addToken("bool", tokenStart, tokenStart+len(value))
@@ -217,7 +274,7 @@ func highlightTOML(text string, offset int) []insertion {
 		offset: offset,
 	}
 
-	state := "lineStart"
+	state := tomlLineStart
 	tokenStart := 0
 	quoteChar := byte(0)
 	escapeNext := false
@@ -227,301 +284,301 @@ func highlightTOML(text string, offset int) []insertion {
 		ch := text[pos]
 
 		switch state {
-		case "lineStart":
+		case tomlLineStart:
 			if ch == ' ' || ch == '\t' {
 				// Skip indentation
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = tomlComment
 			} else if ch == '[' {
 				tokenStart = pos
 				bracketDepth = 1
-				state = "section"
+				state = tomlSection
 			} else if ch == '\n' {
 				// Stay in lineStart
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "keyString"
+				state = tomlKeyString
 			} else {
 				tokenStart = pos
-				state = "key"
+				state = tomlKey
 			}
 
-		case "section":
+		case tomlSection:
 			if ch == '[' {
 				bracketDepth++
 			} else if ch == ']' {
 				bracketDepth--
 				if bracketDepth == 0 {
 					h.addToken("key", tokenStart, pos+1)
-					state = "afterSection"
+					state = tomlAfterSection
 				}
 			} else if ch == '\n' {
 				// Invalid section header
-				state = "lineStart"
+				state = tomlLineStart
 			}
 
-		case "afterSection":
+		case tomlAfterSection:
 			if ch == '\n' {
-				state = "lineStart"
+				state = tomlLineStart
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = tomlComment
 			} else if ch != ' ' && ch != '\t' {
 				// Invalid content after section
-				state = "lineStart"
+				state = tomlLineStart
 			}
 
-		case "key":
+		case tomlKey:
 			if ch == '=' {
 				h.addToken("key", tokenStart, pos)
-				state = "afterEquals"
+				state = tomlAfterEquals
 			} else if ch == '\n' {
 				// Key without value
-				state = "lineStart"
+				state = tomlLineStart
 			} else if ch == ' ' || ch == '\t' {
 				// End of key, expect equals
 				h.addToken("key", tokenStart, pos)
-				state = "beforeEquals"
+				state = tomlBeforeEquals
 			}
 
-		case "keyString":
+		case tomlKeyString:
 			if escapeNext {
 				escapeNext = false
 			} else if ch == '\\' {
 				escapeNext = true
 			} else if ch == quoteChar {
-				state = "afterKeyString"
+				state = tomlAfterKeyString
 			} else if ch == '\n' && quoteChar == '\'' {
 				// Single-quoted strings don't support multi-line
 				h.addToken("key", tokenStart, pos)
-				state = "lineStart"
+				state = tomlLineStart
 			}
 
-		case "afterKeyString":
+		case tomlAfterKeyString:
 			if ch == ' ' || ch == '\t' {
 				// Skip whitespace
 			} else if ch == '=' {
 				h.addToken("key", tokenStart, pos)
-				state = "afterEquals"
+				state = tomlAfterEquals
 			} else if ch == '\n' {
 				h.addToken("key", tokenStart, pos)
-				state = "lineStart"
+				state = tomlLineStart
 			}
 
-		case "beforeEquals":
+		case tomlBeforeEquals:
 			if ch == ' ' || ch == '\t' {
 				// Skip whitespace
 			} else if ch == '=' {
-				state = "afterEquals"
+				state = tomlAfterEquals
 			} else if ch == '\n' {
-				state = "lineStart"
+				state = tomlLineStart
 			}
 
-		case "afterEquals":
+		case tomlAfterEquals:
 			if ch == ' ' || ch == '\t' {
 				// Skip whitespace
 			} else if ch == '\n' {
-				state = "lineStart"
+				state = tomlLineStart
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = tomlComment
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "valueString"
+				state = tomlValueString
 			} else if ch == '[' {
 				tokenStart = pos
-				state = "array"
+				state = tomlArray
 			} else if ch == '{' {
 				tokenStart = pos
-				state = "inlineTable"
+				state = tomlInlineTable
 			} else if (ch >= '0' && ch <= '9') || ch == '-' || ch == '+' {
 				tokenStart = pos
-				state = "number"
+				state = tomlNumber
 			} else if ch == 't' || ch == 'f' {
 				tokenStart = pos
-				state = "boolean"
+				state = tomlBoolean
 			} else {
 				tokenStart = pos
-				state = "bareString"
+				state = tomlBareString
 			}
 
-		case "valueString":
+		case tomlValueString:
 			if escapeNext {
 				escapeNext = false
 			} else if ch == '\\' {
 				escapeNext = true
 			} else if ch == quoteChar {
 				h.addToken("string", tokenStart, pos+1)
-				state = "afterValue"
+				state = tomlAfterValue
 			} else if ch == '\n' && quoteChar == '\'' {
 				// Single-quoted strings don't support multi-line in our simplified parser
 				h.addToken("string", tokenStart, pos)
-				state = "lineStart"
+				state = tomlLineStart
 			}
 
-		case "bareString":
+		case tomlBareString:
 			if ch == '\n' || ch == '#' || ch == ',' || ch == ']' || ch == '}' {
 				h.addToken("string", tokenStart, pos)
 				if ch == '\n' {
-					state = "lineStart"
+					state = tomlLineStart
 				} else if ch == '#' {
 					tokenStart = pos
-					state = "comment"
+					state = tomlComment
 				} else if ch == ',' {
-					state = "afterComma"
+					state = tomlAfterComma
 				} else {
-					state = "inValue"
+					state = tomlInValue
 				}
 			}
 
-		case "number":
+		case tomlNumber:
 			if ch == '\n' || ch == '#' || ch == ',' || ch == ']' || ch == '}' || ch == ' ' || ch == '\t' {
 				h.addToken("number", tokenStart, pos)
 				if ch == '\n' {
-					state = "lineStart"
+					state = tomlLineStart
 				} else if ch == '#' {
 					tokenStart = pos
-					state = "comment"
+					state = tomlComment
 				} else if ch == ',' {
-					state = "afterComma"
+					state = tomlAfterComma
 				} else if ch == ']' || ch == '}' {
-					state = "inValue"
+					state = tomlInValue
 				} else {
-					state = "afterValue"
+					state = tomlAfterValue
 				}
 			} else if (ch >= '0' && ch <= '9') || ch == '.' || ch == 'e' || ch == 'E' || ch == '+' || ch == '-' || ch == '_' || ch == ':' || ch == 'T' || ch == 'Z' {
 				// Continue number (including dates/times)
 			} else {
 				// End of number
 				h.addToken("number", tokenStart, pos)
-				state = "afterValue"
+				state = tomlAfterValue
 			}
 
-		case "boolean":
+		case tomlBoolean:
 			if ch == '\n' || ch == '#' || ch == ',' || ch == ']' || ch == '}' || ch == ' ' || ch == '\t' {
 				value := text[tokenStart:pos]
 				if value == "true" || value == "false" {
 					h.addToken("bool", tokenStart, pos)
 				}
 				if ch == '\n' {
-					state = "lineStart"
+					state = tomlLineStart
 				} else if ch == '#' {
 					tokenStart = pos
-					state = "comment"
+					state = tomlComment
 				} else if ch == ',' {
-					state = "afterComma"
+					state = tomlAfterComma
 				} else if ch == ']' || ch == '}' {
-					state = "inValue"
+					state = tomlInValue
 				} else {
-					state = "afterValue"
+					state = tomlAfterValue
 				}
 			} else if ch >= 'a' && ch <= 'z' {
 				// Continue boolean
 			} else {
 				// Not a boolean
-				state = "bareString"
+				state = tomlBareString
 			}
 
-		case "array":
+		case tomlArray:
 			if ch == ']' {
-				state = "afterValue"
+				state = tomlAfterValue
 			} else if ch == ' ' || ch == '\t' || ch == '\n' {
 				// Skip whitespace
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = tomlComment
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "valueString"
+				state = tomlValueString
 			} else if ch == '[' {
 				// Nested array
 			} else if (ch >= '0' && ch <= '9') || ch == '-' || ch == '+' {
 				tokenStart = pos
-				state = "number"
+				state = tomlNumber
 			} else if ch == 't' || ch == 'f' {
 				tokenStart = pos
-				state = "boolean"
+				state = tomlBoolean
 			} else {
 				tokenStart = pos
-				state = "bareString"
+				state = tomlBareString
 			}
 
-		case "inlineTable":
+		case tomlInlineTable:
 			// Simplified inline table handling
 			if ch == '}' {
-				state = "afterValue"
+				state = tomlAfterValue
 			}
 
-		case "afterComma":
+		case tomlAfterComma:
 			if ch == ' ' || ch == '\t' || ch == '\n' {
 				// Skip whitespace
 			} else if ch == '"' || ch == '\'' {
 				tokenStart = pos
 				quoteChar = ch
-				state = "valueString"
+				state = tomlValueString
 			} else if (ch >= '0' && ch <= '9') || ch == '-' || ch == '+' {
 				tokenStart = pos
-				state = "number"
+				state = tomlNumber
 			} else if ch == 't' || ch == 'f' {
 				tokenStart = pos
-				state = "boolean"
+				state = tomlBoolean
 			} else {
 				tokenStart = pos
-				state = "bareString"
+				state = tomlBareString
 			}
 
-		case "afterValue":
+		case tomlAfterValue:
 			if ch == '\n' {
-				state = "lineStart"
+				state = tomlLineStart
 			} else if ch == '#' {
 				tokenStart = pos
-				state = "comment"
+				state = tomlComment
 			} else if ch == ',' {
-				state = "afterComma"
+				state = tomlAfterComma
 			} else if ch == ']' || ch == '}' {
-				state = "afterValue"
+				state = tomlAfterValue
 			}
 
-		case "inValue":
+		case tomlInValue:
 			// Generic state for when we're inside a complex value
 			if ch == '\n' {
-				state = "lineStart"
+				state = tomlLineStart
 			} else if ch == ']' || ch == '}' {
-				state = "afterValue"
+				state = tomlAfterValue
 			} else if ch == ',' {
-				state = "afterComma"
+				state = tomlAfterComma
 			}
 
-		case "comment":
+		case tomlComment:
 			if ch == '\n' {
 				h.addToken("comment", tokenStart, pos)
-				state = "lineStart"
+				state = tomlLineStart
 			}
 		}
 	}
 
 	// Handle any remaining tokens at end of text
 	switch state {
-	case "comment":
+	case tomlComment:
 		h.addToken("comment", tokenStart, len(text))
-	case "valueString", "keyString":
+	case tomlValueString, tomlKeyString:
 		h.addToken("string", tokenStart, len(text))
-	case "bareString":
+	case tomlBareString:
 		h.addToken("string", tokenStart, len(text))
-	case "number":
+	case tomlNumber:
 		h.addToken("number", tokenStart, len(text))
-	case "boolean":
+	case tomlBoolean:
 		value := text[tokenStart:]
 		if value == "true" || value == "false" {
 			h.addToken("bool", tokenStart, len(text))
 		}
-	case "key":
+	case tomlKey:
 		h.addToken("key", tokenStart, len(text))
-	case "section":
+	case tomlSection:
 		h.addToken("key", tokenStart, len(text))
 	}
 
@@ -534,7 +591,7 @@ func highlightJSON(text string, offset int) []insertion {
 		offset: offset,
 	}
 
-	state := "value"
+	state := jsonValue
 	tokenStart := 0
 	escapeNext := false
 	contextStack := []string{}
@@ -543,80 +600,80 @@ func highlightJSON(text string, offset int) []insertion {
 		ch := text[pos]
 
 		switch state {
-		case "value":
+		case jsonValue:
 			if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				// Skip whitespace
 			} else if ch == '"' {
 				tokenStart = pos
-				state = "string"
+				state = jsonString
 			} else if ch == '{' {
 				contextStack = append(contextStack, "object")
-				state = "objectStart"
+				state = jsonObjectStart
 			} else if ch == '[' {
 				contextStack = append(contextStack, "array")
-				state = "value"
+				state = jsonValue
 			} else if ch == 't' || ch == 'f' || ch == 'n' {
 				tokenStart = pos
-				state = "keyword"
+				state = jsonKeyword
 			} else if ch == '-' || (ch >= '0' && ch <= '9') {
 				tokenStart = pos
-				state = "number"
+				state = jsonNumber
 			} else if ch == '}' || ch == ']' {
 				if len(contextStack) > 0 {
 					contextStack = contextStack[:len(contextStack)-1]
 				}
 				if len(contextStack) == 0 {
-					state = "done"
+					state = jsonDone
 				} else {
-					state = "afterValue"
+					state = jsonAfterValue
 				}
 			}
 
-		case "objectStart":
+		case jsonObjectStart:
 			if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				// Skip whitespace
 			} else if ch == '"' {
 				tokenStart = pos
-				state = "objectKey"
+				state = jsonObjectKey
 			} else if ch == '}' {
 				if len(contextStack) > 0 {
 					contextStack = contextStack[:len(contextStack)-1]
 				}
 				if len(contextStack) == 0 {
-					state = "done"
+					state = jsonDone
 				} else {
-					state = "afterValue"
+					state = jsonAfterValue
 				}
 			}
 
-		case "objectKey":
+		case jsonObjectKey:
 			if escapeNext {
 				escapeNext = false
 			} else if ch == '\\' {
 				escapeNext = true
 			} else if ch == '"' {
 				h.addToken("key", tokenStart, pos+1)
-				state = "afterKey"
+				state = jsonAfterKey
 			}
 
-		case "afterKey":
+		case jsonAfterKey:
 			if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				// Skip whitespace
 			} else if ch == ':' {
-				state = "value"
+				state = jsonValue
 			}
 
-		case "string":
+		case jsonString:
 			if escapeNext {
 				escapeNext = false
 			} else if ch == '\\' {
 				escapeNext = true
 			} else if ch == '"' {
 				h.addToken("string", tokenStart, pos+1)
-				state = "afterValue"
+				state = jsonAfterValue
 			}
 
-		case "number":
+		case jsonNumber:
 			if ch == ',' || ch == '}' || ch == ']' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				h.addToken("number", tokenStart, pos)
 				if ch == ',' {
@@ -625,30 +682,30 @@ func highlightJSON(text string, offset int) []insertion {
 						context = contextStack[len(contextStack)-1]
 					}
 					if context == "object" {
-						state = "expectKey"
+						state = jsonExpectKey
 					} else {
-						state = "value"
+						state = jsonValue
 					}
 				} else if ch == '}' || ch == ']' {
 					if len(contextStack) > 0 {
 						contextStack = contextStack[:len(contextStack)-1]
 					}
 					if len(contextStack) == 0 {
-						state = "done"
+						state = jsonDone
 					} else {
-						state = "afterValue"
+						state = jsonAfterValue
 					}
 				} else {
-					state = "afterValue"
+					state = jsonAfterValue
 				}
 			} else if (ch >= '0' && ch <= '9') || ch == '.' || ch == 'e' || ch == 'E' || ch == '+' || ch == '-' {
 				// Continue number
 			} else {
 				// Invalid number
-				state = "error"
+				state = jsonError
 			}
 
-		case "keyword":
+		case jsonKeyword:
 			if ch == ',' || ch == '}' || ch == ']' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				keyword := text[tokenStart:pos]
 				if keyword == "true" || keyword == "false" {
@@ -662,30 +719,30 @@ func highlightJSON(text string, offset int) []insertion {
 						context = contextStack[len(contextStack)-1]
 					}
 					if context == "object" {
-						state = "expectKey"
+						state = jsonExpectKey
 					} else {
-						state = "value"
+						state = jsonValue
 					}
 				} else if ch == '}' || ch == ']' {
 					if len(contextStack) > 0 {
 						contextStack = contextStack[:len(contextStack)-1]
 					}
 					if len(contextStack) == 0 {
-						state = "done"
+						state = jsonDone
 					} else {
-						state = "afterValue"
+						state = jsonAfterValue
 					}
 				} else {
-					state = "afterValue"
+					state = jsonAfterValue
 				}
 			} else if ch >= 'a' && ch <= 'z' {
 				// Continue keyword
 			} else {
 				// Invalid keyword
-				state = "error"
+				state = jsonError
 			}
 
-		case "afterValue":
+		case jsonAfterValue:
 			if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				// Skip whitespace
 			} else if ch == ',' {
@@ -694,39 +751,39 @@ func highlightJSON(text string, offset int) []insertion {
 					context = contextStack[len(contextStack)-1]
 				}
 				if context == "object" {
-					state = "expectKey"
+					state = jsonExpectKey
 				} else {
-					state = "value"
+					state = jsonValue
 				}
 			} else if ch == '}' || ch == ']' {
 				if len(contextStack) > 0 {
 					contextStack = contextStack[:len(contextStack)-1]
 				}
 				if len(contextStack) == 0 {
-					state = "done"
+					state = jsonDone
 				} else {
-					state = "afterValue"
+					state = jsonAfterValue
 				}
 			}
 
-		case "expectKey":
+		case jsonExpectKey:
 			if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				// Skip whitespace
 			} else if ch == '"' {
 				tokenStart = pos
-				state = "objectKey"
+				state = jsonObjectKey
 			} else if ch == '}' {
 				if len(contextStack) > 0 {
 					contextStack = contextStack[:len(contextStack)-1]
 				}
 				if len(contextStack) == 0 {
-					state = "done"
+					state = jsonDone
 				} else {
-					state = "afterValue"
+					state = jsonAfterValue
 				}
 			}
 
-		case "error", "done":
+		case jsonError, jsonDone:
 			// Stop processing
 			return h.insertions
 		}
@@ -734,13 +791,13 @@ func highlightJSON(text string, offset int) []insertion {
 
 	// Handle any remaining tokens at end of text
 	switch state {
-	case "string":
+	case jsonString:
 		h.addToken("string", tokenStart, len(text))
-	case "objectKey":
+	case jsonObjectKey:
 		h.addToken("key", tokenStart, len(text))
-	case "number":
+	case jsonNumber:
 		h.addToken("number", tokenStart, len(text))
-	case "keyword":
+	case jsonKeyword:
 		keyword := text[tokenStart:]
 		if keyword == "true" || keyword == "false" {
 			h.addToken("bool", tokenStart, len(text))
