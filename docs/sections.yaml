@@ -28,7 +28,7 @@
         highlights: ["8081"]
         languages: [[0, "shell"], [1, "toml"]]
     - content: |
-        bkl knows that <highlight>service.test.toml</highlight> inherits from <highlight>service.yaml</highlight> by the filename pattern (<a href="#inheritance">override with <highlight>$parent</highlight></a>) and uses filename extensions to determine formats.
+        bkl automatically inherits <highlight>service.test.toml</highlight> from <highlight>service.yaml</highlight> by filename pattern and handles format conversion.
 
 - id: install
   title: Install
@@ -38,22 +38,21 @@
         code: |
           # Install go from <a href="https://go.dev/dl/">go.dev</a>
           $ go install github.com/gopatchy/bkl/...@latest
-          # Verify that ~/go/bin is in your $PATH
         languages: [[0, "shell"]]
     - code:
-        label: macOS using brew
+        label: brew (macOS)
         code: |
           # Install brew from <a href="https://brew.sh/">brew.sh</a>
           $ brew install gopatchy/bkl/bkl
         languages: [[0, "shell"]]
     - content: |
-        You can also download binaries directly <a href="https://github.com/gopatchy/bkl/releases">here</a>.
+        Download binaries from <a href="https://github.com/gopatchy/bkl/releases">releases</a>.
 
 - id: formats
   title: Formats
   items:
     - content: |
-        Output defaults to the same format as the specified input file. Use <highlight>-f</highlight> (or <highlight>--format</highlight>) to override.
+        Output defaults to input format. Use <highlight>-f</highlight> to override.
     - code:
         label: YAML
         code: |
@@ -91,9 +90,7 @@
         highlights: ["-f json-pretty"]
         languages: [[0, "shell"], [1, "json"]]
     - content: |
-        <highlight>jsonl</highlight> is an alias for <highlight>json</highlight> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
-    - content: |
-        You can also set the output format implicitly by using a different file extension.
+        <highlight>jsonl</highlight> is an alias for <highlight>json</highlight> (see <a href="https://jsonlines.org/">JSON Lines</a>). Format is auto-detected from file extensions.
     - code:
         code: |
           $ bkl service.test.yaml   # real file is service.test.toml
@@ -107,15 +104,14 @@
   title: Output
   items:
     - content: |
-        Output goes to stdout by default. Errors always go to stderr.
+        Output goes to stdout by default. Use <highlight>-o</highlight> to write to a file.
     - code:
-        label: File Output
         code: |
           $ bkl -o out.yaml service.test.toml
         highlights: ["-o out.yaml"]
         languages: [[0, "shell"]]
     - content: |
-        Output format is autodetected from output filename (unless specified with <highlight>-f</highlight>).
+        The output format is automatically detected from the output filename.
 
 - id: inputs
   title: Inputs
@@ -137,7 +133,7 @@
         highlights: ["-- -.yaml"]
         languages: [[0, "shell"], [1, "yaml"]]
     - content: |
-        Specifying an input file with the base name <highlight>-</highlight> and a valid format extension causes bkl to read that format from standard input. Use <highlight>--</highlight> before the filename to avoid it being treated as a flag.
+        Use <highlight>-.yaml</highlight>, <highlight>-.json</highlight>, or <highlight>-.toml</highlight> to read from stdin. Prefix with <highlight>--</highlight> to prevent flag interpretation.
 
 - id: inheritance
   title: Inheritance
@@ -168,9 +164,7 @@
           highlights: ["$parent: a.*"]
           languages: [[0, "yaml"]]
     - content: |
-        Setting <highlight>$parent</highlight> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
-    - content: |
-        <highlight>*</highlight> does not match <highlight>.</highlight>. <highlight>a.*</highlight> matches <highlight>a.b.yaml</highlight> but not <highlight>a.b.c.yaml</highlight>.
+        <highlight>$parent</highlight> supports lists and wildcards for multiple inheritance. Wildcard <highlight>*</highlight> matches one segment only: <highlight>a.*</highlight> matches <highlight>a.b.yaml</highlight> but not <highlight>a.b.c.yaml</highlight>.
     - code:
         label: Set Parent In CLI
         code: |
@@ -192,9 +186,9 @@
   title: Streams
   items:
     - content: |
-        Streams package multiple documents into a single file. YAML/TOML streams are delimited with <highlight>---</highlight> or sometimes <highlight>+++</highlight>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
+        Streams contain multiple documents in one file. YAML uses <highlight>---</highlight> delimiters. JSON formats use newlines (see <a href="https://jsonlines.org/">JSON Lines</a>).
     - content: |
-        To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <highlight>$match</highlight> allows applying to specific parent documents.
+        By default, child documents apply to all parent documents. Use <highlight>$match</highlight> to target specific documents.
     - example:
         operation: evaluate
         layers:
@@ -316,7 +310,7 @@
   title: Maps
   items:
     - content: |
-        Maps are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
+        Maps are merged by default. Use <highlight>$replace: true</highlight> to replace the entire map or <highlight>$delete</highlight> to remove specific keys.
     - example:
         operation: evaluate
         layers:
@@ -370,7 +364,7 @@
   title: Lists
   items:
     - content: |
-        Lists are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
+        Lists are merged by default. Use <highlight>$replace: true</highlight> to replace the entire list or <highlight>$delete</highlight> to remove specific entries.
     - example:
         operation: evaluate
         layers:
@@ -421,7 +415,7 @@
     - content: |
         bkl returns an error if you use <highlight>$replace: true</highlight> or <highlight>$delete</highlight> when they don't override a value from a lower layer. This helps keep upper layers minimal.
     - content: |
-        To update a specific list item from a parent layer, use <highlight>$match</highlight>. Combine it with <highlight>$value</highlight> for scalars.
+        To update a specific list item, use <highlight>$match</highlight>. For scalar values in lists, use <highlight>$value</highlight> to replace the entire item.
     - example:
         operation: evaluate
         layers:
@@ -652,6 +646,19 @@
     - example:
         operation: evaluate
         layers:
+          - label: sha256
+            code: |
+              $value: hello world
+              $encode: sha256
+            highlights: ["$encode: sha256"]
+            languages: [[0, "yaml"]]
+        result:
+          code: |
+            b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+          languages: [[0, "yaml"]]
+    - example:
+        operation: evaluate
+        layers:
           - label: tolist
             code: |
               a: 1
@@ -663,6 +670,23 @@
           code: |
             - a=1
             - b=2
+          languages: [[0, "yaml"]]
+    - example:
+        operation: evaluate
+        layers:
+          - label: values
+            code: |
+              a: 1
+              b: 2
+              c: 3
+              $encode: values
+            highlights: ["$encode: values"]
+            languages: [[0, "yaml"]]
+        result:
+          code: |
+            - 1
+            - 2
+            - 3
           languages: [[0, "yaml"]]
     - example:
         operation: evaluate
@@ -877,7 +901,7 @@
           highlights: ["c: 3"]
           languages: [[0, "yaml"]]
     - content: |
-        <highlight>$merge</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
+        <highlight>$merge</highlight> supports a shorthand syntax: <highlight>$merge: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
     - example:
         operation: evaluate
         layers:
@@ -1041,7 +1065,7 @@
             c: 3
           languages: [[0, "yaml"]]
     - content: |
-        <highlight>$replace</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
+        <highlight>$replace</highlight> supports a shorthand syntax: <highlight>$replace: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
     - example:
         operation: evaluate
         layers:
@@ -1172,7 +1196,7 @@
             b: 2
           languages: [[0, "yaml"]]
     - content: |
-        Combine <highlight>$output</highlight> with <highlight>$replace</highlight> or <highlight>$merge</highlight> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
+        Combine <highlight>$output</highlight> with <highlight>$merge</highlight> to create reusable template sections.
 
 - id: repeat
   title: $repeat
@@ -1325,12 +1349,32 @@
   title: TOML
   items:
     - content: |
-        TOML doesn't allow unquoted <highlight>$</highlight> in keys, which impacts bkl directives. Work around this by quoting keys:
+        TOML doesn't allow unquoted <highlight>$</highlight> in keys. Quote keys containing bkl directives:
     - code:
         code: |
           "$parent" = false
         highlights: ["\"$parent\""]
         languages: [[0, "toml"]]
+
+- id: errors
+  title: Errors
+  items:
+    - content: |
+        bkl helps maintain clean layers by reporting errors for unused directives:
+    - example:
+        operation: evaluate
+        layers:
+          - code: |
+              a: 1
+            languages: [[0, "yaml"]]
+          - code: |
+              b: 2
+            languages: [[0, "yaml"]]
+        result:
+          code: |
+            Error: key not found in parent
+    - content: |
+        This ensures upper layers only contain overrides, not new values. Use the base layer for shared configuration.
 
 - id: bklb
   title: bklb
@@ -1493,7 +1537,7 @@
           $ bklr &lt;lower_layer_path&gt;
         languages: [[0, "shell"]]
     - content: |
-        <highlight>bklr</highlight> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
+        <highlight>bklr</highlight> extracts only <highlight>$required</highlight> fields and their parent paths. Use this output as a template for creating minimal upper layers.
     - example:
         operation: evaluate
         layers:
@@ -1539,25 +1583,11 @@
           deployment.apps/deploy-dev unchanged
         languages: [[0, "shell"]]
 
-- id: docker
-  title: Docker
-  items:
-    - content: |
-        bkl docker images are available at <highlight>ghcr.io/gopatchy/bkl:latest</highlight> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
-    - code:
-        label: Dockerfile
-        code: |
-          FROM ghcr.io/gopatchy/bkl:latest AS bkl
-          
-          FROM debian:latest AS build
-          COPY --from=bkl /bin /bin
-        languages: [[0, "dockerfile"]]
-
 - id: diff
-  title: diff
+  title: Comparing Files
   items:
     - content: |
-        It's easy to see differences between processed bkl files using shell syntax.
+        Compare evaluated bkl files using standard diff tools:
     - code:
         code: |
           $ diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)

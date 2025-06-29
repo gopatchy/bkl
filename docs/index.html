@@ -496,6 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	<li><a href="#toml">TOML</a></li>
 
+	<li><a href="#errors">Errors</a></li>
+
 	<li><a href="#bklb">bklb</a></li>
 
 	<li><a href="#bkld">bkld</a></li>
@@ -506,9 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	<li><a href="#kubectl-bkl">kubectl bkl</a></li>
 
-	<li><a href="#docker">Docker</a></li>
-
-	<li><a href="#diff">diff</a></li>
+	<li><a href="#diff">Comparing Files</a></li>
 
 	<li><a href="#migrate">Migrate</a></li>
 
@@ -571,7 +571,7 @@ BKL</h1>
 
 
 
-<p>bkl knows that <highlight>service.test.toml</highlight> inherits from <highlight>service.yaml</highlight> by the filename pattern (<a href="#inheritance">override with <highlight>$parent</highlight></a>) and uses filename extensions to determine formats.
+<p>bkl automatically inherits <highlight>service.test.toml</highlight> from <highlight>service.yaml</highlight> by filename pattern and handles format conversion.
 </p>
 
 
@@ -588,8 +588,7 @@ BKL</h1>
 <div>
 <label>Using go</label>
 <bkl-code><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
-<prompt>$</prompt> <command>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument>
-<comment># Verify that ~/go/bin is in your $PATH</comment></bkl-code>
+<prompt>$</prompt> <command>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -599,7 +598,7 @@ BKL</h1>
 <doc-grid>
 
 <div>
-<label>macOS using brew</label>
+<label>brew (macOS)</label>
 <bkl-code><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
 <prompt>$</prompt> <command>brew</command> <argument>install</argument> <argument>gopatchy/bkl/bkl</argument></bkl-code>
 </div>
@@ -608,7 +607,7 @@ BKL</h1>
 
 
 
-<p>You can also download binaries directly <a href="https://github.com/gopatchy/bkl/releases">here</a>.
+<p>Download binaries from <a href="https://github.com/gopatchy/bkl/releases">releases</a>.
 </p>
 
 
@@ -620,7 +619,7 @@ BKL</h1>
 
 
 
-<p>Output defaults to the same format as the specified input file. Use <highlight>-f</highlight> (or <highlight>--format</highlight>) to override.
+<p>Output defaults to input format. Use <highlight>-f</highlight> to override.
 </p>
 
 
@@ -681,12 +680,7 @@ BKL</h1>
 
 
 
-<p><highlight>jsonl</highlight> is an alias for <highlight>json</highlight> to fully support <a href="https://jsonlines.org/">JSON Lines</a>.
-</p>
-
-
-
-<p>You can also set the output format implicitly by using a different file extension.
+<p><highlight>jsonl</highlight> is an alias for <highlight>json</highlight> (see <a href="https://jsonlines.org/">JSON Lines</a>). Format is auto-detected from file extensions.
 </p>
 
 
@@ -709,23 +703,20 @@ BKL</h1>
 
 
 
-<p>Output goes to stdout by default. Errors always go to stderr.
+<p>Output goes to stdout by default. Use <highlight>-o</highlight> to write to a file.
 </p>
 
 
 
 <doc-grid>
 
-<div>
-<label>File Output</label>
 <bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
-</div>
 
 </doc-grid>
 
 
 
-<p>Output format is autodetected from output filename (unless specified with <highlight>-f</highlight>).
+<p>The output format is automatically detected from the output filename.
 </p>
 
 
@@ -766,7 +757,7 @@ BKL</h1>
 
 
 
-<p>Specifying an input file with the base name <highlight>-</highlight> and a valid format extension causes bkl to read that format from standard input. Use <highlight>--</highlight> before the filename to avoid it being treated as a flag.
+<p>Use <highlight>-.yaml</highlight>, <highlight>-.json</highlight>, or <highlight>-.toml</highlight> to read from stdin. Prefix with <highlight>--</highlight> to prevent flag interpretation.
 </p>
 
 
@@ -816,12 +807,7 @@ BKL</h1>
 
 
 
-<p>Setting <highlight>$parent</highlight> to a list or wildcard allows inheriting from multiple files. All parent files are loaded before the child.
-</p>
-
-
-
-<p><highlight>*</highlight> does not match <highlight>.</highlight>. <highlight>a.*</highlight> matches <highlight>a.b.yaml</highlight> but not <highlight>a.b.c.yaml</highlight>.
+<p><highlight>$parent</highlight> supports lists and wildcards for multiple inheritance. Wildcard <highlight>*</highlight> matches one segment only: <highlight>a.*</highlight> matches <highlight>a.b.yaml</highlight> but not <highlight>a.b.c.yaml</highlight>.
 </p>
 
 
@@ -865,12 +851,12 @@ BKL</h1>
 
 
 
-<p>Streams package multiple documents into a single file. YAML/TOML streams are delimited with <highlight>---</highlight> or sometimes <highlight>+++</highlight>. JSON streams are concatenated or delimited with newlines (see <a href="https://jsonlines.org/">JSON Lines</a> and <a href="http://ndjson.org/">ndjson</a>).
+<p>Streams contain multiple documents in one file. YAML uses <highlight>---</highlight> delimiters. JSON formats use newlines (see <a href="https://jsonlines.org/">JSON Lines</a>).
 </p>
 
 
 
-<p>To layer streams, bkl has to match documents between layers. By default, child documents are applied to all parent documents. <highlight>$match</highlight> allows applying to specific parent documents.
+<p>By default, child documents apply to all parent documents. Use <highlight>$match</highlight> to target specific documents.
 </p>
 
 
@@ -1093,7 +1079,7 @@ BKL</h1>
 
 
 
-<p>Maps are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
+<p>Maps are merged by default. Use <highlight>$replace: true</highlight> to replace the entire map or <highlight>$delete</highlight> to remove specific keys.
 </p>
 
 
@@ -1211,7 +1197,7 @@ BKL</h1>
 
 
 
-<p>Lists are merged by default. To change that, use <highlight>$replace: true</highlight> or remove individual entries with <highlight>$delete</highlight>.
+<p>Lists are merged by default. Use <highlight>$replace: true</highlight> to replace the entire list or <highlight>$delete</highlight> to remove specific entries.
 </p>
 
 
@@ -1323,7 +1309,7 @@ BKL</h1>
 
 
 
-<p>To update a specific list item from a parent layer, use <highlight>$match</highlight>. Combine it with <highlight>$value</highlight> for scalars.
+<p>To update a specific list item, use <highlight>$match</highlight>. For scalar values in lists, use <highlight>$value</highlight> to replace the entire item.
 </p>
 
 
@@ -1810,6 +1796,37 @@ BKL</h1>
 
 <div>
 
+<label>sha256</label>
+
+<bkl-code><key>$value</key>: <string>hello world</string>
+<highlight><key>$encode</key>: <string>sha256</string></highlight></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code><string>b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9</string></bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
 <label>tolist</label>
 
 <bkl-code><key>a</key>: <number>1</number>
@@ -1826,6 +1843,41 @@ BKL</h1>
 
 <bkl-code>- <string>a=1</string>
 - <string>b=2</string></bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
+<label>values</label>
+
+<bkl-code><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<key>c</key>: <number>3</number>
+<highlight><key>$encode</key>: <string>values</string></highlight></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+<label class="invisible">invisible</label>
+
+
+<bkl-code>- <number>1</number>
+- <number>2</number>
+- <number>3</number></bkl-code>
 
 </div>
 </row>
@@ -2220,7 +2272,7 @@ BKL</h1>
 
 
 
-<p><highlight>$merge</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
+<p><highlight>$merge</highlight> supports a shorthand syntax: <highlight>$merge: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
 </p>
 
 
@@ -2498,7 +2550,7 @@ BKL</h1>
 
 
 
-<p><highlight>$replace</highlight> also supports a shorthand syntax equivalent to <highlight>$match</highlight> and <highlight>$path</highlight>:
+<p><highlight>$replace</highlight> supports a shorthand syntax: <highlight>$replace: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
 </p>
 
 
@@ -2747,7 +2799,7 @@ BKL</h1>
 
 
 
-<p>Combine <highlight>$output</highlight> with <highlight>$replace</highlight> or <highlight>$merge</highlight> to have hidden "template" subtrees that don't appear in the output but can be copied in as needed.
+<p>Combine <highlight>$output</highlight> with <highlight>$merge</highlight> to create reusable template sections.
 </p>
 
 
@@ -3040,7 +3092,7 @@ BKL</h1>
 
 
 
-<p>TOML doesn't allow unquoted <highlight>$</highlight> in keys, which impacts bkl directives. Work around this by quoting keys:
+<p>TOML doesn't allow unquoted <highlight>$</highlight> in keys. Quote keys containing bkl directives:
 </p>
 
 
@@ -3050,6 +3102,55 @@ BKL</h1>
 <bkl-code><highlight><key>"$parent"</highlight> </key>= <bool>false</bool></bkl-code>
 
 </doc-grid>
+
+
+
+</section>
+
+<section id="errors">
+<h2><a name="errors">Errors</a></h2>
+
+
+
+<p>bkl helps maintain clean layers by reporting errors for unused directives:
+</p>
+
+
+
+
+<doc-grid>
+
+
+
+<row>
+
+
+<div>
+
+<bkl-code><key>a</key>: <number>1</number></bkl-code>
+</div>
+
+<op>+</op>
+<div>
+
+<bkl-code><key>b</key>: <number>2</number></bkl-code>
+</div>
+
+
+<op>=</op>
+<div>
+
+
+<bkl-code>Error: key not found in parent</bkl-code>
+
+</div>
+</row>
+</doc-grid>
+
+
+
+<p>This ensures upper layers only contain overrides, not new values. Use the base layer for shared configuration.
+</p>
 
 
 
@@ -3354,7 +3455,7 @@ BKL</h1>
 
 
 
-<p><highlight>bklr</highlight> (r for "required") generates a document containing just the required fields and their ancestors from the lower layer. The output can be edited into a minimal upper layer.
+<p><highlight>bklr</highlight> extracts only <highlight>$required</highlight> fields and their parent paths. Use this output as a template for creating minimal upper layers.
 </p>
 
 
@@ -3450,38 +3551,12 @@ BKL</h1>
 
 </section>
 
-<section id="docker">
-<h2><a name="docker">Docker</a></h2>
-
-
-
-<p>bkl docker images are available at <highlight>ghcr.io/gopatchy/bkl:latest</highlight> for amd64 and arm64. Compose these images for your development and CI/CD workflows.
-</p>
-
-
-
-<doc-grid>
-
-<div>
-<label>Dockerfile</label>
-<bkl-code><keyword>FROM</keyword> <argument>ghcr.io/gopatchy/bkl:latest</argument> <argument>AS</argument> <argument>bkl</argument>
-
-<keyword>FROM</keyword> <argument>debian:latest</argument> <argument>AS</argument> <argument>build</argument>
-<keyword>COPY</keyword> <argument>--from=bkl</argument> <argument>/bin</argument> <argument>/bin</argument></bkl-code>
-</div>
-
-</doc-grid>
-
-
-
-</section>
-
 <section id="diff">
-<h2><a name="diff">diff</a></h2>
+<h2><a name="diff">Comparing Files</a></h2>
 
 
 
-<p>It's easy to see differences between processed bkl files using shell syntax.
+<p>Compare evaluated bkl files using standard diff tools:
 </p>
 
 

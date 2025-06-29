@@ -1,5 +1,18 @@
 # Context - bkl Project
 
+## Documentation Improvements Made (2025-06-29)
+- Simplified language throughout sections.yaml for clarity
+- Removed Docker section (not common usage pattern)
+- Fixed JSON Lines references to use "(see [JSON Lines])" format
+- Removed colons from section content lines
+- Made sentence fragments into full sentences
+- Reordered encode operations alphabetically
+- Added sha256 and values encoding examples
+- Preserved installation hints for brew and go
+- Labeled brew as (macOS) since go install works on all platforms
+- Changed "Error Handling" section title to "Errors"
+- Reverted comparison and migration sections to original content
+
 ## CRITICAL INSTRUCTIONS - MUST FOLLOW
 
 1. **No wrappers**: NEVER create wrapper files that just re-export from other packages. Always update callers directly to use the new import paths.
