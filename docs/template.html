@@ -1,3 +1,94 @@
+{{define "codeBlock"}}
+<div class="code-container">
+{{if .HasLabels}}
+{{if .Label}}<label class="label-spacing">{{.Label}}</label>{{else}}<label class="invisible label-spacing">invisible</label>{{end}}
+{{end}}
+<bkl-code class="{{if .HasLabels}}code-labeled{{else}}code-unlabeled{{end}}">{{.Code}}</bkl-code>
+</div>
+{{end}}
+
+{{define "operatorSymbol"}}
+<div class="operator-symbol{{if .HasLabels}} operator-with-label{{end}}">{{.Symbol}}</div>
+{{end}}
+
+{{define "sideBySideLayout"}}
+<div class="example-container">
+<div class="grid-container grid-2-col">
+{{template "codeBlock" dict "Label" .Left.Label "Code" (.Left | formatLayer) "HasLabels" true}}
+{{template "codeBlock" dict "Label" .Right.Label "Code" (.Right | formatLayer) "HasLabels" true}}
+</div>
+</div>
+{{end}}
+
+{{define "simpleCodeBlock"}}
+<div class="example-container">
+{{if .Label}}
+<div class="label-container">
+<label class="{{if eq .Label "invisible"}}invisible {{end}}label-spacing">{{.Label}}</label>
+<bkl-code class="code-labeled">{{.Code}}</bkl-code>
+</div>
+{{else}}
+<bkl-code class="code-unlabeled">{{.Code}}</bkl-code>
+{{end}}
+</div>
+{{end}}
+
+{{define "exampleLayout"}}
+{{$example := .}}
+{{$hasLabels := false}}
+{{range $layer := $example.Layers}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
+{{if $example.Result.Label}}{{$hasLabels = true}}{{end}}
+{{$numLayers := len $example.Layers}}
+{{$numChildren := 0}}
+{{if eq $numLayers 1}}
+  {{$numChildren = 3}}
+{{else if eq $numLayers 2}}
+  {{$numChildren = 5}}
+{{else}}
+  {{$numChildren = 3}}
+{{end}}
+{{$gridTemplate := "1fr 1fr"}}
+{{if eq $numChildren 3}}
+  {{$gridTemplate = "1fr auto 1fr"}}
+{{else if eq $numChildren 5}}
+  {{$gridTemplate = "1fr auto 1fr auto 1fr"}}
+{{end}}
+<div class="example-container">
+<div class="grid-container {{if eq $numChildren 3}}grid-3-col{{else if eq $numChildren 5}}grid-5-col{{end}}">
+{{range $layerIndex, $layer := $example.Layers}}
+{{if eq $layerIndex 1}}
+  {{if eq $example.Operation "evaluate"}}
+    {{template "operatorSymbol" dict "Symbol" "+" "HasLabels" $hasLabels}}
+  {{else if eq $example.Operation "diff"}}
+    {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" $hasLabels}}
+  {{else if eq $example.Operation "intersect"}}
+    {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" $hasLabels}}
+  {{end}}
+{{end}}
+{{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
+{{end}}
+{{if and (eq (len $example.Layers) 1) (ne $example.Operation "evaluate")}}
+  {{if eq $example.Operation "diff"}}
+    {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" $hasLabels}}
+  {{else if eq $example.Operation "intersect"}}
+    {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" $hasLabels}}
+  {{end}}
+{{end}}
+{{template "operatorSymbol" dict "Symbol" "=" "HasLabels" $hasLabels}}
+<div class="code-container">
+{{if $hasLabels}}
+{{if $example.Result.Label}}<label class="label-spacing">{{$example.Result.Label}}</label>{{else}}<label class="invisible label-spacing">invisible</label>{{end}}
+{{end}}
+{{if eq ($example.Result | formatLayer) "Error"}}
+<div class="error-display">Error</div>
+{{else}}
+<bkl-code class="{{if $hasLabels}}code-labeled{{else}}code-unlabeled{{end}}">{{$example.Result | formatLayer}}</bkl-code>
+{{end}}
+</div>
+</div>
+</div>
+{{end}}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,6 +157,16 @@
 	--green7: hsl(122deg 42% 75%);
 	--green8: hsl(126deg 49% 84%);
 	--green9: hsl(125deg 65% 93%);
+	
+	/* Layout Variables */
+	--gap-small: 15px;
+	--gap-large: 20px;
+	--padding-code: 15px;
+	--padding-label: 6px 15px 4px 15px;
+	--border-radius: 5px;
+	--border-radius-label: 0 5px 5px 5px;
+	--operator-size: 30px;
+	--operator-padding-top: 27px;
 }
 
 @font-face {
@@ -163,11 +264,11 @@ a {
 
 label {
 	background: var(--neutral2);
-	border-radius: 5px 5px 0 0;
+	border-radius: var(--border-radius) var(--border-radius) 0 0;
 	color: var(--neutral8);
 	font-family: source-code-pro;
 	display: block;
-	padding: 6px 15px 4px 15px;
+	padding: var(--padding-label);
 	width: fit-content;
 }
 
@@ -179,7 +280,7 @@ label.invisible {
 bkl-code {
 	color: var(--neutral7);
 	background: var(--neutral0);
-	border-radius: 5px;
+	border-radius: var(--border-radius);
 	display: block;
 	font-family: source-code-pro;
 	font-size: 16px;
@@ -188,7 +289,7 @@ bkl-code {
 	line-height: 1.5;
 	overflow-x: auto;
 	overflow-y: auto;
-	padding: 15px;
+	padding: var(--padding-code);
 	tab-size: 4;
 	text-align: left;
 	white-space: pre;
@@ -236,6 +337,86 @@ op {
 	line-height: 0.5;
 	text-align: center;
 	white-space: pre;
+}
+
+/* Layout Classes */
+.code-container {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.example-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap-small);
+	margin: var(--gap-large) 0;
+}
+
+.grid-container {
+	display: grid;
+	align-items: stretch;
+	column-gap: var(--gap-small);
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.grid-2-col {
+	grid-template-columns: 1fr 1fr;
+}
+
+.grid-3-col {
+	grid-template-columns: 1fr auto 1fr;
+}
+
+.grid-5-col {
+	grid-template-columns: 1fr auto 1fr auto 1fr;
+}
+
+.operator-symbol {
+	align-items: center;
+	display: flex;
+	font-size: var(--operator-size);
+	justify-content: center;
+	line-height: 0.5;
+	text-align: center;
+	white-space: pre;
+}
+
+.operator-with-label {
+	padding-top: var(--operator-padding-top);
+}
+
+.code-labeled {
+	margin-top: 0;
+	flex-grow: 1;
+	border-radius: var(--border-radius-label);
+	border-top-left-radius: 0;
+}
+
+.code-unlabeled {
+	flex-grow: 1;
+	height: 100%;
+}
+
+.label-container {
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+}
+
+.label-spacing {
+	margin-bottom: 0;
+}
+
+.error-display {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	font-size: 24px;
+	font-weight: bold;
 }
 
 key {
@@ -382,74 +563,11 @@ BKL</h1>
 {{if $item.Content}}
 <p>{{$item.Content | formatContent}}</p>
 {{else if $item.SideBySide}}
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr 1fr; max-width: 100%; overflow: hidden;">
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-<label style="margin-bottom: 0;">{{$item.SideBySide.Left.Label}}</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">{{$item.SideBySide.Left | formatLayer}}</bkl-code>
-</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-<label style="margin-bottom: 0;">{{$item.SideBySide.Right.Label}}</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">{{$item.SideBySide.Right | formatLayer}}</bkl-code>
-</div>
-</div>
-</div>
+{{template "sideBySideLayout" $item.SideBySide}}
 {{else if $item.Code}}
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-{{if $item.Code.Label}}
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label{{if eq $item.Code.Label "invisible"}} class="invisible"{{end}} style="margin-bottom: 0;">{{$item.Code.Label}}</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">{{$item.Code | formatLayer}}</bkl-code>
-</div>
-{{else}}
-<bkl-code style="flex-grow: 1; height: 100%;">{{$item.Code | formatLayer}}</bkl-code>
-{{end}}
-</div>
+{{template "simpleCodeBlock" dict "Label" $item.Code.Label "Code" ($item.Code | formatLayer)}}
 {{else if $item.Example}}
-{{$example := $item.Example}}
-{{$hasLabels := false}}
-{{range $layer := $example.Layers}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
-{{if $example.Result.Label}}{{$hasLabels = true}}{{end}}
-{{$numLayers := len $example.Layers}}
-{{$numChildren := 0}}
-{{if eq $numLayers 1}}
-  {{$numChildren = 3}}{{/* layer + op + result */}}
-{{else if eq $numLayers 2}}
-  {{$numChildren = 5}}{{/* layer + op + layer + = + result */}}
-{{else}}
-  {{$numChildren = 3}}{{/* just handle as 3 columns */}}
-{{end}}
-{{$gridTemplate := "1fr 1fr"}}
-{{if eq $numChildren 3}}
-  {{$gridTemplate = "1fr auto 1fr"}}
-{{else if eq $numChildren 5}}
-  {{$gridTemplate = "1fr auto 1fr auto 1fr"}}
-{{end}}
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: {{$gridTemplate}}; max-width: 100%; overflow: hidden;">
-{{range $layerIndex, $layer := $example.Layers}}
-{{if eq $layerIndex 1}}{{if eq $example.Operation "evaluate"}}<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;{{if $hasLabels}} padding-top: 27px;{{end}}">+</div>{{else if eq $example.Operation "diff"}}<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;{{if $hasLabels}} padding-top: 27px;{{end}}">?</div>{{else if eq $example.Operation "intersect"}}<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;{{if $hasLabels}} padding-top: 27px;{{end}}">∩</div>{{end}}{{end}}
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-{{if $hasLabels}}
-{{if $layer.Label}}<label style="margin-bottom: 0;">{{$layer.Label}}</label>{{else}}<label class="invisible" style="margin-bottom: 0;">invisible</label>{{end}}
-{{end}}
-<bkl-code style="margin-top: 0; flex-grow: 1;{{if $hasLabels}} border-radius: 0 5px 5px 5px; border-top-left-radius: 0;{{else}} height: 100%;{{end}}">{{$layer | formatLayer}}</bkl-code>
-</div>
-{{end}}
-{{if and (eq (len $example.Layers) 1) (ne $example.Operation "evaluate")}}<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;{{if $hasLabels}} padding-top: 27px;{{end}}">{{if eq $example.Operation "diff"}}?{{else if eq $example.Operation "intersect"}}∩{{end}}</div>{{end}}
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;{{if $hasLabels}} padding-top: 27px;{{end}}">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-{{if $hasLabels}}
-{{if $example.Result.Label}}<label style="margin-bottom: 0;">{{$example.Result.Label}}</label>{{else}}<label class="invisible" style="margin-bottom: 0;">invisible</label>{{end}}
-{{end}}
-{{if eq ($example.Result | formatLayer) "Error"}}
-<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
-{{else}}
-<bkl-code style="margin-top: 0; flex-grow: 1;{{if $hasLabels}} border-radius: 0 5px 5px 5px; border-top-left-radius: 0;{{else}} height: 100%;{{end}}">{{$example.Result | formatLayer}}</bkl-code>
-{{end}}
-</div>
-</div>
-</div>
+{{template "exampleLayout" $item.Example}}
 {{end}}
 {{end}}
 

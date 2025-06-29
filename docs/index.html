@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,6 +76,16 @@
 	--green7: hsl(122deg 42% 75%);
 	--green8: hsl(126deg 49% 84%);
 	--green9: hsl(125deg 65% 93%);
+	
+	 
+	--gap-small: 15px;
+	--gap-large: 20px;
+	--padding-code: 15px;
+	--padding-label: 6px 15px 4px 15px;
+	--border-radius: 5px;
+	--border-radius-label: 0 5px 5px 5px;
+	--operator-size: 30px;
+	--operator-padding-top: 27px;
 }
 
 @font-face {
@@ -163,11 +183,11 @@ a {
 
 label {
 	background: var(--neutral2);
-	border-radius: 5px 5px 0 0;
+	border-radius: var(--border-radius) var(--border-radius) 0 0;
 	color: var(--neutral8);
 	font-family: source-code-pro;
 	display: block;
-	padding: 6px 15px 4px 15px;
+	padding: var(--padding-label);
 	width: fit-content;
 }
 
@@ -179,7 +199,7 @@ label.invisible {
 bkl-code {
 	color: var(--neutral7);
 	background: var(--neutral0);
-	border-radius: 5px;
+	border-radius: var(--border-radius);
 	display: block;
 	font-family: source-code-pro;
 	font-size: 16px;
@@ -188,7 +208,7 @@ bkl-code {
 	line-height: 1.5;
 	overflow-x: auto;
 	overflow-y: auto;
-	padding: 15px;
+	padding: var(--padding-code);
 	tab-size: 4;
 	text-align: left;
 	white-space: pre;
@@ -236,6 +256,86 @@ op {
 	line-height: 0.5;
 	text-align: center;
 	white-space: pre;
+}
+
+ 
+.code-container {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.example-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap-small);
+	margin: var(--gap-large) 0;
+}
+
+.grid-container {
+	display: grid;
+	align-items: stretch;
+	column-gap: var(--gap-small);
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.grid-2-col {
+	grid-template-columns: 1fr 1fr;
+}
+
+.grid-3-col {
+	grid-template-columns: 1fr auto 1fr;
+}
+
+.grid-5-col {
+	grid-template-columns: 1fr auto 1fr auto 1fr;
+}
+
+.operator-symbol {
+	align-items: center;
+	display: flex;
+	font-size: var(--operator-size);
+	justify-content: center;
+	line-height: 0.5;
+	text-align: center;
+	white-space: pre;
+}
+
+.operator-with-label {
+	padding-top: var(--operator-padding-top);
+}
+
+.code-labeled {
+	margin-top: 0;
+	flex-grow: 1;
+	border-radius: var(--border-radius-label);
+	border-top-left-radius: 0;
+}
+
+.code-unlabeled {
+	flex-grow: 1;
+	height: 100%;
+}
+
+.label-container {
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+}
+
+.label-spacing {
+	margin-bottom: 0;
+}
+
+.error-display {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	font-size: 24px;
+	font-weight: bold;
 }
 
 key {
@@ -434,34 +534,46 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr 1fr; max-width: 100%; overflow: hidden;">
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-<label style="margin-bottom: 0;">service.yaml</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>addr</key>: <string>127.0.0.1</string>
+
+<div class="example-container">
+<div class="grid-container grid-2-col">
+
+<div class="code-container">
+
+<label class="label-spacing">service.yaml</label>
+
+<bkl-code class="code-labeled"><key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number></bkl-code>
 </div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-<label style="margin-bottom: 0;">service.test.toml</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
+
+
+<div class="code-container">
+
+<label class="label-spacing">service.test.toml</label>
+
+<bkl-code class="code-labeled"><key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
+</div>
+
 </div>
 </div>
-</div>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Run it!</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <argument>service.test.toml</argument>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Run it!</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -477,11 +589,12 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Using go</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Using go</label>
+<bkl-code class="code-labeled"><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
 <prompt>$</prompt> <command>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument></bkl-code>
 </div>
 
@@ -489,15 +602,18 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">brew (macOS)</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">brew (macOS)</label>
+<bkl-code class="code-labeled"><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
 <prompt>$</prompt> <command>brew</command> <argument>install</argument> <argument>gopatchy/bkl/bkl</argument></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -518,11 +634,12 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">YAML</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">YAML</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
@@ -532,11 +649,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">TOML</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">TOML</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <number>8081</number></bkl-code>
@@ -546,11 +665,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">JSON</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">JSON</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
 {<key>"addr"</key>:<string>"127.0.0.1"</string>,<key>"name"</key>:<string>"myService"</string>,<key>"port"</key>:<number>8081</number>}</bkl-code>
 </div>
 
@@ -558,11 +679,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">JSON (pretty)</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">JSON (pretty)</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
 {
   <key>"addr"</key>: <string>"127.0.0.1"</string>,
   <key>"name"</key>: <string>"myService"</string>,
@@ -574,19 +697,22 @@ BKL</h1>
 
 
 
+
 <p><highlight>jsonl</highlight> is an alias for <highlight>json</highlight> (see <a href="https://jsonlines.org/">JSON Lines</a>). Format is auto-detected from file extensions.
 </p>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
 
 </div>
+
 
 
 
@@ -602,11 +728,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
 
 </div>
+
 
 
 
@@ -622,14 +750,16 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Commandline Layering</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Commandline Layering</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -638,16 +768,18 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">stdin</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">stdin</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
 <key>a</key>: <number>1</number>
 <string>EOF</string></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -668,14 +800,16 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Set Parent In File</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><highlight><key>$parent</key>: <string>a.b</string></highlight>   <comment># inherits from a.b.<ext>, from a.<ext></comment></bkl-code>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Set Parent In File</label>
+<bkl-code class="code-labeled"><highlight><key>$parent</key>: <string>a.b</string></highlight>   <comment># inherits from a.b.<ext>, from a.<ext></comment></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -684,20 +818,30 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr 1fr; max-width: 100%; overflow: hidden;">
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-<label style="margin-bottom: 0;">Parent List</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><highlight><key>$parent</key>:</highlight>
+
+<div class="example-container">
+<div class="grid-container grid-2-col">
+
+<div class="code-container">
+
+<label class="label-spacing">Parent List</label>
+
+<bkl-code class="code-labeled"><highlight><key>$parent</key>:</highlight>
 <highlight>- <string>a</string></highlight>
 <highlight>- <string>b</string></highlight></bkl-code>
 </div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-<label style="margin-bottom: 0;">Parent Wildcard</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><highlight><key>$parent</key>: <string>a.*</string></highlight></bkl-code>
+
+
+<div class="code-container">
+
+<label class="label-spacing">Parent Wildcard</label>
+
+<bkl-code class="code-labeled"><highlight><key>$parent</key>: <string>a.*</string></highlight></bkl-code>
+</div>
+
 </div>
 </div>
-</div>
+
 
 
 
@@ -706,14 +850,16 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Set Parent In CLI</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Set Parent In CLI</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -722,14 +868,16 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">No Parent</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><highlight><key>$parent</key>: <bool>false</bool></highlight>   <comment># no further inheritance</comment></bkl-code>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">No Parent</label>
+<bkl-code class="code-labeled"><highlight><key>$parent</key>: <bool>false</bool></highlight>   <comment># no further inheritance</comment></bkl-code>
 </div>
 
 </div>
+
 
 
 
@@ -762,35 +910,48 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>c</key>: <number>3</number></bkl-code>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><highlight><key>c</key>: <number>3</number></highlight></highlight>
 <string>---</string>
 <key>b</key>: <number>2</number>
@@ -809,37 +970,51 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$match</key>:</highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$match</key>:</highlight>
   <highlight><key>b</key>: <number>2</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number>
 <highlight><key>c</key>: <number>3</number></highlight></bkl-code>
@@ -847,6 +1022,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -862,39 +1038,52 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>a</key>: <number>1</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$match</key>:</highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$match</key>:</highlight>
   <highlight><key>a</key>: <number>1</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><highlight><key>c</key>: <number>3</number></highlight></highlight>
 <string>---</string>
 <key>b</key>: <number>2</number>
@@ -905,6 +1094,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -920,38 +1110,51 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$match</key>:</highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$match</key>:</highlight>
   <key>a</key>: <number>1</number>
   <highlight><key>$invert</key>: <bool>true</bool></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number>
 <highlight><key>c</key>: <number>3</number></highlight></bkl-code>
@@ -959,6 +1162,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -974,40 +1178,54 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number></bkl-code>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$match</key>: <string>null</string></highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$match</key>: <string>null</string></highlight>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <string>---</string>
 <highlight><key>b</key>: <number>2</number></highlight></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -1030,33 +1248,46 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number></bkl-code>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>b</key>: <number>2</number></bkl-code>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>b</key>: <number>2</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></bkl-code>
 
 </div>
@@ -1072,38 +1303,54 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number></bkl-code>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>b</key>: <number>2</number>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>b</key>: <number>2</number>
 <highlight><key>$replace</key>: <bool>true</bool></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>b</key>: <number>2</number></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>b</key>: <number>2</number></bkl-code>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -1120,34 +1367,47 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>c</key>: <number>3</number>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>c</key>: <number>3</number>
 <highlight><key>b</key>: <string>$delete</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>c</key>: <number>3</number></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -1175,33 +1435,46 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number></bkl-code>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>1</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>2</number></bkl-code>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>2</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <number>1</number>
 - <number>2</number></bkl-code>
 
 </div>
@@ -1217,38 +1490,54 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number></bkl-code>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>1</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>2</number>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>2</number>
 - <highlight><key>$replace</key>: <bool>true</bool></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>2</number></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <number>2</number></bkl-code>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -1265,35 +1554,48 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>x</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>x</key>: <number>3</number>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>x</key>: <number>3</number>
 - <highlight><key>$delete</key>:</highlight>
     <highlight><key>x</key>: <number>2</number></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>x</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>3</number></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -1314,36 +1616,49 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <highlight><key>$match</key>:</highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <highlight><key>$match</key>:</highlight>
     <highlight><key>b</key>: <number>2</number></highlight>
   <key>b</key>: <number>10</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>10</number></bkl-code>
 
 </div>
@@ -1359,40 +1674,55 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>1</number>
 - <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <highlight><key>$match</key>: <number>2</number></highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <highlight><key>$match</key>: <number>2</number></highlight>
   <highlight><key>$value</key>: <number>10</number></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <number>1</number>
 - <number>10</number></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -1415,30 +1745,35 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <string>foo</string>
 <key>d</key>: <highlight><string>$"{b.c} bar {a} 2"</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <string>foo</string>
 <key>d</key>: <highlight><string>foo bar 1 2</string></highlight></bkl-code>
@@ -1446,6 +1781,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -1468,33 +1804,39 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>$value</key>: <string>|</string>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>$value</key>: <string>|</string>
   <highlight><string>{"a":1}</string></highlight>
 <highlight><key>$decode</key>: <string>json</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -1517,32 +1859,39 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><comment># export FOO=test</comment>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><comment># export FOO=test</comment>
 <highlight><string><string>"$env:FOO"</string></highlight>: 1</string></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>test</key></highlight>: <number>1</number></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><highlight><key>test</key></highlight>: <number>1</number></bkl-code>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -1559,26 +1908,31 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><comment># export FOO=test</comment>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><comment># export FOO=test</comment>
 <key>a</key>: <highlight><string>$env:FOO</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <highlight><string>test</string></highlight></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <highlight><string>test</string></highlight></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -1606,36 +1960,43 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<label style="margin-bottom: 0;">base64</label>
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>$value</key>: <string>a</string>
+
+
+<div class="code-container">
+
+<label class="label-spacing">base64</label>
+
+<bkl-code class="code-labeled"><key>$value</key>: <string>a</string>
 <highlight><key>$encode</key>: <string>base64</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><string>YQ==</string></bkl-code>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><string>YQ==</string></bkl-code>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -1652,28 +2013,32 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">flags</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>a</key>: <number>1</number>
+<label class="label-spacing">flags</label>
+
+<bkl-code class="code-labeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>flags</string></highlight>
 <comment># [tolist:=, prefix:--]</comment></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <string>--a=1</string>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled">- <string>--a=1</string>
 - <string>--b=2</string></bkl-code>
 
 </div>
@@ -1689,21 +2054,24 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">flatten</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <string>- a</string>
+<label class="label-spacing">flatten</label>
+
+<bkl-code class="code-labeled">- <string>- a</string>
   - <string>b</string>
 - <string>- c</string>
   - <number>4</number>
@@ -1712,13 +2080,16 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <string>a</string>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled">- <string>a</string>
 - <string>b</string>
 - <string>c</string>
 - <number>4</number>
@@ -1737,36 +2108,44 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">join</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>$value</key>: <string>[a, b]</string>
+<label class="label-spacing">join</label>
+
+<bkl-code class="code-labeled"><key>$value</key>: <string>[a, b]</string>
 <highlight><key>$encode</key>: <string>join:/</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><string>a/b</string></bkl-code>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><string>a/b</string></bkl-code>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -1783,27 +2162,31 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">json</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>a</key>: <number>1</number>
+<label class="label-spacing">json</label>
+
+<bkl-code class="code-labeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>json</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><string>|</string>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><string>|</string>
   <string>{"a":1,"b":2}</string></bkl-code>
 
 </div>
@@ -1819,33 +2202,39 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">json (list)</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <key>a</key>: <number>1</number>
+<label class="label-spacing">json (list)</label>
+
+<bkl-code class="code-labeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number>
 - <highlight><key>$encode</key>: <string>json</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><string>|</string>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><string>|</string>
   <string>[{"a":1},{"b":2}]</string></bkl-code>
 
 </div>
@@ -1861,33 +2250,39 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">prefix</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <string>a</string>
+<label class="label-spacing">prefix</label>
+
+<bkl-code class="code-labeled">- <string>a</string>
 - <number>2</number>
 - <highlight><key>$encode</key>: <string>prefix:X</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <string>Xa</string>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled">- <string>Xa</string>
 - <string>X2</string></bkl-code>
 
 </div>
@@ -1903,36 +2298,44 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">sha256</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>$value</key>: <string>hello world</string>
+<label class="label-spacing">sha256</label>
+
+<bkl-code class="code-labeled"><key>$value</key>: <string>hello world</string>
 <highlight><key>$encode</key>: <string>sha256</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><string>b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9</string></bkl-code>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><string>b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9</string></bkl-code>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -1949,27 +2352,31 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">tolist</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>a</key>: <number>1</number>
+<label class="label-spacing">tolist</label>
+
+<bkl-code class="code-labeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>tolist:=</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <string>a=1</string>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled">- <string>a=1</string>
 - <string>b=2</string></bkl-code>
 
 </div>
@@ -1985,34 +2392,40 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">values</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>a</key>: <number>1</number>
+<label class="label-spacing">values</label>
+
+<bkl-code class="code-labeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>c</key>: <number>3</number>
 <highlight><key>$encode</key>: <string>values</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;">- <number>1</number>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled">- <number>1</number>
 - <number>2</number>
 - <number>3</number></bkl-code>
 
@@ -2029,37 +2442,44 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<label style="margin-bottom: 0;">Stacking</label>
+<div class="code-container">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><key>a</key>: <number>1</number>
+<label class="label-spacing">Stacking</label>
+
+<bkl-code class="code-labeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>[tolist:=, "join:,"]</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre; padding-top: 27px;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
-
-<label class="invisible" style="margin-bottom: 0;">invisible</label>
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><string>a=1,b=2</string></bkl-code>
+<div class="operator-symbol operator-with-label">=</div>
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><string>a=1,b=2</string></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -2082,38 +2502,53 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><key>b</key>: <string>$required</string></highlight></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>c</key>: <number>3</number></bkl-code>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<div class="error-display">Error</div>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -2130,29 +2565,41 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><key>b</key>: <string>$required</string></highlight></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>b</key>: <number>2</number></highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>b</key>: <number>2</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>c</key>: <number>3</number></bkl-code>
 
@@ -2169,39 +2616,55 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><key>b</key>:</highlight>
   <highlight>- <string>$required</string></highlight></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>c</key>: <number>3</number></bkl-code>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<div class="error-display">Error</div>
 
 </div>
 </div>
 </div>
+
+
 
 
 
@@ -2218,31 +2681,43 @@ BKL</h1>
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><key>b</key>:</highlight>
   <highlight>- <string>$required</string></highlight></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">+</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>b</key>:</highlight>
+
+  
+    
+<div class="operator-symbol">&#43;</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>b</key>:</highlight>
   <highlight>- <number>2</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   - <number>2</number>
 <key>c</key>: <number>3</number></bkl-code>
@@ -2250,6 +2725,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2272,19 +2748,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2293,11 +2771,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2317,19 +2798,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     - <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2338,11 +2822,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     - <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2362,19 +2849,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2383,11 +2873,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <highlight><number>1</number></highlight>
 <key>zig</key>:
@@ -2397,6 +2890,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2412,19 +2906,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2434,11 +2930,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2458,19 +2957,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2482,11 +2984,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <highlight><key>c</key>: <number>3</number></highlight>
 <string>---</string>
@@ -2496,6 +3001,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2511,19 +3017,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2531,11 +3039,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2555,19 +3066,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2576,11 +3090,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <highlight><key>c</key>: <number>3</number></highlight>
 <string>---</string>
@@ -2590,6 +3107,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2612,19 +3130,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2633,11 +3153,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2656,19 +3179,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     - <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2677,11 +3203,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     - <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2700,19 +3229,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2721,11 +3253,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <highlight><number>1</number></highlight>
 <key>zig</key>:
@@ -2735,6 +3270,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2755,19 +3291,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2777,11 +3315,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2800,19 +3341,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2824,11 +3368,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2837,6 +3384,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2852,19 +3400,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2872,11 +3422,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>a</key>: <number>1</number></highlight>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2895,19 +3448,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2916,11 +3472,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>:
   <highlight><key>c</key>: <number>3</number></highlight>
 <string>---</string>
@@ -2929,6 +3488,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -2951,19 +3511,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     <highlight><key>$output</key>: <bool>true</bool></highlight>
     <key>a</key>: <number>1</number>
@@ -2971,11 +3533,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></bkl-code>
 
 </div>
@@ -2991,19 +3556,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>foo</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>foo</key>:
   <key>bar</key>:
     - <highlight><key>$output</key>: <bool>true</bool></highlight>
     - <key>a</key>: <number>1</number>
@@ -3011,16 +3579,20 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -3041,19 +3613,21 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   <key>b</key>: <number>1</number>
   <highlight><key>$output</key>: <bool>false</bool></highlight>
 <key>c</key>:
@@ -3061,11 +3635,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>c</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>c</key>:
   <key>d</key>: <number>2</number></bkl-code>
 
 </div>
@@ -3081,19 +3658,22 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   - <key>b</key>: <number>1</number>
   - <highlight><key>$output</key>: <bool>false</bool></highlight>
 <key>c</key>:
@@ -3101,11 +3681,14 @@ BKL</h1>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>c</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>c</key>:
   - <key>d</key>: <number>2</number></bkl-code>
 
 </div>
@@ -3121,34 +3704,41 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <highlight><key>$output</key>: <bool>false</bool></highlight>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>b</key>: <number>2</number></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>b</key>: <number>2</number></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -3176,29 +3766,34 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <string>foo</string>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <string>foo</string>
 <highlight><key>b</key>: <string>$repeat</string></highlight>
 <highlight><key>$repeat</key>: <number>2</number></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <string>foo</string>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <string>foo</string>
 <key>b</key>: <number>0</number>
 <string>---</string>
 <key>a</key>: <string>foo</string>
@@ -3207,6 +3802,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -3222,30 +3818,35 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$repeat</key>:</highlight>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$repeat</key>:</highlight>
   <highlight><key>a</key>: <number>2</number></highlight>
   <highlight><key>b</key>: <number>3</number></highlight>
 <key>$value</key>: <string>$"{<highlight><highlight>$repeat:</highlight>a</highlight>},{<highlight><highlight>$repeat:</highlight>b</highlight>}"</string></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><string>0,0</string>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><string>0,0</string>
 <string>---</string>
 <string>0,1</string>
 <string>---</string>
@@ -3263,6 +3864,7 @@ BKL</h1>
 
 
 
+
 <p><highlight>$repeat:</highlight> can contain a list of values to iterate over:
 </p>
 
@@ -3275,28 +3877,33 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$repeat</key>: <string>[foo, bar, baz]</string></highlight>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$repeat</key>: <string>[foo, bar, baz]</string></highlight>
 <highlight><key>a</key>: <string>$repeat</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <string>foo</string>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <string>foo</string>
 <string>---</string>
 <key>a</key>: <string>bar</string>
 <string>---</string>
@@ -3305,6 +3912,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -3320,30 +3928,35 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><highlight><key>$repeat</key>:</highlight>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>$repeat</key>:</highlight>
   <highlight><key>$first</key>: <number>10</number></highlight>
   <highlight><key>$count</key>: <number>3</number></highlight>
 <highlight><key>a</key>: <string>$repeat</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>10</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>10</number>
 <string>---</string>
 <key>a</key>: <number>11</number>
 <string>---</string>
@@ -3352,6 +3965,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -3372,30 +3986,35 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   <key>$"b{$repeat}"</key>:
     <highlight><key>c</key>: <string>$repeat</string></highlight>
     <highlight><key>$repeat</key>: <number>3</number></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   <key>b0</key>:
     <key>c</key>: <number>0</number>
   <key>b1</key>:
@@ -3406,6 +4025,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -3421,29 +4041,34 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   - <highlight><key>b</key>: <string>$repeat</string></highlight>
     <highlight><key>$repeat</key>: <string>[foo, bar, baz]</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   - <key>b</key>: <string>foo</string>
   - <key>b</key>: <string>bar</string>
   - <key>b</key>: <string>baz</string></bkl-code>
@@ -3451,6 +4076,7 @@ BKL</h1>
 </div>
 </div>
 </div>
+
 
 
 
@@ -3473,31 +4099,37 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <highlight><string>$$env:foo</string></highlight></bkl-code>
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <highlight><string>$$env:foo</string></highlight></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <highlight><string>$env:foo</string></highlight></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <highlight><string>$env:foo</string></highlight></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -3513,11 +4145,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><highlight><key>"$parent"</highlight> </key>= <bool>false</bool></bkl-code>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><highlight><key>"$parent"</highlight> </key>= <bool>false</bool></bkl-code>
 
 </div>
+
 
 
 
@@ -3533,9 +4167,10 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <highlight><command>ln</command> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <highlight><command>ln</command> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
 
 <prompt>$</prompt> <command>cat</command> <argument>service.yaml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
@@ -3566,6 +4201,7 @@ BKL</h1>
 
 
 
+
 <p>Note that the files mentioned don't have to exist; <highlight>bklb</highlight> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
 </p>
 
@@ -3583,11 +4219,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
 
 </div>
+
 
 
 
@@ -3603,37 +4241,50 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <string>$required</string>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">?</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+
+  
+    
+<div class="operator-symbol">?</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>d</key>: <number>4</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>$match</key>: <string>{}</string>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>$match</key>: <string>{}</string>
 <key>b</key>: <number>2</number>
 <key>c</key>: <string>$delete</string>
 <key>d</key>: <number>4</number></bkl-code>
@@ -3651,35 +4302,49 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">?</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+
+  
+    
+<div class="operator-symbol">?</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>$match</key>: <string>{}</string>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <key>$match</key>: <string>{}</string>
 - <key>c</key>: <number>3</number>
 - <key>$delete</key>:
     <key>b</key>: <number>2</number></bkl-code>
@@ -3697,35 +4362,49 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>1</number>
 - <number>2</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">?</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <number>1</number>
+
+  
+    
+<div class="operator-symbol">?</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <number>1</number>
 - <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>$match</key>: <string>{}</string>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <key>$match</key>: <string>{}</string>
 - <number>1</number>
 - <number>3</number>
 - <key>$replace</key>: <bool>true</bool></bkl-code>
@@ -3736,6 +4415,7 @@ BKL</h1>
 
 
 
+
 </section>
 
 <section id="bkli">
@@ -3743,11 +4423,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
 
 </div>
+
 
 
 
@@ -3768,37 +4450,50 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">∩</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+
+  
+    
+<div class="operator-symbol">∩</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <number>10</number>
 <key>d</key>: <number>4</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>: <number>1</number>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
 <key>b</key>: <string>$required</string></bkl-code>
 
 </div>
@@ -3814,41 +4509,56 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-5-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number>
 - <key>c</key>: <number>3</number></bkl-code>
 </div>
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">∩</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number>
+
+  
+    
+<div class="operator-symbol">∩</div>
+
+  
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>10</number>
 - <key>d</key>: <number>4</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;">- <key>a</key>: <number>1</number></bkl-code>
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled">- <key>a</key>: <number>1</number></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -3859,11 +4569,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <command>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
 
 </div>
+
 
 
 
@@ -3879,29 +4591,34 @@ BKL</h1>
 
 
 
-  
-
-
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+  
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   <key>b</key>: <string>$required</string>
   <key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   <key>b</key>: <string>$required</string></bkl-code>
 
 </div>
@@ -3917,35 +4634,42 @@ BKL</h1>
 
 
 
+
+
   
 
 
 
   
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-<div style="display: grid; align-items: stretch; column-gap: 15px; grid-template-columns: 1fr auto 1fr; max-width: 100%; overflow: hidden;">
+<div class="example-container">
+<div class="grid-container grid-3-col">
 
 
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   - <string>$required</string>
 <key>b</key>:
   - <number>2</number></bkl-code>
 </div>
 
 
-<div style="align-items: center; display: flex; font-size: 30px; justify-content: center; line-height: 0.5; text-align: center; white-space: pre;">=</div>
-<div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
 
 
-<bkl-code style="margin-top: 0; flex-grow: 1; height: 100%;"><key>a</key>:
+<div class="operator-symbol">=</div>
+
+<div class="code-container">
+
+
+<bkl-code class="code-unlabeled"><key>a</key>:
   - <string>$required</string></bkl-code>
 
 </div>
 </div>
 </div>
+
 
 
 
@@ -3956,11 +4680,13 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
 
 </div>
+
 
 
 
@@ -3969,13 +4695,15 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><comment># deploy.dev.yaml and deploy.yaml are bkl layer files</comment>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><comment># deploy.dev.yaml and deploy.yaml are bkl layer files</comment>
 <prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>apply</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
 <argument>deployment.apps/deploy-dev</argument> <argument>unchanged</argument></bkl-code>
 
 </div>
+
 
 
 
@@ -3991,9 +4719,10 @@ BKL</h1>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<bkl-code style="flex-grow: 1; height: 100%;"><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
+<div class="example-container">
+
+<bkl-code class="code-unlabeled"><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
 <file-header>--- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700</file-header>
 <file-header>+++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700</file-header>
 <hunk-header>@@ -1,3 +1,2 @@</hunk-header>
@@ -4007,6 +4736,7 @@ b: 2                            &lt;
 c: 3                              c: 3</bkl-code>
 
 </div>
+
 
 
 
@@ -4044,11 +4774,12 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Export Existing Config</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><comment># "kubectl neat" removes status and default value fields</comment>
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Export Existing Config</label>
+<bkl-code class="code-labeled"><comment># "kubectl neat" removes status and default value fields</comment>
 <prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-dev</argument> <operator>&gt;</operator> <command>deploy-dev-orig.yaml</command>
 <prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-prod</argument> <operator>&gt;</operator> <command>deploy-prod-orig.yaml</command></bkl-code>
 </div>
@@ -4057,11 +4788,13 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Generate Base Layer</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><comment># See bkli details <a href="#bkli">here</a></comment>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Generate Base Layer</label>
+<bkl-code class="code-labeled"><comment># See bkli details <a href="#bkli">here</a></comment>
 <prompt>$</prompt> <command>bkli</command> <flag>-o</flag> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
@@ -4069,11 +4802,13 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Generate Service Layers</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><comment># See bkld details <a href="#bkld">here</a></comment>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Generate Service Layers</label>
+<bkl-code class="code-labeled"><comment># See bkld details <a href="#bkld">here</a></comment>
 <prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.dev.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument>
 <prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.prod.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
@@ -4082,11 +4817,13 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Check Results</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><comment># Should show no diff</comment>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Check Results</label>
+<bkl-code class="code-labeled"><comment># Should show no diff</comment>
 <prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
 <prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.prod.yaml</argument></bkl-code>
 </div>
@@ -4095,14 +4832,17 @@ c: 3                              c: 3</bkl-code>
 
 
 
-<div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
 
-<div style="display: flex; flex-direction: column; flex-shrink: 0;">
-<label style="margin-bottom: 0;">Clean Up</label>
-<bkl-code style="margin-top: 0; flex-grow: 1; border-radius: 0 5px 5px 5px; border-top-left-radius: 0;"><prompt>$</prompt> <command>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+
+<div class="example-container">
+
+<div class="label-container">
+<label class="label-spacing">Clean Up</label>
+<bkl-code class="code-labeled"><prompt>$</prompt> <command>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
 </div>
+
 
 
 
