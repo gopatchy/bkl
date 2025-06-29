@@ -424,7 +424,12 @@ class BklCode extends HTMLElement {
       cleanText += html.substring(htmlPos, removal.pos);
       cleanPos += removal.pos - htmlPos;
       
-      insertions.push({pos: cleanPos, text: removal.tag});
+      
+      
+      
+      
+      const priority = removal.tag === '<highlight>' ? 0 : 2;
+      insertions.push({pos: cleanPos, text: removal.tag, priority: priority});
       
       htmlPos = removal.pos + removal.tag.length;
     }
@@ -433,12 +438,21 @@ class BklCode extends HTMLElement {
     
     this.applySyntaxHighlighting(cleanText, languages, insertions);
     
-    insertions.sort((a, b) => b.pos - a.pos);
+    
+    insertions.sort((a, b) => {
+      if (a.pos === b.pos) {
+        
+        
+        return b.priority - a.priority;
+      }
+      return b.pos - a.pos;
+    });
     
     let result = cleanText;
     for (const insertion of insertions) {
       result = result.substring(0, insertion.pos) + insertion.text + result.substring(insertion.pos);
     }
+    
     
     this.innerHTML = result;
   }
@@ -506,8 +520,9 @@ class BklCode extends HTMLElement {
     let escapeNext = false;
     
     const addToken = (type, start, end) => {
-      insertions.push({pos: startOffset + start, text: `<${type}>`});
-      insertions.push({pos: startOffset + end, text: `</${type}>`});
+      
+      insertions.push({pos: startOffset + start, text: `<${type}>`, priority: 1});
+      insertions.push({pos: startOffset + end, text: `</${type}>`, priority: 1});
     };
     
     for (let pos = 0; pos < text.length; pos++) {
@@ -558,7 +573,7 @@ class BklCode extends HTMLElement {
             state = 'string';
           } else {
             tokenStart = pos;
-            state = 'scalar';
+            state = 'keyOrScalar';
           }
           break;
           
@@ -695,8 +710,9 @@ class BklCode extends HTMLElement {
     let contextStack = []; 
     
     const addToken = (type, start, end) => {
-      insertions.push({pos: startOffset + start, text: `<${type}>`});
-      insertions.push({pos: startOffset + end, text: `</${type}>`});
+      
+      insertions.push({pos: startOffset + start, text: `<${type}>`, priority: 1});
+      insertions.push({pos: startOffset + end, text: `</${type}>`, priority: 1});
     };
     
     for (let pos = 0; pos < text.length; pos++) {
@@ -3505,7 +3521,7 @@ a: 12</bkl-code>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[3,&#34;yaml&#34;],[8,&#34;shell&#34;],[9,&#34;toml&#34;],[11,&#34;shell&#34;],[12,&#34;toml&#34;],[17,&#34;shell&#34;],[22,&#34;yaml&#34;],[27,&#34;shell&#34;],[28,&#34;json&#34;]]'>$ <highlight>ln -s ~/go/bin/bklb ~/go/bin/catb</highlight>   # catb could be, e.g. kubectlb
+<bkl-code data-languages='[[0,&#34;shell&#34;],[2,&#34;shell&#34;],[3,&#34;yaml&#34;],[7,&#34;shell&#34;],[8,&#34;toml&#34;],[10,&#34;shell&#34;],[11,&#34;toml&#34;],[15,&#34;shell&#34;],[19,&#34;shell&#34;],[20,&#34;yaml&#34;],[24,&#34;shell&#34;],[25,&#34;json&#34;]]'>$ <highlight>ln -s ~/go/bin/bklb ~/go/bin/catb</highlight>   # catb could be, e.g. kubectlb
 
 $ cat service.yaml
 addr: 127.0.0.1

@@ -424,7 +424,12 @@ class BklCode extends HTMLElement {
       cleanText += html.substring(htmlPos, removal.pos);
       cleanPos += removal.pos - htmlPos;
       
-      insertions.push({pos: cleanPos, text: removal.tag});
+      // Assign priority based on tag type
+      // When inserting right-to-left, higher priority gets inserted first
+      // Opening <highlight>: priority 0 (inserted last, appears first/outermost)
+      // Closing </highlight>: priority 2 (inserted first, appears last/outermost)
+      const priority = removal.tag === '<highlight>' ? 0 : 2;
+      insertions.push({pos: cleanPos, text: removal.tag, priority: priority});
       
       htmlPos = removal.pos + removal.tag.length;
     }
@@ -433,12 +438,21 @@ class BklCode extends HTMLElement {
     
     this.applySyntaxHighlighting(cleanText, languages, insertions);
     
-    insertions.sort((a, b) => b.pos - a.pos);
+    // Sort by position (descending), then by priority
+    insertions.sort((a, b) => {
+      if (a.pos === b.pos) {
+        // At same position, sort by priority
+        // Since we insert right-to-left, higher priority number gets inserted first
+        return b.priority - a.priority;
+      }
+      return b.pos - a.pos;
+    });
     
     let result = cleanText;
     for (const insertion of insertions) {
       result = result.substring(0, insertion.pos) + insertion.text + result.substring(insertion.pos);
     }
+    
     
     this.innerHTML = result;
   }
@@ -506,8 +520,9 @@ class BklCode extends HTMLElement {
     let escapeNext = false;
     
     const addToken = (type, start, end) => {
-      insertions.push({pos: startOffset + start, text: `<${type}>`});
-      insertions.push({pos: startOffset + end, text: `</${type}>`});
+      // Syntax highlighting tags get lower priority (1)
+      insertions.push({pos: startOffset + start, text: `<${type}>`, priority: 1});
+      insertions.push({pos: startOffset + end, text: `</${type}>`, priority: 1});
     };
     
     for (let pos = 0; pos < text.length; pos++) {
@@ -558,7 +573,7 @@ class BklCode extends HTMLElement {
             state = 'string';
           } else {
             tokenStart = pos;
-            state = 'scalar';
+            state = 'keyOrScalar';
           }
           break;
           
@@ -695,8 +710,9 @@ class BklCode extends HTMLElement {
     let contextStack = []; // Track whether we're in object or array
     
     const addToken = (type, start, end) => {
-      insertions.push({pos: startOffset + start, text: `<${type}>`});
-      insertions.push({pos: startOffset + end, text: `</${type}>`});
+      // Syntax highlighting tags get lower priority (1)
+      insertions.push({pos: startOffset + start, text: `<${type}>`, priority: 1});
+      insertions.push({pos: startOffset + end, text: `</${type}>`, priority: 1});
     };
     
     for (let pos = 0; pos < text.length; pos++) {

@@ -1365,7 +1365,7 @@
           
           $ catb service.test.json
           {"addr":"127.0.0.1","name":"myService","port":8081}
-        languages: [[0, "shell"], [3, "yaml"], [8, "shell"], [9, "toml"], [11, "shell"], [12, "toml"], [17, "shell"], [22, "yaml"], [27, "shell"], [28, "json"]]
+        languages: [[0, "shell"], [2, "shell"], [3, "yaml"], [7, "shell"], [8, "toml"], [10, "shell"], [11, "toml"], [15, "shell"], [19, "shell"], [20, "yaml"], [24, "shell"], [25, "json"]]
         highlights: ["ln -s ~/go/bin/bklb ~/go/bin/catb", "catb service.test.toml", "catb service.test.yaml", "catb service.test.json"]
     - content: |
         Note that the files mentioned don't have to exist; <highlight>bklb</highlight> will search for files with the same root name but different extensions, then merge layers and translate into the specified format.
