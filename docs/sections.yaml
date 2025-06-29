@@ -131,7 +131,7 @@
     - code:
         label: stdin
         code: |
-          $ bkl -- -.yaml <<'EOF'
+          $ bkl -- -.yaml &lt;&lt;'EOF'
           a: 1
           EOF
         highlights: ["-- -.yaml"]
@@ -1594,8 +1594,8 @@
         label: Export Existing Config
         code: |
           # "kubectl neat" removes status and default value fields
-          $ kubectl neat get -- deploy deploy-dev > deploy-dev-orig.yaml
-          $ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml
+          $ kubectl neat get -- deploy deploy-dev &gt; deploy-dev-orig.yaml
+          $ kubectl neat get -- deploy deploy-prod &gt; deploy-prod-orig.yaml
         languages: [[0, "shell"]]
     - code:
         label: Generate Base Layer

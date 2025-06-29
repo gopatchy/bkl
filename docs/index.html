@@ -257,10 +257,33 @@ key {
 prompt {
 	user-select: none;
 	-webkit-user-select: none;
+	color: var(--neutral5);
 }
 
 cmd {
 	color: var(--blue5);
+}
+
+command {
+	color: var(--blue5);
+	font-weight: 500;
+}
+
+builtin {
+	color: var(--purple5);
+}
+
+operator {
+	color: var(--orange5);
+	font-weight: 600;
+}
+
+argument {
+	color: var(--neutral8);
+}
+
+variable {
+	color: var(--cyan5);
 }
 
 string {
@@ -511,7 +534,7 @@ BKL</h1>
 
 <div>
 <label>Run it!</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;toml&#34;]]'>$ bkl service.test.toml
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;toml&#34;]]'><prompt>$</prompt> <command>bkl</command> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
@@ -537,9 +560,9 @@ BKL</h1>
 
 <div>
 <label>Using go</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># Install go from <a href="https://go.dev/dl/">go.dev</a>
-$ go install github.com/gopatchy/bkl/...@latest
-# Verify that ~/go/bin is in your $PATH</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
+<prompt>$</prompt> <command>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument>
+<comment># Verify that ~/go/bin is in your $PATH</comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -550,8 +573,8 @@ $ go install github.com/gopatchy/bkl/...@latest
 
 <div>
 <label>macOS using brew</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># Install brew from <a href="https://brew.sh/">brew.sh</a>
-$ brew install gopatchy/bkl/bkl</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
+<prompt>$</prompt> <command>brew</command> <argument>install</argument> <argument>gopatchy/bkl/bkl</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -579,7 +602,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>YAML</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'>$ bkl <highlight>-f yaml</highlight> service.test.toml
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
@@ -593,7 +616,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>TOML</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;toml&#34;]]'>$ bkl <highlight>-f toml</highlight> service.test.toml
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;toml&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <number>8081</number></bkl-code>
@@ -607,7 +630,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>JSON</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;json&#34;]]'>$ bkl <highlight>-f json</highlight> service.test.toml
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;json&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
 {<key>"addr"</key>:<string>"127.0.0.1"</string>,<key>"name"</key>:<string>"myService"</string>,<key>"port"</key>:<number>8081</number>}</bkl-code>
 </div>
 
@@ -619,7 +642,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>JSON (pretty)</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;json&#34;]]'>$ bkl <highlight>-f json-pretty</highlight> service.test.toml
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;json&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
 {
   <key>"addr"</key>: <string>"127.0.0.1"</string>,
   <key>"name"</key>: <string>"myService"</string>,
@@ -643,7 +666,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'>$ bkl service.test.<highlight>yaml</highlight>   # real file is service.test.<highlight>toml</highlight>
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'><prompt>$</prompt> <command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
@@ -668,7 +691,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>File Output</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ bkl <highlight>-o out.yaml</highlight> service.test.toml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -691,7 +714,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>Commandline Layering</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ bkl <highlight>a.b.yaml c.d.yaml</highlight>   # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -707,7 +730,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>stdin</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'>$ bkl <highlight>-- -.yaml</highlight> <<'EOF'
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
 <key>a</key>: <number>1</number>
 <string>EOF</string></bkl-code>
 </div>
@@ -780,7 +803,7 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <div>
 <label>Set Parent In CLI</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ bkl <highlight>a.b.yaml c.d.yaml</highlight>      # a.yaml + a.b.yaml + c.yaml + c.d.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -3017,31 +3040,31 @@ $ brew install gopatchy/bkl/bkl</bkl-code>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[2,&#34;shell&#34;],[3,&#34;yaml&#34;],[7,&#34;shell&#34;],[8,&#34;toml&#34;],[10,&#34;shell&#34;],[11,&#34;toml&#34;],[15,&#34;shell&#34;],[19,&#34;shell&#34;],[20,&#34;yaml&#34;],[24,&#34;shell&#34;],[25,&#34;json&#34;]]'>$ <highlight>ln -s ~/go/bin/bklb ~/go/bin/catb</highlight>   # catb could be, e.g. kubectlb
+<bkl-code data-languages='[[0,&#34;shell&#34;],[2,&#34;shell&#34;],[3,&#34;yaml&#34;],[7,&#34;shell&#34;],[8,&#34;toml&#34;],[10,&#34;shell&#34;],[11,&#34;toml&#34;],[15,&#34;shell&#34;],[19,&#34;shell&#34;],[20,&#34;yaml&#34;],[24,&#34;shell&#34;],[25,&#34;json&#34;]]'><prompt>$</prompt> <highlight><builtin>ln</builtin> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
 
-$ cat service.yaml
+<prompt>$</prompt> <builtin>cat</builtin> <argument>service.yaml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number>
 
-$ cat service.test.toml
+<prompt>$</prompt> <builtin>cat</builtin> <argument>service.test.toml</argument>
 <key>port</key> = <number>8081</number>
 
-$ <highlight>catb service.test.toml</highlight>
+<prompt>$</prompt> <highlight><command>catb</command> <argument>service.test.toml</argument></highlight>
 <key>addr</key> = <string>"127.0.0.1"</string>
 <key>name</key> = <string>"myService"</string>
 <key>port</key> = <number>8081</number>
 
-$ cat service.test.yaml service.test.json
-cat: service.test.yaml: No such file or directory
-cat: service.test.json: No such file or directory
+<prompt>$</prompt> <builtin>cat</builtin> <argument>service.test.yaml</argument> <argument>service.test.json</argument>
+<argument>cat:</argument> <argument>service.test.yaml:</argument> <argument>No</argument> <argument>such</argument> <argument>file</argument> <argument>or</argument> <argument>directory</argument>
+<argument>cat:</argument> <argument>service.test.json:</argument> <argument>No</argument> <argument>such</argument> <argument>file</argument> <argument>or</argument> <argument>directory</argument>
 
-$ <highlight>catb service.test.yaml</highlight>
+<prompt>$</prompt> <highlight><command>catb</command> <argument>service.test.yaml</argument></highlight>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number>
 
-$ <highlight>catb service.test.json</highlight>
+<prompt>$</prompt> <highlight><command>catb</command> <argument>service.test.json</argument></highlight>
 {<key>"addr"</key>:<string>"127.0.0.1"</string>,<key>"name"</key>:<string>"myService"</string>,<key>"port"</key>:<number>8081</number>}</bkl-code>
 
 </doc-grid>
@@ -3067,7 +3090,7 @@ $ <highlight>catb service.test.json</highlight>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
 
 </doc-grid>
 
@@ -3197,7 +3220,7 @@ $ <highlight>catb service.test.json</highlight>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
 
 </doc-grid>
 
@@ -3295,7 +3318,7 @@ $ <highlight>catb service.test.json</highlight>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ bklr &lt;lower_layer_path&gt;</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
 
 </doc-grid>
 
@@ -3374,7 +3397,7 @@ $ <highlight>catb service.test.json</highlight>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ kubectl <highlight>bkl</highlight> &lt;kubectl_commands&gt;</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
 
 </doc-grid>
 
@@ -3387,9 +3410,9 @@ $ <highlight>catb service.test.json</highlight>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># deploy.dev.yaml and deploy.yaml are bkl layer files
-$ kubectl bkl apply -f deploy.dev.yaml
-deployment.apps/deploy-dev unchanged</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># deploy.dev.yaml and deploy.yaml are bkl layer files</comment>
+<prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>apply</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
+<argument>deployment.apps/deploy-dev</argument> <argument>unchanged</argument></bkl-code>
 
 </doc-grid>
 
@@ -3435,7 +3458,7 @@ COPY --from=bkl /bin /bin</bkl-code>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;diff&#34;],[8,&#34;shell&#34;],[9,&#34;diff&#34;]]'>$ <highlight>diff -ud --color</highlight> <highlight>&lt;<highlight></highlight>(bkl a.yaml)</highlight> <highlight>&lt;<highlight></highlight>(bkl b.yaml)</highlight>
+<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;diff&#34;],[8,&#34;shell&#34;],[9,&#34;diff&#34;]]'><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag></highlight> <highlight><operator>&lt;<highlight></operator><command></highlight>(bkl</command> <argument>a.yaml)</argument></highlight> <highlight><operator>&lt;<highlight><command></operator></highlight>(bkl</command> <argument>b.yaml)</argument></highlight>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
 @@ -1,3 +1,2 @@
@@ -3443,7 +3466,7 @@ COPY --from=bkl /bin /bin</bkl-code>
 <highlight>-b: 2</highlight>
  c: 3
 
-$ <highlight>diff -y --color</highlight> <highlight>&lt;<highlight></highlight>(bkl a.yaml)</highlight> <highlight>&lt;<highlight></highlight>(bkl b.yaml)</highlight>
+<prompt>$</prompt> <highlight><command>diff</command> <flag>-y</flag> <flag>--color</flag></highlight> <highlight><operator>&lt;<highlight><command></operator></highlight>(bkl</command> <argument>a.yaml)</argument></highlight> <highlight><operator>&lt;<highlight><command></operator></highlight>(bkl</command> <argument>b.yaml)</argument></highlight>
 a: 1                              a: 1
 b: 2                            <highlight>&lt;</highlight>
 c: 3                              c: 3</bkl-code>
@@ -3490,9 +3513,9 @@ c: 3                              c: 3</bkl-code>
 
 <div>
 <label>Export Existing Config</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># "kubectl neat" removes status and default value fields
-$ kubectl neat get -- deploy deploy-dev > deploy-dev-orig.yaml
-$ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># "kubectl neat" removes status and default value fields</comment>
+<prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-dev</argument> <operator>&gt;</operator> <command>deploy-dev-orig.yaml</command>
+<prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-prod</argument> <operator>&gt;</operator> <command>deploy-prod-orig.yaml</command></bkl-code>
 </div>
 
 </doc-grid>
@@ -3503,8 +3526,8 @@ $ kubectl neat get -- deploy deploy-prod > deploy-prod-orig.yaml</bkl-code>
 
 <div>
 <label>Generate Base Layer</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># See bkli details <a href="#bkli">here</a>
-$ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># See bkli details <a href="#bkli">here</a></comment>
+<prompt>$</prompt> <command>bkli</command> <flag>-o</flag> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -3515,9 +3538,9 @@ $ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
 
 <div>
 <label>Generate Service Layers</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># See bkld details <a href="#bkld">here</a>
-$ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
-$ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># See bkld details <a href="#bkld">here</a></comment>
+<prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.dev.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument>
+<prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.prod.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -3528,9 +3551,9 @@ $ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml</bkl-code>
 
 <div>
 <label>Check Results</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'># Should show no diff
-$ kubectl bkl diff -f deploy.dev.yaml
-$ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># Should show no diff</comment>
+<prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
+<prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.prod.yaml</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -3541,7 +3564,7 @@ $ kubectl bkl diff -f deploy.prod.yaml</bkl-code>
 
 <div>
 <label>Clean Up</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'>$ rm deploy-dev-orig.yaml deploy-prod-orig.yaml</bkl-code>
+<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <builtin>rm</builtin> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
 </doc-grid>
