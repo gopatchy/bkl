@@ -33,6 +33,29 @@
 </div>
 {{end}}
 
+{{define "exampleOperatorSymbol"}}
+{{if eq .Operation "evaluate"}}
+  {{template "operatorSymbol" dict "Symbol" "+" "HasLabels" .HasLabels}}
+{{else if eq .Operation "diff"}}
+  {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" .HasLabels}}
+{{else if eq .Operation "intersect"}}
+  {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" .HasLabels}}
+{{end}}
+{{end}}
+
+{{define "exampleResultBlock"}}
+<div class="code-container">
+{{if .HasLabels}}
+{{if .Result.Label}}<label class="label-spacing">{{.Result.Label}}</label>{{else}}<label class="invisible label-spacing">invisible</label>{{end}}
+{{end}}
+{{if eq (.Result | formatLayer) "Error"}}
+<div class="error-display">Error</div>
+{{else}}
+<bkl-code class="{{if .HasLabels}}code-labeled{{else}}code-unlabeled{{end}}">{{.Result | formatLayer}}</bkl-code>
+{{end}}
+</div>
+{{end}}
+
 {{define "exampleLayout"}}
 {{$example := .}}
 {{$hasLabels := false}}
@@ -47,44 +70,19 @@
 {{else}}
   {{$numChildren = 3}}
 {{end}}
-{{$gridTemplate := "1fr 1fr"}}
-{{if eq $numChildren 3}}
-  {{$gridTemplate = "1fr auto 1fr"}}
-{{else if eq $numChildren 5}}
-  {{$gridTemplate = "1fr auto 1fr auto 1fr"}}
-{{end}}
 <div class="example-container">
 <div class="grid-container {{if eq $numChildren 3}}grid-3-col{{else if eq $numChildren 5}}grid-5-col{{end}}">
 {{range $layerIndex, $layer := $example.Layers}}
 {{if eq $layerIndex 1}}
-  {{if eq $example.Operation "evaluate"}}
-    {{template "operatorSymbol" dict "Symbol" "+" "HasLabels" $hasLabels}}
-  {{else if eq $example.Operation "diff"}}
-    {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" $hasLabels}}
-  {{else if eq $example.Operation "intersect"}}
-    {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" $hasLabels}}
-  {{end}}
+  {{template "exampleOperatorSymbol" dict "Operation" $example.Operation "HasLabels" $hasLabels}}
 {{end}}
 {{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
 {{end}}
 {{if and (eq (len $example.Layers) 1) (ne $example.Operation "evaluate")}}
-  {{if eq $example.Operation "diff"}}
-    {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" $hasLabels}}
-  {{else if eq $example.Operation "intersect"}}
-    {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" $hasLabels}}
-  {{end}}
+  {{template "exampleOperatorSymbol" dict "Operation" $example.Operation "HasLabels" $hasLabels}}
 {{end}}
 {{template "operatorSymbol" dict "Symbol" "=" "HasLabels" $hasLabels}}
-<div class="code-container">
-{{if $hasLabels}}
-{{if $example.Result.Label}}<label class="label-spacing">{{$example.Result.Label}}</label>{{else}}<label class="invisible label-spacing">invisible</label>{{end}}
-{{end}}
-{{if eq ($example.Result | formatLayer) "Error"}}
-<div class="error-display">Error</div>
-{{else}}
-<bkl-code class="{{if $hasLabels}}code-labeled{{else}}code-unlabeled{{end}}">{{$example.Result | formatLayer}}</bkl-code>
-{{end}}
-</div>
+{{template "exampleResultBlock" dict "Result" $example.Result "HasLabels" $hasLabels}}
 </div>
 </div>
 {{end}}
@@ -319,9 +317,6 @@ div:has(> bkl-code) + p {
 	margin-top: 10px;
 }
 
-}
-
-/* Row is styled by JavaScript, but ensure it's a block element */
 row {
 	display: block;
 	max-width: 100%;
