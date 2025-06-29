@@ -312,6 +312,11 @@ keyword {
 	color: var(--red5);
 }
 
+escape {
+	color: var(--vivid3);
+	font-weight: 600;
+}
+
 /* Highlights in code blocks - no background */
 bkl-code highlight,
 bkl-code highlight > * {
@@ -332,6 +337,25 @@ p highlight {
 
 p highlight * {
 	color: var(--red6) !important;
+}
+
+/* Diff syntax highlighting */
+addition {
+	color: var(--green5);
+}
+
+deletion {
+	color: var(--red5);
+}
+
+file-header {
+	color: var(--blue5);
+	font-weight: 500;
+}
+
+hunk-header {
+	color: var(--vivid5);
+	font-weight: 500;
 }
 </style>
 <script>

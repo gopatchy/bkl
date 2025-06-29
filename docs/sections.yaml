@@ -886,8 +886,8 @@
               b: 2
               ---
               c: 3
-              $merge: <value>[{a: 1}]</value>
-            highlights: ["$merge: <value>[{a: 1}]</value>"]
+              $merge: [{a: 1}]
+            highlights: ["$merge: [{a: 1}]"]
             languages: [[0, "yaml"]]
         result:
           code: |
@@ -908,8 +908,8 @@
                 c: 3
               ---
               d: 4
-              $merge: <value>[{a: 1}, b]</value>
-            highlights: ["$merge: <value>[{a: 1}, b]</value>"]
+              $merge: [{a: 1}, b]
+            highlights: ["$merge: [{a: 1}, b]"]
             languages: [[0, "yaml"]]
         result:
           code: |
@@ -1050,8 +1050,8 @@
               b: 2
               ---
               c: 3
-              $replace: <value>[{a: 1}]</value>
-            highlights: ["$replace: <value>[{a: 1}]</value>"]
+              $replace: [{a: 1}]
+            highlights: ["$replace: [{a: 1}]"]
             languages: [[0, "yaml"]]
         result:
           code: |
@@ -1071,8 +1071,8 @@
                 c: 3
               ---
               d: 4
-              $replace: <value>[{a: 1}, b]</value>
-            highlights: ["$replace: <value>[{a: 1}, b]</value>"]
+              $replace: [{a: 1}, b]
+            highlights: ["$replace: [{a: 1}, b]"]
             languages: [[0, "yaml"]]
         result:
           code: |

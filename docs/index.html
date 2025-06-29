@@ -312,6 +312,11 @@ keyword {
 	color: var(--red5);
 }
 
+escape {
+	color: var(--vivid3);
+	font-weight: 600;
+}
+
  
 bkl-code highlight,
 bkl-code highlight > * {
@@ -332,6 +337,25 @@ p highlight {
 
 p highlight * {
 	color: var(--red6) !important;
+}
+
+ 
+addition {
+	color: var(--green5);
+}
+
+deletion {
+	color: var(--red5);
+}
+
+file-header {
+	color: var(--blue5);
+	font-weight: 500;
+}
+
+hunk-header {
+	color: var(--vivid5);
+	font-weight: 500;
 }
 </style>
 <script>
@@ -2213,7 +2237,7 @@ BKL</h1>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
-<highlight><key>$merge</key>: <string><value>[{a: 1}]</value></string></highlight></bkl-code>
+<highlight><key>$merge</key>: <string>[{a: 1}]</string></highlight></bkl-code>
 </div>
 
 
@@ -2249,7 +2273,7 @@ BKL</h1>
   <key>c</key>: <number>3</number>
 <string>---</string>
 <key>d</key>: <number>4</number>
-<highlight><key>$merge</key>: <string><value>[{a: 1}, b]</value></string></highlight></bkl-code>
+<highlight><key>$merge</key>: <string>[{a: 1}, b]</string></highlight></bkl-code>
 </div>
 
 
@@ -2491,7 +2515,7 @@ BKL</h1>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
-<highlight><key>$replace</key>: <string><value>[{a: 1}]</value></string></highlight></bkl-code>
+<highlight><key>$replace</key>: <string>[{a: 1}]</string></highlight></bkl-code>
 </div>
 
 
@@ -2526,7 +2550,7 @@ BKL</h1>
   <key>c</key>: <number>3</number>
 <string>---</string>
 <key>d</key>: <number>4</number>
-<highlight><key>$replace</key>: <string><value>[{a: 1}, b]</value></string></highlight></bkl-code>
+<highlight><key>$replace</key>: <string>[{a: 1}, b]</string></highlight></bkl-code>
 </div>
 
 
@@ -3435,10 +3459,10 @@ BKL</h1>
 
 <div>
 <label>Dockerfile</label>
-<bkl-code>FROM ghcr.io/gopatchy/bkl:latest AS bkl
+<bkl-code><keyword>FROM</keyword> <argument>ghcr.io/gopatchy/bkl:latest</argument> <argument>AS</argument> <argument>bkl</argument>
 
-FROM debian:latest AS build
-COPY --from=bkl /bin /bin</bkl-code>
+<keyword>FROM</keyword> <argument>debian:latest</argument> <argument>AS</argument> <argument>build</argument>
+<keyword>COPY</keyword> <argument>--from=bkl</argument> <argument>/bin</argument> <argument>/bin</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -3460,11 +3484,11 @@ COPY --from=bkl /bin /bin</bkl-code>
 <doc-grid>
 
 <bkl-code><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
---- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
-+++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
-@@ -1,3 +1,2 @@
+<file-header>--- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700</file-header>
+<file-header>+++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700</file-header>
+<hunk-header>@@ -1,3 +1,2 @@</hunk-header>
  a: 1
--b: 2
+<deletion>-b: 2</deletion>
  c: 3
 
 <prompt>$</prompt> <highlight><command>diff</command> <flag>-y</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>

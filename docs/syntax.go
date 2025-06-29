@@ -33,16 +33,6 @@ func (h *syntaxHighlighter) addToken(tokenType string, start, end int) {
 	})
 }
 
-func highlightDiff(text string, offset int) []insertion {
-	// TODO: Implement diff syntax highlighting
-	return []insertion{}
-}
-
-func highlightDockerfile(text string, offset int) []insertion {
-	// TODO: Implement Dockerfile syntax highlighting
-	return []insertion{}
-}
-
 func isNumber(s string) bool {
 	match, _ := regexp.MatchString(`^-?\d+(\.\d+)?$`, s)
 	return match
