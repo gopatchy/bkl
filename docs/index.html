@@ -518,13 +518,13 @@ BKL</h1>
 <row>
 <div>
 <label>service.yaml</label>
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>addr</key>: <string>127.0.0.1</string>
+<bkl-code><key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number></bkl-code>
 </div>
 <div>
 <label>service.test.toml</label>
-<bkl-code data-languages='[[0,&#34;toml&#34;]]'><key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
+<bkl-code><key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -535,7 +535,7 @@ BKL</h1>
 
 <div>
 <label>Run it!</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;toml&#34;]]'><prompt>$</prompt> <command>bkl</command> <argument>service.test.toml</argument>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
@@ -561,7 +561,7 @@ BKL</h1>
 
 <div>
 <label>Using go</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
+<bkl-code><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
 <prompt>$</prompt> <command>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument>
 <comment># Verify that ~/go/bin is in your $PATH</comment></bkl-code>
 </div>
@@ -574,7 +574,7 @@ BKL</h1>
 
 <div>
 <label>macOS using brew</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
+<bkl-code><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
 <prompt>$</prompt> <command>brew</command> <argument>install</argument> <argument>gopatchy/bkl/bkl</argument></bkl-code>
 </div>
 
@@ -603,7 +603,7 @@ BKL</h1>
 
 <div>
 <label>YAML</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
@@ -617,7 +617,7 @@ BKL</h1>
 
 <div>
 <label>TOML</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;toml&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <number>8081</number></bkl-code>
@@ -631,7 +631,7 @@ BKL</h1>
 
 <div>
 <label>JSON</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;json&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
 {<key>"addr"</key>:<string>"127.0.0.1"</string>,<key>"name"</key>:<string>"myService"</string>,<key>"port"</key>:<number>8081</number>}</bkl-code>
 </div>
 
@@ -643,7 +643,7 @@ BKL</h1>
 
 <div>
 <label>JSON (pretty)</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;json&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
 {
   <key>"addr"</key>: <string>"127.0.0.1"</string>,
   <key>"name"</key>: <string>"myService"</string>,
@@ -667,7 +667,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'><prompt>$</prompt> <command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
@@ -692,7 +692,7 @@ BKL</h1>
 
 <div>
 <label>File Output</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
 </div>
 
 </doc-grid>
@@ -715,7 +715,7 @@ BKL</h1>
 
 <div>
 <label>Commandline Layering</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -731,7 +731,7 @@ BKL</h1>
 
 <div>
 <label>stdin</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;yaml&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
 <key>a</key>: <number>1</number>
 <string>EOF</string></bkl-code>
 </div>
@@ -761,7 +761,7 @@ BKL</h1>
 
 <div>
 <label>Set Parent In File</label>
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$parent</key>: <string>a.b</string></highlight>   <comment># inherits from a.b.<ext>, from a.<ext></comment></bkl-code>
+<bkl-code><highlight><key>$parent</key>: <string>a.b</string></highlight>   <comment># inherits from a.b.<ext>, from a.<ext></comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -777,13 +777,13 @@ BKL</h1>
 <row>
 <div>
 <label>Parent List</label>
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$parent</key>:</highlight>
+<bkl-code><highlight><key>$parent</key>:</highlight>
 <highlight>- <string>a</string></highlight>
 <highlight>- <string>b</string></highlight></bkl-code>
 </div>
 <div>
 <label>Parent Wildcard</label>
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$parent</key>: <string>a.*</string></highlight></bkl-code>
+<bkl-code><highlight><key>$parent</key>: <string>a.*</string></highlight></bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -804,7 +804,7 @@ BKL</h1>
 
 <div>
 <label>Set Parent In CLI</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+<bkl-code><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -820,7 +820,7 @@ BKL</h1>
 
 <div>
 <label>No Parent</label>
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$parent</key>: <bool>false</bool></highlight>   <comment># no further inheritance</comment></bkl-code>
+<bkl-code><highlight><key>$parent</key>: <bool>false</bool></highlight>   <comment># no further inheritance</comment></bkl-code>
 </div>
 
 </doc-grid>
@@ -859,7 +859,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
@@ -867,7 +867,7 @@ BKL</h1>
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>c</key>: <number>3</number></bkl-code>
+<bkl-code><key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
@@ -875,7 +875,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><highlight><key>c</key>: <number>3</number></highlight></highlight>
 <string>---</string>
 <key>b</key>: <number>2</number>
@@ -897,7 +897,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
@@ -905,7 +905,7 @@ BKL</h1>
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$match</key>:</highlight>
+<bkl-code><highlight><key>$match</key>:</highlight>
   <highlight><key>b</key>: <number>2</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -915,7 +915,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number>
 <highlight><key>c</key>: <number>3</number></highlight></bkl-code>
@@ -941,7 +941,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number>
 <string>---</string>
@@ -951,7 +951,7 @@ BKL</h1>
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$match</key>:</highlight>
+<bkl-code><highlight><key>$match</key>:</highlight>
   <highlight><key>a</key>: <number>1</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -961,7 +961,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><highlight><key>c</key>: <number>3</number></highlight></highlight>
 <string>---</string>
 <key>b</key>: <number>2</number>
@@ -990,7 +990,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
@@ -998,7 +998,7 @@ BKL</h1>
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$match</key>:</highlight>
+<bkl-code><highlight><key>$match</key>:</highlight>
   <key>a</key>: <number>1</number>
   <highlight><key>$invert</key>: <bool>true</bool></highlight>
 <key>c</key>: <number>3</number></bkl-code>
@@ -1009,7 +1009,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <key>b</key>: <number>2</number>
 <highlight><key>c</key>: <number>3</number></highlight></bkl-code>
@@ -1035,13 +1035,13 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number></bkl-code>
+<bkl-code><key>a</key>: <number>1</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$match</key>: <string>null</string></highlight>
+<bkl-code><highlight><key>$match</key>: <string>null</string></highlight>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
@@ -1050,7 +1050,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <string>---</string>
 <highlight><key>b</key>: <number>2</number></highlight></bkl-code>
 
@@ -1082,13 +1082,13 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number></bkl-code>
+<bkl-code><key>a</key>: <number>1</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>b</key>: <number>2</number></bkl-code>
+<bkl-code><key>b</key>: <number>2</number></bkl-code>
 </div>
 
 
@@ -1096,7 +1096,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></bkl-code>
 
 </div>
@@ -1115,13 +1115,13 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number></bkl-code>
+<bkl-code><key>a</key>: <number>1</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>b</key>: <number>2</number>
+<bkl-code><key>b</key>: <number>2</number>
 <highlight><key>$replace</key>: <bool>true</bool></highlight></bkl-code>
 </div>
 
@@ -1130,7 +1130,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>b</key>: <number>2</number></bkl-code>
+<bkl-code><key>b</key>: <number>2</number></bkl-code>
 
 </div>
 </row>
@@ -1148,14 +1148,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>c</key>: <number>3</number>
+<bkl-code><key>c</key>: <number>3</number>
 <highlight><key>b</key>: <string>$delete</string></highlight></bkl-code>
 </div>
 
@@ -1164,7 +1164,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>c</key>: <number>3</number></bkl-code>
 
 </div>
@@ -1200,13 +1200,13 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number></bkl-code>
+<bkl-code>- <number>1</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>2</number></bkl-code>
+<bkl-code>- <number>2</number></bkl-code>
 </div>
 
 
@@ -1214,7 +1214,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number>
+<bkl-code>- <number>1</number>
 - <number>2</number></bkl-code>
 
 </div>
@@ -1233,13 +1233,13 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number></bkl-code>
+<bkl-code>- <number>1</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>2</number>
+<bkl-code>- <number>2</number>
 - <highlight><key>$replace</key>: <bool>true</bool></highlight></bkl-code>
 </div>
 
@@ -1248,7 +1248,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>2</number></bkl-code>
+<bkl-code>- <number>2</number></bkl-code>
 
 </div>
 </row>
@@ -1266,14 +1266,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>x</key>: <number>1</number>
+<bkl-code>- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>2</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>x</key>: <number>3</number>
+<bkl-code>- <key>x</key>: <number>3</number>
 - <highlight><key>$delete</key>:</highlight>
     <highlight><key>x</key>: <number>2</number></highlight></bkl-code>
 </div>
@@ -1283,7 +1283,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>x</key>: <number>1</number>
+<bkl-code>- <key>x</key>: <number>1</number>
 - <key>x</key>: <number>3</number></bkl-code>
 
 </div>
@@ -1312,14 +1312,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <highlight><key>$match</key>:</highlight>
+<bkl-code>- <highlight><key>$match</key>:</highlight>
     <highlight><key>b</key>: <number>2</number></highlight>
   <key>b</key>: <number>10</number></bkl-code>
 </div>
@@ -1329,7 +1329,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>10</number></bkl-code>
 
 </div>
@@ -1348,14 +1348,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number>
+<bkl-code>- <number>1</number>
 - <number>2</number></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <highlight><key>$match</key>: <number>2</number></highlight>
+<bkl-code>- <highlight><key>$match</key>: <number>2</number></highlight>
   <highlight><key>$value</key>: <number>10</number></highlight></bkl-code>
 </div>
 
@@ -1364,7 +1364,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number>
+<bkl-code>- <number>1</number>
 - <number>10</number></bkl-code>
 
 </div>
@@ -1395,7 +1395,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <string>foo</string>
 <key>d</key>: <highlight><string>$"{b.c} bar {a} 2"</string></highlight></bkl-code>
@@ -1406,7 +1406,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <string>foo</string>
 <key>d</key>: <highlight><string>foo bar 1 2</string></highlight></bkl-code>
@@ -1439,7 +1439,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>$value</key>: <string>|</string>
+<bkl-code><key>$value</key>: <string>|</string>
   <highlight><string>{"a":1}</string></highlight>
 <highlight><key>$decode</key>: <string>json</string></highlight></bkl-code>
 </div>
@@ -1449,7 +1449,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight></bkl-code>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight></bkl-code>
 
 </div>
 </row>
@@ -1479,7 +1479,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><comment># export FOO=test</comment>
+<bkl-code><comment># export FOO=test</comment>
 <highlight><string><string>"$env:FOO"</string></highlight>: 1</string></bkl-code>
 </div>
 
@@ -1488,7 +1488,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>test</key></highlight>: <number>1</number></bkl-code>
+<bkl-code><highlight><key>test</key></highlight>: <number>1</number></bkl-code>
 
 </div>
 </row>
@@ -1506,7 +1506,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><comment># export FOO=test</comment>
+<bkl-code><comment># export FOO=test</comment>
 <key>a</key>: <highlight><string>$env:FOO</string></highlight></bkl-code>
 </div>
 
@@ -1515,7 +1515,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <highlight><string>test</string></highlight></bkl-code>
+<bkl-code><key>a</key>: <highlight><string>test</string></highlight></bkl-code>
 
 </div>
 </row>
@@ -1552,7 +1552,7 @@ BKL</h1>
 
 <label>base64</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>$value</key>: <string>a</string>
+<bkl-code><key>$value</key>: <string>a</string>
 <highlight><key>$encode</key>: <string>base64</string></highlight></bkl-code>
 </div>
 
@@ -1563,7 +1563,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><string>YQ==</string></bkl-code>
+<bkl-code><string>YQ==</string></bkl-code>
 
 </div>
 </row>
@@ -1583,7 +1583,7 @@ BKL</h1>
 
 <label>flags</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>flags</string></highlight>
 <comment># [tolist:=, prefix:--]</comment></bkl-code>
@@ -1596,7 +1596,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <string>--a=1</string>
+<bkl-code>- <string>--a=1</string>
 - <string>--b=2</string></bkl-code>
 
 </div>
@@ -1617,7 +1617,7 @@ BKL</h1>
 
 <label>flatten</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <string>- a</string>
+<bkl-code>- <string>- a</string>
   - <string>b</string>
 - <string>- c</string>
   - <number>4</number>
@@ -1632,7 +1632,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <string>a</string>
+<bkl-code>- <string>a</string>
 - <string>b</string>
 - <string>c</string>
 - <number>4</number>
@@ -1656,7 +1656,7 @@ BKL</h1>
 
 <label>join</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>$value</key>: <string>[a, b]</string>
+<bkl-code><key>$value</key>: <string>[a, b]</string>
 <highlight><key>$encode</key>: <string>join:/</string></highlight></bkl-code>
 </div>
 
@@ -1667,7 +1667,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><string>a/b</string></bkl-code>
+<bkl-code><string>a/b</string></bkl-code>
 
 </div>
 </row>
@@ -1687,7 +1687,7 @@ BKL</h1>
 
 <label>json</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>json</string></highlight></bkl-code>
 </div>
@@ -1699,7 +1699,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><string>|</string>
+<bkl-code><string>|</string>
   <string>{"a":1,"b":2}</string></bkl-code>
 
 </div>
@@ -1720,7 +1720,7 @@ BKL</h1>
 
 <label>json (list)</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number>
 - <highlight><key>$encode</key>: <string>json</string></highlight></bkl-code>
 </div>
@@ -1732,7 +1732,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><string>|</string>
+<bkl-code><string>|</string>
   <string>[{"a":1},{"b":2}]</string></bkl-code>
 
 </div>
@@ -1753,7 +1753,7 @@ BKL</h1>
 
 <label>prefix</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <string>a</string>
+<bkl-code>- <string>a</string>
 - <number>2</number>
 - <highlight><key>$encode</key>: <string>prefix:X</string></highlight></bkl-code>
 </div>
@@ -1765,7 +1765,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <string>Xa</string>
+<bkl-code>- <string>Xa</string>
 - <string>X2</string></bkl-code>
 
 </div>
@@ -1786,7 +1786,7 @@ BKL</h1>
 
 <label>tolist</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>tolist:=</string></highlight></bkl-code>
 </div>
@@ -1798,7 +1798,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <string>a=1</string>
+<bkl-code>- <string>a=1</string>
 - <string>b=2</string></bkl-code>
 
 </div>
@@ -1819,7 +1819,7 @@ BKL</h1>
 
 <label>Stacking</label>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <highlight><key>$encode</key>: <string>[tolist:=, "join:,"]</string></highlight></bkl-code>
 </div>
@@ -1831,7 +1831,7 @@ BKL</h1>
 <label class="invisible">invisible</label>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><string>a=1,b=2</string></bkl-code>
+<bkl-code><string>a=1,b=2</string></bkl-code>
 
 </div>
 </row>
@@ -1861,14 +1861,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><key>b</key>: <string>$required</string></highlight></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>c</key>: <number>3</number></bkl-code>
+<bkl-code><key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
@@ -1894,14 +1894,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><key>b</key>: <string>$required</string></highlight></bkl-code>
 </div>
 
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>b</key>: <number>2</number></highlight>
+<bkl-code><highlight><key>b</key>: <number>2</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
 
@@ -1910,7 +1910,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>c</key>: <number>3</number></bkl-code>
 
@@ -1930,7 +1930,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><key>b</key>:</highlight>
   <highlight>- <string>$required</string></highlight></bkl-code>
 </div>
@@ -1938,7 +1938,7 @@ BKL</h1>
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>c</key>: <number>3</number></bkl-code>
+<bkl-code><key>c</key>: <number>3</number></bkl-code>
 </div>
 
 
@@ -1964,7 +1964,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><key>b</key>:</highlight>
   <highlight>- <string>$required</string></highlight></bkl-code>
 </div>
@@ -1972,7 +1972,7 @@ BKL</h1>
 <op>+</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>b</key>:</highlight>
+<bkl-code><highlight><key>b</key>:</highlight>
   <highlight>- <number>2</number></highlight>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -1982,7 +1982,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   - <number>2</number>
 <key>c</key>: <number>3</number></bkl-code>
@@ -2015,7 +2015,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2028,7 +2028,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2051,7 +2051,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     - <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2064,7 +2064,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     - <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2087,7 +2087,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2100,7 +2100,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <highlight><number>1</number></highlight>
 <key>zig</key>:
@@ -2128,7 +2128,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2142,7 +2142,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2165,7 +2165,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2181,7 +2181,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <highlight><key>c</key>: <number>3</number></highlight>
 <string>---</string>
@@ -2209,7 +2209,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2221,7 +2221,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2244,7 +2244,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2257,7 +2257,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <highlight><key>c</key>: <number>3</number></highlight>
 <string>---</string>
@@ -2292,7 +2292,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2305,7 +2305,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2327,7 +2327,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     - <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2340,7 +2340,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     - <highlight><key>a</key>: <number>1</number></highlight>
 <key>zig</key>:
@@ -2362,7 +2362,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <number>1</number>
 <key>zig</key>:
@@ -2375,7 +2375,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <key>a</key>: <highlight><number>1</number></highlight>
 <key>zig</key>:
@@ -2408,7 +2408,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2422,7 +2422,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2444,7 +2444,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2460,7 +2460,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2487,7 +2487,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <string>---</string>
 <key>c</key>: <number>3</number>
@@ -2499,7 +2499,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>a</key>: <number>1</number></highlight>
+<bkl-code><highlight><key>a</key>: <number>1</number></highlight>
 <highlight><key>b</key>: <number>2</number></highlight>
 <string>---</string>
 <highlight><key>a</key>: <number>1</number></highlight>
@@ -2521,7 +2521,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <key>c</key>: <number>3</number>
 <string>---</string>
@@ -2534,7 +2534,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>:
   <highlight><key>c</key>: <number>3</number></highlight>
 <string>---</string>
@@ -2568,7 +2568,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     <highlight><key>$output</key>: <bool>true</bool></highlight>
     <key>a</key>: <number>1</number>
@@ -2580,7 +2580,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number></bkl-code>
 
 </div>
@@ -2599,7 +2599,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>foo</key>:
+<bkl-code><key>foo</key>:
   <key>bar</key>:
     - <highlight><key>$output</key>: <bool>true</bool></highlight>
     - <key>a</key>: <number>1</number>
@@ -2611,7 +2611,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></bkl-code>
 
 </div>
@@ -2640,7 +2640,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   <key>b</key>: <number>1</number>
   <highlight><key>$output</key>: <bool>false</bool></highlight>
 <key>c</key>:
@@ -2652,7 +2652,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>c</key>:
+<bkl-code><key>c</key>:
   <key>d</key>: <number>2</number></bkl-code>
 
 </div>
@@ -2671,7 +2671,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   - <key>b</key>: <number>1</number>
   - <highlight><key>$output</key>: <bool>false</bool></highlight>
 <key>c</key>:
@@ -2683,7 +2683,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>c</key>:
+<bkl-code><key>c</key>:
   - <key>d</key>: <number>2</number></bkl-code>
 
 </div>
@@ -2702,7 +2702,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <highlight><key>$output</key>: <bool>false</bool></highlight>
 <string>---</string>
 <key>b</key>: <number>2</number></bkl-code>
@@ -2713,7 +2713,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>b</key>: <number>2</number></bkl-code>
+<bkl-code><key>b</key>: <number>2</number></bkl-code>
 
 </div>
 </row>
@@ -2748,7 +2748,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <string>foo</string>
+<bkl-code><key>a</key>: <string>foo</string>
 <highlight><key>b</key>: <string>$repeat</string></highlight>
 <highlight><key>$repeat</key>: <number>2</number></highlight></bkl-code>
 </div>
@@ -2758,7 +2758,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <string>foo</string>
+<bkl-code><key>a</key>: <string>foo</string>
 <key>b</key>: <number>0</number>
 <string>---</string>
 <key>a</key>: <string>foo</string>
@@ -2785,7 +2785,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$repeat</key>:</highlight>
+<bkl-code><highlight><key>$repeat</key>:</highlight>
   <highlight><key>a</key>: <number>2</number></highlight>
   <highlight><key>b</key>: <number>3</number></highlight>
 <key>$value</key>: <string>$"{<highlight><highlight>$repeat:</highlight>a</highlight>},{<highlight><highlight>$repeat:</highlight>b</highlight>}"</string></bkl-code>
@@ -2796,7 +2796,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><string>0,0</string>
+<bkl-code><string>0,0</string>
 <string>---</string>
 <string>0,1</string>
 <string>---</string>
@@ -2829,7 +2829,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$repeat</key>: <string>[x, y, z]</string></highlight>
+<bkl-code><highlight><key>$repeat</key>: <string>[x, y, z]</string></highlight>
 <highlight><key>a</key>: <string>$repeat</string></highlight></bkl-code>
 </div>
 
@@ -2838,7 +2838,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <string>x</string>
+<bkl-code><key>a</key>: <string>x</string>
 <string>---</string>
 <key>a</key>: <string>y</string>
 <string>---</string>
@@ -2865,7 +2865,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><highlight><key>$repeat</key>:</highlight>
+<bkl-code><highlight><key>$repeat</key>:</highlight>
   <highlight><key>$first</key>: <number>10</number></highlight>
   <highlight><key>$count</key>: <number>3</number></highlight>
 <highlight><key>a</key>: <string>$repeat</string></highlight></bkl-code>
@@ -2876,7 +2876,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>10</number>
+<bkl-code><key>a</key>: <number>10</number>
 <string>---</string>
 <key>a</key>: <number>11</number>
 <string>---</string>
@@ -2908,7 +2908,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   <key>$"b{$repeat}"</key>:
     <highlight><key>c</key>: <string>$repeat</string></highlight>
     <highlight><key>$repeat</key>: <number>3</number></highlight></bkl-code>
@@ -2919,7 +2919,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   <key>b0</key>:
     <key>c</key>: <number>0</number>
   <key>b1</key>:
@@ -2948,7 +2948,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   - <highlight><key>b</key>: <string>$repeat</string></highlight>
     <highlight><key>$repeat</key>: <string>[x, y, z]</string></highlight></bkl-code>
 </div>
@@ -2958,7 +2958,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   - <key>b</key>: <string>x</string>
   - <key>b</key>: <string>y</string>
   - <key>b</key>: <string>z</string></bkl-code>
@@ -2991,7 +2991,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <highlight><string>$$env:foo</string></highlight></bkl-code>
+<bkl-code><key>a</key>: <highlight><string>$$env:foo</string></highlight></bkl-code>
 </div>
 
 
@@ -2999,7 +2999,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <highlight><string>$env:foo</string></highlight></bkl-code>
+<bkl-code><key>a</key>: <highlight><string>$env:foo</string></highlight></bkl-code>
 
 </div>
 </row>
@@ -3021,7 +3021,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;toml&#34;]]'><highlight><key>"$parent"</highlight> </key>= <bool>false</bool></bkl-code>
+<bkl-code><highlight><key>"$parent"</highlight> </key>= <bool>false</bool></bkl-code>
 
 </doc-grid>
 
@@ -3041,7 +3041,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[2,&#34;shell&#34;],[3,&#34;yaml&#34;],[7,&#34;shell&#34;],[8,&#34;toml&#34;],[10,&#34;shell&#34;],[11,&#34;toml&#34;],[15,&#34;shell&#34;],[19,&#34;shell&#34;],[20,&#34;yaml&#34;],[24,&#34;shell&#34;],[25,&#34;json&#34;]]'><prompt>$</prompt> <highlight><command>ln</command> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
+<bkl-code><prompt>$</prompt> <highlight><command>ln</command> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
 
 <prompt>$</prompt> <command>cat</command> <argument>service.yaml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
@@ -3091,7 +3091,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
+<bkl-code><prompt>$</prompt> <command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
 
 </doc-grid>
 
@@ -3112,7 +3112,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <string>$required</string>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -3120,7 +3120,7 @@ BKL</h1>
 <op>?</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>d</key>: <number>4</number></bkl-code>
 </div>
@@ -3130,7 +3130,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>b</key>: <number>2</number>
+<bkl-code><key>b</key>: <number>2</number>
 <key>c</key>: <string>null</string>
 <key>d</key>: <number>4</number></bkl-code>
 
@@ -3150,14 +3150,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number></bkl-code>
 </div>
 
 <op>?</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>c</key>: <number>3</number></bkl-code>
 </div>
 
@@ -3166,7 +3166,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>c</key>: <number>3</number>
+<bkl-code>- <key>c</key>: <number>3</number>
 - <key>$delete</key>:
     <key>b</key>: <number>2</number></bkl-code>
 
@@ -3186,14 +3186,14 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number>
+<bkl-code>- <number>1</number>
 - <number>2</number></bkl-code>
 </div>
 
 <op>?</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number>
+<bkl-code>- <number>1</number>
 - <number>3</number></bkl-code>
 </div>
 
@@ -3202,7 +3202,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <number>1</number>
+<bkl-code>- <number>1</number>
 - <number>3</number>
 - <key>$replace</key>: <bool>true</bool></bkl-code>
 
@@ -3221,7 +3221,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
+<bkl-code><prompt>$</prompt> <command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
 
 </doc-grid>
 
@@ -3247,7 +3247,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>2</number>
 <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -3255,7 +3255,7 @@ BKL</h1>
 <op>∩</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <number>10</number>
 <key>d</key>: <number>4</number></bkl-code>
 </div>
@@ -3265,7 +3265,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>: <number>1</number>
+<bkl-code><key>a</key>: <number>1</number>
 <key>b</key>: <string>$required</string></bkl-code>
 
 </div>
@@ -3284,7 +3284,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>2</number>
 - <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -3292,7 +3292,7 @@ BKL</h1>
 <op>∩</op>
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number>
+<bkl-code>- <key>a</key>: <number>1</number>
 - <key>b</key>: <number>10</number>
 - <key>d</key>: <number>4</number></bkl-code>
 </div>
@@ -3302,7 +3302,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'>- <key>a</key>: <number>1</number></bkl-code>
+<bkl-code>- <key>a</key>: <number>1</number></bkl-code>
 
 </div>
 </row>
@@ -3319,7 +3319,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
+<bkl-code><prompt>$</prompt> <command>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
 
 </doc-grid>
 
@@ -3340,7 +3340,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   <key>b</key>: <string>$required</string>
   <key>c</key>: <number>3</number></bkl-code>
 </div>
@@ -3350,7 +3350,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   <key>b</key>: <string>$required</string></bkl-code>
 
 </div>
@@ -3369,7 +3369,7 @@ BKL</h1>
 
 <div>
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   - <string>$required</string>
 <key>b</key>:
   - <number>2</number></bkl-code>
@@ -3380,7 +3380,7 @@ BKL</h1>
 <div>
 
 
-<bkl-code data-languages='[[0,&#34;yaml&#34;]]'><key>a</key>:
+<bkl-code><key>a</key>:
   - <string>$required</string></bkl-code>
 
 </div>
@@ -3398,7 +3398,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
+<bkl-code><prompt>$</prompt> <command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
 
 </doc-grid>
 
@@ -3411,7 +3411,7 @@ BKL</h1>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># deploy.dev.yaml and deploy.yaml are bkl layer files</comment>
+<bkl-code><comment># deploy.dev.yaml and deploy.yaml are bkl layer files</comment>
 <prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>apply</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
 <argument>deployment.apps/deploy-dev</argument> <argument>unchanged</argument></bkl-code>
 
@@ -3435,7 +3435,7 @@ BKL</h1>
 
 <div>
 <label>Dockerfile</label>
-<bkl-code data-languages='[[0,&#34;dockerfile&#34;]]'>FROM ghcr.io/gopatchy/bkl:latest AS bkl
+<bkl-code>FROM ghcr.io/gopatchy/bkl:latest AS bkl
 
 FROM debian:latest AS build
 COPY --from=bkl /bin /bin</bkl-code>
@@ -3459,7 +3459,7 @@ COPY --from=bkl /bin /bin</bkl-code>
 
 <doc-grid>
 
-<bkl-code data-languages='[[0,&#34;shell&#34;],[1,&#34;diff&#34;],[8,&#34;shell&#34;],[9,&#34;diff&#34;]]'><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
+<bkl-code><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
 --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
 +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
 @@ -1,3 +1,2 @@
@@ -3514,7 +3514,7 @@ c: 3                              c: 3</bkl-code>
 
 <div>
 <label>Export Existing Config</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># "kubectl neat" removes status and default value fields</comment>
+<bkl-code><comment># "kubectl neat" removes status and default value fields</comment>
 <prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-dev</argument> <operator>&gt;</operator> <command>deploy-dev-orig.yaml</command>
 <prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-prod</argument> <operator>&gt;</operator> <command>deploy-prod-orig.yaml</command></bkl-code>
 </div>
@@ -3527,7 +3527,7 @@ c: 3                              c: 3</bkl-code>
 
 <div>
 <label>Generate Base Layer</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># See bkli details <a href="#bkli">here</a></comment>
+<bkl-code><comment># See bkli details <a href="#bkli">here</a></comment>
 <prompt>$</prompt> <command>bkli</command> <flag>-o</flag> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
@@ -3539,7 +3539,7 @@ c: 3                              c: 3</bkl-code>
 
 <div>
 <label>Generate Service Layers</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># See bkld details <a href="#bkld">here</a></comment>
+<bkl-code><comment># See bkld details <a href="#bkld">here</a></comment>
 <prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.dev.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument>
 <prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.prod.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
@@ -3552,7 +3552,7 @@ c: 3                              c: 3</bkl-code>
 
 <div>
 <label>Check Results</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><comment># Should show no diff</comment>
+<bkl-code><comment># Should show no diff</comment>
 <prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
 <prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.prod.yaml</argument></bkl-code>
 </div>
@@ -3565,7 +3565,7 @@ c: 3                              c: 3</bkl-code>
 
 <div>
 <label>Clean Up</label>
-<bkl-code data-languages='[[0,&#34;shell&#34;]]'><prompt>$</prompt> <command>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+<bkl-code><prompt>$</prompt> <command>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
 </div>
 
 </doc-grid>

@@ -41,22 +41,23 @@ func highlightTOML(text string, offset int) []insertion {
 
 		switch state {
 		case tomlLineStart:
-			if ch == ' ' || ch == '\t' {
+			switch ch {
+			case ' ', '\t':
 				// Skip indentation
-			} else if ch == '#' {
+			case '#':
 				tokenStart = pos
 				state = tomlComment
-			} else if ch == '[' {
+			case '[':
 				tokenStart = pos
 				bracketDepth = 1
 				state = tomlSection
-			} else if ch == '\n' {
+			case '\n':
 				// Stay in lineStart
-			} else if ch == '"' || ch == '\'' {
+			case '"', '\'':
 				tokenStart = pos
 				quoteChar = ch
 				state = tomlKeyString
-			} else {
+			default:
 				tokenStart = pos
 				state = tomlKey
 			}
@@ -133,30 +134,31 @@ func highlightTOML(text string, offset int) []insertion {
 			}
 
 		case tomlAfterEquals:
-			if ch == ' ' || ch == '\t' {
+			switch {
+			case ch == ' ' || ch == '\t':
 				// Skip whitespace
-			} else if ch == '\n' {
+			case ch == '\n':
 				state = tomlLineStart
-			} else if ch == '#' {
+			case ch == '#':
 				tokenStart = pos
 				state = tomlComment
-			} else if ch == '"' || ch == '\'' {
+			case ch == '"' || ch == '\'':
 				tokenStart = pos
 				quoteChar = ch
 				state = tomlValueString
-			} else if ch == '[' {
+			case ch == '[':
 				tokenStart = pos
 				state = tomlArray
-			} else if ch == '{' {
+			case ch == '{':
 				tokenStart = pos
 				state = tomlInlineTable
-			} else if (ch >= '0' && ch <= '9') || ch == '-' || ch == '+' {
+			case (ch >= '0' && ch <= '9') || ch == '-' || ch == '+':
 				tokenStart = pos
 				state = tomlNumber
-			} else if ch == 't' || ch == 'f' {
+			case ch == 't' || ch == 'f':
 				tokenStart = pos
 				state = tomlBoolean
-			} else {
+			default:
 				tokenStart = pos
 				state = tomlBareString
 			}
@@ -178,14 +180,15 @@ func highlightTOML(text string, offset int) []insertion {
 		case tomlBareString:
 			if ch == '\n' || ch == '#' || ch == ',' || ch == ']' || ch == '}' {
 				h.addToken("string", tokenStart, pos)
-				if ch == '\n' {
+				switch ch {
+				case '\n':
 					state = tomlLineStart
-				} else if ch == '#' {
+				case '#':
 					tokenStart = pos
 					state = tomlComment
-				} else if ch == ',' {
+				case ',':
 					state = tomlAfterComma
-				} else {
+				default:
 					state = tomlInValue
 				}
 			}
@@ -193,16 +196,17 @@ func highlightTOML(text string, offset int) []insertion {
 		case tomlNumber:
 			if ch == '\n' || ch == '#' || ch == ',' || ch == ']' || ch == '}' || ch == ' ' || ch == '\t' {
 				h.addToken("number", tokenStart, pos)
-				if ch == '\n' {
+				switch ch {
+				case '\n':
 					state = tomlLineStart
-				} else if ch == '#' {
+				case '#':
 					tokenStart = pos
 					state = tomlComment
-				} else if ch == ',' {
+				case ',':
 					state = tomlAfterComma
-				} else if ch == ']' || ch == '}' {
+				case ']', '}':
 					state = tomlInValue
-				} else {
+				default:
 					state = tomlAfterValue
 				}
 			} else if (ch >= '0' && ch <= '9') || ch == '.' || ch == 'e' || ch == 'E' || ch == '+' || ch == '-' || ch == '_' || ch == ':' || ch == 'T' || ch == 'Z' {
@@ -219,16 +223,17 @@ func highlightTOML(text string, offset int) []insertion {
 				if value == "true" || value == "false" {
 					h.addToken("bool", tokenStart, pos)
 				}
-				if ch == '\n' {
+				switch ch {
+				case '\n':
 					state = tomlLineStart
-				} else if ch == '#' {
+				case '#':
 					tokenStart = pos
 					state = tomlComment
-				} else if ch == ',' {
+				case ',':
 					state = tomlAfterComma
-				} else if ch == ']' || ch == '}' {
+				case ']', '}':
 					state = tomlInValue
-				} else {
+				default:
 					state = tomlAfterValue
 				}
 			} else if ch >= 'a' && ch <= 'z' {
@@ -329,7 +334,8 @@ func highlightTOML(text string, offset int) []insertion {
 		h.addToken("number", tokenStart, len(text))
 	case tomlBoolean:
 		value := text[tokenStart:]
-		if value == "true" || value == "false" {
+		switch value {
+		case "true", "false":
 			h.addToken("bool", tokenStart, len(text))
 		}
 	case tomlKey:

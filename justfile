@@ -15,6 +15,9 @@ test:
 bench:
 	{{go}} test -bench=BenchmarkLanguage -benchmem -run=^$ ./...
 
+docs:
+	cd docs && {{go}} run .
+
 todo:
 	-git grep -e TODO --and --not -e ignoretodo
 

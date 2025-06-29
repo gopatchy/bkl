@@ -462,11 +462,11 @@ BKL</h1>
 <row>
 <div>
 <label>{{$item.SideBySide.Left.Label}}</label>
-<bkl-code data-languages='{{getLanguages $item.SideBySide.Left}}'>{{$item.SideBySide.Left | formatLayer}}</bkl-code>
+<bkl-code>{{$item.SideBySide.Left | formatLayer}}</bkl-code>
 </div>
 <div>
 <label>{{$item.SideBySide.Right.Label}}</label>
-<bkl-code data-languages='{{getLanguages $item.SideBySide.Right}}'>{{$item.SideBySide.Right | formatLayer}}</bkl-code>
+<bkl-code>{{$item.SideBySide.Right | formatLayer}}</bkl-code>
 </div>
 </row>
 </doc-grid>
@@ -475,10 +475,10 @@ BKL</h1>
 {{if $item.Code.Label}}
 <div>
 <label{{if eq $item.Code.Label "invisible"}} class="invisible"{{end}}>{{$item.Code.Label}}</label>
-<bkl-code data-languages='{{getLanguages $item.Code}}'>{{$item.Code | formatLayer}}</bkl-code>
+<bkl-code>{{$item.Code | formatLayer}}</bkl-code>
 </div>
 {{else}}
-<bkl-code data-languages='{{getLanguages $item.Code}}'>{{$item.Code | formatLayer}}</bkl-code>
+<bkl-code>{{$item.Code | formatLayer}}</bkl-code>
 {{end}}
 </doc-grid>
 {{else if $item.Example}}
@@ -494,7 +494,7 @@ BKL</h1>
 {{if $hasLabels}}
 {{if $layer.Label}}<label>{{$layer.Label}}</label>{{else}}<label class="invisible">invisible</label>{{end}}
 {{end}}
-<bkl-code data-languages='{{getLanguages $layer}}'>{{$layer | formatLayer}}</bkl-code>
+<bkl-code>{{$layer | formatLayer}}</bkl-code>
 </div>
 {{end}}
 {{if and (eq (len $example.Layers) 1) (ne $example.Operation "evaluate")}}<op>{{if eq $example.Operation "diff"}}?{{else if eq $example.Operation "intersect"}}∩{{end}}</op>{{end}}
@@ -506,7 +506,7 @@ BKL</h1>
 {{if eq ($example.Result | formatLayer) "Error"}}
 <div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 24px; font-weight: bold;">Error</div>
 {{else}}
-<bkl-code data-languages='{{getLanguages $example.Result}}'>{{$example.Result | formatLayer}}</bkl-code>
+<bkl-code>{{$example.Result | formatLayer}}</bkl-code>
 {{end}}
 </div>
 </row>

@@ -36,20 +36,21 @@ func highlightYAML(text string, offset int) []insertion {
 
 		switch state {
 		case yamlLineStart:
-			if ch == ' ' || ch == '\t' {
+			switch ch {
+			case ' ', '\t':
 				// Skip indentation
-			} else if ch == '#' {
+			case '#':
 				tokenStart = pos
 				state = yamlComment
-			} else if ch == '-' {
+			case '-':
 				state = yamlMaybeDash
-			} else if ch == '\n' {
+			case '\n':
 				// Stay in lineStart
-			} else if ch == '"' || ch == '\'' {
+			case '"', '\'':
 				tokenStart = pos
 				quoteChar = ch
 				state = yamlString
-			} else {
+			default:
 				tokenStart = pos
 				state = yamlKeyOrScalar
 			}
@@ -86,11 +87,12 @@ func highlightYAML(text string, offset int) []insertion {
 			} else if ch == '\n' {
 				// It was just a scalar value
 				value := strings.TrimSpace(text[tokenStart:pos])
-				if value == "true" || value == "false" {
+				switch {
+				case value == "true" || value == "false":
 					h.addToken("bool", tokenStart, tokenStart+len(value))
-				} else if isNumber(value) {
+				case isNumber(value):
 					h.addToken("number", tokenStart, tokenStart+len(value))
-				} else if len(value) > 0 {
+				case len(value) > 0:
 					h.addToken("string", tokenStart, tokenStart+len(value))
 				}
 				state = yamlLineStart
@@ -110,18 +112,19 @@ func highlightYAML(text string, offset int) []insertion {
 			}
 
 		case yamlAfterColon:
-			if ch == ' ' || ch == '\t' {
+			switch ch {
+			case ' ', '\t':
 				// Skip spaces after colon
-			} else if ch == '\n' {
+			case '\n':
 				state = yamlLineStart
-			} else if ch == '#' {
+			case '#':
 				tokenStart = pos
 				state = yamlComment
-			} else if ch == '"' || ch == '\'' {
+			case '"', '\'':
 				tokenStart = pos
 				quoteChar = ch
 				state = yamlString
-			} else {
+			default:
 				tokenStart = pos
 				state = yamlScalar
 			}
@@ -129,11 +132,12 @@ func highlightYAML(text string, offset int) []insertion {
 		case yamlScalar:
 			if ch == '\n' || ch == '#' {
 				value := strings.TrimSpace(text[tokenStart:pos])
-				if value == "true" || value == "false" {
+				switch {
+				case value == "true" || value == "false":
 					h.addToken("bool", tokenStart, tokenStart+len(value))
-				} else if isNumber(value) {
+				case isNumber(value):
 					h.addToken("number", tokenStart, tokenStart+len(value))
-				} else if len(value) > 0 {
+				case len(value) > 0:
 					h.addToken("string", tokenStart, tokenStart+len(value))
 				}
 
@@ -186,11 +190,12 @@ func highlightYAML(text string, offset int) []insertion {
 		h.addToken("string", tokenStart, len(text))
 	case yamlScalar, yamlKeyOrScalar:
 		value := strings.TrimSpace(text[tokenStart:])
-		if value == "true" || value == "false" {
+		switch {
+		case value == "true" || value == "false":
 			h.addToken("bool", tokenStart, tokenStart+len(value))
-		} else if isNumber(value) {
+		case isNumber(value):
 			h.addToken("number", tokenStart, tokenStart+len(value))
-		} else if len(value) > 0 {
+		case len(value) > 0:
 			h.addToken("string", tokenStart, tokenStart+len(value))
 		}
 	}

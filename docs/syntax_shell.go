@@ -36,35 +36,36 @@ func highlightShell(text string, offset int) []insertion {
 
 		switch state {
 		case shellStart:
-			if ch == ' ' || ch == '\t' {
+			switch {
+			case ch == ' ' || ch == '\t':
 				// Skip whitespace
-			} else if ch == '\n' {
+			case ch == '\n':
 				isFirstWord = true
 				sawPrompt = false
-			} else if ch == '$' && pos+1 < len(text) && text[pos+1] == ' ' && isFirstWord {
+			case ch == '$' && pos+1 < len(text) && text[pos+1] == ' ' && isFirstWord:
 				// Shell prompt
 				h.addToken("prompt", pos, pos+1)
 				sawPrompt = true
 				pos++ // Skip the space after prompt
 				isFirstWord = true
-			} else if ch == '#' {
+			case ch == '#':
 				tokenStart = pos
 				state = shellComment
-			} else if ch == '\'' {
+			case ch == '\'':
 				tokenStart = pos
 				state = shellSingleQuote
-			} else if ch == '"' {
+			case ch == '"':
 				tokenStart = pos
 				state = shellDoubleQuote
-			} else if ch == '`' {
+			case ch == '`':
 				tokenStart = pos
 				state = shellBacktick
-			} else if ch == '&' && pos+1 < len(text) && text[pos+1] == 'g' {
+			case ch == '&' && pos+1 < len(text) && text[pos+1] == 'g':
 				// This is &gt; (escaped >)
 				h.addToken("operator", pos, pos+4)
 				pos += 3
 				isFirstWord = true
-			} else if ch == '&' && pos+1 < len(text) && text[pos+1] == 'l' {
+			case ch == '&' && pos+1 < len(text) && text[pos+1] == 'l':
 				// This is &lt; (escaped <)
 				h.addToken("operator", pos, pos+4)
 				pos += 3
@@ -80,25 +81,25 @@ func highlightShell(text string, offset int) []insertion {
 					state = shellHeredocMarker
 					wordStart = pos
 				}
-			} else if ch == '&' && pos+1 < len(text) && text[pos+1] == 'a' {
+			case ch == '&' && pos+1 < len(text) && text[pos+1] == 'a':
 				// This is &amp; (escaped &)
 				h.addToken("operator", pos, pos+5)
 				pos += 4
 				isFirstWord = true
-			} else if ch == '|' || ch == ';' {
+			case ch == '|' || ch == ';':
 				h.addToken("operator", pos, pos+1)
 				isFirstWord = true
-			} else if ch == '<' || ch == '>' {
+			case ch == '<' || ch == '>':
 				// Skip HTML tags entirely
 				for pos < len(text) && text[pos] != '>' {
 					pos++
 				}
 				// Don't highlight HTML tags
-			} else if ch == '-' && isFirstWord && sawPrompt {
+			case ch == '-' && isFirstWord && sawPrompt:
 				// This is a flag
 				wordStart = pos
 				state = shellWord
-			} else {
+			default:
 				// Start of a word
 				wordStart = pos
 				state = shellWord
@@ -110,20 +111,22 @@ func highlightShell(text string, offset int) []insertion {
 				// End of word
 				word := text[wordStart:pos]
 
-				if isFirstWord && sawPrompt {
-					if isShellKeyword(word) {
+				switch {
+				case isFirstWord && sawPrompt:
+					switch {
+					case isShellKeyword(word):
 						h.addToken("keyword", wordStart, pos)
-					} else if isShellBuiltin(word) {
+					case isShellBuiltin(word):
 						h.addToken("command", wordStart, pos)
-					} else {
+					default:
 						h.addToken("command", wordStart, pos)
 					}
 					isFirstWord = false
-				} else if len(word) > 0 && word[0] == '-' {
+				case len(word) > 0 && word[0] == '-':
 					h.addToken("flag", wordStart, pos)
-				} else if len(word) > 0 && word[0] == '$' {
+				case len(word) > 0 && word[0] == '$':
 					h.addToken("variable", wordStart, pos)
-				} else if len(word) > 0 {
+				case len(word) > 0:
 					h.addToken("argument", wordStart, pos)
 				}
 
@@ -164,13 +167,14 @@ func highlightShell(text string, offset int) []insertion {
 			}
 
 		case shellAfterWord:
-			if ch == ' ' || ch == '\t' {
+			switch ch {
+			case ' ', '\t':
 				// Skip whitespace
-			} else if ch == '\n' {
+			case '\n':
 				isFirstWord = true
 				sawPrompt = false
 				state = shellStart
-			} else {
+			default:
 				state = shellStart
 				pos-- // Reprocess
 			}
@@ -182,14 +186,15 @@ func highlightShell(text string, offset int) []insertion {
 			}
 
 		case shellDoubleQuote:
-			if escapeNext {
+			switch {
+			case escapeNext:
 				escapeNext = false
-			} else if ch == '\\' {
+			case ch == '\\':
 				escapeNext = true
-			} else if ch == '"' {
+			case ch == '"':
 				h.addToken("string", tokenStart, pos+1)
 				state = shellAfterWord
-			} else if ch == '$' && pos+1 < len(text) && isShellVarChar(text[pos+1]) {
+			case ch == '$' && pos+1 < len(text) && isShellVarChar(text[pos+1]):
 				// Variable inside double quotes
 				varStart := pos
 				pos++
@@ -201,11 +206,12 @@ func highlightShell(text string, offset int) []insertion {
 			}
 
 		case shellBacktick:
-			if escapeNext {
+			switch {
+			case escapeNext:
 				escapeNext = false
-			} else if ch == '\\' {
+			case ch == '\\':
 				escapeNext = true
-			} else if ch == '`' {
+			case ch == '`':
 				h.addToken("string", tokenStart, pos+1)
 				state = shellAfterWord
 			}
@@ -244,19 +250,21 @@ func highlightShell(text string, offset int) []insertion {
 		h.addToken("string", tokenStart, len(text))
 	case shellWord:
 		word := text[wordStart:]
-		if isFirstWord && sawPrompt {
-			if isShellKeyword(word) {
+		switch {
+		case isFirstWord && sawPrompt:
+			switch {
+			case isShellKeyword(word):
 				h.addToken("keyword", wordStart, len(text))
-			} else if isShellBuiltin(word) {
+			case isShellBuiltin(word):
 				h.addToken("command", wordStart, len(text))
-			} else {
+			default:
 				h.addToken("command", wordStart, len(text))
 			}
-		} else if word[0] == '-' {
+		case word[0] == '-':
 			h.addToken("flag", wordStart, len(text))
-		} else if word[0] == '$' {
+		case word[0] == '$':
 			h.addToken("variable", wordStart, len(text))
-		} else {
+		default:
 			h.addToken("argument", wordStart, len(text))
 		}
 	}

@@ -140,9 +140,10 @@ func highlightJSON(text string, offset int) []insertion {
 		case jsonKeyword:
 			if ch == ',' || ch == '}' || ch == ']' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 				keyword := text[tokenStart:pos]
-				if keyword == "true" || keyword == "false" {
+				switch keyword {
+				case "true", "false":
 					h.addToken("bool", tokenStart, pos)
-				} else if keyword == "null" {
+				case "null":
 					h.addToken("keyword", tokenStart, pos)
 				}
 				if ch == ',' {
@@ -231,9 +232,10 @@ func highlightJSON(text string, offset int) []insertion {
 		h.addToken("number", tokenStart, len(text))
 	case jsonKeyword:
 		keyword := text[tokenStart:]
-		if keyword == "true" || keyword == "false" {
+		switch keyword {
+		case "true", "false":
 			h.addToken("bool", tokenStart, len(text))
-		} else if keyword == "null" {
+		case "null":
 			h.addToken("keyword", tokenStart, len(text))
 		}
 	}
