@@ -114,7 +114,7 @@ func highlightShell(text string, offset int) []insertion {
 					if isShellKeyword(word) {
 						h.addToken("keyword", wordStart, pos)
 					} else if isShellBuiltin(word) {
-						h.addToken("builtin", wordStart, pos)
+						h.addToken("command", wordStart, pos)
 					} else {
 						h.addToken("command", wordStart, pos)
 					}
@@ -248,7 +248,7 @@ func highlightShell(text string, offset int) []insertion {
 			if isShellKeyword(word) {
 				h.addToken("keyword", wordStart, len(text))
 			} else if isShellBuiltin(word) {
-				h.addToken("builtin", wordStart, len(text))
+				h.addToken("command", wordStart, len(text))
 			} else {
 				h.addToken("command", wordStart, len(text))
 			}
