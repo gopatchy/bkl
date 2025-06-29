@@ -3156,8 +3156,9 @@ BKL</h1>
 <div>
 
 
-<bkl-code><key>b</key>: <number>2</number>
-<key>c</key>: <string>null</string>
+<bkl-code><key>$match</key>: <string>{}</string>
+<key>b</key>: <number>2</number>
+<key>c</key>: <string>$delete</string>
 <key>d</key>: <number>4</number></bkl-code>
 
 </div>
@@ -3192,7 +3193,8 @@ BKL</h1>
 <div>
 
 
-<bkl-code>- <key>c</key>: <number>3</number>
+<bkl-code>- <key>$match</key>: <string>{}</string>
+- <key>c</key>: <number>3</number>
 - <key>$delete</key>:
     <key>b</key>: <number>2</number></bkl-code>
 
@@ -3228,7 +3230,8 @@ BKL</h1>
 <div>
 
 
-<bkl-code>- <number>1</number>
+<bkl-code>- <key>$match</key>: <string>{}</string>
+- <number>1</number>
 - <number>3</number>
 - <key>$replace</key>: <bool>true</bool></bkl-code>
 

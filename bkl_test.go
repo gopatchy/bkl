@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -37,6 +38,7 @@ type TestSuite map[string]TestCase
 var (
 	testFilter  = flag.String("test.filter", "", "Run only specified tests from tests.toml (comma-separated list)")
 	testExclude = flag.String("test.exclude", "", "Exclude specified tests from tests.toml (comma-separated list)")
+	exportRegex = regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
 )
 
 func runTestCase(testCase TestCase) ([]byte, error) {
@@ -399,14 +401,13 @@ func TestDocumentationExamples(t *testing.T) {
 			example := item.Example
 			testName := fmt.Sprintf("%s_item%d", section.ID, itemIdx)
 
-			// Build test case from example
 			testCase := TestCase{
 				Description: fmt.Sprintf("Doc example from %s", section.Title),
 				Files:       map[string]string{},
 				Eval:        []string{},
+				Env:         map[string]string{},
 			}
 
-			// Build files and check that each layer has exactly one language
 			for i, layer := range example.Layers {
 				if len(layer.Languages) != 1 {
 					continue itemLoop
@@ -416,7 +417,6 @@ func TestDocumentationExamples(t *testing.T) {
 					continue itemLoop
 				}
 
-				// Build filename
 				filename := fmt.Sprintf("file%d", i)
 				if example.Operation == "evaluate" {
 					// For evaluate, files are layered
@@ -427,14 +427,27 @@ func TestDocumentationExamples(t *testing.T) {
 					}
 				}
 
-				// Add file extension based on format
 				filename += "." + layerLang
 
 				testCase.Files[filename] = layer.Code
-				testCase.Eval = []string{filename}
+
+				// Parse environment variables from # export comments
+				lines := strings.Split(layer.Code, "\n")
+				for _, line := range lines {
+					if matches := exportRegex.FindStringSubmatch(line); matches != nil {
+						testCase.Env[matches[1]] = matches[2]
+					}
+				}
+
+				// For diff and intersect operations, we need all files in eval list
+				if example.Operation == "diff" || example.Operation == "intersect" {
+					testCase.Eval = append(testCase.Eval, filename)
+				} else {
+					// For evaluate and required, only use the last file
+					testCase.Eval = []string{filename}
+				}
 			}
 
-			// Check result layer and get output format
 			if len(example.Result.Languages) != 1 {
 				continue itemLoop
 			}
@@ -443,7 +456,6 @@ func TestDocumentationExamples(t *testing.T) {
 				continue itemLoop
 			}
 
-			// Set operation flags
 			switch example.Operation {
 			case "diff":
 				testCase.Diff = true
@@ -453,11 +465,14 @@ func TestDocumentationExamples(t *testing.T) {
 				testCase.Required = true
 			}
 
+			// Special case for bklr tests - they need Required flag
+			if section.ID == "bklr" {
+				testCase.Required = true
+			}
+
 			t.Run(testName, func(t *testing.T) {
-				// Run the test
 				output, err := runTestCase(testCase)
 
-				// Check for expected error
 				expectedResult := strings.TrimSpace(example.Result.Code)
 				if expectedResult == "Error" {
 					if err == nil {
@@ -471,7 +486,6 @@ func TestDocumentationExamples(t *testing.T) {
 					return
 				}
 
-				// Compare output
 				if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(expectedResult))) {
 					t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedResult, output)
 				}
