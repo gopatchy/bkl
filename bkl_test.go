@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -375,5 +376,106 @@ func TestCLI(t *testing.T) {
 				t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", testCase.Expected, output)
 			}
 		})
+	}
+}
+
+func TestDocumentationExamples(t *testing.T) {
+	t.Parallel()
+
+	sections, err := bkl.GetDocSections()
+	if err != nil {
+		t.Fatalf("Failed to get doc sections: %v", err)
+	}
+
+	acceptableLanguages := []string{"yaml", "toml", "json"}
+
+	for _, section := range sections {
+	itemLoop:
+		for itemIdx, item := range section.Items {
+			if item.Example == nil {
+				continue
+			}
+
+			example := item.Example
+			testName := fmt.Sprintf("%s_item%d", section.ID, itemIdx)
+
+			// Build test case from example
+			testCase := TestCase{
+				Description: fmt.Sprintf("Doc example from %s", section.Title),
+				Files:       map[string]string{},
+				Eval:        []string{},
+			}
+
+			// Build files and check that each layer has exactly one language
+			for i, layer := range example.Layers {
+				if len(layer.Languages) != 1 {
+					continue itemLoop
+				}
+				layerLang := layer.Languages[0][1].(string)
+				if !slices.Contains(acceptableLanguages, layerLang) {
+					continue itemLoop
+				}
+
+				// Build filename
+				filename := fmt.Sprintf("file%d", i)
+				if example.Operation == "evaluate" {
+					// For evaluate, files are layered
+					if i == 0 {
+						filename = "base"
+					} else {
+						filename = fmt.Sprintf("base.layer%d", i)
+					}
+				}
+
+				// Add file extension based on format
+				filename += "." + layerLang
+
+				testCase.Files[filename] = layer.Code
+				testCase.Eval = []string{filename}
+			}
+
+			// Check result layer and get output format
+			if len(example.Result.Languages) != 1 {
+				continue itemLoop
+			}
+			testCase.Format = example.Result.Languages[0][1].(string)
+			if !slices.Contains(acceptableLanguages, testCase.Format) {
+				continue itemLoop
+			}
+
+			// Set operation flags
+			switch example.Operation {
+			case "diff":
+				testCase.Diff = true
+			case "intersect":
+				testCase.Intersect = true
+			case "required":
+				testCase.Required = true
+			}
+
+			t.Run(testName, func(t *testing.T) {
+				// Run the test
+				output, err := runTestCase(testCase)
+
+				// Check for expected error
+				expectedResult := strings.TrimSpace(example.Result.Code)
+				if expectedResult == "Error" {
+					if err == nil {
+						t.Errorf("Expected error but got none\nOutput: %s", output)
+					}
+					return
+				}
+
+				if err != nil {
+					t.Errorf("Unexpected error: %v\nOutput: %s", err, output)
+					return
+				}
+
+				// Compare output
+				if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(expectedResult))) {
+					t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedResult, output)
+				}
+			})
+		}
 	}
 }
