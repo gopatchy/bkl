@@ -1570,7 +1570,7 @@
           b: 2                            &lt;
           c: 3                              c: 3
         languages: [[0, "shell"], [1, "diff"], [8, "shell"], [9, "diff"]]
-        highlights: ["diff -ud --color", "(bkl a.yaml)", "(bkl b.yaml)", "-b: 2", "diff -y --color", "&lt;"]
+        highlights: ["diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)", "diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)"]
 
 - id: migrate
   title: Migrate
