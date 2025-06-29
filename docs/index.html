@@ -700,7 +700,336 @@ class BklCode extends HTMLElement {
   }
   
   highlightToml(text, startOffset, insertions) {
+    let state = 'lineStart';
+    let tokenStart = 0;
+    let quoteChar = '';
+    let escapeNext = false;
+    let bracketDepth = 0;
     
+    const addToken = (type, start, end) => {
+      
+      insertions.push({pos: startOffset + start, text: `<${type}>`, priority: 1});
+      insertions.push({pos: startOffset + end, text: `</${type}>`, priority: 1});
+    };
+    
+    for (let pos = 0; pos < text.length; pos++) {
+      const ch = text[pos];
+      
+      switch (state) {
+        case 'lineStart':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === '[') {
+            tokenStart = pos;
+            bracketDepth = 1;
+            state = 'section';
+          } else if (ch === '\n') {
+            
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'keyString';
+          } else {
+            tokenStart = pos;
+            state = 'key';
+          }
+          break;
+          
+        case 'section':
+          if (ch === '[') {
+            bracketDepth++;
+          } else if (ch === ']') {
+            bracketDepth--;
+            if (bracketDepth === 0) {
+              addToken('key', tokenStart, pos + 1);
+              state = 'afterSection';
+            }
+          } else if (ch === '\n') {
+            
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'afterSection':
+          if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch !== ' ' && ch !== '\t') {
+            
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'key':
+          if (ch === '=') {
+            addToken('key', tokenStart, pos);
+            state = 'afterEquals';
+          } else if (ch === '\n') {
+            
+            state = 'lineStart';
+          } else if (ch === ' ' || ch === '\t') {
+            
+            addToken('key', tokenStart, pos);
+            state = 'beforeEquals';
+          }
+          break;
+          
+        case 'keyString':
+          if (escapeNext) {
+            escapeNext = false;
+          } else if (ch === '\\') {
+            escapeNext = true;
+          } else if (ch === quoteChar) {
+            state = 'afterKeyString';
+          } else if (ch === '\n' && quoteChar === "'") {
+            
+            addToken('key', tokenStart, pos);
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'afterKeyString':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '=') {
+            addToken('key', tokenStart, pos);
+            state = 'afterEquals';
+          } else if (ch === '\n') {
+            addToken('key', tokenStart, pos);
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'beforeEquals':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '=') {
+            state = 'afterEquals';
+          } else if (ch === '\n') {
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'afterEquals':
+          if (ch === ' ' || ch === '\t') {
+            
+          } else if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'valueString';
+          } else if (ch === '[') {
+            tokenStart = pos;
+            state = 'array';
+          } else if (ch === '{') {
+            tokenStart = pos;
+            state = 'inlineTable';
+          } else if ((ch >= '0' && ch <= '9') || ch === '-' || ch === '+') {
+            tokenStart = pos;
+            state = 'number';
+          } else if (ch === 't' || ch === 'f') {
+            tokenStart = pos;
+            state = 'boolean';
+          } else {
+            tokenStart = pos;
+            state = 'bareString';
+          }
+          break;
+          
+        case 'valueString':
+          if (escapeNext) {
+            escapeNext = false;
+          } else if (ch === '\\') {
+            escapeNext = true;
+          } else if (ch === quoteChar) {
+            addToken('string', tokenStart, pos + 1);
+            state = 'afterValue';
+          } else if (ch === '\n' && quoteChar === "'") {
+            
+            addToken('string', tokenStart, pos);
+            state = 'lineStart';
+          }
+          break;
+          
+        case 'bareString':
+          if (ch === '\n' || ch === '#' || ch === ',' || ch === ']' || ch === '}') {
+            addToken('string', tokenStart, pos);
+            if (ch === '\n') {
+              state = 'lineStart';
+            } else if (ch === '#') {
+              tokenStart = pos;
+              state = 'comment';
+            } else if (ch === ',') {
+              state = 'afterComma';
+            } else {
+              state = 'inValue';
+            }
+          }
+          break;
+          
+        case 'number':
+          if (ch === '\n' || ch === '#' || ch === ',' || ch === ']' || ch === '}' || ch === ' ' || ch === '\t') {
+            addToken('number', tokenStart, pos);
+            if (ch === '\n') {
+              state = 'lineStart';
+            } else if (ch === '#') {
+              tokenStart = pos;
+              state = 'comment';
+            } else if (ch === ',') {
+              state = 'afterComma';
+            } else if (ch === ']' || ch === '}') {
+              state = 'inValue';
+            } else {
+              state = 'afterValue';
+            }
+          } else if ((ch >= '0' && ch <= '9') || ch === '.' || ch === 'e' || ch === 'E' || ch === '+' || ch === '-' || ch === '_' || ch === ':' || ch === 'T' || ch === 'Z') {
+            
+          } else {
+            
+            addToken('number', tokenStart, pos);
+            state = 'afterValue';
+          }
+          break;
+          
+        case 'boolean':
+          if (ch === '\n' || ch === '#' || ch === ',' || ch === ']' || ch === '}' || ch === ' ' || ch === '\t') {
+            const value = text.substring(tokenStart, pos);
+            if (value === 'true' || value === 'false') {
+              addToken('bool', tokenStart, pos);
+            }
+            if (ch === '\n') {
+              state = 'lineStart';
+            } else if (ch === '#') {
+              tokenStart = pos;
+              state = 'comment';
+            } else if (ch === ',') {
+              state = 'afterComma';
+            } else if (ch === ']' || ch === '}') {
+              state = 'inValue';
+            } else {
+              state = 'afterValue';
+            }
+          } else if (ch >= 'a' && ch <= 'z') {
+            
+          } else {
+            
+            state = 'bareString';
+          }
+          break;
+          
+        case 'array':
+          if (ch === ']') {
+            state = 'afterValue';
+          } else if (ch === ' ' || ch === '\t' || ch === '\n') {
+            
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'valueString';
+          } else if (ch === '[') {
+            
+          } else if ((ch >= '0' && ch <= '9') || ch === '-' || ch === '+') {
+            tokenStart = pos;
+            state = 'number';
+          } else if (ch === 't' || ch === 'f') {
+            tokenStart = pos;
+            state = 'boolean';
+          } else {
+            tokenStart = pos;
+            state = 'bareString';
+          }
+          break;
+          
+        case 'inlineTable':
+          
+          if (ch === '}') {
+            state = 'afterValue';
+          }
+          break;
+          
+        case 'afterComma':
+          if (ch === ' ' || ch === '\t' || ch === '\n') {
+            
+          } else if (ch === '"' || ch === "'") {
+            tokenStart = pos;
+            quoteChar = ch;
+            state = 'valueString';
+          } else if ((ch >= '0' && ch <= '9') || ch === '-' || ch === '+') {
+            tokenStart = pos;
+            state = 'number';
+          } else if (ch === 't' || ch === 'f') {
+            tokenStart = pos;
+            state = 'boolean';
+          } else {
+            tokenStart = pos;
+            state = 'bareString';
+          }
+          break;
+          
+        case 'afterValue':
+          if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === '#') {
+            tokenStart = pos;
+            state = 'comment';
+          } else if (ch === ',') {
+            state = 'afterComma';
+          } else if (ch === ']' || ch === '}') {
+            state = 'afterValue';
+          }
+          break;
+          
+        case 'inValue':
+          
+          if (ch === '\n') {
+            state = 'lineStart';
+          } else if (ch === ']' || ch === '}') {
+            state = 'afterValue';
+          } else if (ch === ',') {
+            state = 'afterComma';
+          }
+          break;
+          
+        case 'comment':
+          if (ch === '\n') {
+            addToken('comment', tokenStart, pos);
+            state = 'lineStart';
+          }
+          break;
+      }
+    }
+    
+    
+    if (state === 'comment') {
+      addToken('comment', tokenStart, text.length);
+    } else if (state === 'valueString' || state === 'keyString') {
+      addToken('string', tokenStart, text.length);
+    } else if (state === 'bareString') {
+      addToken('string', tokenStart, text.length);
+    } else if (state === 'number') {
+      addToken('number', tokenStart, text.length);
+    } else if (state === 'boolean') {
+      const value = text.substring(tokenStart);
+      if (value === 'true' || value === 'false') {
+        addToken('bool', tokenStart, text.length);
+      }
+    } else if (state === 'key') {
+      addToken('key', tokenStart, text.length);
+    } else if (state === 'section') {
+      addToken('key', tokenStart, text.length);
+    }
   }
   
   highlightJson(text, startOffset, insertions) {
