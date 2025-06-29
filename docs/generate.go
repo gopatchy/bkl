@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gopatchy/bkl"
@@ -123,8 +124,15 @@ func formatNote(note string) template.HTML {
 func formatLayer(layer bkl.DocLayer) template.HTML {
 	code := strings.TrimSpace(layer.Code)
 
+	// Sort highlights from longest to shortest to avoid overlapping replacements
+	highlights := make([]string, len(layer.Highlights))
+	copy(highlights, layer.Highlights)
+	slices.SortFunc(highlights, func(a, b string) int {
+		return len(b) - len(a) // Sort by length descending
+	})
+
 	// Apply highlights
-	for _, highlight := range layer.Highlights {
+	for _, highlight := range highlights {
 		code = strings.ReplaceAll(code, highlight, "<highlight>"+highlight+"</highlight>")
 	}
 
