@@ -35,7 +35,7 @@ type DocSection struct {
 type DocItem struct {
 	Content    string         `yaml:"content,omitempty"`
 	Example    *DocExample    `yaml:"example,omitempty"`
-	Code       *DocLayer      `yaml:"code,omitempty"` // For simple code examples
+	Code       *DocLayer      `yaml:"code,omitempty"`         // For simple code examples
 	SideBySide *DocSideBySide `yaml:"side_by_side,omitempty"` // For special two-column layout
 }
 
@@ -51,10 +51,10 @@ type DocExample struct {
 }
 
 type DocLayer struct {
-	Label      string      `yaml:"label,omitempty"`
-	Code       string      `yaml:"code"`
-	Highlights []string    `yaml:"highlights,omitempty"`
-	Languages  [][]any     `yaml:"languages,omitempty"` // List of [line, language] pairs
+	Label      string   `yaml:"label,omitempty"`
+	Code       string   `yaml:"code"`
+	Highlights []string `yaml:"highlights,omitempty"`
+	Languages  [][]any  `yaml:"languages,omitempty"` // List of [line, language] pairs
 }
 
 func GetTests() (map[string]*TestCase, error) {

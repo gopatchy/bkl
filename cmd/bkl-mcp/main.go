@@ -174,7 +174,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 
 		matchingContent := []string{}
 		for _, item := range section.Items {
-			if item.Type == "text" {
+			if item.Content != "" {
 				contentLower := strings.ToLower(item.Content)
 				contentMatches := countKeywordMatches(contentLower, normalizedKeywords)
 				if contentMatches > 0 {
@@ -195,29 +195,41 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 					matchingContent = append(matchingContent, content)
 				}
 			}
-			if item.Type == "example" {
-				if item.Example.Type == "grid" {
-					for _, row := range item.Example.Rows {
-						for _, gridItem := range row.Items {
-							codeMatches := countKeywordMatches(strings.ToLower(gridItem.Code), normalizedKeywords)
-							labelMatches := countKeywordMatches(strings.ToLower(gridItem.Label), normalizedKeywords)
-							if codeMatches > 0 || labelMatches > 0 {
-								score += (codeMatches + labelMatches) * 5
-								if gridItem.Label != "" {
-									details["example_label"] = gridItem.Label
-								}
-								break
-							}
+			if item.Example != nil {
+				// Check example layers
+				for _, layer := range item.Example.Layers {
+					codeMatches := countKeywordMatches(strings.ToLower(layer.Code), normalizedKeywords)
+					labelMatches := countKeywordMatches(strings.ToLower(layer.Label), normalizedKeywords)
+					if codeMatches > 0 || labelMatches > 0 {
+						score += (codeMatches + labelMatches) * 5
+						if layer.Label != "" {
+							details["example_label"] = layer.Label
 						}
+						break
 					}
-				} else {
-					codeMatches := countKeywordMatches(strings.ToLower(item.Example.Code), normalizedKeywords)
-					if codeMatches > 0 {
-						score += codeMatches * 5
-						if item.Example.Label != "" {
-							details["example_label"] = item.Example.Label
-						}
+				}
+				// Also check result layer
+				resultMatches := countKeywordMatches(strings.ToLower(item.Example.Result.Code), normalizedKeywords)
+				if resultMatches > 0 {
+					score += resultMatches * 5
+				}
+			}
+			// Check simple code blocks
+			if item.Code != nil {
+				codeMatches := countKeywordMatches(strings.ToLower(item.Code.Code), normalizedKeywords)
+				if codeMatches > 0 {
+					score += codeMatches * 5
+					if item.Code.Label != "" {
+						details["example_label"] = item.Code.Label
 					}
+				}
+			}
+			// Check side-by-side code blocks
+			if item.SideBySide != nil {
+				leftMatches := countKeywordMatches(strings.ToLower(item.SideBySide.Left.Code), normalizedKeywords)
+				rightMatches := countKeywordMatches(strings.ToLower(item.SideBySide.Right.Code), normalizedKeywords)
+				if leftMatches > 0 || rightMatches > 0 {
+					score += (leftMatches + rightMatches) * 5
 				}
 			}
 		}
