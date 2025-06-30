@@ -12,12 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// TemplateData holds all data for the template
 type TemplateData struct {
-	IntroText1 string
-	IntroText2 string
-	Badges     string
-	Sections   []bkl.DocSection
+	Sections []bkl.DocSection
 }
 
 func main() {
