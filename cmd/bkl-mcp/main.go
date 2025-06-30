@@ -977,6 +977,16 @@ This guide helps you convert Kubernetes manifests to bkl format for better confi
 ## Prerequisites
 - Install kubectl-neat: https://github.com/itaysk/kubectl-neat
 - Have access to your Kubernetes cluster or manifest files
+- Use the bkl-mcp MCP server for evaluation (NOT the bkl CLI directly)
+
+## Important: Use Filename-Based Layering, NOT $parent
+
+**CRITICAL**: bkl uses filename patterns for automatic inheritance. DO NOT use $parent directives unless absolutely necessary!
+
+Instead of using $parent, use these filename patterns:
+- Base layer: ` + "`myapp.yaml`" + `
+- Staging overrides: ` + "`myapp.staging.yaml`" + ` (automatically inherits from myapp.yaml)
+- Dev overrides: ` + "`myapp.staging.dev.yaml`" + ` (inherits from both in order)
 
 ## Phase 1: Clean Up Kubernetes Manifests
 
@@ -1105,26 +1115,54 @@ spec:
 ` + "```" + `
 
 ### 6. Validate Results
-Compare the evaluated output with original files:
+Compare the evaluated output with original files using the bkl-mcp MCP server:
+
+**IMPORTANT**: Always use the bkl-mcp MCP server for evaluation, NOT the bkl CLI directly!
+
 ` + "```" + `bash
 # Test that converted layers produce original staging config
+# Use the bkl-mcp evaluate function through your MCP client
 mcp call bkl-mcp evaluate \
-  --files "converted.myapp.yaml,converted.myapp.prod.yaml,converted.myapp.prod.staging.yaml" \
+  --files "myapp.yaml,myapp.staging.yaml" \
   --fileSystem '{
-    "converted.myapp.yaml": "...",
-    "converted.myapp.prod.yaml": "...",
-    "converted.myapp.prod.staging.yaml": "..."
+    "myapp.yaml": "...",
+    "myapp.staging.yaml": "..."
   }' \
+  --environment '{"DATABASE_HOST": "postgres-staging.myapp-staging.svc.cluster.local"}' \
   --format yaml
 ` + "```" + `
+
+Note: The evaluate function automatically handles filename-based inheritance. List files in inheritance order.
 
 ### 7. Iterate and Refine
 - If outputs don't match, adjust layer content
 - Consider moving common patterns to base layer
-- Use $parent for explicit inheritance when needed
+- Avoid $parent - use filename-based inheritance instead
 - Ensure layers are human-readable and maintainable
 
 ## Kubernetes-Specific Tips:
+
+### Working with Environments
+Instead of creating custom variables, leverage Kubernetes' built-in fields:
+` + "```" + `yaml
+# myapp.yaml
+metadata:
+  namespace: myapp-prod
+  labels:
+    environment: prod
+    
+# Reference these in other resources:
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        env:
+        - name: ENVIRONMENT
+          value: prod
+        - name: DB_HOST
+          value: postgres.myapp-prod.svc.cluster.local
+` + "```" + `
 
 ### Container Images
 ` + "```" + `yaml
@@ -1168,24 +1206,57 @@ resources:
 ### Multi-Document Files
 Split Kubernetes multi-document YAML files by resource type before converting for better organization.
 
+### File Organization Best Practices
+1. **Separate by logical component**: Create files for each service/component
+   - ` + "`api.yaml`" + ` - API service, deployment, configmap
+   - ` + "`web.yaml`" + ` - Web/frontend service and deployment
+   - ` + "`database.yaml`" + ` - Database statefulset/deployment and service
+   - ` + "`ingress.yaml`" + ` - Ingress rules
+   - ` + "`monitoring.yaml`" + ` - ServiceMonitor, alerts, etc.
+
+2. **Layer by environment using filenames**:
+   - ` + "`api.yaml`" + ` - Base configuration (production)
+   - ` + "`api.staging.yaml`" + ` - Staging overrides only
+   - ` + "`api.staging.dev.yaml`" + ` - Dev overrides only
+
+3. **Use $output: false to exclude resources from specific environments**:
+   ` + "```" + `yaml
+   # ingress.staging.dev.yaml
+   # No ingress in dev environment
+   $output: false
+   ` + "```" + `
+
 ## Example Workflow:
-1. Start with: original.myapp.prod.yaml, original.myapp.staging.yaml, original.myapp.dev.yaml
-2. Use production configuration as base → copy original.myapp.prod.yaml to converted.myapp.yaml
-3. Add interpolation patterns to base (namespace, image tags, etc.)
-4. Use diff to create upper layers:
-   - converted.myapp.prod.yaml (usually empty since base = prod)
-   - converted.myapp.prod.staging.yaml (staging differences from prod)
-   - converted.myapp.prod.staging.dev.yaml (dev differences from staging)
-5. Mark secrets as $env:SECRET_NAME or reference secretKeyRef
-6. Validate each combination produces original output
-7. Test with: ` + "`kubectl bkl diff converted.*.yaml`" + `
+1. Start with cleaned K8s manifests: original.myapp.prod.yaml, original.myapp.staging.yaml, original.myapp.dev.yaml
+2. Split resources into logical files: api.yaml, web.yaml, database.yaml, etc.
+3. Use production configuration as base in each file
+4. Identify patterns that change between environments (namespaces, replicas, resources)
+5. Create environment-specific overrides using filename layering:
+   - ` + "`api.yaml`" + ` - Base configuration (production values)
+   - ` + "`api.staging.yaml`" + ` - Only staging differences
+   - ` + "`api.staging.dev.yaml`" + ` - Only dev differences from staging
+6. Mark secrets as $env:SECRET_NAME or use secretKeyRef
+7. Validate using bkl-mcp evaluate (NOT the CLI)
 
 ## Common Patterns:
-1. **Namespace patterns**: ` + "`$\"myapp-{environment}\"`" + `
-2. **Service discovery**: ` + "`$\"api-service.{namespace}.svc.cluster.local\"`" + `
-3. **Ingress hosts**: ` + "`$\"{environment}.myapp.com\"`" + ` or ` + "`$required`" + ` for custom domains
+1. **Namespace differences**: Each environment typically uses different namespaces
+   - Base: ` + "`namespace: myapp-prod`" + `
+   - Staging override: ` + "`namespace: myapp-staging`" + `
+   - Dev override: ` + "`namespace: myapp-dev`" + `
+2. **Service discovery**: Update service references per environment
+   - Base: ` + "`postgres.myapp-prod.svc.cluster.local`" + `
+   - Override: ` + "`postgres.myapp-staging.svc.cluster.local`" + `
+3. **Ingress hosts**: Different domains per environment or ` + "`$required`" + ` for custom domains
 4. **Replica counts**: Base=prod values, reduce for lower environments
 5. **Resource limits**: Progressive reduction from prod→staging→dev
+6. **Removing features**: Use ` + "`$delete`" + ` to remove fields in lower environments
+7. **Replacing resources**: Use ` + "`$replace`" + ` to change resource types (e.g., StatefulSet → Deployment)
+
+## Common Pitfalls to Avoid:
+1. **Don't use $parent** - Use filename-based inheritance instead
+2. **Don't use the bkl CLI for testing** - Use bkl-mcp evaluate through MCP
+3. **Don't forget environment variables** - Pass required env vars to evaluate function
+4. **Don't over-abstract** - Keep configurations readable and maintainable
 
 Note: kubectl-neat removes default values, null/empty fields, server-generated fields, and kubectl annotations - perfect for bkl conversion!`
 
