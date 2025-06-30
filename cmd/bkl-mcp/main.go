@@ -978,12 +978,9 @@ This guide helps you convert Kubernetes manifests to bkl format for better confi
 - Install kubectl-neat: https://github.com/itaysk/kubectl-neat
 - Have access to your Kubernetes cluster or manifest files
 
-## Steps:
+## Phase 1: Clean Up Kubernetes Manifests
 
-### 1. Clean Up Kubernetes Manifests
-Use kubectl-neat to remove clutter and reduce manifests to their essential configuration:
-
-#### For live cluster resources:
+### For live cluster resources:
 ` + "```" + `bash
 # Export a single resource
 kubectl get deployment myapp -o yaml | kubectl neat > original.myapp.prod.yaml
@@ -995,7 +992,7 @@ kubectl get deployment -o yaml | kubectl neat > original.deployments.prod.yaml
 kubectl get all -n production -o yaml | kubectl neat > original.all.prod.yaml
 ` + "```" + `
 
-#### For existing manifest files:
+### For existing manifest files:
 ` + "```" + `bash
 # Clean up existing manifests
 kubectl neat -f messy-manifest.yaml > original.myapp.prod.yaml
@@ -1006,7 +1003,7 @@ for f in *.yaml; do
 done
 ` + "```" + `
 
-### 2. Organize by Environment
+### Organize by Environment
 If you have multiple environments, export cleaned manifests for each:
 ` + "```" + `bash
 # Production
@@ -1019,26 +1016,54 @@ kubectl get deployment myapp -n staging -o yaml | kubectl neat > original.myapp.
 kubectl get deployment myapp -n development -o yaml | kubectl neat > original.myapp.dev.yaml
 ` + "```" + `
 
-### 3. Convert to bkl Format
-Once you have clean YAML files, use the convert_to_bkl prompt for the remaining steps:
+## Phase 2: Convert to bkl Format
+
+### 1. Determine Layer Ordering
+- Use production as the base layer (bottom)
+- Stack environments in order: prod → staging → dev
+- This shows each environment as differences from production
+- Encourages environments to stay similar to production
+
+### 2. Find Common Base Values (if multiple services)
+For files at the same level (e.g., multiple services in prod):
 ` + "```" + `bash
-mcp call bkl-mcp convert_to_bkl
+# Find common values between original production configs
+mcp call bkl-mcp intersect \
+  --files "original.service1.prod.yaml,original.service2.prod.yaml" \
+  --fileSystem '{
+    "original.service1.prod.yaml": "...",
+    "original.service2.prod.yaml": "..."
+  }'
 ` + "```" + `
 
-This will guide you through:
-- Using production as the base layer
-- Creating environment-specific difference layers
-- Adding interpolation patterns for common values
-- Handling secrets with $env references
-- Validating the converted configuration
+### 3. Generate Layer Differences
+Once you have the base layer, create upper layers using diff:
+` + "```" + `bash
+# Generate staging differences from prod base
+mcp call bkl-mcp diff \
+  --baseFile "converted.myapp.yaml" \
+  --targetFile "original.myapp.staging.yaml" \
+  --fileSystem '{
+    "converted.myapp.yaml": "...",
+    "original.myapp.staging.yaml": "..."
+  }'
+` + "```" + `
 
-## Kubernetes-Specific Tips:
+### 4. Optimize with Patterns
+When many values follow patterns across environments:
+- Use string interpolation ($"") to derive values from variables
+- Use $merge when combining multiple configuration sources
 
-### Container Images
-Use string interpolation for image tags:
+Example:
 ` + "```" + `yaml
 # converted.myapp.yaml
+environment: prod
+namespace: $"myapp-{environment}"
 image_tag: $env:IMAGE_TAG
+
+metadata:
+  name: myapp
+  namespace: $"{namespace}"
 
 spec:
   template:
@@ -1046,73 +1071,123 @@ spec:
       containers:
       - name: myapp
         image: $"myregistry.com/myapp:{image_tag}"
+
+# converted.myapp.prod.yaml
+# Empty or minimal - production uses base values
+
+# converted.myapp.prod.staging.yaml
+environment: staging  # Changes namespace and all interpolated values
 ` + "```" + `
 
-### Resource Names and Namespaces
+### 5. Handle Secrets and Required Fields
+Mark fields based on how they're managed:
 ` + "```" + `yaml
 # converted.myapp.yaml
-environment: prod
-namespace: $"myapp-{environment}"
-
-metadata:
-  name: myapp
-  namespace: $"{namespace}"
-` + "```" + `
-
-### ConfigMaps and Secrets
-Reference from environment or mark as required:
-` + "```" + `yaml
-# converted.myapp.yaml
+# For secrets from environment/secret store:
 spec:
   template:
     spec:
       containers:
       - name: myapp
         env:
-        - name: DATABASE_URL
+        - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: $required  # Or specific pattern like $"myapp-{environment}-secrets"
-              key: database-url
+              name: database-secrets
+              key: password
+        - name: API_KEY
+          value: $env:API_KEY
+
+# For values that must be manually configured per environment:
+spec:
+  ingress:
+    host: $required
+` + "```" + `
+
+### 6. Validate Results
+Compare the evaluated output with original files:
+` + "```" + `bash
+# Test that converted layers produce original staging config
+mcp call bkl-mcp evaluate \
+  --files "converted.myapp.yaml,converted.myapp.prod.yaml,converted.myapp.prod.staging.yaml" \
+  --fileSystem '{
+    "converted.myapp.yaml": "...",
+    "converted.myapp.prod.yaml": "...",
+    "converted.myapp.prod.staging.yaml": "..."
+  }' \
+  --format yaml
+` + "```" + `
+
+### 7. Iterate and Refine
+- If outputs don't match, adjust layer content
+- Consider moving common patterns to base layer
+- Use $parent for explicit inheritance when needed
+- Ensure layers are human-readable and maintainable
+
+## Kubernetes-Specific Tips:
+
+### Container Images
+` + "```" + `yaml
+# Use environment variable for tag
+image_tag: $env:IMAGE_TAG
+image: $"myregistry.com/myapp:{image_tag}"
+
+# Or use environment-based tags
+image_tag: v1.0.0  # prod default
+image: $"myregistry.com/myapp:{image_tag}"
 ` + "```" + `
 
 ### Resource Limits
 Use base values with environment overrides:
 ` + "```" + `yaml
-# converted.myapp.yaml
+# converted.myapp.yaml (prod base)
 resources:
   requests:
-    memory: "256Mi"
-    cpu: "100m"
-  limits:
     memory: "512Mi"
     cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
 
 # converted.myapp.prod.staging.yaml
 resources:
   requests:
-    memory: "128Mi"  # Lower for staging
-    cpu: "50m"
+    memory: "256Mi"  # Lower for staging
+    cpu: "200m"
+  limits:
+    memory: "512Mi"
+    cpu: "400m"
+
+# converted.myapp.prod.staging.dev.yaml
+resources:
+  requests:
+    memory: "128Mi"  # Even lower for dev
+    cpu: "100m"
 ` + "```" + `
 
-## Common Patterns:
-1. **Multi-document files**: Split into separate files before converting
-2. **Helm templates**: Extract rendered values first with ` + "`helm template`" + `
-3. **Kustomize**: Use ` + "`kubectl kustomize`" + ` to render before cleaning with neat
-4. **Large manifests**: Focus on one resource type at a time
+### Multi-Document Files
+Split Kubernetes multi-document YAML files by resource type before converting for better organization.
 
 ## Example Workflow:
-1. Export and clean: ` + "`kubectl get deploy,svc,ingress -o yaml | kubectl neat > original.resources.prod.yaml`" + `
-2. Split by resource type if needed
-3. Repeat for other environments
-4. Follow convert_to_bkl process
-5. Test with: ` + "`bkl converted.*.yaml | kubectl diff -f -`" + `
+1. Start with: original.myapp.prod.yaml, original.myapp.staging.yaml, original.myapp.dev.yaml
+2. Use production configuration as base → copy original.myapp.prod.yaml to converted.myapp.yaml
+3. Add interpolation patterns to base (namespace, image tags, etc.)
+4. Use diff to create upper layers:
+   - converted.myapp.prod.yaml (usually empty since base = prod)
+   - converted.myapp.prod.staging.yaml (staging differences from prod)
+   - converted.myapp.prod.staging.dev.yaml (dev differences from staging)
+5. Mark secrets as $env:SECRET_NAME or reference secretKeyRef
+6. Validate each combination produces original output
+7. Test with: ` + "`kubectl bkl diff converted.*.yaml`" + `
 
-Note: kubectl-neat removes:
-- Default values
-- Null/empty fields  
-- Server-generated fields (like status, metadata.uid)
-- Kubectl last-applied-configuration annotations`
+## Common Patterns:
+1. **Namespace patterns**: ` + "`$\"myapp-{environment}\"`" + `
+2. **Service discovery**: ` + "`$\"api-service.{namespace}.svc.cluster.local\"`" + `
+3. **Ingress hosts**: ` + "`$\"{environment}.myapp.com\"`" + ` or ` + "`$required`" + ` for custom domains
+4. **Replica counts**: Base=prod values, reduce for lower environments
+5. **Resource limits**: Progressive reduction from prod→staging→dev
+
+Note: kubectl-neat removes default values, null/empty fields, server-generated fields, and kubectl annotations - perfect for bkl conversion!`
 
 	return mcp.NewToolResultText(prompt), nil
 }
