@@ -6,29 +6,22 @@ import (
 	"runtime/debug"
 
 	"github.com/gopatchy/bkl"
+	"github.com/gopatchy/bkl/pkg/version"
 	"github.com/jessevdk/go-flags"
 )
 
 type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"jsonl" choice:"toml" choice:"yaml"`
+	Version      bool            `short:"v" long:"version" description:"print version and exit"`
 
 	Positional struct {
-		InputPath flags.Filename `positional-arg-name:"layerPath" required:"true" description:"lower layer file path"`
+		InputPath flags.Filename `positional-arg-name:"layerPath" description:"lower layer file path"`
 	} `positional-args:"yes"`
 }
 
 func main() {
 	debug.SetGCPercent(-1)
-	if os.Getenv("BKL_VERSION") != "" {
-		bi, ok := debug.ReadBuildInfo()
-		if !ok {
-			fatal(fmt.Errorf("ReadBuildInfo() failed"))
-		}
-
-		fmt.Printf("%s", bi)
-		os.Exit(0)
-	}
 
 	opts := &options{}
 
@@ -40,6 +33,13 @@ See https://bkl.gopatchy.io/#bklr for detailed documentation.`
 
 	_, err := fp.Parse()
 	if err != nil {
+		os.Exit(1)
+	}
+
+	version.PrintVersion(opts.Version)
+
+	if opts.Positional.InputPath == "" {
+		fp.WriteHelp(os.Stderr)
 		os.Exit(1)
 	}
 
