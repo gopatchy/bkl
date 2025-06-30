@@ -1,6 +1,20 @@
 # bkl Documentation Sections
 # Ordered list of documentation sections
 
+- id: bkl
+  title: BKL
+  items:
+    - content: |
+        bkl is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.
+    - content: |
+        Write your configuration in your favorite format: <a href="https://json.org/">JSON</a>, <a href="https://yaml.org/">YAML</a>, or <a href="https://toml.io/">TOML</a>. Layer configurations on top of each other, even from different file formats. Use filenames to define the inheritance. Have as many layers as you like. bkl merges your layers together with sane default behavior that you can override. Export your results in any supported format for human or machine consumption. Use the CLI directly or in scripts or automate with the <a href="https://pkg.go.dev/github.com/gopatchy/bkl">library</a>.
+
+        <p>
+          <a href="https://pkg.go.dev/github.com/gopatchy/bkl"><img src="go-reference.svg" alt="Go Reference"></a>
+          <a href="https://github.com/gopatchy/bkl/"><img alt="GitHub: bkl" src="github-bkl.svg"></a>
+          <a href="https://discord.gg/TyDAmqkz3m"><img alt="Discord: bkl" src="discord-bkl.svg"></a>
+        </p>
+
 - id: example
   title: Example
   items:
