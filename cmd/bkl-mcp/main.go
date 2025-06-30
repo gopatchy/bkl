@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"os"
 	"sort"
 	"strings"
 	"testing/fstest"
@@ -52,8 +53,7 @@ func main() {
 		mcp.Description("Output format (yaml, json, toml) - will auto-detect if not specified"),
 	)
 	fileSystemParam := mcp.WithObject("fileSystem",
-		mcp.Required(),
-		mcp.Description("Map of filename to file content for the operation"),
+		mcp.Description("Map of filename to file content. If not provided, uses actual filesystem in current directory"),
 	)
 
 	queryTool := mcp.NewTool("query",
@@ -89,6 +89,9 @@ func main() {
 			mcp.Description("Environment variables as key-value pairs"),
 		),
 		fileSystemParam,
+		mcp.WithString("workingDir",
+			mcp.Description("Working directory for file operations (default: current directory)"),
+		),
 	)
 	mcpServer.AddTool(evaluateTool, evaluateHandler)
 
@@ -104,6 +107,9 @@ func main() {
 		),
 		formatParam,
 		fileSystemParam,
+		mcp.WithString("workingDir",
+			mcp.Description("Working directory for file operations (default: current directory)"),
+		),
 	)
 	mcpServer.AddTool(diffTool, diffHandler)
 
@@ -115,6 +121,9 @@ func main() {
 		),
 		formatParam,
 		fileSystemParam,
+		mcp.WithString("workingDir",
+			mcp.Description("Working directory for file operations (default: current directory)"),
+		),
 	)
 	mcpServer.AddTool(intersectTool, intersectHandler)
 
@@ -126,6 +135,9 @@ func main() {
 		),
 		formatParam,
 		fileSystemParam,
+		mcp.WithString("workingDir",
+			mcp.Description("Working directory for file operations (default: current directory)"),
+		),
 	)
 	mcpServer.AddTool(requiredTool, requiredHandler)
 
@@ -514,7 +526,7 @@ func findFirstKeyword(text string, keywords []string) string {
 func parseFileSystem(args map[string]any) (map[string]string, error) {
 	fileSystemRaw := args["fileSystem"]
 	if fileSystemRaw == nil {
-		return nil, fmt.Errorf("fileSystem parameter is required")
+		return nil, nil
 	}
 
 	fileSystemMap, ok := fileSystemRaw.(map[string]any)
@@ -552,6 +564,17 @@ func createTestFS(fileSystem map[string]string) (fs.FS, error) {
 	}
 
 	return fsys, nil
+}
+
+func getFileSystem(fileSystem map[string]string, workingDir string) (fs.FS, error) {
+	if fileSystem != nil {
+		return createTestFS(fileSystem)
+	}
+	
+	if workingDir == "" {
+		workingDir = "."
+	}
+	return os.DirFS(workingDir), nil
 }
 
 func parseEnvironment(args map[string]any) (map[string]string, error) {
@@ -607,12 +630,19 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	testFS, err := createTestFS(fileSystem)
+	workingDir := parseOptionalString(args, "workingDir", ".")
+	
+	fsys, err := getFileSystem(fileSystem, workingDir)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	output, err := bkl.Evaluate(testFS, files, "/", "/", env, &format)
+	rootPath := "/"
+	if fileSystem == nil {
+		rootPath = "."
+	}
+
+	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}
@@ -657,16 +687,22 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	}
 
 	format := parseOptionalString(args, "format", "")
+	workingDir := parseOptionalString(args, "workingDir", ".")
 
-	testFS, err := createTestFS(fileSystem)
+	fsys, err := getFileSystem(fileSystem, workingDir)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	rootPath := "/"
+	if fileSystem == nil {
+		rootPath = "."
 	}
 
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Diff(testFS, baseFile, targetFile, "/", "/", &format)
+	output, err := bkl.Diff(fsys, baseFile, targetFile, rootPath, workingDir, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
@@ -716,16 +752,22 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	format := parseOptionalString(args, "format", "")
+	workingDir := parseOptionalString(args, "workingDir", ".")
 
-	testFS, err := createTestFS(fileSystem)
+	fsys, err := getFileSystem(fileSystem, workingDir)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	rootPath := "/"
+	if fileSystem == nil {
+		rootPath = "."
 	}
 
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Intersect(testFS, files, "/", "/", &format)
+	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
@@ -761,16 +803,22 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	format := parseOptionalString(args, "format", "")
+	workingDir := parseOptionalString(args, "workingDir", ".")
 
-	testFS, err := createTestFS(fileSystem)
+	fsys, err := getFileSystem(fileSystem, workingDir)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	rootPath := "/"
+	if fileSystem == nil {
+		rootPath = "."
 	}
 
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Required(testFS, file, "/", "/", &format)
+	output, err := bkl.Required(fsys, file, rootPath, workingDir, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
