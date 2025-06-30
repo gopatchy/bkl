@@ -570,7 +570,7 @@ func getFileSystem(fileSystem map[string]string, workingDir string) (fs.FS, erro
 	if fileSystem != nil {
 		return createTestFS(fileSystem)
 	}
-	
+
 	if workingDir == "" {
 		workingDir = "."
 	}
@@ -631,15 +631,17 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	workingDir := parseOptionalString(args, "workingDir", ".")
-	
+
 	fsys, err := getFileSystem(fileSystem, workingDir)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "/"
-	if fileSystem == nil {
-		rootPath = "."
+	rootPath := "."
+	if fileSystem != nil {
+		// For in-memory filesystem, use current directory as root
+		// since files are already in the correct format
+		workingDir = "."
 	}
 
 	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &format)
@@ -694,9 +696,11 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "/"
-	if fileSystem == nil {
-		rootPath = "."
+	rootPath := "."
+	if fileSystem != nil {
+		// For in-memory filesystem, use current directory as root
+		// since files are already in the correct format
+		workingDir = "."
 	}
 
 	if format == "" {
@@ -759,9 +763,11 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "/"
-	if fileSystem == nil {
-		rootPath = "."
+	rootPath := "."
+	if fileSystem != nil {
+		// For in-memory filesystem, use current directory as root
+		// since files are already in the correct format
+		workingDir = "."
 	}
 
 	if format == "" {
@@ -810,9 +816,11 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "/"
-	if fileSystem == nil {
-		rootPath = "."
+	rootPath := "."
+	if fileSystem != nil {
+		// For in-memory filesystem, use current directory as root
+		// since files are already in the correct format
+		workingDir = "."
 	}
 
 	if format == "" {
