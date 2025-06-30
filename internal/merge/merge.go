@@ -178,6 +178,11 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string) (
 		return nil, err
 	}
 
+	// Finalize outputs (e.g., unescape $$)
+	for i, out := range outputs {
+		outputs[i] = output.FinalizeOutput(out)
+	}
+
 	return ft.MarshalStream(outputs)
 }
 

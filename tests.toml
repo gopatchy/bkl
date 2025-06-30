@@ -5002,3 +5002,19 @@ b: special
 files."a.b.c.yaml" = '''
 $repeat: 3
 '''
+
+[deferEscapeInteraction]
+description = "Test $$ escape interaction with $defer - $$ should be unescaped after defer processing"
+eval = ["test.yaml"]
+format = "yaml"
+expected = '''
+a: $foo
+b: test
+'''
+files."test.yaml" = '''
+a: $$foo
+---
+$defer: true
+$match: {}
+b: test
+'''

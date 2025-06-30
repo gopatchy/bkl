@@ -44,7 +44,7 @@ func Document(docs []*document.Document, doc *document.Document, env map[string]
 			return nil, err
 		}
 
-		return []any{FinalizeOutput(v2)}, nil
+		return []any{v2}, nil
 	})
 }
 
