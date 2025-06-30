@@ -194,11 +194,25 @@ body {
 }
 
 nav {
-	overflow-y: auto;
-	position: sticky;
+	position: fixed;
+	left: 20px;
 	top: 20px;
-	height: calc(100vh - 40px);
+	bottom: 20px;
+	width: 200px;
+	display: flex;
+	flex-direction: column;
 }
+
+nav {
+	position: relative;
+}
+
+nav .nav-scroll-container {
+	overflow-y: auto;
+	flex: 1;
+	margin-top: 10px;
+}
+
 
 nav ol {
 	list-style: none;
@@ -218,6 +232,7 @@ nav a {
 
 main {
 	max-width: min(750px, 100vw - 20px);
+	margin-left: 250px;
 }
 
 h1, h2 {
@@ -720,13 +735,16 @@ hunk-header {
 	}
 
 	nav {
-		display: block !important;
-		position: static;
-		width: auto;
+		display: flex !important;
+		flex-direction: column;
+		position: fixed;
+		left: 20px;
+		top: 20px;
+		bottom: 20px;
+		width: 200px;
 		height: auto;
 		padding: 0;
 		margin-right: 0;
-		min-width: 200px;
 		background: transparent;
 	}
 
@@ -741,12 +759,14 @@ hunk-header {
 <button class="mobile-menu-button" onclick="toggleMobileMenu()">☰ Nav</button>
 
 <nav>
-<input type="text" id="searchBar" placeholder="Search" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+<input type="text" id="searchBar" placeholder="Search" style="width: 100%; padding: 8px; box-sizing: border-box;">
+<div class="nav-scroll-container">
 <ol>
 {{range .Sections}}
 	<li><a href="#{{.ID}}">{{.Title}}</a></li>
 {{end}}
 </ol>
+</div>
 </nav>
 
 <main>
