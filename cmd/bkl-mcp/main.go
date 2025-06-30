@@ -139,6 +139,11 @@ func main() {
 	)
 	mcpServer.AddTool(issuePromptTool, issuePromptHandler)
 
+	convertToBklTool := mcp.NewTool("convert_to_bkl",
+		mcp.WithDescription("Get guidance for converting YAML files to bkl format with layering"),
+	)
+	mcpServer.AddTool(convertToBklTool, convertToBklHandler)
+
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
@@ -834,6 +839,127 @@ Tips for minimal reproductions:
 - For $match issues, include the matching documents
 - For encoding/decoding issues, show input and expected output
 - Keep file contents as small as possible while reproducing the issue`
+
+	return mcp.NewToolResultText(prompt), nil
+}
+
+func convertToBklHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	prompt := `# Converting YAML Files to bkl Format
+
+This guide helps you convert a set of YAML files into bkl format with proper layering.
+
+## Steps:
+
+### 1. Determine Layer Ordering
+- If layers represent different environments (prod, staging, dev):
+  - Use production as the base layer (bottom)
+  - Stack environments in order: prod → staging → dev
+  - This shows each environment as differences from production
+  - Encourages environments to stay similar to production
+
+### 2. Find Common Base Values
+For files at the same level (e.g., multiple services in prod):
+` + "```" + `bash
+# Find common values between original production configs
+mcp call bkl-mcp intersect \
+  --files "original.service1.prod.yaml,original.service2.prod.yaml" \
+  --fileSystem '{
+    "original.service1.prod.yaml": "...",
+    "original.service2.prod.yaml": "..."
+  }'
+` + "```" + `
+
+### 3. Generate Layer Differences
+Once you have the base layer, create upper layers using diff:
+` + "```" + `bash
+# Generate staging differences from prod base
+mcp call bkl-mcp diff \
+  --baseFile "converted.service1.yaml" \
+  --targetFile "original.service1.staging.yaml" \
+  --fileSystem '{
+    "converted.service1.yaml": "...",
+    "original.service1.staging.yaml": "..."
+  }'
+` + "```" + `
+
+### 4. Optimize with Patterns
+When many values follow patterns across environments:
+- Use string interpolation ($"") to derive values from variables
+- Use $merge when combining multiple configuration sources
+
+Example:
+` + "```" + `yaml
+# converted.service1.yaml
+environment: prod
+database_url: $"postgres://db.{environment}.example.com"
+api_endpoint: $"https://api.{environment}.example.com"
+cache_ttl: 3600
+
+# converted.service1.prod.yaml
+# Empty or minimal - production uses base values
+
+# converted.service1.prod.staging.yaml
+environment: staging  # Changes all interpolated values
+cache_ttl: 300       # Override specific value
+` + "```" + `
+
+### 5. Handle Secrets and Required Fields
+Mark fields based on how they're managed:
+` + "```" + `yaml
+# converted.service1.yaml
+# For secrets from a secret store:
+api_key: $env:API_KEY
+database_password: $env:DB_PASSWORD
+
+# For values that must be manually configured per environment:
+region: $required
+cluster_name: $required
+` + "```" + `
+
+### 6. Validate Results
+Compare the evaluated output with original files:
+` + "```" + `bash
+# Test that converted layers produce original staging config
+mcp call bkl-mcp evaluate \
+  --files "converted.service1.yaml,converted.service1.prod.yaml,converted.service1.prod.staging.yaml" \
+  --fileSystem '{
+    "converted.service1.yaml": "...",
+    "converted.service1.prod.yaml": "...",
+    "converted.service1.prod.staging.yaml": "..."
+  }' \
+  --format yaml
+` + "```" + `
+
+### 7. Iterate and Refine
+- If outputs don't match, adjust layer content
+- Consider moving common patterns to base layer
+- Use $parent for explicit inheritance when needed
+- Ensure layers are human-readable and maintainable
+
+## Best Practices:
+- Keep base layer comprehensive but not overly specific
+- Use environment variables for runtime configuration
+- Group related configuration with meaningful structure
+- Document layer relationships and dependencies
+- Test each layer combination thoroughly
+
+## Example Workflow:
+1. Start with: original.service1.prod.yaml, original.service1.staging.yaml, original.service1.dev.yaml
+2. Use production as base → copy original.service1.prod.yaml to converted.service1.yaml
+3. Use diff to create upper layers:
+   - converted.service1.prod.yaml (usually empty since base = prod)
+   - converted.service1.prod.staging.yaml (staging differences from prod)
+   - converted.service1.prod.staging.dev.yaml (dev differences from staging)
+4. Add string interpolation patterns for environment-specific values
+5. Mark secrets and keys as $env:SECRET_NAME if using a secret store, or $required if manually configured
+6. Validate each combination produces original output
+7. Final structure:
+   - converted.service1.yaml (production configuration as base)
+   - converted.service1.prod.yaml (usually empty)
+   - converted.service1.prod.staging.yaml (staging differences)
+   - converted.service1.prod.staging.dev.yaml (development differences)
+
+Note: Use intersect when multiple services need a shared base layer, not for single service environment layering.`
 
 	return mcp.NewToolResultText(prompt), nil
 }
