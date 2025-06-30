@@ -451,6 +451,7 @@ hunk-header {
 <body>
 
 <nav>
+<input type="text" id="searchBar" placeholder="Search" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
 <ol>
 
 	<li><a href="#example">Example</a></li>
@@ -4906,6 +4907,58 @@ c: 3                              c: 3</bkl-code>
 
 
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBar = document.getElementById('searchBar');
+    const sections = Array.from(document.querySelectorAll('main > section'));
+    const originalOrder = sections.map(section => ({
+        element: section,
+        id: section.id,
+        title: section.querySelector('h2').textContent.toLowerCase(),
+        content: section.textContent.toLowerCase()
+    }));
+
+    searchBar.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        
+        if (!query) {
+            const main = document.querySelector('main');
+            originalOrder.forEach(item => {
+                main.appendChild(item.element);
+            });
+            return;
+        }
+
+        const scored = originalOrder.map(item => {
+            let score = 0;
+            const keywords = query.split(/\s+/);
+            
+            keywords.forEach(keyword => {
+                if (item.title.includes(keyword)) {
+                    score += 5;
+                }
+                let index = 0;
+                let matches = 0;
+                while ((index = item.content.indexOf(keyword, index)) !== -1) {
+                    matches++;
+                    index += keyword.length;
+                }
+                score += matches;
+            });
+            
+            return { ...item, score };
+        });
+
+        const main = document.querySelector('main');
+        scored.sort((a, b) => b.score - a.score);
+        
+        scored.forEach(item => {
+            main.appendChild(item.element);
+        });
+    });
+});
+</script>
 
 </body>
 </html>
