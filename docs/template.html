@@ -594,17 +594,13 @@ hunk-header {
 		margin-top: 20px;
 	}
 
-	/* Grid layouts - stack on mobile */
-	.grid-container {
-		display: flex;
-		flex-direction: column;
-		gap: var(--gap-small);
+	/* Example containers on mobile - just reduce spacing */
+	.example-container {
+		margin: var(--gap-large) 0;
 	}
 
-	.grid-2-col,
-	.grid-3-col,
-	.grid-5-col {
-		grid-template-columns: 1fr;
+	.grid-container {
+		gap: var(--gap-small);
 	}
 
 	/* Code blocks */
@@ -626,10 +622,6 @@ hunk-header {
 		padding-top: 0;
 	}
 
-	/* Example containers */
-	.example-container {
-		margin: var(--gap-large) 0;
-	}
 
 	/* Labels */
 	label {
