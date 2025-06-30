@@ -579,9 +579,9 @@ hunk-header {
 	/* Mobile menu button */
 	.mobile-menu-button {
 		display: block;
-		position: fixed;
-		top: 10px;
-		right: 10px;
+		position: fixed !important;
+		top: 10px !important;
+		right: 10px !important;
 		z-index: 1001;
 		background: var(--vivid4);
 		color: white;
@@ -590,11 +590,14 @@ hunk-header {
 		border-radius: 4px;
 		font-size: 16px;
 		cursor: pointer;
+		transform: translateZ(0); /* Force GPU acceleration */
+		-webkit-transform: translateZ(0);
+		will-change: transform;
 	}
 
 	main {
 		max-width: 100%;
-		padding: 0;
+		padding: 50px 0 0 0; /* Add top padding to avoid button overlap */
 		margin-left: 0;
 	}
 
