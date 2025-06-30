@@ -144,6 +144,11 @@ func main() {
 	)
 	mcpServer.AddTool(convertToBklTool, convertToBklHandler)
 
+	k8sToBklTool := mcp.NewTool("k8s_to_bkl",
+		mcp.WithDescription("Get guidance for converting Kubernetes manifests to bkl format"),
+	)
+	mcpServer.AddTool(k8sToBklTool, k8sToBklHandler)
+
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
@@ -960,6 +965,154 @@ mcp call bkl-mcp evaluate \
    - converted.service1.prod.staging.dev.yaml (development differences)
 
 Note: Use intersect when multiple services need a shared base layer, not for single service environment layering.`
+
+	return mcp.NewToolResultText(prompt), nil
+}
+
+func k8sToBklHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	prompt := `# Converting Kubernetes Manifests to bkl Format
+
+This guide helps you convert Kubernetes manifests to bkl format for better configuration management.
+
+## Prerequisites
+- Install kubectl-neat: https://github.com/itaysk/kubectl-neat
+- Have access to your Kubernetes cluster or manifest files
+
+## Steps:
+
+### 1. Clean Up Kubernetes Manifests
+Use kubectl-neat to remove clutter and reduce manifests to their essential configuration:
+
+#### For live cluster resources:
+` + "```" + `bash
+# Export a single resource
+kubectl get deployment myapp -o yaml | kubectl neat > original.myapp.prod.yaml
+
+# Export multiple resources of the same type
+kubectl get deployment -o yaml | kubectl neat > original.deployments.prod.yaml
+
+# Export all resources in a namespace
+kubectl get all -n production -o yaml | kubectl neat > original.all.prod.yaml
+` + "```" + `
+
+#### For existing manifest files:
+` + "```" + `bash
+# Clean up existing manifests
+kubectl neat -f messy-manifest.yaml > original.myapp.prod.yaml
+
+# Process multiple files
+for f in *.yaml; do
+  kubectl neat -f "$f" > "original.${f}"
+done
+` + "```" + `
+
+### 2. Organize by Environment
+If you have multiple environments, export cleaned manifests for each:
+` + "```" + `bash
+# Production
+kubectl get deployment myapp -n production -o yaml | kubectl neat > original.myapp.prod.yaml
+
+# Staging
+kubectl get deployment myapp -n staging -o yaml | kubectl neat > original.myapp.staging.yaml
+
+# Development
+kubectl get deployment myapp -n development -o yaml | kubectl neat > original.myapp.dev.yaml
+` + "```" + `
+
+### 3. Convert to bkl Format
+Once you have clean YAML files, use the convert_to_bkl prompt for the remaining steps:
+` + "```" + `bash
+mcp call bkl-mcp convert_to_bkl
+` + "```" + `
+
+This will guide you through:
+- Using production as the base layer
+- Creating environment-specific difference layers
+- Adding interpolation patterns for common values
+- Handling secrets with $env references
+- Validating the converted configuration
+
+## Kubernetes-Specific Tips:
+
+### Container Images
+Use string interpolation for image tags:
+` + "```" + `yaml
+# converted.myapp.yaml
+image_tag: $env:IMAGE_TAG
+
+spec:
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: $"myregistry.com/myapp:{image_tag}"
+` + "```" + `
+
+### Resource Names and Namespaces
+` + "```" + `yaml
+# converted.myapp.yaml
+environment: prod
+namespace: $"myapp-{environment}"
+
+metadata:
+  name: myapp
+  namespace: $"{namespace}"
+` + "```" + `
+
+### ConfigMaps and Secrets
+Reference from environment or mark as required:
+` + "```" + `yaml
+# converted.myapp.yaml
+spec:
+  template:
+    spec:
+      containers:
+      - name: myapp
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: $required  # Or specific pattern like $"myapp-{environment}-secrets"
+              key: database-url
+` + "```" + `
+
+### Resource Limits
+Use base values with environment overrides:
+` + "```" + `yaml
+# converted.myapp.yaml
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# converted.myapp.prod.staging.yaml
+resources:
+  requests:
+    memory: "128Mi"  # Lower for staging
+    cpu: "50m"
+` + "```" + `
+
+## Common Patterns:
+1. **Multi-document files**: Split into separate files before converting
+2. **Helm templates**: Extract rendered values first with ` + "`helm template`" + `
+3. **Kustomize**: Use ` + "`kubectl kustomize`" + ` to render before cleaning with neat
+4. **Large manifests**: Focus on one resource type at a time
+
+## Example Workflow:
+1. Export and clean: ` + "`kubectl get deploy,svc,ingress -o yaml | kubectl neat > original.resources.prod.yaml`" + `
+2. Split by resource type if needed
+3. Repeat for other environments
+4. Follow convert_to_bkl process
+5. Test with: ` + "`bkl converted.*.yaml | kubectl diff -f -`" + `
+
+Note: kubectl-neat removes:
+- Default values
+- Null/empty fields  
+- Server-generated fields (like status, metadata.uid)
+- Kubectl last-applied-configuration annotations`
 
 	return mcp.NewToolResultText(prompt), nil
 }
