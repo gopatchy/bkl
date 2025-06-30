@@ -91,6 +91,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>bkl - Layered Configuration Language</title>
 <link rel="icon" href="data:image/png;base64,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">
 <style>
@@ -521,9 +522,219 @@ hunk-header {
 	color: var(--vivid5);
 	font-weight: 500;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+	/* Root variables for mobile */
+	:root {
+		--padding-code: 10px;
+		--padding-label: 5px 10px;
+		--gap-small: 10px;
+		--gap-large: 15px;
+		--operator-size: 24px;
+	}
+
+	/* Layout adjustments */
+	body {
+		padding: 10px;
+		display: block;
+	}
+
+	nav {
+		display: none; /* Hide nav on mobile by default */
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: var(--neutral1);
+		z-index: 1000;
+		padding: 20px;
+		overflow-y: auto;
+	}
+
+	nav.mobile-open {
+		display: block;
+	}
+
+	/* Mobile menu button */
+	.mobile-menu-button {
+		display: block;
+		position: fixed;
+		top: 10px;
+		right: 10px;
+		z-index: 1001;
+		background: var(--vivid4);
+		color: white;
+		border: none;
+		padding: 10px 15px;
+		border-radius: 4px;
+		font-size: 16px;
+		cursor: pointer;
+	}
+
+	main {
+		max-width: 100%;
+		padding: 0;
+	}
+
+	h1 {
+		font-size: 24px;
+		padding: 5px 0;
+		flex-wrap: wrap;
+	}
+
+	h1 img.logo {
+		height: 35px;
+		margin-right: 5px;
+	}
+
+	h2 {
+		font-size: 20px;
+		margin-top: 20px;
+	}
+
+	/* Grid layouts - stack on mobile */
+	.grid-container {
+		display: flex;
+		flex-direction: column;
+		gap: var(--gap-small);
+	}
+
+	.grid-2-col,
+	.grid-3-col,
+	.grid-5-col {
+		grid-template-columns: 1fr;
+	}
+
+	/* Code blocks */
+	bkl-code {
+		font-size: 14px;
+		padding: var(--padding-code);
+		max-width: calc(100vw - 40px);
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	/* Operators in examples */
+	.operator-symbol {
+		font-size: var(--operator-size);
+		margin: 10px 0;
+	}
+
+	.operator-with-label {
+		padding-top: 0;
+	}
+
+	/* Example containers */
+	.example-container {
+		margin: var(--gap-large) 0;
+	}
+
+	/* Labels */
+	label {
+		font-size: 14px;
+		padding: var(--padding-label);
+	}
+
+	/* Tables */
+	table {
+		font-size: 14px;
+		display: block;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		width: max-content;
+		max-width: 100%;
+	}
+
+	th, td {
+		padding: 8px;
+		min-width: 100px;
+	}
+
+	/* Code inline */
+	code {
+		font-size: 14px;
+		padding: 2px 4px;
+	}
+
+	/* Lists */
+	ol, ul {
+		padding-left: 20px;
+	}
+
+	/* Scroll hint for wide content */
+	.code-container {
+		position: relative;
+	}
+
+	.code-container::after {
+		content: '';
+		position: absolute;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		width: 20px;
+		background: linear-gradient(to right, transparent, rgba(0,0,0,0.1));
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.3s;
+	}
+
+	.code-container:has(bkl-code::-webkit-scrollbar-thumb)::after {
+		opacity: 1;
+	}
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+	:root {
+		--padding-code: 8px;
+		--padding-label: 4px 8px;
+		--gap-small: 8px;
+		--gap-large: 12px;
+		--operator-size: 20px;
+	}
+
+	h1 {
+		font-size: 20px;
+	}
+
+	h2 {
+		font-size: 18px;
+	}
+
+	bkl-code {
+		font-size: 12px;
+	}
+
+	label {
+		font-size: 12px;
+	}
+}
+
+/* Desktop styles - ensure nav is visible */
+@media (min-width: 769px) {
+	.mobile-menu-button {
+		display: none;
+	}
+
+	nav {
+		display: block !important;
+		position: static;
+		width: auto;
+		height: auto;
+		padding: 0;
+		margin-right: 0;
+		min-width: 200px;
+		background: transparent;
+	}
+}
 </style>
 </head>
 <body>
+
+<button class="mobile-menu-button" onclick="toggleMobileMenu()">☰ Menu</button>
 
 <nav>
 <input type="text" id="searchBar" placeholder="Search" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
@@ -573,11 +784,31 @@ BKL</h1>
 </main>
 
 <script>
+// Mobile menu toggle function
+function toggleMobileMenu() {
+    const nav = document.querySelector('nav');
+    const button = document.querySelector('.mobile-menu-button');
+    nav.classList.toggle('mobile-open');
+    button.textContent = nav.classList.contains('mobile-open') ? '✕ Close' : '☰ Menu';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchBar = document.getElementById('searchBar');
     const sections = Array.from(document.querySelectorAll('main > section'));
     const navList = document.querySelector('nav ol');
     const navItems = Array.from(navList.querySelectorAll('li'));
+    
+    // Close mobile menu when clicking a nav link
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const nav = document.querySelector('nav');
+            const button = document.querySelector('.mobile-menu-button');
+            if (nav.classList.contains('mobile-open')) {
+                nav.classList.remove('mobile-open');
+                button.textContent = '☰ Menu';
+            }
+        });
+    });
     
     const originalOrder = sections.map((section, index) => ({
         element: section,
