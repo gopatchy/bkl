@@ -15,25 +15,7 @@ import (
 	"testing/fstest"
 
 	"github.com/gopatchy/bkl"
-	"github.com/pelletier/go-toml/v2"
 )
-
-type TestCase struct {
-	Description string
-	Eval        []string
-	Format      string
-	Expected    string
-	Files       map[string]string
-	Errors      []string          // Expected errors from evaluation (one must match)
-	RootPath    string            // Root path for restricting file access
-	Env         map[string]string // Environment variables for the test
-	Diff        bool              // Run diff operation instead of eval
-	Intersect   bool              // Run intersect operation instead of eval
-	Required    bool              // Run required operation instead of eval
-	Benchmark   bool              // Run as benchmark test
-}
-
-type TestSuite map[string]TestCase
 
 var (
 	testFilter  = flag.String("test.filter", "", "Run only specified tests from tests.toml (comma-separated list)")
@@ -41,7 +23,7 @@ var (
 	exportRegex = regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
 )
 
-func runTestCase(testCase TestCase) ([]byte, error) {
+func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 	fsys := fstest.MapFS{}
 
 	for filename, content := range testCase.Files {
@@ -108,15 +90,9 @@ func runTestCase(testCase TestCase) ([]byte, error) {
 func TestBKL(t *testing.T) {
 	t.Parallel()
 
-	data, err := os.ReadFile("tests.toml")
+	tests, err := bkl.GetTests()
 	if err != nil {
-		t.Fatalf("Failed to read tests.toml: %v", err)
-	}
-
-	var suite TestSuite
-	err = toml.Unmarshal(data, &suite)
-	if err != nil {
-		t.Fatalf("Failed to parse tests.toml: %v", err)
+		t.Fatalf("Failed to get tests: %v", err)
 	}
 
 	filterTests := map[string]bool{}
@@ -124,8 +100,8 @@ func TestBKL(t *testing.T) {
 		for _, name := range strings.Split(*testFilter, ",") {
 			name = strings.TrimSpace(name)
 			if name != "" {
-				if _, ok := suite[name]; !ok {
-					t.Fatalf("Test %q not found in tests.toml", name)
+				if _, ok := tests[name]; !ok {
+					t.Fatalf("Test %q not found", name)
 				}
 				filterTests[name] = true
 			}
@@ -137,15 +113,15 @@ func TestBKL(t *testing.T) {
 		for _, name := range strings.Split(*testExclude, ",") {
 			name = strings.TrimSpace(name)
 			if name != "" {
-				if _, ok := suite[name]; !ok {
-					t.Fatalf("Test %q not found in tests.toml", name)
+				if _, ok := tests[name]; !ok {
+					t.Fatalf("Test %q not found", name)
 				}
 				excludeTests[name] = true
 			}
 		}
 	}
 
-	for testName, testCase := range suite {
+	for testName, testCase := range tests {
 		if len(filterTests) > 0 && !filterTests[testName] {
 			continue
 		}
@@ -194,18 +170,12 @@ func TestBKL(t *testing.T) {
 }
 
 func BenchmarkBKL(b *testing.B) {
-	data, err := os.ReadFile("tests.toml")
+	tests, err := bkl.GetTests()
 	if err != nil {
-		b.Fatalf("Failed to read tests.toml: %v", err)
+		b.Fatalf("Failed to get tests: %v", err)
 	}
 
-	var suite TestSuite
-	err = toml.Unmarshal(data, &suite)
-	if err != nil {
-		b.Fatalf("Failed to parse tests.toml: %v", err)
-	}
-
-	for testName, testCase := range suite {
+	for testName, testCase := range tests {
 		if !testCase.Benchmark {
 			continue
 		}
@@ -228,15 +198,9 @@ func BenchmarkBKL(b *testing.B) {
 func TestCLI(t *testing.T) {
 	t.Parallel()
 
-	data, err := os.ReadFile("tests.toml")
+	tests, err := bkl.GetTests()
 	if err != nil {
-		t.Fatalf("Failed to read tests.toml: %v", err)
-	}
-
-	var suite TestSuite
-	err = toml.Unmarshal(data, &suite)
-	if err != nil {
-		t.Fatalf("Failed to parse tests.toml: %v", err)
+		t.Fatalf("Failed to get tests: %v", err)
 	}
 
 	filterTests := map[string]bool{}
@@ -244,8 +208,8 @@ func TestCLI(t *testing.T) {
 		for _, name := range strings.Split(*testFilter, ",") {
 			name = strings.TrimSpace(name)
 			if name != "" {
-				if _, ok := suite[name]; !ok {
-					t.Fatalf("Test %q not found in tests.toml", name)
+				if _, ok := tests[name]; !ok {
+					t.Fatalf("Test %q not found", name)
 				}
 				filterTests[name] = true
 			}
@@ -257,15 +221,15 @@ func TestCLI(t *testing.T) {
 		for _, name := range strings.Split(*testExclude, ",") {
 			name = strings.TrimSpace(name)
 			if name != "" {
-				if _, ok := suite[name]; !ok {
-					t.Fatalf("Test %q not found in tests.toml", name)
+				if _, ok := tests[name]; !ok {
+					t.Fatalf("Test %q not found", name)
 				}
 				excludeTests[name] = true
 			}
 		}
 	}
 
-	for testName, testCase := range suite {
+	for testName, testCase := range tests {
 		if len(filterTests) > 0 && !filterTests[testName] {
 			continue
 		}
@@ -401,7 +365,7 @@ func TestDocumentationExamples(t *testing.T) {
 			example := item.Example
 			testName := fmt.Sprintf("%s_item%d", section.ID, itemIdx)
 
-			testCase := TestCase{
+			testCase := &bkl.TestCase{
 				Description: fmt.Sprintf("Doc example from %s", section.Title),
 				Files:       map[string]string{},
 				Eval:        []string{},

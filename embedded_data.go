@@ -18,12 +18,14 @@ type TestCase struct {
 	Eval        []string          `toml:"eval"`
 	Format      string            `toml:"format"`
 	Expected    string            `toml:"expected,omitempty"`
-	Error       string            `toml:"error,omitempty"`
 	Files       map[string]string `toml:"files"`
+	Errors      []string          `toml:"errors,omitempty"`
+	RootPath    string            `toml:"rootPath,omitempty"`
+	Env         map[string]string `toml:"env,omitempty"`
 	Diff        bool              `toml:"diff,omitempty"`
 	Intersect   bool              `toml:"intersect,omitempty"`
 	Required    bool              `toml:"required,omitempty"`
-	Skip        bool              `toml:"skip,omitempty"`
+	Benchmark   bool              `toml:"benchmark,omitempty"`
 }
 
 type DocSection struct {
@@ -35,8 +37,8 @@ type DocSection struct {
 type DocItem struct {
 	Content    string         `yaml:"content,omitempty"`
 	Example    *DocExample    `yaml:"example,omitempty"`
-	Code       *DocLayer      `yaml:"code,omitempty"`         // For simple code examples
-	SideBySide *DocSideBySide `yaml:"side_by_side,omitempty"` // For special two-column layout
+	Code       *DocLayer      `yaml:"code,omitempty"`
+	SideBySide *DocSideBySide `yaml:"side_by_side,omitempty"`
 }
 
 type DocSideBySide struct {
@@ -45,7 +47,7 @@ type DocSideBySide struct {
 }
 
 type DocExample struct {
-	Operation string     `yaml:"operation,omitempty"` // "evaluate", "diff", "intersect", "required"
+	Operation string     `yaml:"operation,omitempty"`
 	Layers    []DocLayer `yaml:"layers,omitempty"`
 	Result    DocLayer   `yaml:"result,omitempty"`
 }
@@ -54,7 +56,7 @@ type DocLayer struct {
 	Label      string   `yaml:"label,omitempty"`
 	Code       string   `yaml:"code"`
 	Highlights []string `yaml:"highlights,omitempty"`
-	Languages  [][]any  `yaml:"languages,omitempty"` // List of [line, language] pairs
+	Languages  [][]any  `yaml:"languages,omitempty"`
 }
 
 func GetTests() (map[string]*TestCase, error) {

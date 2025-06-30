@@ -4790,7 +4790,6 @@ description = "Benchmark repeat with 100 items"
 eval = ["a.yaml"]
 format = "yaml"
 expected = "items: []"
-skip = true
 benchmark = true
 [benchRepeat100.files]
 "a.yaml" = '''
@@ -4805,7 +4804,6 @@ description = "Benchmark repeat with 1000 items"
 eval = ["a.yaml"]
 format = "yaml"
 expected = "items: []"
-skip = true
 benchmark = true
 [benchRepeat1000.files]
 "a.yaml" = '''

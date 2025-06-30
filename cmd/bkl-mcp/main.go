@@ -168,11 +168,11 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		normalizedKeywords[i] = strings.ToLower(keyword)
 	}
 
-	var allResults []map[string]interface{}
+	var allResults []map[string]any
 
 	for _, section := range sections {
 		score := 0
-		details := map[string]interface{}{}
+		details := map[string]any{}
 
 		titleLower := strings.ToLower(section.Title)
 		idLower := strings.ToLower(section.ID)
@@ -246,7 +246,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		}
 
 		if score > 0 {
-			result := map[string]interface{}{
+			result := map[string]any{
 				"type":         "documentation",
 				"id":           section.ID,
 				"title":        section.Title,
@@ -269,7 +269,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		}
 
 		score := 0
-		details := map[string]interface{}{}
+		details := map[string]any{}
 
 		nameLower := strings.ToLower(name)
 		descLower := strings.ToLower(test.Description)
@@ -307,7 +307,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		score += bestFileMatches * 10
 
 		if score > 0 {
-			result := map[string]interface{}{
+			result := map[string]any{
 				"type":        "test",
 				"name":        name,
 				"description": test.Description,
@@ -348,7 +348,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		allResults = allResults[:15]
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"keywords": keywords,
 		"results":  allResults,
 		"count":    len(allResults),
@@ -415,7 +415,7 @@ func getTestFeatures(test *bkl.TestCase) []string {
 	if test.Required {
 		features = append(features, "required")
 	}
-	if test.Error != "" {
+	if len(test.Errors) > 0 {
 		features = append(features, "error-test")
 	}
 	if len(test.Files) > 1 {
@@ -501,13 +501,13 @@ func findFirstKeyword(text string, keywords []string) string {
 	return firstKeyword
 }
 
-func parseFileSystem(args map[string]interface{}) (map[string]string, error) {
+func parseFileSystem(args map[string]any) (map[string]string, error) {
 	fileSystemRaw := args["fileSystem"]
 	if fileSystemRaw == nil {
 		return nil, fmt.Errorf("fileSystem parameter is required")
 	}
 
-	fileSystemMap, ok := fileSystemRaw.(map[string]interface{})
+	fileSystemMap, ok := fileSystemRaw.(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("fileSystem must be an object")
 	}
@@ -524,7 +524,7 @@ func parseFileSystem(args map[string]interface{}) (map[string]string, error) {
 	return fileSystem, nil
 }
 
-func parseOptionalString(args map[string]interface{}, key string, defaultValue string) string {
+func parseOptionalString(args map[string]any, key string, defaultValue string) string {
 	if val := args[key]; val != nil {
 		if str, ok := val.(string); ok && str != "" {
 			return str
@@ -544,9 +544,9 @@ func createTestFS(fileSystem map[string]string) (fs.FS, error) {
 	return fsys, nil
 }
 
-func parseEnvironment(args map[string]interface{}) (map[string]string, error) {
+func parseEnvironment(args map[string]any) (map[string]string, error) {
 	if envRaw := args["environment"]; envRaw != nil {
-		if envMap, ok := envRaw.(map[string]interface{}); ok {
+		if envMap, ok := envRaw.(map[string]any); ok {
 			env := make(map[string]string)
 			for k, v := range envMap {
 				if str, ok := v.(string); ok {
@@ -580,7 +580,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError("No files provided"), nil
 	}
 
-	args, ok := request.Params.Arguments.(map[string]interface{})
+	args, ok := request.Params.Arguments.(map[string]any)
 	if !ok {
 		return mcp.NewToolResultError("Invalid arguments format"), nil
 	}
@@ -602,12 +602,12 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	output, err := bkl.Evaluate(testFS, files, "/", "", env, &format)
+	output, err := bkl.Evaluate(testFS, files, "/", "/", env, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"files":     files,
 		"format":    format,
 		"output":    string(output),
@@ -636,7 +636,7 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	args, ok := request.Params.Arguments.(map[string]interface{})
+	args, ok := request.Params.Arguments.(map[string]any)
 	if !ok {
 		return mcp.NewToolResultError("Invalid arguments format"), nil
 	}
@@ -656,12 +656,12 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Diff(testFS, baseFile, targetFile, "/", "", &format)
+	output, err := bkl.Diff(testFS, baseFile, targetFile, "/", "/", &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"baseFile":   baseFile,
 		"targetFile": targetFile,
 		"format":     format,
@@ -695,7 +695,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError("Intersect operation requires at least 2 files"), nil
 	}
 
-	args, ok := request.Params.Arguments.(map[string]interface{})
+	args, ok := request.Params.Arguments.(map[string]any)
 	if !ok {
 		return mcp.NewToolResultError("Invalid arguments format"), nil
 	}
@@ -715,12 +715,12 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Intersect(testFS, files, "/", "", &format)
+	output, err := bkl.Intersect(testFS, files, "/", "/", &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"files":     files,
 		"format":    format,
 		"output":    string(output),
@@ -740,7 +740,7 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	args, ok := request.Params.Arguments.(map[string]interface{})
+	args, ok := request.Params.Arguments.(map[string]any)
 	if !ok {
 		return mcp.NewToolResultError("Invalid arguments format"), nil
 	}
@@ -760,12 +760,12 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Required(testFS, file, "/", "", &format)
+	output, err := bkl.Required(testFS, file, "/", "/", &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"file":      file,
 		"format":    format,
 		"output":    string(output),
