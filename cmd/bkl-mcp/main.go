@@ -11,6 +11,7 @@ import (
 	"testing/fstest"
 
 	"github.com/gopatchy/bkl"
+	"github.com/gopatchy/bkl/pkg/version"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -127,6 +128,11 @@ func main() {
 		fileSystemParam,
 	)
 	mcpServer.AddTool(requiredTool, requiredHandler)
+
+	versionTool := mcp.NewTool("version",
+		mcp.WithDescription("Get version and build information for bkl"),
+	)
+	mcpServer.AddTool(versionTool, versionHandler)
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
@@ -762,6 +768,19 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+	return mcp.NewToolResultText(string(resultJSON)), nil
+}
+
+func versionHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	bi := version.GetVersion()
+	if bi == nil {
+		return mcp.NewToolResultError("Failed to get build information"), nil
+	}
+
+	resultJSON, err := json.MarshalIndent(bi, "", "  ")
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
