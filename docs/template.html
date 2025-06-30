@@ -230,6 +230,10 @@ nav a {
 	font-family: source-code-pro;
 }
 
+nav a:hover {
+	color: var(--neutral3);
+}
+
 main {
 	max-width: min(750px, 100vw - 20px);
 	margin-left: 250px;
@@ -763,7 +767,7 @@ hunk-header {
 <div class="nav-scroll-container">
 <ol>
 {{range .Sections}}
-	<li><a href="#{{.ID}}">{{.Title}}</a></li>
+	<li><a href="#{{.ID}}">{{.Title | formatContent}}</a></li>
 {{end}}
 </ol>
 </div>
@@ -773,7 +777,7 @@ hunk-header {
 
 {{range .Sections}}
 <section id="{{.ID}}">
-<h2><a name="{{.ID}}">{{.Title}}</a></h2>
+<h2><a name="{{.ID}}">{{.Title | formatContent}}</a></h2>
 
 {{range $item := .Items}}
 {{if $item.Content}}

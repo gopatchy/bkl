@@ -2,7 +2,7 @@
 # Ordered list of documentation sections
 
 - id: bkl
-  title: BKL
+  title: '<img src="logo.png" alt="" style="height: 0.9em; width: auto; vertical-align: -0.1em; padding-left: 0.05em; padding-right: 0.4em;">BKL'
   items:
     - content: |
         bkl is a templating configuration language without the templates. It's designed to be simple to read and write with obvious behavior.
