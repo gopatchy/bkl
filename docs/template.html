@@ -576,8 +576,12 @@ BKL</h1>
 document.addEventListener('DOMContentLoaded', function() {
     const searchBar = document.getElementById('searchBar');
     const sections = Array.from(document.querySelectorAll('main > section'));
-    const originalOrder = sections.map(section => ({
+    const navList = document.querySelector('nav ol');
+    const navItems = Array.from(navList.querySelectorAll('li'));
+    
+    const originalOrder = sections.map((section, index) => ({
         element: section,
+        navItem: navItems[index],
         id: section.id,
         title: section.querySelector('h2').textContent.toLowerCase(),
         content: section.textContent.toLowerCase()
@@ -590,7 +594,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const main = document.querySelector('main');
             originalOrder.forEach(item => {
                 main.appendChild(item.element);
+                navList.appendChild(item.navItem);
             });
+            window.scrollTo(0, 0);
             return;
         }
 
@@ -619,7 +625,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         scored.forEach(item => {
             main.appendChild(item.element);
+            navList.appendChild(item.navItem);
         });
+        
+        window.scrollTo(0, 0);
     });
 });
 </script>
