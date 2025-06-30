@@ -12,6 +12,8 @@
 - Labeled brew as (macOS) since go install works on all platforms
 - Changed "Error Handling" section title to "Errors"
 - Reverted comparison and migration sections to original content
+- Added $defer directive for post-processing operations
+- Updated to use PopMapBoolValue/PopListMapBoolValue for directive detection
 
 ## CRITICAL INSTRUCTIONS - MUST FOLLOW
 
@@ -88,6 +90,7 @@ bkl is a flexible configuration templating language that simplifies configuratio
     - Diff Operations (bkld)
     - Intersect Operations (bkli)
     - Required Field Extraction (bklr)
+    - Defer Operations ($defer)
     - Performance Benchmarks
 - **Test naming**: Use descriptive names without "bug", "debug", or "tmp" (tests are kept permanently)
   - Use "null" not "nil" in test names (language perspective vs implementation)
@@ -197,6 +200,14 @@ bkl is a flexible configuration templating language that simplifies configuratio
 - All repeat modes (integer, list, key-value map, range parameters) work in both document-level and object-level contexts
 - When using `$repeat` in map keys, use string interpolation: `$"item-{$repeat}"`
 - Variables created by key-value repeat can be accessed as `$repeat:keyname` in strings and interpolations
+
+## Defer Functionality
+- `$defer: true` marks a document for deferred processing
+- Deferred documents are evaluated after all non-deferred documents have been fully processed
+- This allows operations on the final output after transformations like `$repeat` have been applied
+- Multiple deferred documents are evaluated in definition order
+- Deferred documents with `$match` will match against the fully-processed output documents
+- Useful for adding fields or modifications that depend on the final state after all processing
 
 ## MCP Servers Available
 - **bkl-mcp** (Model Context Protocol server for documentation and test queries):

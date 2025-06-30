@@ -118,6 +118,7 @@ func findMatches(docs []*document.Document, doc *document.Document, pat any) []*
 // If format is empty, it defaults to "json-pretty".
 func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
 	var docs []*document.Document
+	var deferredDocs []*document.Document
 	fileSystem := fsys.New(fx)
 
 	for _, path := range files {
@@ -127,14 +128,57 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string) (
 		}
 
 		for _, f := range fileObjs {
-			docs, err = FileObj(docs, f)
+			regularDocs := []*document.Document{}
+
+			for _, doc := range f.Docs {
+				deferred := doc.PopMapBoolValue("$defer", true)
+				if !deferred {
+					deferred, _ = doc.PopListMapBoolValue("$defer", true)
+				}
+
+				if deferred {
+					deferredDocs = append(deferredDocs, doc)
+				} else {
+					regularDocs = append(regularDocs, doc)
+				}
+			}
+
+			docs, err = FileObj(docs, &file.File{
+				ID:    f.ID,
+				Child: f.Child,
+				Path:  f.Path,
+				Docs:  regularDocs,
+			})
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
 
-	return output.Bytes(docs, ft, env)
+	for _, deferredDoc := range deferredDocs {
+		outputs, err := output.Documents(docs, env)
+		if err != nil {
+			return nil, err
+		}
+
+		processedDocs := []*document.Document{}
+		for i, out := range outputs {
+			doc := document.NewWithData(fmt.Sprintf("output|%d", i), out)
+			processedDocs = append(processedDocs, doc)
+		}
+
+		docs, err = Document(processedDocs, deferredDoc)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	outputs, err := output.Documents(docs, env)
+	if err != nil {
+		return nil, err
+	}
+
+	return ft.MarshalStream(outputs)
 }
 
 // FileObj applies an already-parsed file object into the document state.

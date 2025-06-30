@@ -489,6 +489,8 @@ hunk-header {
 
 	<li><a href="#repeat">$repeat</a></li>
 
+	<li><a href="#defer">$defer</a></li>
+
 	<li><a href="#escape">$$</a></li>
 
 	<li><a href="#toml">TOML</a></li>
@@ -3992,6 +3994,95 @@ BKL</h1>
   - <key>b</key>: <string>foo</string>
   - <key>b</key>: <string>bar</string>
   - <key>b</key>: <string>baz</string></bkl-code>
+
+</div>
+
+</div>
+</div>
+
+
+
+
+</section>
+
+<section id="defer">
+<h2><a name="defer">$defer</a></h2>
+
+
+
+<p>Use <highlight>$defer: true</highlight> to process a document after all non-deferred documents have been fully evaluated.
+</p>
+
+
+
+<p>This allows operations on the final output after transformations like <highlight>$repeat</highlight> have been applied.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<div class="example-container">
+<div class="grid-container grid-5-col">
+
+
+
+<div class="code-container">
+
+<label class="label-spacing">a.yaml</label>
+
+<bkl-code class="code-labeled"><key>$repeat</key>: <number>2</number>
+<key>a</key>: <string>$repeat</string></bkl-code>
+</div>
+
+
+
+  
+
+  
+<div class="operator-symbol operator-with-label">&#43;</div>
+
+
+
+
+
+<div class="code-container">
+
+<label class="label-spacing">a.b.yaml</label>
+
+<bkl-code class="code-labeled"><key>$repeat</key>: <number>3</number>
+<string>---</string>
+<highlight><key>$defer</key>: <bool>true</bool></highlight>
+<key>$match</key>:
+  <key>a</key>: <number>2</number>
+<key>b</key>: <string>special</string></bkl-code>
+</div>
+
+
+
+
+<div class="operator-symbol operator-with-label">=</div>
+
+
+<div class="code-container">
+
+<label class="invisible label-spacing">invisible</label>
+
+
+<bkl-code class="code-labeled"><key>a</key>: <number>0</number>
+<string>---</string>
+<key>a</key>: <number>1</number>
+<string>---</string>
+<key>a</key>: <number>2</number>
+<highlight><key>b</key>: <string>special</string></highlight></bkl-code>
 
 </div>
 

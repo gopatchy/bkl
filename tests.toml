@@ -4946,3 +4946,59 @@ x:
 ---
 
 '''
+
+###############################################################################
+# Defer Operations ($defer)
+###############################################################################
+
+[deferWithRepeat]
+description = "Test $defer with $repeat - override repeat count then match specific item"
+eval = ["a.b.c.yaml"]
+format = "yaml"
+expected = '''
+a: 0
+---
+a: 1
+---
+a: 2
+b: special
+'''
+files."a.yaml" = '''
+$repeat: 2
+a: $repeat
+'''
+files."a.b.yaml" = '''
+$repeat: 3
+'''
+files."a.b.c.yaml" = '''
+$defer: true
+$match:
+  a: 2
+b: special
+'''
+
+[deferWithRepeatSwapped]
+description = "Test $defer with $repeat - content swapped between files"
+eval = ["a.b.c.yaml"]
+format = "yaml"
+expected = '''
+a: 0
+---
+a: 1
+---
+a: 2
+b: special
+'''
+files."a.yaml" = '''
+$repeat: 2
+a: $repeat
+'''
+files."a.b.yaml" = '''
+$defer: true
+$match:
+  a: 2
+b: special
+'''
+files."a.b.c.yaml" = '''
+$repeat: 3
+'''

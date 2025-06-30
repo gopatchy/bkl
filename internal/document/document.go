@@ -70,6 +70,39 @@ func (d *Document) PopMapValue(key string) (bool, any) {
 	return found, val
 }
 
+func (d *Document) PopMapBoolValue(key string, val bool) bool {
+	dataMap, ok := d.Data.(map[string]any)
+	if !ok {
+		return false
+	}
+
+	found, data := utils.PopMapBoolValue(dataMap, key, val)
+
+	if found {
+		d.Data = data
+	}
+
+	return found
+}
+
+func (d *Document) PopListMapBoolValue(key string, val bool) (bool, error) {
+	dataList, ok := d.Data.([]any)
+	if !ok {
+		return false, nil
+	}
+
+	found, data, err := utils.PopListMapBoolValue(dataList, key, val)
+	if err != nil {
+		return false, err
+	}
+
+	if found {
+		d.Data = data
+	}
+
+	return found, nil
+}
+
 func (d *Document) String() string {
 	return d.ID
 }

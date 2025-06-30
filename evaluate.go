@@ -28,6 +28,7 @@ import (
 //
 // Phase 1
 //   - $parent
+//   - $defer (marks document for deferred processing)
 //
 // Phase 2
 //   - $delete
@@ -51,6 +52,8 @@ import (
 //
 // Phase 6
 //   - $output
+//
+// After all phases, documents marked with $defer are applied to the output.
 //
 // # Document Layer Matching Logic
 //
