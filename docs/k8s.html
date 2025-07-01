@@ -737,7 +737,9 @@ hunk-header {
 
 	<li><a href="#original">Original config</a></li>
 
-	<li><a href="#namespace">Namespace</a></li>
+	<li><a href="#namespace">namespace</a></li>
+
+	<li><a href="#api-service">api-service</a></li>
 
 </ol>
 </div>
@@ -1961,7 +1963,7 @@ hunk-header {
 </section>
 
 <section id="namespace">
-<h2><a name="namespace">Namespace</a></h2>
+<h2><a name="namespace">namespace</a></h2>
 
 
 
@@ -2066,6 +2068,93 @@ hunk-header {
 <bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.yaml</argument><operator>)</operator>
 <prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>staging/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.staging.yaml</argument><operator>)</operator>
 <prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>bkl/namespace.staging.dev.yaml</argument><operator>)</operator></bkl-code>
+</div>
+
+</div>
+
+
+
+
+</section>
+
+<section id="api-service">
+<h2><a name="api-service">api-service</a></h2>
+
+
+
+<p><p>Next, we'll convert the <highlight>api-service.yaml</highlight> files.</p>
+
+<p>Use <highlight>yq</highlight> to split the config into files named by resource type:</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>yq</command> <flag>-s</flag> <string>'.kind'</string> <argument>prod/api-service.yaml</argument></bkl-code>
+</div>
+
+</div>
+
+
+
+
+<p><p>For the ConfigMap, we'll use <highlight>$encode: properties</highlight> to convert to an embedded properties string.</p>
+</p>
+
+
+
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">bkl/api-config.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>ConfigMap</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-config</string>
+  <key>namespace</key>: <string>microservices-prod</string>
+<key>data</key>:
+  <key>app.properties</key>:
+    <key>$encode</key>: <string>properties</string>
+    <key>server</key>:
+      <key>port</key>: <number>8080</number>
+      <key>name</key>: <string>api-service</string>
+      <key>workers</key>: <number>8</number>
+      <key>max_connections</key>: <number>1000</number>
+    <key>logging</key>:
+      <key>level</key>: <string>warn</string>
+      <key>format</key>: <string>json</string>
+      <key>output</key>: <string>stdout</string>
+      <key>sample_rate</key>: <number>0.1</number>
+    <key>cache</key>:
+      <key>enabled</key>: <bool>true</bool>
+      <key>ttl</key>: <number>3600</number>
+      <key>backend</key>: <string>redis-cluster</string>
+      <key>max_size</key>: <number>1000</number>
+    <key>database</key>:
+      <key>pool_size</key>: <number>20</number>
+      <key>max_pool_size</key>: <number>50</number>
+      <key>timeout</key>: <number>30</number>
+      <key>max_idle</key>: <number>10</number>
+    <key>metrics</key>:
+      <key>enabled</key>: <bool>true</bool>
+      <key>port</key>: <number>9090</number>
+      <key>path</key>: <string>/metrics</string>
+    <key>security</key>:
+      <key>rate_limit</key>: <number>1000</number>
+      <key>jwt_expiry</key>: <number>3600</number>
+    <key>environment</key>: <string>production</string></bkl-code>
+</div>
 </div>
 
 </div>
