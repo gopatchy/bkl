@@ -1482,6 +1482,26 @@ b: 2
 $encode: json
 '''
 
+[encodeProperties]
+description = "Test properties encoding with $encode directive"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+|
+  a = 1
+  b = 2
+  nested.x = hello
+  nested.y = world
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+nested:
+  x: hello
+  y: world
+$encode: properties
+'''
+
 [encodeSha256]
 description = "Test SHA-256 encoding with $encode directive"
 eval = ["a.yaml"]
@@ -1558,6 +1578,29 @@ a:
   $value: |
     {"foo":"bar"}
   $decode: json
+'''
+
+[decodeProperties]
+description = "Test properties decoding with $decode directive"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+config:
+  app:
+    name: myapp
+    version: "1.0"
+  db:
+    host: localhost
+    port: "5432"
+'''
+files."a.yaml" = '''
+config:
+  $value: |
+    app.name = myapp
+    app.version = 1.0
+    db.host = localhost
+    db.port = 5432
+  $decode: properties
 '''
 
 ###############################################################################

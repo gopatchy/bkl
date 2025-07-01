@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/magiconair/properties v1.8.10
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/metoro-io/mcp-golang v0.13.0
 	github.com/pelletier/go-toml/v2 v2.2.4
