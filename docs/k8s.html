@@ -1475,28 +1475,28 @@ hunk-header {
   <key>namespace</key>: <string>microservices-prod</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
-    <string>server.port=8080</string>
-    <string>server.name=api-service</string>
-    <string>server.workers=8</string>
-    <string>server.max_connections=1000</string>
-    <string>logging.level=warn</string>
+    <string>cache.backend=redis-cluster</string>
+    <string>cache.enabled=true</string>
+    <string>cache.max_size=1000</string>
+    <string>cache.ttl=3600</string>
+    <string>database.max_idle=10</string>
+    <string>database.max_pool_size=50</string>
+    <string>database.pool_size=20</string>
+    <string>database.timeout=30</string>
+    <string>environment=production</string>
     <string>logging.format=json</string>
+    <string>logging.level=warn</string>
     <string>logging.output=stdout</string>
     <string>logging.sample_rate=0.1</string>
-    <string>cache.enabled=true</string>
-    <string>cache.ttl=3600</string>
-    <string>cache.backend=redis-cluster</string>
-    <string>cache.max_size=1000</string>
-    <string>database.pool_size=20</string>
-    <string>database.max_pool_size=50</string>
-    <string>database.timeout=30</string>
-    <string>database.max_idle=10</string>
     <string>metrics.enabled=true</string>
-    <string>metrics.port=9090</string>
     <string>metrics.path=/metrics</string>
-    <string>security.rate_limit=1000</string>
+    <string>metrics.port=9090</string>
     <string>security.jwt_expiry=3600</string>
-    <string>environment=production</string>
+    <string>security.rate_limit=1000</string>
+    <string>server.max_connections=1000</string>
+    <string>server.name=api-service</string>
+    <string>server.port=8080</string>
+    <string>server.workers=8</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -2111,7 +2111,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">bkl/api-service.yaml</label>
+<label class="label-spacing">bkl/configmap.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">

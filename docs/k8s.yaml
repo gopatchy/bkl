@@ -620,28 +620,28 @@
             namespace: microservices-prod
           data:
             app.properties: |
-              server.port=8080
-              server.name=api-service
-              server.workers=8
-              server.max_connections=1000
-              logging.level=warn
+              cache.backend=redis-cluster
+              cache.enabled=true
+              cache.max_size=1000
+              cache.ttl=3600
+              database.max_idle=10
+              database.max_pool_size=50
+              database.pool_size=20
+              database.timeout=30
+              environment=production
               logging.format=json
+              logging.level=warn
               logging.output=stdout
               logging.sample_rate=0.1
-              cache.enabled=true
-              cache.ttl=3600
-              cache.backend=redis-cluster
-              cache.max_size=1000
-              database.pool_size=20
-              database.max_pool_size=50
-              database.timeout=30
-              database.max_idle=10
               metrics.enabled=true
-              metrics.port=9090
               metrics.path=/metrics
-              security.rate_limit=1000
+              metrics.port=9090
               security.jwt_expiry=3600
-              environment=production
+              security.rate_limit=1000
+              server.max_connections=1000
+              server.name=api-service
+              server.port=8080
+              server.workers=8
           ---
           apiVersion: v1
           kind: Secret
@@ -1140,9 +1140,9 @@
         code: |
           $ yq -s '.kind' prod/api-service.yaml
     - content: |
-        <p>For the ConfigMap, we'll use <highlight>$encode: properties</highlight> to convert to an embedded properties string.</p>
+        <p>For the ConfigMap, we'll use <highlight>$encode: properties</highlight> to convert a map to an embedded properties string.</p>
     - code:
-        label: bkl/api-service.yaml
+        label: bkl/configmap.yaml
         expandable: true
         collapsed: true
         languages: [[0, "yaml"]]
