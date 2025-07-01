@@ -302,21 +302,21 @@
             namespace: microservices-staging
           data:
             app.properties: |
-              server.port=8080
-              server.name=api-service
-              server.workers=4
-              logging.level=info
-              logging.format=json
-              logging.output=stdout
               cache.enabled=true
               cache.ttl=300
               cache.backend=redis
               database.pool_size=10
               database.timeout=30
               database.max_idle=5
+              environment=staging
+              logging.level=info
+              logging.format=json
+              logging.output=stdout
               metrics.enabled=true
               metrics.port=9090
-              environment=staging
+              server.port=8080
+              server.name=api-service
+              server.workers=4
           ---
           apiVersion: v1
           kind: Secret

@@ -1118,21 +1118,21 @@ hunk-header {
   <key>namespace</key>: <string>microservices-staging</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
-    <string>server.port=8080</string>
-    <string>server.name=api-service</string>
-    <string>server.workers=4</string>
-    <string>logging.level=info</string>
-    <string>logging.format=json</string>
-    <string>logging.output=stdout</string>
     <string>cache.enabled=true</string>
     <string>cache.ttl=300</string>
     <string>cache.backend=redis</string>
     <string>database.pool_size=10</string>
     <string>database.timeout=30</string>
     <string>database.max_idle=5</string>
+    <string>environment=staging</string>
+    <string>logging.level=info</string>
+    <string>logging.format=json</string>
+    <string>logging.output=stdout</string>
     <string>metrics.enabled=true</string>
     <string>metrics.port=9090</string>
-    <string>environment=staging</string>
+    <string>server.port=8080</string>
+    <string>server.name=api-service</string>
+    <string>server.workers=4</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
