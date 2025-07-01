@@ -32,9 +32,13 @@
           data:
             app.properties: |
               server.port=8080
-              app.name=api-service
-              log.level=debug
+              server.name=api-service
+              logging.level=debug
+              logging.format=json
               cache.enabled=false
+              cache.ttl=300
+              database.pool_size=5
+              database.timeout=30
               environment=development
           ---
           apiVersion: v1
@@ -123,6 +127,13 @@
                         port: 8080
                       initialDelaySeconds: 5
                       periodSeconds: 5
+                    args:
+                      - "server"
+                      - "--config=/app/config/app.properties"
+                      - "--workers=2"
+                      - "--feature=auth"
+                      - "--feature=metrics"
+                      - "--verbose"
                     volumeMounts:
                       - name: config
                         mountPath: /app/config
@@ -142,23 +153,6 @@
             name: web-config
             namespace: microservices-dev
           data:
-            nginx.conf: |
-              server {
-                  listen 80;
-                  server_name localhost;
-                  
-                  location / {
-                      root /usr/share/nginx/html;
-                      index index.html;
-                      try_files $uri $uri/ /index.html;
-                  }
-                  
-                  location /api {
-                      proxy_pass http://api-service;
-                      proxy_set_header Host $host;
-                      proxy_set_header X-Real-IP $remote_addr;
-                  }
-              }
             app.config.json: |
               {
                 "environment": "development",
@@ -244,18 +238,20 @@
                         port: 80
                       initialDelaySeconds: 5
                       periodSeconds: 5
+                    command: ["/app/web-server"]
+                    args:
+                      - "serve"
+                      - "--port=80"
+                      - "--static-dir=/usr/share/nginx/html"
+                      - "--api-backend=http://api-service"
+                      - "--enable-compression"
+                      - "--enable-cache"
+                      - "-v"
+                      - "-v"
                     volumeMounts:
-                      - name: nginx-config
-                        mountPath: /etc/nginx/conf.d
                       - name: app-config
                         mountPath: /usr/share/nginx/html/config
                 volumes:
-                  - name: nginx-config
-                    configMap:
-                      name: web-config
-                      items:
-                        - key: nginx.conf
-                          path: default.conf
                   - name: app-config
                     configMap:
                       name: web-config
@@ -307,12 +303,20 @@
           data:
             app.properties: |
               server.port=8080
-              app.name=api-service
-              log.level=info
+              server.name=api-service
+              server.workers=4
+              logging.level=info
+              logging.format=json
+              logging.output=stdout
               cache.enabled=true
               cache.ttl=300
-              environment=staging
+              cache.backend=redis
+              database.pool_size=10
+              database.timeout=30
+              database.max_idle=5
               metrics.enabled=true
+              metrics.port=9090
+              environment=staging
           ---
           apiVersion: v1
           kind: Secret
@@ -400,6 +404,16 @@
                         port: 8080
                       initialDelaySeconds: 5
                       periodSeconds: 5
+                    args:
+                      - "server"
+                      - "--config=/app/config/app.properties"
+                      - "--workers=4"
+                      - "--feature=auth"
+                      - "--feature=metrics"
+                      - "--feature=rate-limiting"
+                      - "--feature=caching"
+                      - "--log-format=json"
+                      - "--graceful-timeout=30s"
                     volumeMounts:
                       - name: config
                         mountPath: /app/config
@@ -445,32 +459,6 @@
             name: web-config
             namespace: microservices-staging
           data:
-            nginx.conf: |
-              server {
-                  listen 80;
-                  server_name staging.app.example.com;
-                  
-                  location / {
-                      root /usr/share/nginx/html;
-                      index index.html;
-                      try_files $uri $uri/ /index.html;
-                      
-                      add_header Cache-Control "max-age=300";
-                  }
-                  
-                  location /api {
-                      proxy_pass http://api-service;
-                      proxy_set_header Host $host;
-                      proxy_set_header X-Real-IP $remote_addr;
-                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                      proxy_set_header X-Forwarded-Proto $scheme;
-                  }
-                  
-                  location /health {
-                      access_log off;
-                      return 200 "healthy\n";
-                  }
-              }
             app.config.json: |
               {
                 "environment": "staging",
@@ -557,18 +545,24 @@
                         port: 80
                       initialDelaySeconds: 5
                       periodSeconds: 5
+                    command: ["/app/web-server"]
+                    args:
+                      - "serve"
+                      - "--port=80"
+                      - "--static-dir=/usr/share/nginx/html"
+                      - "--api-backend=http://api-service"
+                      - "--enable-compression"
+                      - "--enable-cache"
+                      - "--cache-ttl=300"
+                      - "--enable-metrics"
+                      - "--metrics-port=9090"
+                      - "--access-log=/var/log/access.log"
+                      - "--error-log=/var/log/error.log"
+                      - "-v"
                     volumeMounts:
-                      - name: nginx-config
-                        mountPath: /etc/nginx/conf.d
                       - name: app-config
                         mountPath: /usr/share/nginx/html/config
                 volumes:
-                  - name: nginx-config
-                    configMap:
-                      name: web-config
-                      items:
-                        - key: nginx.conf
-                          path: default.conf
                   - name: app-config
                     configMap:
                       name: web-config
@@ -627,14 +621,27 @@
           data:
             app.properties: |
               server.port=8080
-              app.name=api-service
-              log.level=warn
+              server.name=api-service
+              server.workers=8
+              server.max_connections=1000
+              logging.level=warn
+              logging.format=json
+              logging.output=stdout
+              logging.sample_rate=0.1
               cache.enabled=true
               cache.ttl=3600
-              environment=production
+              cache.backend=redis-cluster
+              cache.max_size=1000
+              database.pool_size=20
+              database.max_pool_size=50
+              database.timeout=30
+              database.max_idle=10
               metrics.enabled=true
-              database.pool.size=20
-              database.pool.max=50
+              metrics.port=9090
+              metrics.path=/metrics
+              security.rate_limit=1000
+              security.jwt_expiry=3600
+              environment=production
           ---
           apiVersion: v1
           kind: Secret
@@ -752,6 +759,21 @@
                       timeoutSeconds: 3
                       successThreshold: 1
                       failureThreshold: 3
+                    args:
+                      - "server"
+                      - "--config=/app/config/app.properties"
+                      - "--workers=8"
+                      - "--feature=auth"
+                      - "--feature=metrics"
+                      - "--feature=rate-limiting"
+                      - "--feature=caching"
+                      - "--feature=circuit-breaker"
+                      - "--feature=request-tracing"
+                      - "--log-format=json"
+                      - "--log-sample-rate=0.1"
+                      - "--graceful-timeout=60s"
+                      - "--max-request-size=10MB"
+                      - "--request-timeout=30s"
                     volumeMounts:
                       - name: config
                         mountPath: /app/config
@@ -809,49 +831,6 @@
             name: web-config
             namespace: microservices-prod
           data:
-            nginx.conf: |
-              server {
-                  listen 80;
-                  server_name app.example.com www.app.example.com;
-                  
-                  # Security headers
-                  add_header X-Frame-Options "SAMEORIGIN" always;
-                  add_header X-Content-Type-Options "nosniff" always;
-                  add_header X-XSS-Protection "1; mode=block" always;
-                  
-                  # Gzip compression
-                  gzip on;
-                  gzip_vary on;
-                  gzip_min_length 1024;
-                  gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
-                  
-                  location / {
-                      root /usr/share/nginx/html;
-                      index index.html;
-                      try_files $uri $uri/ /index.html;
-                      
-                      # Cache static assets
-                      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-                          expires 1y;
-                          add_header Cache-Control "public, immutable";
-                      }
-                  }
-                  
-                  location /api {
-                      proxy_pass http://api-service;
-                      proxy_set_header Host $host;
-                      proxy_set_header X-Real-IP $remote_addr;
-                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                      proxy_set_header X-Forwarded-Proto $scheme;
-                      proxy_read_timeout 30s;
-                      proxy_connect_timeout 10s;
-                  }
-                  
-                  location /health {
-                      access_log off;
-                      return 200 "healthy\n";
-                  }
-              }
             app.config.json: |
               {
                 "environment": "production",
@@ -968,18 +947,31 @@
                       timeoutSeconds: 3
                       successThreshold: 1
                       failureThreshold: 3
+                    command: ["/app/web-server"]
+                    args:
+                      - "serve"
+                      - "--port=80"
+                      - "--static-dir=/usr/share/nginx/html"
+                      - "--api-backend=https://api-service"
+                      - "--enable-compression"
+                      - "--enable-cache"
+                      - "--cache-ttl=3600"
+                      - "--enable-metrics"
+                      - "--metrics-port=9090"
+                      - "--enable-security-headers"
+                      - "--enable-rate-limiting"
+                      - "--rate-limit=100"
+                      - "--enable-access-log"
+                      - "--access-log-format=json"
+                      - "--enable-cdn"
+                      - "--cdn-url=https://cdn.example.com"
+                      - "--graceful-timeout=30s"
+                      - "--read-timeout=30s"
+                      - "--write-timeout=30s"
                     volumeMounts:
-                      - name: nginx-config
-                        mountPath: /etc/nginx/conf.d
                       - name: app-config
                         mountPath: /usr/share/nginx/html/config
                 volumes:
-                  - name: nginx-config
-                    configMap:
-                      name: web-config
-                      items:
-                        - key: nginx.conf
-                          path: default.conf
                   - name: app-config
                     configMap:
                       name: web-config

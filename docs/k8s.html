@@ -807,9 +807,13 @@ hunk-header {
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
     <string>server.port=8080</string>
-    <string>app.name=api-service</string>
-    <string>log.level=debug</string>
+    <string>server.name=api-service</string>
+    <string>logging.level=debug</string>
+    <string>logging.format=json</string>
     <string>cache.enabled=false</string>
+    <string>cache.ttl=300</string>
+    <string>database.pool_size=5</string>
+    <string>database.timeout=30</string>
     <string>environment=development</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
@@ -898,6 +902,13 @@ hunk-header {
               <key>port</key>: <number>8080</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
+          <key>args</key>:
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=2"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--verbose"</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -930,23 +941,6 @@ hunk-header {
   <key>name</key>: <string>web-config</string>
   <key>namespace</key>: <string>microservices-dev</string>
 <key>data</key>:
-  <key>nginx.conf</key>: <string>|</string>
-    <string>server {</string>
-        <string>listen 80;</string>
-        <string>server_name localhost;</string>
-        
-        <string>location / {</string>
-            <string>root /usr/share/nginx/html;</string>
-            <string>index index.html;</string>
-            <string>try_files $uri $uri/ /index.html;</string>
-        <string>}</string>
-        
-        <string>location /api {</string>
-            <string>proxy_pass http://api-service;</string>
-            <string>proxy_set_header Host $host;</string>
-            <string>proxy_set_header X-Real-IP $remote_addr;</string>
-        <string>}</string>
-    <string>}</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
       <string><string>"environment"</string>: "development",</string>
@@ -1032,18 +1026,20 @@ hunk-header {
               <key>port</key>: <number>80</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
+          <key>command</key>: <string>["/app/web-server"]</string>
+          <key>args</key>:
+            - <string>"serve"</string>
+            - <string>"--port=80"</string>
+            - <string>"--static-dir=/usr/share/nginx/html"</string>
+            - <string>"--api-backend=http://api-service"</string>
+            - <string>"--enable-compression"</string>
+            - <string>"--enable-cache"</string>
+            - <string>"-v"</string>
+            - <string>"-v"</string>
           <key>volumeMounts</key>:
-            - <key>name</key>: <string>nginx-config</string>
-              <key>mountPath</key>: <string>/etc/nginx/conf.d</string>
             - <key>name</key>: <string>app-config</string>
               <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
       <key>volumes</key>:
-        - <key>name</key>: <string>nginx-config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>nginx.conf</string>
-                <key>path</key>: <string>default.conf</string>
         - <key>name</key>: <string>app-config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
@@ -1121,12 +1117,20 @@ hunk-header {
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
     <string>server.port=8080</string>
-    <string>app.name=api-service</string>
-    <string>log.level=info</string>
+    <string>server.name=api-service</string>
+    <string>server.workers=4</string>
+    <string>logging.level=info</string>
+    <string>logging.format=json</string>
+    <string>logging.output=stdout</string>
     <string>cache.enabled=true</string>
     <string>cache.ttl=300</string>
-    <string>environment=staging</string>
+    <string>cache.backend=redis</string>
+    <string>database.pool_size=10</string>
+    <string>database.timeout=30</string>
+    <string>database.max_idle=5</string>
     <string>metrics.enabled=true</string>
+    <string>metrics.port=9090</string>
+    <string>environment=staging</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -1214,6 +1218,16 @@ hunk-header {
               <key>port</key>: <number>8080</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
+          <key>args</key>:
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=4"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--feature=rate-limiting"</string>
+            - <string>"--feature=caching"</string>
+            - <string>"--log-format=json"</string>
+            - <string>"--graceful-timeout=30s"</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1272,32 +1286,6 @@ hunk-header {
   <key>name</key>: <string>web-config</string>
   <key>namespace</key>: <string>microservices-staging</string>
 <key>data</key>:
-  <key>nginx.conf</key>: <string>|</string>
-    <string>server {</string>
-        <string>listen 80;</string>
-        <string>server_name staging.app.example.com;</string>
-        
-        <string>location / {</string>
-            <string>root /usr/share/nginx/html;</string>
-            <string>index index.html;</string>
-            <string>try_files $uri $uri/ /index.html;</string>
-            
-            <string>add_header Cache-Control "max-age=300";</string>
-        <string>}</string>
-        
-        <string>location /api {</string>
-            <string>proxy_pass http://api-service;</string>
-            <string>proxy_set_header Host $host;</string>
-            <string>proxy_set_header X-Real-IP $remote_addr;</string>
-            <string>proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</string>
-            <string>proxy_set_header X-Forwarded-Proto $scheme;</string>
-        <string>}</string>
-        
-        <string>location /health {</string>
-            <string>access_log off;</string>
-            <string>return 200 "healthy\n";</string>
-        <string>}</string>
-    <string>}</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
       <string><string>"environment"</string>: "staging",</string>
@@ -1384,18 +1372,24 @@ hunk-header {
               <key>port</key>: <number>80</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
+          <key>command</key>: <string>["/app/web-server"]</string>
+          <key>args</key>:
+            - <string>"serve"</string>
+            - <string>"--port=80"</string>
+            - <string>"--static-dir=/usr/share/nginx/html"</string>
+            - <string>"--api-backend=http://api-service"</string>
+            - <string>"--enable-compression"</string>
+            - <string>"--enable-cache"</string>
+            - <string>"--cache-ttl=300"</string>
+            - <string>"--enable-metrics"</string>
+            - <string>"--metrics-port=9090"</string>
+            - <string>"--access-log=/var/log/access.log"</string>
+            - <string>"--error-log=/var/log/error.log"</string>
+            - <string>"-v"</string>
           <key>volumeMounts</key>:
-            - <key>name</key>: <string>nginx-config</string>
-              <key>mountPath</key>: <string>/etc/nginx/conf.d</string>
             - <key>name</key>: <string>app-config</string>
               <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
       <key>volumes</key>:
-        - <key>name</key>: <string>nginx-config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>nginx.conf</string>
-                <key>path</key>: <string>default.conf</string>
         - <key>name</key>: <string>app-config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
@@ -1480,14 +1474,27 @@ hunk-header {
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
     <string>server.port=8080</string>
-    <string>app.name=api-service</string>
-    <string>log.level=warn</string>
+    <string>server.name=api-service</string>
+    <string>server.workers=8</string>
+    <string>server.max_connections=1000</string>
+    <string>logging.level=warn</string>
+    <string>logging.format=json</string>
+    <string>logging.output=stdout</string>
+    <string>logging.sample_rate=0.1</string>
     <string>cache.enabled=true</string>
     <string>cache.ttl=3600</string>
-    <string>environment=production</string>
+    <string>cache.backend=redis-cluster</string>
+    <string>cache.max_size=1000</string>
+    <string>database.pool_size=20</string>
+    <string>database.max_pool_size=50</string>
+    <string>database.timeout=30</string>
+    <string>database.max_idle=10</string>
     <string>metrics.enabled=true</string>
-    <string>database.pool.size=20</string>
-    <string>database.pool.max=50</string>
+    <string>metrics.port=9090</string>
+    <string>metrics.path=/metrics</string>
+    <string>security.rate_limit=1000</string>
+    <string>security.jwt_expiry=3600</string>
+    <string>environment=production</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -1605,6 +1612,21 @@ hunk-header {
             <key>timeoutSeconds</key>: <number>3</number>
             <key>successThreshold</key>: <number>1</number>
             <key>failureThreshold</key>: <number>3</number>
+          <key>args</key>:
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=8"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--feature=rate-limiting"</string>
+            - <string>"--feature=caching"</string>
+            - <string>"--feature=circuit-breaker"</string>
+            - <string>"--feature=request-tracing"</string>
+            - <string>"--log-format=json"</string>
+            - <string>"--log-sample-rate=0.1"</string>
+            - <string>"--graceful-timeout=60s"</string>
+            - <string>"--max-request-size=10MB"</string>
+            - <string>"--request-timeout=30s"</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1675,49 +1697,6 @@ hunk-header {
   <key>name</key>: <string>web-config</string>
   <key>namespace</key>: <string>microservices-prod</string>
 <key>data</key>:
-  <key>nginx.conf</key>: <string>|</string>
-    <string>server {</string>
-        <string>listen 80;</string>
-        <string>server_name app.example.com www.app.example.com;</string>
-        
-        <comment># Security headers</comment>
-        <string>add_header X-Frame-Options "SAMEORIGIN" always;</string>
-        <string>add_header X-Content-Type-Options "nosniff" always;</string>
-        <string>add_header X-XSS-Protection "1; mode=block" always;</string>
-        
-        <comment># Gzip compression</comment>
-        <string>gzip on;</string>
-        <string>gzip_vary on;</string>
-        <string>gzip_min_length 1024;</string>
-        <string>gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;</string>
-        
-        <string>location / {</string>
-            <string>root /usr/share/nginx/html;</string>
-            <string>index index.html;</string>
-            <string>try_files $uri $uri/ /index.html;</string>
-            
-            <comment># Cache static assets</comment>
-            <string>location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {</string>
-                <string>expires 1y;</string>
-                <string>add_header Cache-Control "public, immutable";</string>
-            <string>}</string>
-        <string>}</string>
-        
-        <string>location /api {</string>
-            <string>proxy_pass http://api-service;</string>
-            <string>proxy_set_header Host $host;</string>
-            <string>proxy_set_header X-Real-IP $remote_addr;</string>
-            <string>proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</string>
-            <string>proxy_set_header X-Forwarded-Proto $scheme;</string>
-            <string>proxy_read_timeout 30s;</string>
-            <string>proxy_connect_timeout 10s;</string>
-        <string>}</string>
-        
-        <string>location /health {</string>
-            <string>access_log off;</string>
-            <string>return 200 "healthy\n";</string>
-        <string>}</string>
-    <string>}</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
       <string><string>"environment"</string>: "production",</string>
@@ -1834,18 +1813,31 @@ hunk-header {
             <key>timeoutSeconds</key>: <number>3</number>
             <key>successThreshold</key>: <number>1</number>
             <key>failureThreshold</key>: <number>3</number>
+          <key>command</key>: <string>["/app/web-server"]</string>
+          <key>args</key>:
+            - <string>"serve"</string>
+            - <string>"--port=80"</string>
+            - <string>"--static-dir=/usr/share/nginx/html"</string>
+            - <string>"--api-backend=https://api-service"</string>
+            - <string>"--enable-compression"</string>
+            - <string>"--enable-cache"</string>
+            - <string>"--cache-ttl=3600"</string>
+            - <string>"--enable-metrics"</string>
+            - <string>"--metrics-port=9090"</string>
+            - <string>"--enable-security-headers"</string>
+            - <string>"--enable-rate-limiting"</string>
+            - <string>"--rate-limit=100"</string>
+            - <string>"--enable-access-log"</string>
+            - <string>"--access-log-format=json"</string>
+            - <string>"--enable-cdn"</string>
+            - <string>"--cdn-url=https://cdn.example.com"</string>
+            - <string>"--graceful-timeout=30s"</string>
+            - <string>"--read-timeout=30s"</string>
+            - <string>"--write-timeout=30s"</string>
           <key>volumeMounts</key>:
-            - <key>name</key>: <string>nginx-config</string>
-              <key>mountPath</key>: <string>/etc/nginx/conf.d</string>
             - <key>name</key>: <string>app-config</string>
               <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
       <key>volumes</key>:
-        - <key>name</key>: <string>nginx-config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>nginx.conf</string>
-                <key>path</key>: <string>default.conf</string>
         - <key>name</key>: <string>app-config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
