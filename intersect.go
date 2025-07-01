@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/fs"
 	"reflect"
-	"sort"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
@@ -26,6 +25,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 	fx2 := fsys.New(fx)
 
 	tracking := map[string]any{}
+	var keyOrder []string
 
 	for i, path := range paths {
 		var docs []*document.Document
@@ -57,6 +57,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 					return nil, fmt.Errorf("selector %q matches multiple documents in %s", keyStr, path)
 				}
 				tracking[keyStr] = doc.Data
+				keyOrder = append(keyOrder, keyStr)
 			}
 		} else {
 			seen := map[string]bool{}
@@ -88,14 +89,8 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 	}
 
 	results := []any{}
-	var keys []string
-	for key := range tracking {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	for _, key := range keys {
-		if data := tracking[key]; data != nil {
+	for _, key := range keyOrder {
+		if data, exists := tracking[key]; exists && data != nil {
 			results = append(results, data)
 		}
 	}
