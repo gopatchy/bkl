@@ -5421,3 +5421,175 @@ x:
 x:
   a: 1
 '''
+
+[intersectEmptyObjects]
+description = "Test intersect with empty objects"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+x: {}
+"y": $required
+'''
+[intersectEmptyObjects.files]
+"a.yaml" = '''
+x: {}
+y: 1
+'''
+"b.yaml" = '''
+x: {}
+y: 2
+'''
+
+[intersectEmptyObjectsSkipRequired]
+description = "Test intersect with empty objects skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+x: {}
+'''
+[intersectEmptyObjectsSkipRequired.files]
+"a.yaml" = '''
+x: {}
+y: 1
+'''
+"b.yaml" = '''
+x: {}
+y: 2
+'''
+
+[intersectNullValues]
+description = "Test intersect with null values"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+x: null
+"y": $required
+'''
+[intersectNullValues.files]
+"a.yaml" = '''
+x: null
+y: 1
+'''
+"b.yaml" = '''
+x: null
+y: 2
+'''
+
+[intersectNullValuesSkipRequired]
+description = "Test intersect with null values skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+x: null
+'''
+[intersectNullValuesSkipRequired.files]
+"a.yaml" = '''
+x: null
+y: 1
+'''
+"b.yaml" = '''
+x: null
+y: 2
+'''
+
+[intersectEmptyVsNonEmpty]
+description = "Test intersect empty object vs non-empty"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+x: {}
+'''
+[intersectEmptyVsNonEmpty.files]
+"a.yaml" = '''
+x: {}
+'''
+"b.yaml" = '''
+x:
+  a: 1
+'''
+
+[intersectEmptyVsNonEmptySkipRequired]
+description = "Test intersect empty object vs non-empty skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+x: {}
+'''
+[intersectEmptyVsNonEmptySkipRequired.files]
+"a.yaml" = '''
+x: {}
+'''
+"b.yaml" = '''
+x:
+  a: 1
+'''
+
+[intersectMixedEmptyNullValues]
+description = "Test intersect with mix of empty, null, and values"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+expected = '''
+empty: {}
+nested:
+  x: 1
+  "y": {}
+null_val: null
+value: 1
+'''
+[intersectMixedEmptyNullValues.files]
+"a.yaml" = '''
+empty: {}
+null_val: null
+value: 1
+nested:
+  x: 1
+  y: {}
+'''
+"b.yaml" = '''
+empty: {}
+null_val: null
+value: 1
+nested:
+  x: 1
+  y: {}
+'''
+
+[intersectOnlyEmptyObjectsSkipRequired]
+description = "Test intersect with only empty objects skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+{}
+'''
+[intersectOnlyEmptyObjectsSkipRequired.files]
+"a.yaml" = '{}'
+"b.yaml" = '{}'
+
+[intersectEmptyRootSkipRequired]
+description = "Test intersect with no common fields skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+{}
+'''
+[intersectEmptyRootSkipRequired.files]
+"a.yaml" = '''
+x: 1
+'''
+"b.yaml" = '''
+y: 2
+'''
