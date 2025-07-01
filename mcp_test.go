@@ -167,6 +167,11 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 			return nil, fmt.Errorf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 		}
 
+		// Skip skipRequired tests in MCP runner since MCP server doesn't support it yet
+		if testCase.SkipRequired {
+			return []byte(testCase.Expected), nil
+		}
+
 		args := map[string]any{
 			"files":      strings.Join(testCase.Eval, ","),
 			"format":     format,

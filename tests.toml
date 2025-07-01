@@ -5350,3 +5350,74 @@ b: 2
 a: 1
 c: 3
 '''
+
+[intersectSkipRequiredDifferentTypes]
+description = "Test intersect with different types skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = ""
+[intersectSkipRequiredDifferentTypes.files]
+"a.yaml" = "x: 1"
+"b.yaml" = '"string value"'
+
+[intersectSkipRequiredMapMismatch]
+description = "Test intersect with map value mismatch skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+x: 1
+'''
+[intersectSkipRequiredMapMismatch.files]
+"a.yaml" = '''
+x: 1
+y: 2
+'''
+"b.yaml" = '''
+x: 1
+y: 3
+'''
+
+[intersectSkipRequiredListNoCommon]
+description = "Test intersect with no common list elements skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+skipRequired = true
+expected = '''
+items: []
+'''
+[intersectSkipRequiredListNoCommon.files]
+"a.yaml" = '''
+items:
+  - a
+  - b
+'''
+"b.yaml" = '''
+items:
+  - c
+  - d
+'''
+
+[intersectSkipRequiredListVsMap]
+description = "Test intersect with list vs map skipping $required"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"  
+intersect = true
+skipRequired = true
+expected = '''
+{}
+'''
+[intersectSkipRequiredListVsMap.files]
+"a.yaml" = '''
+x:
+  - 1
+  - 2
+'''
+"b.yaml" = '''
+x:
+  a: 1
+'''
