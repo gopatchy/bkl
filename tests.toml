@@ -5166,10 +5166,12 @@ format = "yaml"
 diff = true
 selector = "name"
 expected = '''
-$match: {}
+$match:
+  name: doc1
 b: 3
 ---
-$match: {}
+$match:
+  name: doc2
 c: 4
 '''
 [diffWithSelector.files]
@@ -5241,13 +5243,17 @@ format = "yaml"
 diff = true
 selector = "metadata.name"
 expected = '''
-$match: {}
+$match:
+  metadata:
+    name: service1
 metadata:
   version: v2
 spec:
   replicas: 3
 ---
-$match: {}
+$match:
+  metadata:
+    name: service2
 '''
 [diffWithSelectorNestedPath.files]
 "a.yaml" = '''
@@ -5284,9 +5290,11 @@ format = "yaml"
 diff = true
 selector = "id"
 expected = '''
-$match: {}
+$match:
+  id: 1
 ---
-$match: {}
+$match:
+  id: 2
 ---
 $match: null
 c: 3

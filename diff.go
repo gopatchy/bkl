@@ -108,7 +108,14 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 			if err != nil {
 				return nil, err
 			}
-			result = addMatchDirective(result)
+
+			matchValue := map[string]any{}
+			if selector != "" {
+				parts := strings.Split(selector, ".")
+				val, _ := getPath(srcDoc.Data, parts)
+				setPath(matchValue, parts, val)
+			}
+			result = addMatchDirective(result, matchValue)
 			results = append(results, result)
 		}
 	}
@@ -302,21 +309,21 @@ func setPath(data map[string]any, parts []string, value any) {
 	}
 }
 
-func addMatchDirective(result any) any {
+func addMatchDirective(result any, matchValue map[string]any) any {
 	switch r := result.(type) {
 	case map[string]any:
 		if _, hasMatch := r["$match"]; !hasMatch {
-			r["$match"] = map[string]any{}
+			r["$match"] = matchValue
 		}
 		return r
 	case []any:
 		return append([]any{
 			map[string]any{
-				"$match": map[string]any{},
+				"$match": matchValue,
 			},
 		}, r...)
 	case nil:
-		return map[string]any{"$match": map[string]any{}}
+		return map[string]any{"$match": matchValue}
 	default:
 		return result
 	}
