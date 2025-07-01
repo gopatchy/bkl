@@ -1028,49 +1028,6 @@
               matchLabels:
                 app: web
                 environment: prod
-    - code:
-        label: prod/monitoring.yaml
-        languages: [[0, "yaml"]]
-        expandable: true
-        collapsed: true
-        code: |
-          apiVersion: v1
-          kind: ServiceMonitor
-          metadata:
-            name: api-metrics
-            namespace: microservices-prod
-            labels:
-              app: api
-              monitoring: prometheus
-              environment: prod
-          spec:
-            selector:
-              matchLabels:
-                app: api
-                environment: prod
-            endpoints:
-              - port: http
-                path: /metrics
-                interval: 30s
-          ---
-          apiVersion: v1
-          kind: ServiceMonitor
-          metadata:
-            name: web-metrics
-            namespace: microservices-prod
-            labels:
-              app: web
-              monitoring: prometheus
-              environment: prod
-          spec:
-            selector:
-              matchLabels:
-                app: web
-                environment: prod
-            endpoints:
-              - port: http
-                path: /metrics
-                interval: 30s
 - id: namespace
   title: namespace
   items:
