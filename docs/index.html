@@ -354,6 +354,48 @@ op {
 	font-weight: bold;
 }
 
+ 
+.code-wrapper {
+	position: relative;
+}
+
+.expand-toggle {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 10;
+	background: var(--blue4);
+	color: var(--neutral9);
+	border: 1px solid var(--blue3);
+	border-radius: 3px;
+	padding: 2px 8px;
+	font-size: 14px;
+	cursor: pointer;
+	font-family: source-code-pro;
+	transition: background-color 0.2s;
+}
+
+.expand-toggle:hover {
+	background: var(--blue3);
+}
+
+bkl-code.collapsed {
+	max-height: 90px;
+	overflow: hidden;
+	position: relative;
+}
+
+bkl-code.collapsed::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 40px;
+	background: linear-gradient(to bottom, transparent, var(--neutral0));
+	pointer-events: none;
+}
+
 key {
 	color: var(--yellow4);
 }
@@ -818,10 +860,13 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">Run it!</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <argument>service.test.toml</argument>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ </prompt><command>bkl</command> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <highlight><number>8081</number></highlight></bkl-code>
+</div>
 </div>
 
 </div>
@@ -846,8 +891,11 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">Using go</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><comment># Install go from <a href="https://go.dev/dl/">go.dev</a></comment>
-<prompt>$</prompt> <command>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument></bkl-code>
+<prompt>$ <command></prompt>go</command> <argument>install</argument> <argument>github.com/gopatchy/bkl/...@latest</argument></bkl-code>
+</div>
 </div>
 
 </div>
@@ -860,8 +908,11 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">brew (macOS)</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><comment># Install brew from <a href="https://brew.sh/">brew.sh</a></comment>
-<prompt>$</prompt> <command>brew</command> <argument>install</argument> <argument>gopatchy/bkl/bkl</argument></bkl-code>
+<prompt>$ <command></prompt>brew</command> <argument>install</argument> <argument>gopatchy/bkl/bkl</argument></bkl-code>
+</div>
 </div>
 
 </div>
@@ -891,10 +942,13 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">YAML</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ </prompt><command>bkl</command> <highlight><flag>-f</flag> <argument>yaml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
+</div>
 </div>
 
 </div>
@@ -907,10 +961,13 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">TOML</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ </prompt><command>bkl</command> <highlight><flag>-f</flag> <argument>toml</argument></highlight> <argument>service.test.toml</argument>
 <key>addr</key> = <string>'127.0.0.1'</string>
 <key>name</key> = <string>'myService'</string>
 <key>port</key> = <number>8081</number></bkl-code>
+</div>
 </div>
 
 </div>
@@ -923,8 +980,11 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">JSON</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ </prompt><command>bkl</command> <highlight><flag>-f</flag> <argument>json</argument></highlight> <argument>service.test.toml</argument>
 {<key>"addr"</key>:<string>"127.0.0.1"</string>,<key>"name"</key>:<string>"myService"</string>,<key>"port"</key>:<number>8081</number>}</bkl-code>
+</div>
 </div>
 
 </div>
@@ -937,12 +997,15 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">JSON (pretty)</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ </prompt><command>bkl</command> <highlight><flag>-f</flag> <argument>json-pretty</argument></highlight> <argument>service.test.toml</argument>
 {
   <key>"addr"</key>: <string>"127.0.0.1"</string>,
   <key>"name"</key>: <string>"myService"</string>,
   <key>"port"</key>: <number>8081</number>
 }</bkl-code>
+</div>
 </div>
 
 </div>
@@ -958,10 +1021,13 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkl</command> <argument>service.test.<highlight>yaml</argument></highlight>   <comment># real file is service.test.<highlight>toml</comment></highlight>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number></bkl-code>
+</div>
 
 </div>
 
@@ -983,7 +1049,10 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>bkl</command> <highlight><flag>-o</flag> <argument>out.yaml</argument></highlight> <argument>service.test.toml</argument></bkl-code>
+</div>
 
 </div>
 
@@ -1007,7 +1076,10 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">Commandline Layering</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ <command></prompt>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>   <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+</div>
 </div>
 
 </div>
@@ -1025,9 +1097,12 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">stdin</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ </prompt><command>bkl</command> <highlight><flag>--</flag> <flag>-.yaml</flag></highlight> <operator>&lt;<operator></operator>&lt;</operator><string>'EOF'</string>
 <key>a</key>: <number>1</number>
 <string>EOF</string></bkl-code>
+</div>
 </div>
 
 </div>
@@ -1057,7 +1132,10 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">Set Parent In File</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><highlight><key>$parent</key>: <string>a.b</string></highlight>   <comment># inherits from a.b.<ext>, from a.<ext></comment></bkl-code>
+</div>
 </div>
 
 </div>
@@ -1107,7 +1185,10 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">Set Parent In CLI</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ <command></prompt>bkl</command> <highlight><argument>a.b.yaml</argument> <argument>c.d.yaml</argument></highlight>      <comment># a.yaml + a.b.yaml + c.yaml + c.d.yaml</comment></bkl-code>
+</div>
 </div>
 
 </div>
@@ -1125,7 +1206,10 @@ hunk-header {
 
 <div class="label-container">
 <label class="label-spacing">No Parent</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><highlight><key>$parent</key>: <bool>false</bool></highlight>   <comment># no further inheritance</comment></bkl-code>
+</div>
 </div>
 
 </div>
@@ -4407,7 +4491,10 @@ hunk-header {
 
 <div class="example-container">
 
+<div class="code-wrapper">
+
 <bkl-code class="code-unlabeled"><highlight><key>"$parent"</highlight> </key>= <bool>false</bool></bkl-code>
+</div>
 
 </div>
 
@@ -4429,32 +4516,35 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <highlight><command>ln</command> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
+<div class="code-wrapper">
 
-<prompt>$</prompt> <command>cat</command> <argument>service.yaml</argument>
+<bkl-code class="code-unlabeled"><prompt>$ <highlight></prompt><command>ln</command> <flag>-s</flag> <argument>~/go/bin/bklb</argument> <argument>~/go/bin/catb</argument></highlight>   <comment># catb could be, e.g. kubectlb</comment>
+
+<prompt>$ </prompt><command>cat</command> <argument>service.yaml</argument>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8080</number>
 
-<prompt>$</prompt> <command>cat</command> <argument>service.test.toml</argument>
+<prompt>$ </prompt><command>cat</command> <argument>service.test.toml</argument>
 <key>port</key> = <number>8081</number>
 
-<prompt>$</prompt> <highlight><command>catb</command> <argument>service.test.toml</argument></highlight>
+<prompt>$ <highlight></prompt><command>catb</command> <argument>service.test.toml</argument></highlight>
 <key>addr</key> = <string>"127.0.0.1"</string>
 <key>name</key> = <string>"myService"</string>
 <key>port</key> = <number>8081</number>
 
-<prompt>$</prompt> <command>cat</command> <argument>service.test.yaml</argument> <argument>service.test.json</argument>
+<prompt>$ <command></prompt>cat</command> <argument>service.test.yaml</argument> <argument>service.test.json</argument>
 <argument>cat:</argument> <argument>service.test.yaml:</argument> <argument>No</argument> <argument>such</argument> <argument>file</argument> <argument>or</argument> <argument>directory</argument>
 <argument>cat:</argument> <argument>service.test.json:</argument> <argument>No</argument> <argument>such</argument> <argument>file</argument> <argument>or</argument> <argument>directory</argument>
 
-<prompt>$</prompt> <highlight><command>catb</command> <argument>service.test.yaml</argument></highlight>
+<prompt>$ <highlight></prompt><command>catb</command> <argument>service.test.yaml</argument></highlight>
 <key>addr</key>: <string>127.0.0.1</string>
 <key>name</key>: <string>myService</string>
 <key>port</key>: <number>8081</number>
 
-<prompt>$</prompt> <highlight><command>catb</command> <argument>service.test.json</argument></highlight>
+<prompt>$ <highlight><command></prompt>catb</command> <argument>service.test.json</argument></highlight>
 {<key>"addr"</key>:<string>"127.0.0.1"</string>,<key>"name"</key>:<string>"myService"</string>,<key>"port"</key>:<number>8081</number>}</bkl-code>
+</div>
 
 </div>
 
@@ -4481,7 +4571,10 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
+</div>
 
 </div>
 
@@ -4685,7 +4778,10 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
+</div>
 
 </div>
 
@@ -4831,7 +4927,10 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>bklr</command> <operator>&lt;<argument></operator>lower_layer_path<operator></argument>&gt;</operator></bkl-code>
+</div>
 
 </div>
 
@@ -4938,7 +5037,10 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>kubectl</command> <highlight><argument>bkl</argument></highlight> <operator>&lt;</operator><argument>kubectl_commands</argument><operator>&gt;</operator></bkl-code>
+</div>
 
 </div>
 
@@ -4953,9 +5055,12 @@ hunk-header {
 
 <div class="example-container">
 
+<div class="code-wrapper">
+
 <bkl-code class="code-unlabeled"><comment># deploy.dev.yaml and deploy.yaml are bkl layer files</comment>
-<prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>apply</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
+<prompt>$ </prompt><command>kubectl</command> <argument>bkl</argument> <argument>apply</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
 <argument>deployment.apps/deploy-dev</argument> <argument>unchanged</argument></bkl-code>
+</div>
 
 </div>
 
@@ -4977,7 +5082,9 @@ hunk-header {
 
 <div class="example-container">
 
-<bkl-code class="code-unlabeled"><prompt>$</prompt> <highlight><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <highlight></prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>a.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>b.yaml</argument><operator>)</operator></highlight>
 <file-header>--- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700</file-header>
 <file-header>+++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700</file-header>
 <hunk-header>@@ -1,3 +1,2 @@</hunk-header>
@@ -4985,10 +5092,11 @@ hunk-header {
 <deletion>-b: 2</deletion>
  c: 3
 
-<prompt>$</prompt> <highlight><command>diff</command> <flag>-y</flag> <flag>--color</flag> <operator>&lt;</operator><command>(bkl</command> <argument>a.yaml)</argument> <operator>&lt;</operator><command>(bkl</command> <argument>b.yaml)</argument></highlight>
+<prompt>$ <highlight></prompt><command>diff</command> <flag>-y</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>a.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>b.yaml</argument><operator>)</operator></highlight>
 a: 1                              a: 1
 b: 2                            &lt;
 c: 3                              c: 3</bkl-code>
+</div>
 
 </div>
 
@@ -5034,9 +5142,12 @@ c: 3                              c: 3</bkl-code>
 
 <div class="label-container">
 <label class="label-spacing">Export Existing Config</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><comment># "kubectl neat" removes status and default value fields</comment>
-<prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-dev</argument> <operator>&gt;</operator> <command>deploy-dev-orig.yaml</command>
-<prompt>$</prompt> <command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-prod</argument> <operator>&gt;</operator> <command>deploy-prod-orig.yaml</command></bkl-code>
+<prompt>$ </prompt><command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-dev</argument> <operator>&gt;</operator> <command>deploy-dev-orig.yaml</command>
+<prompt>$ </prompt><command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-prod</argument> <operator>&gt;</operator> <command>deploy-prod-orig.yaml</command></bkl-code>
+</div>
 </div>
 
 </div>
@@ -5049,8 +5160,11 @@ c: 3                              c: 3</bkl-code>
 
 <div class="label-container">
 <label class="label-spacing">Generate Base Layer</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><comment># See bkli details <a href="#bkli">here</a></comment>
-<prompt>$</prompt> <command>bkli</command> <flag>-o</flag> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+<prompt>$ </prompt><command>bkli</command> <flag>-o</flag> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+</div>
 </div>
 
 </div>
@@ -5063,9 +5177,12 @@ c: 3                              c: 3</bkl-code>
 
 <div class="label-container">
 <label class="label-spacing">Generate Service Layers</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><comment># See bkld details <a href="#bkld">here</a></comment>
-<prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.dev.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument>
-<prompt>$</prompt> <command>bkld</command> <flag>-o</flag> <argument>deploy.prod.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+<prompt>$ </prompt><command>bkld</command> <flag>-o</flag> <argument>deploy.dev.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument>
+<prompt>$ </prompt><command>bkld</command> <flag>-o</flag> <argument>deploy.prod.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+</div>
 </div>
 
 </div>
@@ -5078,9 +5195,12 @@ c: 3                              c: 3</bkl-code>
 
 <div class="label-container">
 <label class="label-spacing">Check Results</label>
+<div class="code-wrapper">
+
 <bkl-code class="code-labeled"><comment># Should show no diff</comment>
-<prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
-<prompt>$</prompt> <command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.prod.yaml</argument></bkl-code>
+<prompt>$ </prompt><command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
+<prompt>$ </prompt><command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.prod.yaml</argument></bkl-code>
+</div>
 </div>
 
 </div>
@@ -5093,7 +5213,10 @@ c: 3                              c: 3</bkl-code>
 
 <div class="label-container">
 <label class="label-spacing">Clean Up</label>
-<bkl-code class="code-labeled"><prompt>$</prompt> <command>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+<div class="code-wrapper">
+
+<bkl-code class="code-labeled"><prompt>$ <command></prompt>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
+</div>
 </div>
 
 </div>
@@ -5164,6 +5287,23 @@ function toggleMobileMenu() {
     const button = document.querySelector('.mobile-menu-button');
     nav.classList.toggle('mobile-open');
     button.textContent = nav.classList.contains('mobile-open') ? '✕ Close' : '☰ Nav';
+}
+
+
+function toggleExpand(button) {
+    const wrapper = button.closest('.code-wrapper');
+    const codeBlock = wrapper.querySelector('bkl-code');
+    const isCollapsed = codeBlock.classList.contains('collapsed');
+    
+    if (isCollapsed) {
+        codeBlock.classList.remove('collapsed');
+        button.textContent = '∨';
+        button.setAttribute('aria-expanded', 'true');
+    } else {
+        codeBlock.classList.add('collapsed');
+        button.textContent = '›';
+        button.setAttribute('aria-expanded', 'false');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

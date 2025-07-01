@@ -43,8 +43,8 @@ func highlightShell(text string, offset int) []insertion {
 				isFirstWord = true
 				sawPrompt = false
 			case ch == '$' && pos+1 < len(text) && text[pos+1] == ' ' && isFirstWord:
-				// Shell prompt
-				h.addToken("prompt", pos, pos+1)
+				// Shell prompt - include the space
+				h.addToken("prompt", pos, pos+2)
 				sawPrompt = true
 				pos++ // Skip the space after prompt
 				isFirstWord = true
@@ -69,7 +69,12 @@ func highlightShell(text string, offset int) []insertion {
 				// This is &lt; (escaped <)
 				h.addToken("operator", pos, pos+4)
 				pos += 3
-				isFirstWord = true
+				// Check for &lt;( (process substitution)
+				if pos < len(text)-1 && text[pos+1] == '(' {
+					// After <(, the next word is a command
+					isFirstWord = true
+					sawPrompt = true
+				}
 				// Check for &lt;&lt; (heredoc)
 				if pos < len(text) && text[pos] == '&' && pos+3 < len(text) && text[pos:pos+4] == "&lt;" {
 					h.addToken("operator", pos, pos+4)
@@ -86,9 +91,13 @@ func highlightShell(text string, offset int) []insertion {
 				h.addToken("operator", pos, pos+5)
 				pos += 4
 				isFirstWord = true
-			case ch == '|' || ch == ';':
+			case ch == '|' || ch == ';' || ch == '(' || ch == ')':
 				h.addToken("operator", pos, pos+1)
 				isFirstWord = true
+				// For '(', treat the next word as a potential command
+				if ch == '(' {
+					sawPrompt = true
+				}
 			case ch == '<' || ch == '>':
 				// Skip HTML tags entirely
 				for pos < len(text) && text[pos] != '>' {
@@ -107,7 +116,7 @@ func highlightShell(text string, offset int) []insertion {
 
 		case shellWord:
 			if ch == ' ' || ch == '\t' || ch == '\n' || ch == '|' || ch == ';' ||
-				ch == '\'' || ch == '"' || ch == '`' || ch == '#' {
+				ch == '\'' || ch == '"' || ch == '`' || ch == '#' || ch == '(' || ch == ')' {
 				// End of word
 				word := text[wordStart:pos]
 
@@ -174,6 +183,17 @@ func highlightShell(text string, offset int) []insertion {
 				isFirstWord = true
 				sawPrompt = false
 				state = shellStart
+			case '&':
+				// Check if this is the start of &lt;(
+				if pos+3 < len(text) && text[pos:pos+4] == "&lt;" &&
+					pos+4 < len(text) && text[pos+4] == '(' {
+					// This is <( after a word, treat next as command
+					state = shellStart
+					pos-- // Reprocess
+				} else {
+					state = shellStart
+					pos-- // Reprocess
+				}
 			default:
 				state = shellStart
 				pos-- // Reprocess
@@ -296,6 +316,7 @@ func isShellBuiltin(word string) bool {
 		"find", "xargs", "curl", "wget", "tar", "gzip", "gunzip", "zip", "unzip",
 		"chmod", "chown", "ln", "ps", "kill", "bg", "fg", "jobs", "alias", "unalias",
 		"which", "whereis", "date", "cal", "sleep", "test", "[", "[[", "]]",
+		"yq", "jq", "bkl", "bkld", "bkli", "bklr", "diff", "git", "make", "go", "npm", "python",
 	}
 	return slices.Contains(builtins, word)
 }

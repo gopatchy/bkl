@@ -57,6 +57,8 @@ type DocLayer struct {
 	Code       string   `yaml:"code"`
 	Highlights []string `yaml:"highlights,omitempty"`
 	Languages  [][]any  `yaml:"languages,omitempty"`
+	Expandable bool     `yaml:"expandable,omitempty"`
+	Collapsed  bool     `yaml:"collapsed,omitempty"`
 }
 
 func GetTests() (map[string]*TestCase, error) {

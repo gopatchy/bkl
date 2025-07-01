@@ -21,14 +21,28 @@
 {{end}}
 
 {{define "simpleCodeBlock"}}
-<div class="example-container">
+<div class="example-container{{if .Expandable}} expandable-container{{end}}">
 {{if .Label}}
 <div class="label-container">
 <label class="{{if eq .Label "invisible"}}invisible {{end}}label-spacing">{{.Label}}</label>
-<bkl-code class="code-labeled">{{.Code}}</bkl-code>
+<div class="code-wrapper">
+{{if .Expandable}}
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="{{if not .Collapsed}}true{{else}}false{{end}}">
+{{if .Collapsed}}›{{else}}∨{{end}}
+</button>
+{{end}}
+<bkl-code class="code-labeled{{if and .Expandable .Collapsed}} collapsed{{end}}">{{.Code}}</bkl-code>
+</div>
 </div>
 {{else}}
-<bkl-code class="code-unlabeled">{{.Code}}</bkl-code>
+<div class="code-wrapper">
+{{if .Expandable}}
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="{{if not .Collapsed}}true{{else}}false{{end}}">
+{{if .Collapsed}}›{{else}}∨{{end}}
+</button>
+{{end}}
+<bkl-code class="code-unlabeled{{if and .Expandable .Collapsed}} collapsed{{end}}">{{.Code}}</bkl-code>
+</div>
 {{end}}
 </div>
 {{end}}
@@ -429,6 +443,48 @@ op {
 	font-weight: bold;
 }
 
+/* Expandable code blocks */
+.code-wrapper {
+	position: relative;
+}
+
+.expand-toggle {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 10;
+	background: var(--blue4);
+	color: var(--neutral9);
+	border: 1px solid var(--blue3);
+	border-radius: 3px;
+	padding: 2px 8px;
+	font-size: 14px;
+	cursor: pointer;
+	font-family: source-code-pro;
+	transition: background-color 0.2s;
+}
+
+.expand-toggle:hover {
+	background: var(--blue3);
+}
+
+bkl-code.collapsed {
+	max-height: 90px;
+	overflow: hidden;
+	position: relative;
+}
+
+bkl-code.collapsed::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 40px;
+	background: linear-gradient(to bottom, transparent, var(--neutral0));
+	pointer-events: none;
+}
+
 key {
 	color: var(--yellow4);
 }
@@ -784,7 +840,7 @@ hunk-header {
 {{else if $item.SideBySide}}
 {{template "sideBySideLayout" $item.SideBySide}}
 {{else if $item.Code}}
-{{template "simpleCodeBlock" dict "Label" $item.Code.Label "Code" ($item.Code | formatLayer)}}
+{{template "simpleCodeBlock" dict "Label" $item.Code.Label "Code" ($item.Code | formatLayer) "Expandable" $item.Code.Expandable "Collapsed" $item.Code.Collapsed}}
 {{else if $item.Example}}
 {{template "exampleLayout" $item.Example}}
 {{end}}
@@ -802,6 +858,23 @@ function toggleMobileMenu() {
     const button = document.querySelector('.mobile-menu-button');
     nav.classList.toggle('mobile-open');
     button.textContent = nav.classList.contains('mobile-open') ? '✕ Close' : '☰ Nav';
+}
+
+// Toggle expandable code blocks
+function toggleExpand(button) {
+    const wrapper = button.closest('.code-wrapper');
+    const codeBlock = wrapper.querySelector('bkl-code');
+    const isCollapsed = codeBlock.classList.contains('collapsed');
+    
+    if (isCollapsed) {
+        codeBlock.classList.remove('collapsed');
+        button.textContent = '∨';
+        button.setAttribute('aria-expanded', 'true');
+    } else {
+        codeBlock.classList.add('collapsed');
+        button.textContent = '›';
+        button.setAttribute('aria-expanded', 'false');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

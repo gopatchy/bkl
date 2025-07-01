@@ -1,0 +1,1138 @@
+- id: intro
+  title: "K8s migration"
+  items:
+    - content: |
+        This example shows conversion of a realistic Kubernetes config to bkl. We'll use bkl best practices and explain the reasoning behind each choice.
+- id: original
+  title: Original config
+  items:
+    - code:
+        label: dev/namespace.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: microservices-dev
+            labels:
+              environment: dev
+    - code:
+        label: dev/api-service.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: api-config
+            namespace: microservices-dev
+          data:
+            app.properties: |
+              server.port=8080
+              app.name=api-service
+              log.level=debug
+              cache.enabled=false
+              environment=development
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: api-secrets
+            namespace: microservices-dev
+          type: Opaque
+          data:
+            database-url: cG9zdGdyZXNxbDovL2RldnVzZXI6ZGV2cGFzc0Bwb3N0Z3Jlcy1kZXY6NTQzMi9kZXZkYg==
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: api-service
+            namespace: microservices-dev
+            labels:
+              app: api
+              tier: backend
+              environment: dev
+          spec:
+            selector:
+              app: api
+              environment: dev
+            ports:
+              - name: http
+                port: 80
+                targetPort: 8080
+                protocol: TCP
+            type: ClusterIP
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: api-deployment
+            namespace: microservices-dev
+            labels:
+              app: api
+              tier: backend
+              environment: dev
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: api
+                environment: dev
+            template:
+              metadata:
+                labels:
+                  app: api
+                  tier: backend
+                  environment: dev
+              spec:
+                containers:
+                  - name: api
+                    image: myregistry/api-service:dev
+                    ports:
+                      - containerPort: 8080
+                        name: http
+                    env:
+                      - name: APP_ENV
+                        value: development
+                      - name: DEBUG
+                        value: "true"
+                      - name: DATABASE_URL
+                        valueFrom:
+                          secretKeyRef:
+                            name: api-secrets
+                            key: database-url
+                    resources:
+                      requests:
+                        memory: "64Mi"
+                        cpu: "50m"
+                      limits:
+                        memory: "128Mi"
+                        cpu: "100m"
+                    livenessProbe:
+                      httpGet:
+                        path: /health
+                        port: 8080
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                    readinessProbe:
+                      httpGet:
+                        path: /ready
+                        port: 8080
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                    volumeMounts:
+                      - name: config
+                        mountPath: /app/config
+                volumes:
+                  - name: config
+                    configMap:
+                      name: api-config
+    - code:
+        label: dev/web-service.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: web-config
+            namespace: microservices-dev
+          data:
+            nginx.conf: |
+              server {
+                  listen 80;
+                  server_name localhost;
+                  
+                  location / {
+                      root /usr/share/nginx/html;
+                      index index.html;
+                      try_files $uri $uri/ /index.html;
+                  }
+                  
+                  location /api {
+                      proxy_pass http://api-service;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                  }
+              }
+            app.config.json: |
+              {
+                "environment": "development",
+                "apiUrl": "http://api-service",
+                "debugMode": true,
+                "features": {
+                  "analytics": false,
+                  "caching": false
+                }
+              }
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: web-service
+            namespace: microservices-dev
+            labels:
+              app: web
+              tier: frontend
+              environment: dev
+          spec:
+            selector:
+              app: web
+              environment: dev
+            ports:
+              - name: http
+                port: 80
+                targetPort: 80
+                protocol: TCP
+            type: NodePort
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: web-deployment
+            namespace: microservices-dev
+            labels:
+              app: web
+              tier: frontend
+              environment: dev
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: web
+                environment: dev
+            template:
+              metadata:
+                labels:
+                  app: web
+                  tier: frontend
+                  environment: dev
+              spec:
+                containers:
+                  - name: web
+                    image: myregistry/web-frontend:dev
+                    ports:
+                      - containerPort: 80
+                        name: http
+                    env:
+                      - name: API_URL
+                        value: "http://api-service"
+                      - name: APP_ENV
+                        value: development
+                      - name: DEBUG_MODE
+                        value: "true"
+                    resources:
+                      requests:
+                        memory: "64Mi"
+                        cpu: "50m"
+                      limits:
+                        memory: "128Mi"
+                        cpu: "100m"
+                    livenessProbe:
+                      httpGet:
+                        path: /
+                        port: 80
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                    readinessProbe:
+                      httpGet:
+                        path: /
+                        port: 80
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                    volumeMounts:
+                      - name: nginx-config
+                        mountPath: /etc/nginx/conf.d
+                      - name: app-config
+                        mountPath: /usr/share/nginx/html/config
+                volumes:
+                  - name: nginx-config
+                    configMap:
+                      name: web-config
+                      items:
+                        - key: nginx.conf
+                          path: default.conf
+                  - name: app-config
+                    configMap:
+                      name: web-config
+                      items:
+                        - key: app.config.json
+                          path: config.json
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: web-ingress
+            namespace: microservices-dev
+          spec:
+            ingressClassName: nginx
+            rules:
+              - host: dev.app.local
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: web-service
+                          port:
+                            number: 80
+    - code:
+        label: staging/namespace.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: microservices-staging
+            labels:
+              environment: staging
+    - code:
+        label: staging/api-service.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: api-config
+            namespace: microservices-staging
+          data:
+            app.properties: |
+              server.port=8080
+              app.name=api-service
+              log.level=info
+              cache.enabled=true
+              cache.ttl=300
+              environment=staging
+              metrics.enabled=true
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: api-secrets
+            namespace: microservices-staging
+          type: Opaque
+          data:
+            database-url: cG9zdGdyZXNxbDovL3N0YWdpbmd1c2VyOnN0YWdpbmdwYXNzQHBvc3RncmVzLXN0YWdpbmc6NTQzMi9zdGFnaW5nZGI=
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: api-service
+            namespace: microservices-staging
+            labels:
+              app: api
+              tier: backend
+              environment: staging
+          spec:
+            selector:
+              app: api
+              environment: staging
+            ports:
+              - name: http
+                port: 80
+                targetPort: 8080
+                protocol: TCP
+            type: ClusterIP
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: api-deployment
+            namespace: microservices-staging
+            labels:
+              app: api
+              tier: backend
+              environment: staging
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: api
+                environment: staging
+            template:
+              metadata:
+                labels:
+                  app: api
+                  tier: backend
+                  environment: staging
+              spec:
+                containers:
+                  - name: api
+                    image: myregistry/api-service:staging
+                    ports:
+                      - containerPort: 8080
+                        name: http
+                    env:
+                      - name: APP_ENV
+                        value: staging
+                      - name: CACHE_ENABLED
+                        value: "true"
+                      - name: DATABASE_URL
+                        valueFrom:
+                          secretKeyRef:
+                            name: api-secrets
+                            key: database-url
+                    resources:
+                      requests:
+                        memory: "256Mi"
+                        cpu: "200m"
+                      limits:
+                        memory: "512Mi"
+                        cpu: "500m"
+                    livenessProbe:
+                      httpGet:
+                        path: /health
+                        port: 8080
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                    readinessProbe:
+                      httpGet:
+                        path: /ready
+                        port: 8080
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                    volumeMounts:
+                      - name: config
+                        mountPath: /app/config
+                volumes:
+                  - name: config
+                    configMap:
+                      name: api-config
+          ---
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+          metadata:
+            name: api-hpa
+            namespace: microservices-staging
+          spec:
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: api-deployment
+            minReplicas: 2
+            maxReplicas: 5
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 70
+              - type: Resource
+                resource:
+                  name: memory
+                  target:
+                    type: Utilization
+                    averageUtilization: 80
+    - code:
+        label: staging/web-service.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: web-config
+            namespace: microservices-staging
+          data:
+            nginx.conf: |
+              server {
+                  listen 80;
+                  server_name staging.app.example.com;
+                  
+                  location / {
+                      root /usr/share/nginx/html;
+                      index index.html;
+                      try_files $uri $uri/ /index.html;
+                      
+                      add_header Cache-Control "max-age=300";
+                  }
+                  
+                  location /api {
+                      proxy_pass http://api-service;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                  }
+                  
+                  location /health {
+                      access_log off;
+                      return 200 "healthy\n";
+                  }
+              }
+            app.config.json: |
+              {
+                "environment": "staging",
+                "apiUrl": "http://api-service",
+                "debugMode": false,
+                "features": {
+                  "analytics": true,
+                  "caching": true,
+                  "cdnEnabled": true
+                }
+              }
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: web-service
+            namespace: microservices-staging
+            labels:
+              app: web
+              tier: frontend
+              environment: staging
+          spec:
+            selector:
+              app: web
+              environment: staging
+            ports:
+              - name: http
+                port: 80
+                targetPort: 80
+                protocol: TCP
+            type: LoadBalancer
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: web-deployment
+            namespace: microservices-staging
+            labels:
+              app: web
+              tier: frontend
+              environment: staging
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: web
+                environment: staging
+            template:
+              metadata:
+                labels:
+                  app: web
+                  tier: frontend
+                  environment: staging
+              spec:
+                containers:
+                  - name: web
+                    image: myregistry/web-frontend:staging
+                    ports:
+                      - containerPort: 80
+                        name: http
+                    env:
+                      - name: API_URL
+                        value: "http://api-service"
+                      - name: APP_ENV
+                        value: staging
+                      - name: CDN_ENABLED
+                        value: "true"
+                    resources:
+                      requests:
+                        memory: "128Mi"
+                        cpu: "100m"
+                      limits:
+                        memory: "256Mi"
+                        cpu: "200m"
+                    livenessProbe:
+                      httpGet:
+                        path: /health
+                        port: 80
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                    readinessProbe:
+                      httpGet:
+                        path: /health
+                        port: 80
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                    volumeMounts:
+                      - name: nginx-config
+                        mountPath: /etc/nginx/conf.d
+                      - name: app-config
+                        mountPath: /usr/share/nginx/html/config
+                volumes:
+                  - name: nginx-config
+                    configMap:
+                      name: web-config
+                      items:
+                        - key: nginx.conf
+                          path: default.conf
+                  - name: app-config
+                    configMap:
+                      name: web-config
+                      items:
+                        - key: app.config.json
+                          path: config.json
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: web-ingress
+            namespace: microservices-staging
+            annotations:
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+              cert-manager.io/cluster-issuer: "letsencrypt-staging"
+          spec:
+            ingressClassName: nginx
+            tls:
+              - hosts:
+                  - staging.app.example.com
+                secretName: staging-tls-cert
+            rules:
+              - host: staging.app.example.com
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: web-service
+                          port:
+                            number: 80
+    - code:
+        label: prod/namespace.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: microservices-prod
+            labels:
+              environment: prod
+    - code:
+        label: prod/api-service.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: api-config
+            namespace: microservices-prod
+          data:
+            app.properties: |
+              server.port=8080
+              app.name=api-service
+              log.level=warn
+              cache.enabled=true
+              cache.ttl=3600
+              environment=production
+              metrics.enabled=true
+              database.pool.size=20
+              database.pool.max=50
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: api-secrets
+            namespace: microservices-prod
+          type: Opaque
+          data:
+            database-url: cG9zdGdyZXNxbDovL3Byb2R1c2VyOnByb2RwYXNzQHByb2QtZGItY2x1c3Rlci5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3Byb2RkYg==
+            api-key: YWJjZGVmZ2hpams=
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: api-service
+            namespace: microservices-prod
+            labels:
+              app: api
+              tier: backend
+              environment: prod
+          spec:
+            selector:
+              app: api
+              environment: prod
+            ports:
+              - name: http
+                port: 80
+                targetPort: 8080
+                protocol: TCP
+            type: ClusterIP
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: api-deployment
+            namespace: microservices-prod
+            labels:
+              app: api
+              tier: backend
+              environment: prod
+          spec:
+            replicas: 3
+            selector:
+              matchLabels:
+                app: api
+                environment: prod
+            strategy:
+              type: RollingUpdate
+              rollingUpdate:
+                maxSurge: 1
+                maxUnavailable: 0
+            template:
+              metadata:
+                labels:
+                  app: api
+                  tier: backend
+                  environment: prod
+              spec:
+                affinity:
+                  podAntiAffinity:
+                    preferredDuringSchedulingIgnoredDuringExecution:
+                      - weight: 100
+                        podAffinityTerm:
+                          labelSelector:
+                            matchExpressions:
+                              - key: app
+                                operator: In
+                                values:
+                                  - api
+                          topologyKey: kubernetes.io/hostname
+                containers:
+                  - name: api
+                    image: myregistry/api-service:v1.2.3
+                    ports:
+                      - containerPort: 8080
+                        name: http
+                    env:
+                      - name: APP_ENV
+                        value: production
+                      - name: CACHE_ENABLED
+                        value: "true"
+                      - name: METRICS_ENABLED
+                        value: "true"
+                      - name: DATABASE_URL
+                        valueFrom:
+                          secretKeyRef:
+                            name: api-secrets
+                            key: database-url
+                      - name: API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: api-secrets
+                            key: api-key
+                    resources:
+                      requests:
+                        memory: "512Mi"
+                        cpu: "500m"
+                      limits:
+                        memory: "1Gi"
+                        cpu: "1000m"
+                    livenessProbe:
+                      httpGet:
+                        path: /health
+                        port: 8080
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                    readinessProbe:
+                      httpGet:
+                        path: /ready
+                        port: 8080
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                      timeoutSeconds: 3
+                      successThreshold: 1
+                      failureThreshold: 3
+                    volumeMounts:
+                      - name: config
+                        mountPath: /app/config
+                volumes:
+                  - name: config
+                    configMap:
+                      name: api-config
+          ---
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+          metadata:
+            name: api-hpa
+            namespace: microservices-prod
+          spec:
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: api-deployment
+            minReplicas: 3
+            maxReplicas: 10
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 60
+              - type: Resource
+                resource:
+                  name: memory
+                  target:
+                    type: Utilization
+                    averageUtilization: 70
+          ---
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          metadata:
+            name: api-pdb
+            namespace: microservices-prod
+          spec:
+            minAvailable: 2
+            selector:
+              matchLabels:
+                app: api
+                environment: prod
+    - code:
+        label: prod/web-service.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: web-config
+            namespace: microservices-prod
+          data:
+            nginx.conf: |
+              server {
+                  listen 80;
+                  server_name app.example.com www.app.example.com;
+                  
+                  # Security headers
+                  add_header X-Frame-Options "SAMEORIGIN" always;
+                  add_header X-Content-Type-Options "nosniff" always;
+                  add_header X-XSS-Protection "1; mode=block" always;
+                  
+                  # Gzip compression
+                  gzip on;
+                  gzip_vary on;
+                  gzip_min_length 1024;
+                  gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+                  
+                  location / {
+                      root /usr/share/nginx/html;
+                      index index.html;
+                      try_files $uri $uri/ /index.html;
+                      
+                      # Cache static assets
+                      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+                          expires 1y;
+                          add_header Cache-Control "public, immutable";
+                      }
+                  }
+                  
+                  location /api {
+                      proxy_pass http://api-service;
+                      proxy_set_header Host $host;
+                      proxy_set_header X-Real-IP $remote_addr;
+                      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                      proxy_set_header X-Forwarded-Proto $scheme;
+                      proxy_read_timeout 30s;
+                      proxy_connect_timeout 10s;
+                  }
+                  
+                  location /health {
+                      access_log off;
+                      return 200 "healthy\n";
+                  }
+              }
+            app.config.json: |
+              {
+                "environment": "production",
+                "apiUrl": "https://api.example.com",
+                "debugMode": false,
+                "features": {
+                  "analytics": true,
+                  "caching": true,
+                  "cdnEnabled": true,
+                  "performanceMonitoring": true
+                },
+                "cdn": {
+                  "url": "https://cdn.example.com"
+                }
+              }
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: web-service
+            namespace: microservices-prod
+            labels:
+              app: web
+              tier: frontend
+              environment: prod
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+          spec:
+            selector:
+              app: web
+              environment: prod
+            ports:
+              - name: http
+                port: 80
+                targetPort: 80
+                protocol: TCP
+            type: LoadBalancer
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: web-deployment
+            namespace: microservices-prod
+            labels:
+              app: web
+              tier: frontend
+              environment: prod
+          spec:
+            replicas: 3
+            selector:
+              matchLabels:
+                app: web
+                environment: prod
+            strategy:
+              type: RollingUpdate
+              rollingUpdate:
+                maxSurge: 1
+                maxUnavailable: 0
+            template:
+              metadata:
+                labels:
+                  app: web
+                  tier: frontend
+                  environment: prod
+              spec:
+                affinity:
+                  podAntiAffinity:
+                    preferredDuringSchedulingIgnoredDuringExecution:
+                      - weight: 100
+                        podAffinityTerm:
+                          labelSelector:
+                            matchExpressions:
+                              - key: app
+                                operator: In
+                                values:
+                                  - web
+                          topologyKey: kubernetes.io/hostname
+                containers:
+                  - name: web
+                    image: myregistry/web-frontend:v1.2.3
+                    ports:
+                      - containerPort: 80
+                        name: http
+                    env:
+                      - name: API_URL
+                        value: "https://api.example.com"
+                      - name: APP_ENV
+                        value: production
+                      - name: CDN_ENABLED
+                        value: "true"
+                      - name: CACHE_CONTROL
+                        value: "max-age=3600"
+                    resources:
+                      requests:
+                        memory: "256Mi"
+                        cpu: "200m"
+                      limits:
+                        memory: "512Mi"
+                        cpu: "500m"
+                    livenessProbe:
+                      httpGet:
+                        path: /health
+                        port: 80
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                    readinessProbe:
+                      httpGet:
+                        path: /health
+                        port: 80
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                      timeoutSeconds: 3
+                      successThreshold: 1
+                      failureThreshold: 3
+                    volumeMounts:
+                      - name: nginx-config
+                        mountPath: /etc/nginx/conf.d
+                      - name: app-config
+                        mountPath: /usr/share/nginx/html/config
+                volumes:
+                  - name: nginx-config
+                    configMap:
+                      name: web-config
+                      items:
+                        - key: nginx.conf
+                          path: default.conf
+                  - name: app-config
+                    configMap:
+                      name: web-config
+                      items:
+                        - key: app.config.json
+                          path: config.json
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: web-ingress
+            namespace: microservices-prod
+            annotations:
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+              cert-manager.io/cluster-issuer: "letsencrypt-prod"
+              nginx.ingress.kubernetes.io/rate-limit: "100"
+          spec:
+            ingressClassName: nginx
+            tls:
+              - hosts:
+                  - app.example.com
+                  - www.app.example.com
+                secretName: prod-tls-cert
+            rules:
+              - host: app.example.com
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: web-service
+                          port:
+                            number: 80
+              - host: www.app.example.com
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: web-service
+                          port:
+                            number: 80
+          ---
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          metadata:
+            name: web-pdb
+            namespace: microservices-prod
+          spec:
+            minAvailable: 2
+            selector:
+              matchLabels:
+                app: web
+                environment: prod
+    - code:
+        label: prod/monitoring.yaml
+        languages: [[0, "yaml"]]
+        expandable: true
+        collapsed: true
+        code: |
+          apiVersion: v1
+          kind: ServiceMonitor
+          metadata:
+            name: api-metrics
+            namespace: microservices-prod
+            labels:
+              app: api
+              monitoring: prometheus
+              environment: prod
+          spec:
+            selector:
+              matchLabels:
+                app: api
+                environment: prod
+            endpoints:
+              - port: http
+                path: /metrics
+                interval: 30s
+          ---
+          apiVersion: v1
+          kind: ServiceMonitor
+          metadata:
+            name: web-metrics
+            namespace: microservices-prod
+            labels:
+              app: web
+              monitoring: prometheus
+              environment: prod
+          spec:
+            selector:
+              matchLabels:
+                app: web
+                environment: prod
+            endpoints:
+              - port: http
+                path: /metrics
+                interval: 30s
+- id: namespace
+  title: Namespace
+  items:
+    - content: |
+        <p>We start with the single-resource <highlight>namespace.yaml</highlight> files.</p>
+        
+        <p><highlight>prod/namespace.yaml</highlight> will form our base layer. This choice means that all other environments are expressed as differences from production, encouraging minimizing those differences.</p>
+
+        <p>We'll use <highlight>$""</highlight> interpolation set the namespace name based on the environment.</p>
+
+        <p>We'll keep the original namespace/api-service/web-service/monitoring split to match the ways users were used to working with the config.</p>
+    - code:
+        label: bkl/namespace.yaml
+        expandable: true
+        collapsed: true
+        languages: [[0, "yaml"]]
+        code: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: $"microservices-{metadata.labels.environment}"
+            labels:
+              environment: prod
+    - code:
+        label: bkl/namespace.staging.yaml
+        expandable: true
+        collapsed: true
+        languages: [[0, "yaml"]]
+        code: |
+          $match:
+            kind: Namespace
+          metadata:
+            labels:
+              environment: staging
+    - code:
+        label: bkl/namespace.staging.dev.yaml
+        expandable: true
+        collapsed: true
+        languages: [[0, "yaml"]]
+        code: |
+          $match:
+            kind: Namespace
+          metadata:
+            labels:
+              environment: dev
+    - content: |
+        <p>This conversion is simple enough to do by hand. We'll use tools for some of the more complex later transformations.</p>
+
+        <p>Once we have bkl files that look correct and parse, we validate them against the original configs.</p>
+
+        <p>Using <highlight>yq</highlight> to sort keys eliminates diffs that are just about ordering.</p>
+    - code:
+        languages: [[0, "shell"]]
+        code: |
+          $ diff -ud --color &lt;(yq 'sort_keys(..)' prod/namespace.yaml) &lt;(bkl bkl/namespace.yaml)
+          $ diff -ud --color &lt;(yq 'sort_keys(..)' staging/namespace.yaml) &lt;(bkl bkl/namespace.staging.yaml)
+          $ diff -ud --color &lt;(yq 'sort_keys(..)' dev/namespace.yaml) &lt;(bkl bkl/namespace.staging.dev.yaml)
