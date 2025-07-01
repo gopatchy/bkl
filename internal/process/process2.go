@@ -225,7 +225,10 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 		return process2ToListMap(obj, delim)
 
 	case "values":
-		if len(parts) != 1 {
+		nameKey := ""
+		if len(parts) == 2 {
+			nameKey = parts[1]
+		} else if len(parts) != 1 {
 			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
@@ -234,7 +237,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 			return nil, fmt.Errorf("$encode: %s: %w (%T)", v, errors.ErrInvalidType, obj)
 		}
 
-		return process2ValuesMap(obj2)
+		return process2ValuesMap(obj2, nameKey)
 
 	default:
 		if len(parts) != 1 {
@@ -436,11 +439,26 @@ func process2StringInterp(obj string, mergeFrom *document.Document, mergeFromDoc
 	return obj, nil
 }
 
-func process2ValuesMap(obj map[string]any) ([]any, error) {
+func process2ValuesMap(obj map[string]any, nameKey string) ([]any, error) {
 	vals := []any{}
 
-	for _, v := range utils.SortedMap(obj) {
-		vals = append(vals, v)
+	if nameKey == "" {
+		for _, v := range utils.SortedMap(obj) {
+			vals = append(vals, v)
+		}
+	} else {
+		for k, v := range utils.SortedMap(obj) {
+			vMap, ok := v.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("$encode: values:%s: value for key %q: %w (%T)", nameKey, k, errors.ErrInvalidType, v)
+			}
+
+			newMap := map[string]any{nameKey: k}
+			for k2, v2 := range vMap {
+				newMap[k2] = v2
+			}
+			vals = append(vals, newMap)
+		}
 	}
 
 	return vals, nil

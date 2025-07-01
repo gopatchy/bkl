@@ -702,6 +702,25 @@
     - example:
         operation: evaluate
         layers:
+          - label: values:name
+            code: |
+              a:
+                b: 1
+              c:
+                d: 2
+              $encode: values:name
+            highlights: ["$encode: values:name"]
+            languages: [[0, "yaml"]]
+        result:
+          code: |
+            - b: 1
+              name: a
+            - d: 2
+              name: c
+          languages: [[0, "yaml"]]
+    - example:
+        operation: evaluate
+        layers:
           - label: Stacking
             code: |
               a: 1

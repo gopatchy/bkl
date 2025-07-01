@@ -1233,6 +1233,35 @@ b: 2
 $encode: values
 '''
 
+[encodeValuesWithName]
+description = "Test values encoding with name parameter"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+- k2: v2
+  name: k1
+- k4: v4
+  name: k3
+'''
+files."a.yaml" = '''
+k1:
+  k2: v2
+k3:
+  k4: v4
+$encode: values:name
+'''
+
+[encodeValuesWithNameScalar]
+description = "Test values encoding with name parameter for scalar values"
+eval = ["a.yaml"]
+format = "yaml"
+errors = ["invalid type"]
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: values:name
+'''
+
 [encodePrefix]
 description = "Test prefix encoding adds prefix to list items"
 eval = ["a.yaml"]
