@@ -10,7 +10,7 @@ import (
 //go:embed tests.toml
 var testsData []byte
 
-//go:embed docs/sections.yaml
+//go:embed docs/index.yaml
 var sectionsData []byte
 
 type TestCase struct {

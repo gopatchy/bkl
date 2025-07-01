@@ -14,6 +14,8 @@
 - Reverted comparison and migration sections to original content
 - Added $defer directive for post-processing operations
 - Updated to use PopMapBoolValue/PopListMapBoolValue for directive detection
+- Renamed docs/sections.yaml to docs/index.yaml for better naming convention
+- Updated generate.go to support multiple YAML files in docs directory
 
 ## CRITICAL INSTRUCTIONS - MUST FOLLOW
 

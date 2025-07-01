@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gopatchy/bkl"
@@ -17,14 +18,13 @@ type TemplateData struct {
 }
 
 func main() {
-	data, err := os.ReadFile("sections.yaml")
+	yamlFiles, err := filepath.Glob("*.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var sections []bkl.DocSection
-	if err := yaml.Unmarshal(data, &sections); err != nil {
-		log.Fatal(err)
+	if len(yamlFiles) == 0 {
+		log.Fatal("No YAML files found in the current directory")
 	}
 
 	templateContent, err := os.ReadFile("template.html")
@@ -38,20 +38,37 @@ func main() {
 		"dict":          dict,
 	}).Parse(string(templateContent)))
 
-	templateData := TemplateData{
-		Sections: sections,
-	}
+	for _, yamlFile := range yamlFiles {
+		data, err := os.ReadFile(yamlFile)
+		if err != nil {
+			log.Printf("Error reading %s: %v", yamlFile, err)
+			continue
+		}
 
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, templateData); err != nil {
-		log.Fatal(err)
-	}
+		var sections []bkl.DocSection
+		if err := yaml.Unmarshal(data, &sections); err != nil {
+			log.Printf("Error unmarshaling %s: %v", yamlFile, err)
+			continue
+		}
 
-	if err := os.WriteFile("index.html", buf.Bytes(), 0o644); err != nil {
-		log.Fatal(err)
-	}
+		templateData := TemplateData{
+			Sections: sections,
+		}
 
-	fmt.Println("Generated index.html")
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, templateData); err != nil {
+			log.Printf("Error executing template for %s: %v", yamlFile, err)
+			continue
+		}
+
+		outputFile := strings.TrimSuffix(yamlFile, filepath.Ext(yamlFile)) + ".html"
+		if err := os.WriteFile(outputFile, buf.Bytes(), 0o644); err != nil {
+			log.Printf("Error writing %s: %v", outputFile, err)
+			continue
+		}
+
+		fmt.Printf("Generated %s from %s\n", outputFile, yamlFile)
+	}
 }
 
 func formatContent(content string) template.HTML {
