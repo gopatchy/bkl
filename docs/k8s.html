@@ -737,7 +737,11 @@ hunk-header {
 
 	<li><a href="#original">Original config</a></li>
 
+	<li><a href="#plan">Target layout</a></li>
+
 	<li><a href="#namespace">namespace</a></li>
+
+	<li><a href="#base">Base layer</a></li>
 
 	<li><a href="#api-service">api-service</a></li>
 
@@ -762,673 +766,6 @@ hunk-header {
 
 <section id="original">
 <h2><a name="original">Original config</a></h2>
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">dev/namespace.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Namespace</string>
-<key>metadata</key>:
-  <key>name</key>: <string>microservices-dev</string>
-  <key>labels</key>:
-    <key>environment</key>: <string>dev</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">dev/api-service.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ConfigMap</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-config</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-<key>data</key>:
-  <key>app.properties</key>: <string>|</string>
-    <string>server.port=8080</string>
-    <string>server.name=api-service</string>
-    <string>logging.level=debug</string>
-    <string>logging.format=json</string>
-    <string>cache.enabled=false</string>
-    <string>cache.ttl=300</string>
-    <string>database.pool_size=5</string>
-    <string>database.timeout=30</string>
-    <string>environment=development</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Secret</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-secrets</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-<key>type</key>: <string>Opaque</string>
-<key>data</key>:
-  <key>database-url</key>: <string>cG9zdGdyZXNxbDovL2RldnVzZXI6ZGV2cGFzc0Bwb3N0Z3Jlcy1kZXY6NTQzMi9kZXZkYg==</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Service</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-service</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-  <key>labels</key>:
-    <key>app</key>: <string>api</string>
-    <key>tier</key>: <string>backend</string>
-    <key>environment</key>: <string>dev</string>
-<key>spec</key>:
-  <key>selector</key>:
-    <key>app</key>: <string>api</string>
-    <key>environment</key>: <string>dev</string>
-  <key>ports</key>:
-    - <key>name</key>: <string>http</string>
-      <key>port</key>: <number>80</number>
-      <key>targetPort</key>: <number>8080</number>
-      <key>protocol</key>: <string>TCP</string>
-  <key>type</key>: <string>ClusterIP</string>
-<string>---</string>
-<key>apiVersion</key>: <string>apps/v1</string>
-<key>kind</key>: <string>Deployment</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-deployment</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-  <key>labels</key>:
-    <key>app</key>: <string>api</string>
-    <key>tier</key>: <string>backend</string>
-    <key>environment</key>: <string>dev</string>
-<key>spec</key>:
-  <key>replicas</key>: <number>1</number>
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>api</string>
-      <key>environment</key>: <string>dev</string>
-  <key>template</key>:
-    <key>metadata</key>:
-      <key>labels</key>:
-        <key>app</key>: <string>api</string>
-        <key>tier</key>: <string>backend</string>
-        <key>environment</key>: <string>dev</string>
-    <key>spec</key>:
-      <key>containers</key>:
-        - <key>name</key>: <string>api</string>
-          <key>image</key>: <string>myregistry/api-service:dev</string>
-          <key>ports</key>:
-            - <key>containerPort</key>: <number>8080</number>
-              <key>name</key>: <string>http</string>
-          <key>env</key>:
-            - <key>name</key>: <string>APP_ENV</string>
-              <key>value</key>: <string>development</string>
-            - <key>name</key>: <string>DEBUG</string>
-              <key>value</key>: <string>"true"</string>
-            - <key>name</key>: <string>DATABASE_URL</string>
-              <key>valueFrom</key>:
-                <key>secretKeyRef</key>:
-                  <key>name</key>: <string>api-secrets</string>
-                  <key>key</key>: <string>database-url</string>
-          <key>resources</key>:
-            <key>requests</key>:
-              <key>memory</key>: <string>"64Mi"</string>
-              <key>cpu</key>: <string>"50m"</string>
-            <key>limits</key>:
-              <key>memory</key>: <string>"128Mi"</string>
-              <key>cpu</key>: <string>"100m"</string>
-          <key>livenessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/health</string>
-              <key>port</key>: <number>8080</number>
-            <key>initialDelaySeconds</key>: <number>30</number>
-            <key>periodSeconds</key>: <number>10</number>
-          <key>readinessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/ready</string>
-              <key>port</key>: <number>8080</number>
-            <key>initialDelaySeconds</key>: <number>5</number>
-            <key>periodSeconds</key>: <number>5</number>
-          <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=2"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--verbose"</string>
-          <key>volumeMounts</key>:
-            - <key>name</key>: <string>config</string>
-              <key>mountPath</key>: <string>/app/config</string>
-      <key>volumes</key>:
-        - <key>name</key>: <string>config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>api-config</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">dev/web-service.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ConfigMap</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-config</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-<key>data</key>:
-  <key>app.config.json</key>: <string>|</string>
-    <string>{</string>
-      <string><string>"environment"</string>: "development",</string>
-      <string><string>"apiUrl"</string>: "http://api-service",</string>
-      <string><string>"debugMode"</string>: true,</string>
-      <string><string>"features"</string>: {</string>
-        <string><string>"analytics"</string>: false,</string>
-        <string><string>"caching"</string>: false</string>
-      <string>}</string>
-    <string>}</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Service</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-service</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-  <key>labels</key>:
-    <key>app</key>: <string>web</string>
-    <key>tier</key>: <string>frontend</string>
-    <key>environment</key>: <string>dev</string>
-<key>spec</key>:
-  <key>selector</key>:
-    <key>app</key>: <string>web</string>
-    <key>environment</key>: <string>dev</string>
-  <key>ports</key>:
-    - <key>name</key>: <string>http</string>
-      <key>port</key>: <number>80</number>
-      <key>targetPort</key>: <number>80</number>
-      <key>protocol</key>: <string>TCP</string>
-  <key>type</key>: <string>NodePort</string>
-<string>---</string>
-<key>apiVersion</key>: <string>apps/v1</string>
-<key>kind</key>: <string>Deployment</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-deployment</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-  <key>labels</key>:
-    <key>app</key>: <string>web</string>
-    <key>tier</key>: <string>frontend</string>
-    <key>environment</key>: <string>dev</string>
-<key>spec</key>:
-  <key>replicas</key>: <number>1</number>
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>web</string>
-      <key>environment</key>: <string>dev</string>
-  <key>template</key>:
-    <key>metadata</key>:
-      <key>labels</key>:
-        <key>app</key>: <string>web</string>
-        <key>tier</key>: <string>frontend</string>
-        <key>environment</key>: <string>dev</string>
-    <key>spec</key>:
-      <key>containers</key>:
-        - <key>name</key>: <string>web</string>
-          <key>image</key>: <string>myregistry/web-frontend:dev</string>
-          <key>ports</key>:
-            - <key>containerPort</key>: <number>80</number>
-              <key>name</key>: <string>http</string>
-          <key>env</key>:
-            - <key>name</key>: <string>API_URL</string>
-              <key>value</key>: <string>"http://api-service"</string>
-            - <key>name</key>: <string>APP_ENV</string>
-              <key>value</key>: <string>development</string>
-            - <key>name</key>: <string>DEBUG_MODE</string>
-              <key>value</key>: <string>"true"</string>
-          <key>resources</key>:
-            <key>requests</key>:
-              <key>memory</key>: <string>"64Mi"</string>
-              <key>cpu</key>: <string>"50m"</string>
-            <key>limits</key>:
-              <key>memory</key>: <string>"128Mi"</string>
-              <key>cpu</key>: <string>"100m"</string>
-          <key>livenessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/</string>
-              <key>port</key>: <number>80</number>
-            <key>initialDelaySeconds</key>: <number>10</number>
-            <key>periodSeconds</key>: <number>10</number>
-          <key>readinessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/</string>
-              <key>port</key>: <number>80</number>
-            <key>initialDelaySeconds</key>: <number>5</number>
-            <key>periodSeconds</key>: <number>5</number>
-          <key>command</key>: <string>["/app/web-server"]</string>
-          <key>args</key>:
-            - <string>"serve"</string>
-            - <string>"--port=80"</string>
-            - <string>"--static-dir=/usr/share/nginx/html"</string>
-            - <string>"--api-backend=http://api-service"</string>
-            - <string>"--enable-compression"</string>
-            - <string>"--enable-cache"</string>
-            - <string>"-v"</string>
-            - <string>"-v"</string>
-          <key>volumeMounts</key>:
-            - <key>name</key>: <string>app-config</string>
-              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
-      <key>volumes</key>:
-        - <key>name</key>: <string>app-config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>app.config.json</string>
-                <key>path</key>: <string>config.json</string>
-<string>---</string>
-<key>apiVersion</key>: <string>networking.k8s.io/v1</string>
-<key>kind</key>: <string>Ingress</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-ingress</string>
-  <key>namespace</key>: <string>microservices-dev</string>
-<key>spec</key>:
-  <key>ingressClassName</key>: <string>nginx</string>
-  <key>rules</key>:
-    - <key>host</key>: <string>dev.app.local</string>
-      <key>http</key>:
-        <key>paths</key>:
-          - <key>path</key>: <string>/</string>
-            <key>pathType</key>: <string>Prefix</string>
-            <key>backend</key>:
-              <key>service</key>:
-                <key>name</key>: <string>web-service</string>
-                <key>port</key>:
-                  <key>number</key>: <number>80</number></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">staging/namespace.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Namespace</string>
-<key>metadata</key>:
-  <key>name</key>: <string>microservices-staging</string>
-  <key>labels</key>:
-    <key>environment</key>: <string>staging</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">staging/api-service.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ConfigMap</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-config</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-<key>data</key>:
-  <key>app.properties</key>: <string>|</string>
-    <string>cache.enabled=true</string>
-    <string>cache.ttl=300</string>
-    <string>cache.backend=redis</string>
-    <string>database.pool_size=10</string>
-    <string>database.timeout=30</string>
-    <string>database.max_idle=5</string>
-    <string>environment=staging</string>
-    <string>logging.level=info</string>
-    <string>logging.format=json</string>
-    <string>logging.output=stdout</string>
-    <string>metrics.enabled=true</string>
-    <string>metrics.port=9090</string>
-    <string>server.port=8080</string>
-    <string>server.name=api-service</string>
-    <string>server.workers=4</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Secret</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-secrets</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-<key>type</key>: <string>Opaque</string>
-<key>data</key>:
-  <key>database-url</key>: <string>cG9zdGdyZXNxbDovL3N0YWdpbmd1c2VyOnN0YWdpbmdwYXNzQHBvc3RncmVzLXN0YWdpbmc6NTQzMi9zdGFnaW5nZGI=</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Service</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-service</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-  <key>labels</key>:
-    <key>app</key>: <string>api</string>
-    <key>tier</key>: <string>backend</string>
-    <key>environment</key>: <string>staging</string>
-<key>spec</key>:
-  <key>selector</key>:
-    <key>app</key>: <string>api</string>
-    <key>environment</key>: <string>staging</string>
-  <key>ports</key>:
-    - <key>name</key>: <string>http</string>
-      <key>port</key>: <number>80</number>
-      <key>targetPort</key>: <number>8080</number>
-      <key>protocol</key>: <string>TCP</string>
-  <key>type</key>: <string>ClusterIP</string>
-<string>---</string>
-<key>apiVersion</key>: <string>apps/v1</string>
-<key>kind</key>: <string>Deployment</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-deployment</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-  <key>labels</key>:
-    <key>app</key>: <string>api</string>
-    <key>tier</key>: <string>backend</string>
-    <key>environment</key>: <string>staging</string>
-<key>spec</key>:
-  <key>replicas</key>: <number>2</number>
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>api</string>
-      <key>environment</key>: <string>staging</string>
-  <key>template</key>:
-    <key>metadata</key>:
-      <key>labels</key>:
-        <key>app</key>: <string>api</string>
-        <key>tier</key>: <string>backend</string>
-        <key>environment</key>: <string>staging</string>
-    <key>spec</key>:
-      <key>containers</key>:
-        - <key>name</key>: <string>api</string>
-          <key>image</key>: <string>myregistry/api-service:staging</string>
-          <key>ports</key>:
-            - <key>containerPort</key>: <number>8080</number>
-              <key>name</key>: <string>http</string>
-          <key>env</key>:
-            - <key>name</key>: <string>APP_ENV</string>
-              <key>value</key>: <string>staging</string>
-            - <key>name</key>: <string>CACHE_ENABLED</string>
-              <key>value</key>: <string>"true"</string>
-            - <key>name</key>: <string>DATABASE_URL</string>
-              <key>valueFrom</key>:
-                <key>secretKeyRef</key>:
-                  <key>name</key>: <string>api-secrets</string>
-                  <key>key</key>: <string>database-url</string>
-          <key>resources</key>:
-            <key>requests</key>:
-              <key>memory</key>: <string>"256Mi"</string>
-              <key>cpu</key>: <string>"200m"</string>
-            <key>limits</key>:
-              <key>memory</key>: <string>"512Mi"</string>
-              <key>cpu</key>: <string>"500m"</string>
-          <key>livenessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/health</string>
-              <key>port</key>: <number>8080</number>
-            <key>initialDelaySeconds</key>: <number>30</number>
-            <key>periodSeconds</key>: <number>10</number>
-          <key>readinessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/ready</string>
-              <key>port</key>: <number>8080</number>
-            <key>initialDelaySeconds</key>: <number>5</number>
-            <key>periodSeconds</key>: <number>5</number>
-          <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=4"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--feature=rate-limiting"</string>
-            - <string>"--feature=caching"</string>
-            - <string>"--log-format=json"</string>
-            - <string>"--graceful-timeout=30s"</string>
-          <key>volumeMounts</key>:
-            - <key>name</key>: <string>config</string>
-              <key>mountPath</key>: <string>/app/config</string>
-      <key>volumes</key>:
-        - <key>name</key>: <string>config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>api-config</string>
-<string>---</string>
-<key>apiVersion</key>: <string>autoscaling/v2</string>
-<key>kind</key>: <string>HorizontalPodAutoscaler</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-hpa</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-<key>spec</key>:
-  <key>scaleTargetRef</key>:
-    <key>apiVersion</key>: <string>apps/v1</string>
-    <key>kind</key>: <string>Deployment</string>
-    <key>name</key>: <string>api-deployment</string>
-  <key>minReplicas</key>: <number>2</number>
-  <key>maxReplicas</key>: <number>5</number>
-  <key>metrics</key>:
-    - <key>type</key>: <string>Resource</string>
-      <key>resource</key>:
-        <key>name</key>: <string>cpu</string>
-        <key>target</key>:
-          <key>type</key>: <string>Utilization</string>
-          <key>averageUtilization</key>: <number>70</number>
-    - <key>type</key>: <string>Resource</string>
-      <key>resource</key>:
-        <key>name</key>: <string>memory</string>
-        <key>target</key>:
-          <key>type</key>: <string>Utilization</string>
-          <key>averageUtilization</key>: <number>80</number></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">staging/web-service.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ConfigMap</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-config</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-<key>data</key>:
-  <key>app.config.json</key>: <string>|</string>
-    <string>{</string>
-      <string><string>"environment"</string>: "staging",</string>
-      <string><string>"apiUrl"</string>: "http://api-service",</string>
-      <string><string>"debugMode"</string>: false,</string>
-      <string><string>"features"</string>: {</string>
-        <string><string>"analytics"</string>: true,</string>
-        <string><string>"caching"</string>: true,</string>
-        <string><string>"cdnEnabled"</string>: true</string>
-      <string>}</string>
-    <string>}</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Service</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-service</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-  <key>labels</key>:
-    <key>app</key>: <string>web</string>
-    <key>tier</key>: <string>frontend</string>
-    <key>environment</key>: <string>staging</string>
-<key>spec</key>:
-  <key>selector</key>:
-    <key>app</key>: <string>web</string>
-    <key>environment</key>: <string>staging</string>
-  <key>ports</key>:
-    - <key>name</key>: <string>http</string>
-      <key>port</key>: <number>80</number>
-      <key>targetPort</key>: <number>80</number>
-      <key>protocol</key>: <string>TCP</string>
-  <key>type</key>: <string>LoadBalancer</string>
-<string>---</string>
-<key>apiVersion</key>: <string>apps/v1</string>
-<key>kind</key>: <string>Deployment</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-deployment</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-  <key>labels</key>:
-    <key>app</key>: <string>web</string>
-    <key>tier</key>: <string>frontend</string>
-    <key>environment</key>: <string>staging</string>
-<key>spec</key>:
-  <key>replicas</key>: <number>2</number>
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>web</string>
-      <key>environment</key>: <string>staging</string>
-  <key>template</key>:
-    <key>metadata</key>:
-      <key>labels</key>:
-        <key>app</key>: <string>web</string>
-        <key>tier</key>: <string>frontend</string>
-        <key>environment</key>: <string>staging</string>
-    <key>spec</key>:
-      <key>containers</key>:
-        - <key>name</key>: <string>web</string>
-          <key>image</key>: <string>myregistry/web-frontend:staging</string>
-          <key>ports</key>:
-            - <key>containerPort</key>: <number>80</number>
-              <key>name</key>: <string>http</string>
-          <key>env</key>:
-            - <key>name</key>: <string>API_URL</string>
-              <key>value</key>: <string>"http://api-service"</string>
-            - <key>name</key>: <string>APP_ENV</string>
-              <key>value</key>: <string>staging</string>
-            - <key>name</key>: <string>CDN_ENABLED</string>
-              <key>value</key>: <string>"true"</string>
-          <key>resources</key>:
-            <key>requests</key>:
-              <key>memory</key>: <string>"128Mi"</string>
-              <key>cpu</key>: <string>"100m"</string>
-            <key>limits</key>:
-              <key>memory</key>: <string>"256Mi"</string>
-              <key>cpu</key>: <string>"200m"</string>
-          <key>livenessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/health</string>
-              <key>port</key>: <number>80</number>
-            <key>initialDelaySeconds</key>: <number>10</number>
-            <key>periodSeconds</key>: <number>10</number>
-          <key>readinessProbe</key>:
-            <key>httpGet</key>:
-              <key>path</key>: <string>/health</string>
-              <key>port</key>: <number>80</number>
-            <key>initialDelaySeconds</key>: <number>5</number>
-            <key>periodSeconds</key>: <number>5</number>
-          <key>command</key>: <string>["/app/web-server"]</string>
-          <key>args</key>:
-            - <string>"serve"</string>
-            - <string>"--port=80"</string>
-            - <string>"--static-dir=/usr/share/nginx/html"</string>
-            - <string>"--api-backend=http://api-service"</string>
-            - <string>"--enable-compression"</string>
-            - <string>"--enable-cache"</string>
-            - <string>"--cache-ttl=300"</string>
-            - <string>"--enable-metrics"</string>
-            - <string>"--metrics-port=9090"</string>
-            - <string>"--access-log=/var/log/access.log"</string>
-            - <string>"--error-log=/var/log/error.log"</string>
-            - <string>"-v"</string>
-          <key>volumeMounts</key>:
-            - <key>name</key>: <string>app-config</string>
-              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
-      <key>volumes</key>:
-        - <key>name</key>: <string>app-config</string>
-          <key>configMap</key>:
-            <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>app.config.json</string>
-                <key>path</key>: <string>config.json</string>
-<string>---</string>
-<key>apiVersion</key>: <string>networking.k8s.io/v1</string>
-<key>kind</key>: <string>Ingress</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-ingress</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-  <key>annotations</key>:
-    <key>nginx.ingress.kubernetes.io/ssl-redirect</key>: <string>"true"</string>
-    <key>cert-manager.io/cluster-issuer</key>: <string>"letsencrypt-staging"</string>
-<key>spec</key>:
-  <key>ingressClassName</key>: <string>nginx</string>
-  <key>tls</key>:
-    - <key>hosts</key>:
-        - <string>staging.app.example.com</string>
-      <key>secretName</key>: <string>staging-tls-cert</string>
-  <key>rules</key>:
-    - <key>host</key>: <string>staging.app.example.com</string>
-      <key>http</key>:
-        <key>paths</key>:
-          - <key>path</key>: <string>/</string>
-            <key>pathType</key>: <string>Prefix</string>
-            <key>backend</key>:
-              <key>service</key>:
-                <key>name</key>: <string>web-service</string>
-                <key>port</key>:
-                  <key>number</key>: <number>80</number></bkl-code>
-</div>
-</div>
-
-</div>
-
 
 
 
@@ -1904,6 +1241,720 @@ hunk-header {
 
 
 
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">staging/namespace.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Namespace</string>
+<key>metadata</key>:
+  <key>name</key>: <string>microservices-staging</string>
+  <key>labels</key>:
+    <key>environment</key>: <string>staging</string></bkl-code>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">staging/api-service.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>ConfigMap</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-config</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+<key>data</key>:
+  <key>app.properties</key>: <string>|</string>
+    <string>cache.enabled=true</string>
+    <string>cache.ttl=300</string>
+    <string>cache.backend=redis</string>
+    <string>database.pool_size=10</string>
+    <string>database.timeout=30</string>
+    <string>database.max_idle=5</string>
+    <string>environment=staging</string>
+    <string>logging.level=info</string>
+    <string>logging.format=json</string>
+    <string>logging.output=stdout</string>
+    <string>metrics.enabled=true</string>
+    <string>metrics.port=9090</string>
+    <string>server.port=8080</string>
+    <string>server.name=api-service</string>
+    <string>server.workers=4</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-secrets</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+<key>type</key>: <string>Opaque</string>
+<key>data</key>:
+  <key>database-url</key>: <string>cG9zdGdyZXNxbDovL3N0YWdpbmd1c2VyOnN0YWdpbmdwYXNzQHBvc3RncmVzLXN0YWdpbmc6NTQzMi9zdGFnaW5nZGI=</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-service</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+  <key>labels</key>:
+    <key>app</key>: <string>api</string>
+    <key>tier</key>: <string>backend</string>
+    <key>environment</key>: <string>staging</string>
+<key>spec</key>:
+  <key>selector</key>:
+    <key>app</key>: <string>api</string>
+    <key>environment</key>: <string>staging</string>
+  <key>ports</key>:
+    - <key>name</key>: <string>http</string>
+      <key>port</key>: <number>80</number>
+      <key>targetPort</key>: <number>8080</number>
+      <key>protocol</key>: <string>TCP</string>
+  <key>type</key>: <string>ClusterIP</string>
+<string>---</string>
+<key>apiVersion</key>: <string>apps/v1</string>
+<key>kind</key>: <string>Deployment</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-deployment</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+  <key>labels</key>:
+    <key>app</key>: <string>api</string>
+    <key>tier</key>: <string>backend</string>
+    <key>environment</key>: <string>staging</string>
+<key>spec</key>:
+  <key>replicas</key>: <number>2</number>
+  <key>selector</key>:
+    <key>matchLabels</key>:
+      <key>app</key>: <string>api</string>
+      <key>environment</key>: <string>staging</string>
+  <key>template</key>:
+    <key>metadata</key>:
+      <key>labels</key>:
+        <key>app</key>: <string>api</string>
+        <key>tier</key>: <string>backend</string>
+        <key>environment</key>: <string>staging</string>
+    <key>spec</key>:
+      <key>containers</key>:
+        - <key>name</key>: <string>api</string>
+          <key>image</key>: <string>myregistry/api-service:staging</string>
+          <key>ports</key>:
+            - <key>containerPort</key>: <number>8080</number>
+              <key>name</key>: <string>http</string>
+          <key>env</key>:
+            - <key>name</key>: <string>APP_ENV</string>
+              <key>value</key>: <string>staging</string>
+            - <key>name</key>: <string>CACHE_ENABLED</string>
+              <key>value</key>: <string>"true"</string>
+            - <key>name</key>: <string>DATABASE_URL</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>api-secrets</string>
+                  <key>key</key>: <string>database-url</string>
+          <key>resources</key>:
+            <key>requests</key>:
+              <key>memory</key>: <string>"256Mi"</string>
+              <key>cpu</key>: <string>"200m"</string>
+            <key>limits</key>:
+              <key>memory</key>: <string>"512Mi"</string>
+              <key>cpu</key>: <string>"500m"</string>
+          <key>livenessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/health</string>
+              <key>port</key>: <number>8080</number>
+            <key>initialDelaySeconds</key>: <number>30</number>
+            <key>periodSeconds</key>: <number>10</number>
+          <key>readinessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/ready</string>
+              <key>port</key>: <number>8080</number>
+            <key>initialDelaySeconds</key>: <number>5</number>
+            <key>periodSeconds</key>: <number>5</number>
+          <key>args</key>:
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=4"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--feature=rate-limiting"</string>
+            - <string>"--feature=caching"</string>
+            - <string>"--log-format=json"</string>
+            - <string>"--graceful-timeout=30s"</string>
+          <key>volumeMounts</key>:
+            - <key>name</key>: <string>config</string>
+              <key>mountPath</key>: <string>/app/config</string>
+      <key>volumes</key>:
+        - <key>name</key>: <string>config</string>
+          <key>configMap</key>:
+            <key>name</key>: <string>api-config</string>
+<string>---</string>
+<key>apiVersion</key>: <string>autoscaling/v2</string>
+<key>kind</key>: <string>HorizontalPodAutoscaler</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-hpa</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+<key>spec</key>:
+  <key>scaleTargetRef</key>:
+    <key>apiVersion</key>: <string>apps/v1</string>
+    <key>kind</key>: <string>Deployment</string>
+    <key>name</key>: <string>api-deployment</string>
+  <key>minReplicas</key>: <number>2</number>
+  <key>maxReplicas</key>: <number>5</number>
+  <key>metrics</key>:
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>cpu</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>70</number>
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>memory</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>80</number></bkl-code>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">staging/web-service.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>ConfigMap</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-config</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+<key>data</key>:
+  <key>app.config.json</key>: <string>|</string>
+    <string>{</string>
+      <string><string>"environment"</string>: "staging",</string>
+      <string><string>"apiUrl"</string>: "http://api-service",</string>
+      <string><string>"debugMode"</string>: false,</string>
+      <string><string>"features"</string>: {</string>
+        <string><string>"analytics"</string>: true,</string>
+        <string><string>"caching"</string>: true,</string>
+        <string><string>"cdnEnabled"</string>: true</string>
+      <string>}</string>
+    <string>}</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-service</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+  <key>labels</key>:
+    <key>app</key>: <string>web</string>
+    <key>tier</key>: <string>frontend</string>
+    <key>environment</key>: <string>staging</string>
+<key>spec</key>:
+  <key>selector</key>:
+    <key>app</key>: <string>web</string>
+    <key>environment</key>: <string>staging</string>
+  <key>ports</key>:
+    - <key>name</key>: <string>http</string>
+      <key>port</key>: <number>80</number>
+      <key>targetPort</key>: <number>80</number>
+      <key>protocol</key>: <string>TCP</string>
+  <key>type</key>: <string>LoadBalancer</string>
+<string>---</string>
+<key>apiVersion</key>: <string>apps/v1</string>
+<key>kind</key>: <string>Deployment</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-deployment</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+  <key>labels</key>:
+    <key>app</key>: <string>web</string>
+    <key>tier</key>: <string>frontend</string>
+    <key>environment</key>: <string>staging</string>
+<key>spec</key>:
+  <key>replicas</key>: <number>2</number>
+  <key>selector</key>:
+    <key>matchLabels</key>:
+      <key>app</key>: <string>web</string>
+      <key>environment</key>: <string>staging</string>
+  <key>template</key>:
+    <key>metadata</key>:
+      <key>labels</key>:
+        <key>app</key>: <string>web</string>
+        <key>tier</key>: <string>frontend</string>
+        <key>environment</key>: <string>staging</string>
+    <key>spec</key>:
+      <key>containers</key>:
+        - <key>name</key>: <string>web</string>
+          <key>image</key>: <string>myregistry/web-frontend:staging</string>
+          <key>ports</key>:
+            - <key>containerPort</key>: <number>80</number>
+              <key>name</key>: <string>http</string>
+          <key>env</key>:
+            - <key>name</key>: <string>API_URL</string>
+              <key>value</key>: <string>"http://api-service"</string>
+            - <key>name</key>: <string>APP_ENV</string>
+              <key>value</key>: <string>staging</string>
+            - <key>name</key>: <string>CDN_ENABLED</string>
+              <key>value</key>: <string>"true"</string>
+          <key>resources</key>:
+            <key>requests</key>:
+              <key>memory</key>: <string>"128Mi"</string>
+              <key>cpu</key>: <string>"100m"</string>
+            <key>limits</key>:
+              <key>memory</key>: <string>"256Mi"</string>
+              <key>cpu</key>: <string>"200m"</string>
+          <key>livenessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/health</string>
+              <key>port</key>: <number>80</number>
+            <key>initialDelaySeconds</key>: <number>10</number>
+            <key>periodSeconds</key>: <number>10</number>
+          <key>readinessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/health</string>
+              <key>port</key>: <number>80</number>
+            <key>initialDelaySeconds</key>: <number>5</number>
+            <key>periodSeconds</key>: <number>5</number>
+          <key>command</key>: <string>["/app/web-server"]</string>
+          <key>args</key>:
+            - <string>"serve"</string>
+            - <string>"--port=80"</string>
+            - <string>"--static-dir=/usr/share/nginx/html"</string>
+            - <string>"--api-backend=http://api-service"</string>
+            - <string>"--enable-compression"</string>
+            - <string>"--enable-cache"</string>
+            - <string>"--cache-ttl=300"</string>
+            - <string>"--enable-metrics"</string>
+            - <string>"--metrics-port=9090"</string>
+            - <string>"--access-log=/var/log/access.log"</string>
+            - <string>"--error-log=/var/log/error.log"</string>
+            - <string>"-v"</string>
+          <key>volumeMounts</key>:
+            - <key>name</key>: <string>app-config</string>
+              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
+      <key>volumes</key>:
+        - <key>name</key>: <string>app-config</string>
+          <key>configMap</key>:
+            <key>name</key>: <string>web-config</string>
+            <key>items</key>:
+              - <key>key</key>: <string>app.config.json</string>
+                <key>path</key>: <string>config.json</string>
+<string>---</string>
+<key>apiVersion</key>: <string>networking.k8s.io/v1</string>
+<key>kind</key>: <string>Ingress</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-ingress</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+  <key>annotations</key>:
+    <key>nginx.ingress.kubernetes.io/ssl-redirect</key>: <string>"true"</string>
+    <key>cert-manager.io/cluster-issuer</key>: <string>"letsencrypt-staging"</string>
+<key>spec</key>:
+  <key>ingressClassName</key>: <string>nginx</string>
+  <key>tls</key>:
+    - <key>hosts</key>:
+        - <string>staging.app.example.com</string>
+      <key>secretName</key>: <string>staging-tls-cert</string>
+  <key>rules</key>:
+    - <key>host</key>: <string>staging.app.example.com</string>
+      <key>http</key>:
+        <key>paths</key>:
+          - <key>path</key>: <string>/</string>
+            <key>pathType</key>: <string>Prefix</string>
+            <key>backend</key>:
+              <key>service</key>:
+                <key>name</key>: <string>web-service</string>
+                <key>port</key>:
+                  <key>number</key>: <number>80</number></bkl-code>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">dev/namespace.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Namespace</string>
+<key>metadata</key>:
+  <key>name</key>: <string>microservices-dev</string>
+  <key>labels</key>:
+    <key>environment</key>: <string>dev</string></bkl-code>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">dev/api-service.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>ConfigMap</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-config</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+<key>data</key>:
+  <key>app.properties</key>: <string>|</string>
+    <string>server.port=8080</string>
+    <string>server.name=api-service</string>
+    <string>logging.level=debug</string>
+    <string>logging.format=json</string>
+    <string>cache.enabled=false</string>
+    <string>cache.ttl=300</string>
+    <string>database.pool_size=5</string>
+    <string>database.timeout=30</string>
+    <string>environment=development</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-secrets</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+<key>type</key>: <string>Opaque</string>
+<key>data</key>:
+  <key>database-url</key>: <string>cG9zdGdyZXNxbDovL2RldnVzZXI6ZGV2cGFzc0Bwb3N0Z3Jlcy1kZXY6NTQzMi9kZXZkYg==</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-service</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+  <key>labels</key>:
+    <key>app</key>: <string>api</string>
+    <key>tier</key>: <string>backend</string>
+    <key>environment</key>: <string>dev</string>
+<key>spec</key>:
+  <key>selector</key>:
+    <key>app</key>: <string>api</string>
+    <key>environment</key>: <string>dev</string>
+  <key>ports</key>:
+    - <key>name</key>: <string>http</string>
+      <key>port</key>: <number>80</number>
+      <key>targetPort</key>: <number>8080</number>
+      <key>protocol</key>: <string>TCP</string>
+  <key>type</key>: <string>ClusterIP</string>
+<string>---</string>
+<key>apiVersion</key>: <string>apps/v1</string>
+<key>kind</key>: <string>Deployment</string>
+<key>metadata</key>:
+  <key>name</key>: <string>api-deployment</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+  <key>labels</key>:
+    <key>app</key>: <string>api</string>
+    <key>tier</key>: <string>backend</string>
+    <key>environment</key>: <string>dev</string>
+<key>spec</key>:
+  <key>replicas</key>: <number>1</number>
+  <key>selector</key>:
+    <key>matchLabels</key>:
+      <key>app</key>: <string>api</string>
+      <key>environment</key>: <string>dev</string>
+  <key>template</key>:
+    <key>metadata</key>:
+      <key>labels</key>:
+        <key>app</key>: <string>api</string>
+        <key>tier</key>: <string>backend</string>
+        <key>environment</key>: <string>dev</string>
+    <key>spec</key>:
+      <key>containers</key>:
+        - <key>name</key>: <string>api</string>
+          <key>image</key>: <string>myregistry/api-service:dev</string>
+          <key>ports</key>:
+            - <key>containerPort</key>: <number>8080</number>
+              <key>name</key>: <string>http</string>
+          <key>env</key>:
+            - <key>name</key>: <string>APP_ENV</string>
+              <key>value</key>: <string>development</string>
+            - <key>name</key>: <string>DEBUG</string>
+              <key>value</key>: <string>"true"</string>
+            - <key>name</key>: <string>DATABASE_URL</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>api-secrets</string>
+                  <key>key</key>: <string>database-url</string>
+          <key>resources</key>:
+            <key>requests</key>:
+              <key>memory</key>: <string>"64Mi"</string>
+              <key>cpu</key>: <string>"50m"</string>
+            <key>limits</key>:
+              <key>memory</key>: <string>"128Mi"</string>
+              <key>cpu</key>: <string>"100m"</string>
+          <key>livenessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/health</string>
+              <key>port</key>: <number>8080</number>
+            <key>initialDelaySeconds</key>: <number>30</number>
+            <key>periodSeconds</key>: <number>10</number>
+          <key>readinessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/ready</string>
+              <key>port</key>: <number>8080</number>
+            <key>initialDelaySeconds</key>: <number>5</number>
+            <key>periodSeconds</key>: <number>5</number>
+          <key>args</key>:
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=2"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--verbose"</string>
+          <key>volumeMounts</key>:
+            - <key>name</key>: <string>config</string>
+              <key>mountPath</key>: <string>/app/config</string>
+      <key>volumes</key>:
+        - <key>name</key>: <string>config</string>
+          <key>configMap</key>:
+            <key>name</key>: <string>api-config</string></bkl-code>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+<div class="example-container expandable-container">
+
+<div class="label-container">
+<label class="label-spacing">dev/web-service.yaml</label>
+<div class="code-wrapper">
+
+<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
+›
+</button>
+
+<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>ConfigMap</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-config</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+<key>data</key>:
+  <key>app.config.json</key>: <string>|</string>
+    <string>{</string>
+      <string><string>"environment"</string>: "development",</string>
+      <string><string>"apiUrl"</string>: "http://api-service",</string>
+      <string><string>"debugMode"</string>: true,</string>
+      <string><string>"features"</string>: {</string>
+        <string><string>"analytics"</string>: false,</string>
+        <string><string>"caching"</string>: false</string>
+      <string>}</string>
+    <string>}</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-service</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+  <key>labels</key>:
+    <key>app</key>: <string>web</string>
+    <key>tier</key>: <string>frontend</string>
+    <key>environment</key>: <string>dev</string>
+<key>spec</key>:
+  <key>selector</key>:
+    <key>app</key>: <string>web</string>
+    <key>environment</key>: <string>dev</string>
+  <key>ports</key>:
+    - <key>name</key>: <string>http</string>
+      <key>port</key>: <number>80</number>
+      <key>targetPort</key>: <number>80</number>
+      <key>protocol</key>: <string>TCP</string>
+  <key>type</key>: <string>NodePort</string>
+<string>---</string>
+<key>apiVersion</key>: <string>apps/v1</string>
+<key>kind</key>: <string>Deployment</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-deployment</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+  <key>labels</key>:
+    <key>app</key>: <string>web</string>
+    <key>tier</key>: <string>frontend</string>
+    <key>environment</key>: <string>dev</string>
+<key>spec</key>:
+  <key>replicas</key>: <number>1</number>
+  <key>selector</key>:
+    <key>matchLabels</key>:
+      <key>app</key>: <string>web</string>
+      <key>environment</key>: <string>dev</string>
+  <key>template</key>:
+    <key>metadata</key>:
+      <key>labels</key>:
+        <key>app</key>: <string>web</string>
+        <key>tier</key>: <string>frontend</string>
+        <key>environment</key>: <string>dev</string>
+    <key>spec</key>:
+      <key>containers</key>:
+        - <key>name</key>: <string>web</string>
+          <key>image</key>: <string>myregistry/web-frontend:dev</string>
+          <key>ports</key>:
+            - <key>containerPort</key>: <number>80</number>
+              <key>name</key>: <string>http</string>
+          <key>env</key>:
+            - <key>name</key>: <string>API_URL</string>
+              <key>value</key>: <string>"http://api-service"</string>
+            - <key>name</key>: <string>APP_ENV</string>
+              <key>value</key>: <string>development</string>
+            - <key>name</key>: <string>DEBUG_MODE</string>
+              <key>value</key>: <string>"true"</string>
+          <key>resources</key>:
+            <key>requests</key>:
+              <key>memory</key>: <string>"64Mi"</string>
+              <key>cpu</key>: <string>"50m"</string>
+            <key>limits</key>:
+              <key>memory</key>: <string>"128Mi"</string>
+              <key>cpu</key>: <string>"100m"</string>
+          <key>livenessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/</string>
+              <key>port</key>: <number>80</number>
+            <key>initialDelaySeconds</key>: <number>10</number>
+            <key>periodSeconds</key>: <number>10</number>
+          <key>readinessProbe</key>:
+            <key>httpGet</key>:
+              <key>path</key>: <string>/</string>
+              <key>port</key>: <number>80</number>
+            <key>initialDelaySeconds</key>: <number>5</number>
+            <key>periodSeconds</key>: <number>5</number>
+          <key>command</key>: <string>["/app/web-server"]</string>
+          <key>args</key>:
+            - <string>"serve"</string>
+            - <string>"--port=80"</string>
+            - <string>"--static-dir=/usr/share/nginx/html"</string>
+            - <string>"--api-backend=http://api-service"</string>
+            - <string>"--enable-compression"</string>
+            - <string>"--enable-cache"</string>
+            - <string>"-v"</string>
+            - <string>"-v"</string>
+          <key>volumeMounts</key>:
+            - <key>name</key>: <string>app-config</string>
+              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
+      <key>volumes</key>:
+        - <key>name</key>: <string>app-config</string>
+          <key>configMap</key>:
+            <key>name</key>: <string>web-config</string>
+            <key>items</key>:
+              - <key>key</key>: <string>app.config.json</string>
+                <key>path</key>: <string>config.json</string>
+<string>---</string>
+<key>apiVersion</key>: <string>networking.k8s.io/v1</string>
+<key>kind</key>: <string>Ingress</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-ingress</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+<key>spec</key>:
+  <key>ingressClassName</key>: <string>nginx</string>
+  <key>rules</key>:
+    - <key>host</key>: <string>dev.app.local</string>
+      <key>http</key>:
+        <key>paths</key>:
+          - <key>path</key>: <string>/</string>
+            <key>pathType</key>: <string>Prefix</string>
+            <key>backend</key>:
+              <key>service</key>:
+                <key>name</key>: <string>web-service</string>
+                <key>port</key>:
+                  <key>number</key>: <number>80</number></bkl-code>
+</div>
+</div>
+
+</div>
+
+
+
+
+</section>
+
+<section id="plan">
+<h2><a name="plan">Target layout</a></h2>
+
+
+
+<p><p>We'll start with a plan for the target layout of the bkl configs. We'll keep the original <highlight>namespace</highlight>/<highlight>api-service</highlight>/<highlight>web-service</highlight> split to match the ways users were used to working with the config.</p>
+
+<p>The <highlight>namespace</highlight> configs are small and self-contained; we'll keep those independent. We can compare the <highlight>api-service</highlight> and <highlight>web-service</highlight> configs to see if they should have a common base layer:</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>diff</command> <flag>-ud</flag> <flag>--color</flag> <argument>prod/api-service.yaml</argument> <argument>prod/web-service.yaml</argument></bkl-code>
+</div>
+
+</div>
+
+
+
+
+<p><p>The configs are similar enough to have a common base layer. We'll use the following bkl config structure:</p>
+
+<pre>
+namespace.yaml
+  namespace.staging.yaml
+    namespace.staging.dev.yaml
+base.yaml
+  base.api-service.yaml
+    base.api-service.staging.yaml
+      base.api-service.staging.dev.yaml
+  base.web-service.yaml
+    base.web-service.staging.yaml
+      base.web-service.staging.dev.yaml
+</pre>
+
+<p>We'll use the production version of each config as the base layer. This means that all other environments are expressed as differences from production, encouraging minimizing those differences.</p>
+</p>
+
+
+
 </section>
 
 <section id="namespace">
@@ -1911,13 +1962,9 @@ hunk-header {
 
 
 
-<p><p>We start with the single-resource <highlight>namespace.yaml</highlight> files.</p>
+<p><p>This conversion is simple enough to do by hand. We'll use tools for some of the more complex later transformations.</p>
 
-<p><highlight>prod/namespace.yaml</highlight> will form our base layer. This choice means that all other environments are expressed as differences from production, encouraging minimizing those differences.</p>
-
-<p>We'll use <highlight>$""</highlight> interpolation set the namespace name based on the environment.</p>
-
-<p>We'll keep the original namespace/api-service/web-service/monitoring split to match the ways users were used to working with the config.</p>
+<p>We'll use <highlight>$""</highlight> interpolation to set the namespace name based on the environment.</p>
 </p>
 
 
@@ -1995,9 +2042,7 @@ hunk-header {
 
 
 
-<p><p>This conversion is simple enough to do by hand. We'll use tools for some of the more complex later transformations.</p>
-
-<p>Once we have bkl files that look correct and parse, we validate them against the original configs.</p>
+<p><p>Once we have bkl files that look correct and parse, we validate them against the original configs.</p>
 
 <p>Using <highlight>yq</highlight> to sort keys eliminates diffs that are just about ordering.</p>
 </p>
@@ -2012,6 +2057,39 @@ hunk-header {
 <bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.yaml</argument><operator>)</operator>
 <prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>staging/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.staging.yaml</argument><operator>)</operator>
 <prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>bkl/namespace.staging.dev.yaml</argument><operator>)</operator></bkl-code>
+</div>
+
+</div>
+
+
+
+
+</section>
+
+<section id="base">
+<h2><a name="base">Base layer</a></h2>
+
+
+
+<p><p>We'll use <highlight>bkli</highlight> to create a minimal base layer for the services. First, we need to split the configs into files named by resource type.</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>pushd</command> <argument>prod</argument>
+<prompt>$ </prompt><command>mkdir</command> <flag>-p</flag> <argument>api-service</argument> <argument>web-service</argument>
+<prompt>$ </prompt><command>pushd</command> <argument>api-service</argument>
+<prompt>$ </prompt><command>yq</command> <flag>-s</flag> <string>'.kind'</string> <argument>../api-service.yaml</argument>
+<prompt>$ </prompt><command>popd</command>
+<prompt>$ </prompt><command>pushd</command> <argument>web-service</argument>
+<prompt>$ </prompt><command>yq</command> <flag>-s</flag> <string>'.kind'</string> <argument>../web-service.yaml</argument>
+<prompt>$ </prompt><command>popd</command>
+<prompt>$ </prompt><command>popd</command></bkl-code>
 </div>
 
 </div>
@@ -2038,7 +2116,7 @@ hunk-header {
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>yq</command> <flag>-s</flag> <string>'.kind'</string> <argument>prod/api-service.yaml</argument></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><operator>(</operator><command>cd</command> <argument>prod</argument> <argument>&&</argument> <argument>yq</argument> <flag>-s</flag> <string>'.kind'</string> <argument>api-service.yaml</argument><operator>)</operator></bkl-code>
 </div>
 
 </div>
