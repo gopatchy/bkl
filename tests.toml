@@ -3675,14 +3675,17 @@ description = "Test required with multiple documents"
 eval = ["a.yaml"]
 format = "yaml"
 required = true
-expected = ""
-errors = ["required operates on exactly 1 document"]
+expected = '''
+a: $required
+---
+b: $required
+'''
 [requiredMultipleDocs.files]
 "a.yaml" = '''
 ---
-x: $required
+a: $required
 ---
-y: $required
+b: $required
 '''
 
 # Additional required coverage tests

@@ -12,7 +12,7 @@ import (
 )
 
 // Required loads a file and returns only the required fields and their ancestors.
-// It expects the file to contain exactly one document.
+// It processes all documents in the file, outputting one document for each input document.
 // The file is loaded directly without processing, matching bklr behavior.
 // If format is nil, it infers the format from the paths parameter.
 func Required(fx fs.FS, path string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
@@ -40,20 +40,20 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 		}
 	}
 
-	if len(docs) != 1 {
-		return nil, fmt.Errorf("required operates on exactly 1 document, got %d in %s", len(docs), path)
-	}
-
-	result, err := required(docs[0].Data)
-	if err != nil {
-		return nil, err
+	results := []any{}
+	for _, doc := range docs {
+		result, err := required(doc.Data)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result)
 	}
 
 	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err
 	}
-	return ft.MarshalStream([]any{result})
+	return ft.MarshalStream(results)
 }
 
 func required(obj any) (any, error) {
