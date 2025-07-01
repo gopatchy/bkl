@@ -1488,10 +1488,10 @@ eval = ["a.yaml"]
 format = "yaml"
 expected = '''
 |
-  a = 1
-  b = 2
-  nested.x = hello
-  nested.y = world
+  a=1
+  b=2
+  nested.x=hello
+  nested.y=world
 '''
 files."a.yaml" = '''
 a: 1
@@ -1596,10 +1596,10 @@ config:
 files."a.yaml" = '''
 config:
   $value: |
-    app.name = myapp
-    app.version = 1.0
-    db.host = localhost
-    db.port = 5432
+    app.name=myapp
+    app.version=1.0
+    db.host=localhost
+    db.port=5432
   $decode: properties
 '''
 

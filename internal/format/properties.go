@@ -20,13 +20,17 @@ func propertiesMarshalStream(stream []any) ([]byte, error) {
 	}
 
 	p := properties.NewProperties()
+	p.WriteSeparator = "="
 
-	if err := flattenMap("", obj, p); err != nil {
+	err := flattenMap("", obj, p)
+	if err != nil {
 		return nil, err
 	}
 
 	var buf bytes.Buffer
-	if _, err := p.Write(&buf, properties.UTF8); err != nil {
+
+	_, err = p.Write(&buf, properties.UTF8)
+	if err != nil {
 		return nil, err
 	}
 
@@ -50,20 +54,27 @@ func flattenMap(prefix string, m map[string]any, p *properties.Properties) error
 		switch v := value.(type) {
 		case string:
 			p.Set(fullKey, v)
+
 		case bool:
 			p.Set(fullKey, fmt.Sprintf("%t", v))
+
 		case int, int64, float64:
 			p.Set(fullKey, fmt.Sprintf("%v", v))
+
 		case map[string]any:
-			if err := flattenMap(fullKey, v, p); err != nil {
+			err := flattenMap(fullKey, v, p)
+			if err != nil {
 				return err
 			}
+			continue
+
 		case []any:
 			var values []string
 			for _, item := range v {
 				values = append(values, fmt.Sprintf("%v", item))
 			}
 			p.Set(fullKey, strings.Join(values, ","))
+
 		default:
 			p.Set(fullKey, fmt.Sprintf("%v", v))
 		}
@@ -94,14 +105,17 @@ func setNestedValue(m map[string]any, key string, value string) {
 		if i == len(parts)-1 {
 			current[part] = value
 		} else {
-			if _, exists := current[part]; !exists {
+			_, exists := current[part]
+			if !exists {
 				current[part] = make(map[string]any)
 			}
-			if nextMap, ok := current[part].(map[string]any); ok {
-				current = nextMap
-			} else {
+
+			nextMap, ok := current[part].(map[string]any)
+			if !ok {
 				return
 			}
+
+			current = nextMap
 		}
 	}
 }
