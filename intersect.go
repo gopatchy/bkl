@@ -33,7 +33,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 
 		var docs []*document.Document
 
-		realPath, _, err := fileMatch(fx, path)
+		realPath, _, err := file.FileMatch(fx, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}

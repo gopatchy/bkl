@@ -5088,3 +5088,70 @@ $defer: true
 $match: {}
 b: test
 '''
+
+###############################################################################
+# Match Expression Tests
+###############################################################################
+
+[matchExpressionFilter]
+description = "Test filename:match expression filters documents"
+eval = ["a.yaml:a: 1"]
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+a: 2
+b: 3
+---
+a: 3
+b: 1
+'''
+
+[matchExpressionMultiple]
+description = "Test match expression with multiple matching documents"
+eval = ["a.yaml:b: 2"]
+format = "yaml"
+expected = '''
+a: 2
+b: 2
+---
+a: 3
+b: 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 1
+---
+a: 2
+b: 2
+---
+a: 3
+b: 2
+'''
+
+[matchExpressionNested]
+description = "Test match expression with nested values"
+eval = ["a.yaml:a: {b: 2}"]
+format = "yaml"
+expected = '''
+a:
+  b: 2
+  c: 3
+b: 1
+'''
+files."a.yaml" = '''
+a:
+  b: 2
+  c: 3
+b: 1
+---
+a:
+  b: 1
+  c: 2
+b: 3
+'''

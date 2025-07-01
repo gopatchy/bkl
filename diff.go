@@ -28,7 +28,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 
 	var srcDocs []*document.Document
 
-	realSrcPath, _, err := fileMatch(fx, srcPath)
+	realSrcPath, _, err := file.FileMatch(fx, srcPath)
 	if err != nil {
 		return nil, fmt.Errorf("source file %s: %w", srcPath, err)
 	}
@@ -51,7 +51,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 
 	var dstDocs []*document.Document
 
-	realDstPath, _, err := fileMatch(fx, dstPath)
+	realDstPath, _, err := file.FileMatch(fx, dstPath)
 	if err != nil {
 		return nil, fmt.Errorf("destination file %s: %w", dstPath, err)
 	}

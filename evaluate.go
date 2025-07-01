@@ -9,14 +9,11 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
 
-	"github.com/gopatchy/bkl/internal/format"
-	"github.com/gopatchy/bkl/internal/fsys"
+	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/merge"
 	"github.com/gopatchy/bkl/internal/utils"
-	"github.com/gopatchy/bkl/pkg/errors"
 )
 
 // bkl reads input documents, merges layers, and generates outputs.
@@ -84,7 +81,7 @@ func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env 
 	realFiles := make([]string, len(evalFiles))
 	var inferredFormat string
 	for i, path := range evalFiles {
-		realPath, fileFormat, err := fileMatch(fx, path)
+		realPath, fileFormat, err := file.FileMatch(fx, path)
 		if err != nil {
 			return nil, fmt.Errorf("file %s: %w", path, err)
 		}
@@ -95,7 +92,6 @@ func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env 
 		}
 	}
 
-	// Determine format to use - append inferredFormat to paths for fallback
 	allPaths := append(paths, &inferredFormat)
 	ft, err := determineFormat(format, allPaths...)
 	if err != nil {
@@ -115,33 +111,4 @@ func getOSEnv() map[string]string {
 		}
 	}
 	return env
-}
-
-// fileMatch attempts to find a file with the same base name as path, but
-// possibly with a different supported extension. It is intended to support
-// "virtual" filenames that auto-convert from the format of the underlying
-// real file.
-//
-// Returns the real filename and the requested output format, or
-// ("", "", error).
-func fileMatch(fx fs.FS, path string) (string, string, error) {
-	formatName := utils.Ext(path)
-	if _, err := format.Get(formatName); err != nil {
-		return "", "", err
-	}
-
-	withoutExt := strings.TrimSuffix(path, "."+formatName)
-
-	if filepath.Base(withoutExt) == "-" {
-		return path, formatName, nil
-	}
-
-	fileSystem := fsys.New(fx)
-	realPath := fileSystem.FindFile(withoutExt)
-
-	if realPath == "" {
-		return "", "", fmt.Errorf("%s.*: %w", withoutExt, errors.ErrMissingFile)
-	}
-
-	return realPath, formatName, nil
 }

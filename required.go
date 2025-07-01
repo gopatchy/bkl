@@ -23,7 +23,7 @@ func Required(fx fs.FS, path string, rootPath string, workingDir string, format 
 	path = preparedPaths[0]
 	var docs []*document.Document
 
-	realPath, _, err := fileMatch(fx, path)
+	realPath, _, err := file.FileMatch(fx, path)
 	if err != nil {
 		return nil, fmt.Errorf("file %s: %w", path, err)
 	}
