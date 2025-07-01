@@ -1904,62 +1904,6 @@ hunk-header {
 
 
 
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">prod/monitoring.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ServiceMonitor</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-metrics</string>
-  <key>namespace</key>: <string>microservices-prod</string>
-  <key>labels</key>:
-    <key>app</key>: <string>api</string>
-    <key>monitoring</key>: <string>prometheus</string>
-    <key>environment</key>: <string>prod</string>
-<key>spec</key>:
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>api</string>
-      <key>environment</key>: <string>prod</string>
-  <key>endpoints</key>:
-    - <key>port</key>: <string>http</string>
-      <key>path</key>: <string>/metrics</string>
-      <key>interval</key>: <string>30s</string>
-<string>---</string>
-<key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ServiceMonitor</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-metrics</string>
-  <key>namespace</key>: <string>microservices-prod</string>
-  <key>labels</key>:
-    <key>app</key>: <string>web</string>
-    <key>monitoring</key>: <string>prometheus</string>
-    <key>environment</key>: <string>prod</string>
-<key>spec</key>:
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>web</string>
-      <key>environment</key>: <string>prod</string>
-  <key>endpoints</key>:
-    - <key>port</key>: <string>http</string>
-      <key>path</key>: <string>/metrics</string>
-      <key>interval</key>: <string>30s</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
 </section>
 
 <section id="namespace">
@@ -2102,7 +2046,7 @@ hunk-header {
 
 
 
-<p><p>For the ConfigMap, we'll use <highlight>$encode: properties</highlight> to convert to an embedded properties string.</p>
+<p><p>For the ConfigMap, we'll use <highlight>$encode: properties</highlight> to convert a map to an embedded properties string.</p>
 </p>
 
 

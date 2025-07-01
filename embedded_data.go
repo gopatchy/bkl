@@ -2,6 +2,7 @@ package bkl
 
 import (
 	_ "embed"
+	"fmt"
 
 	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
@@ -12,6 +13,9 @@ var testsData []byte
 
 //go:embed docs/index.yaml
 var sectionsData []byte
+
+//go:embed docs/k8s.yaml
+var k8sData []byte
 
 type TestCase struct {
 	Description string            `toml:"description"`
@@ -29,9 +33,10 @@ type TestCase struct {
 }
 
 type DocSection struct {
-	ID    string    `yaml:"id"`
-	Title string    `yaml:"title"`
-	Items []DocItem `yaml:"items"`
+	ID     string    `yaml:"id"`
+	Title  string    `yaml:"title"`
+	Items  []DocItem `yaml:"items"`
+	Source string    `yaml:"-"`
 }
 
 type DocItem struct {
@@ -70,9 +75,23 @@ func GetTests() (map[string]*TestCase, error) {
 }
 
 func GetDocSections() ([]DocSection, error) {
-	var sections []DocSection
-	if err := yaml.Unmarshal(sectionsData, &sections); err != nil {
-		return nil, err
+	var allSections []DocSection
+
+	files := map[string][]byte{
+		"index": sectionsData,
+		"k8s":   k8sData,
 	}
-	return sections, nil
+
+	for name, data := range files {
+		var sections []DocSection
+		if err := yaml.Unmarshal(data, &sections); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal %s.yaml: %w", name, err)
+		}
+		for i := range sections {
+			sections[i].Source = name
+		}
+		allSections = append(allSections, sections...)
+	}
+
+	return allSections, nil
 }

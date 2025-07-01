@@ -196,9 +196,11 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 
 		titleMatches := countKeywordMatches(titleLower, normalizedKeywords)
 		idMatches := countKeywordMatches(idLower, normalizedKeywords)
+		sourceMatches := countKeywordMatches(section.Source, normalizedKeywords)
 
 		score += titleMatches * 20
 		score += idMatches * 15
+		score += sourceMatches * 30
 
 		matchingContent := []string{}
 		for _, item := range section.Items {
@@ -207,7 +209,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 				contentMatches := countKeywordMatches(contentLower, normalizedKeywords)
 				if contentMatches > 0 {
 					score += contentMatches * 8
-					// Extract relevant snippet for first matching keyword
 					content := item.Content
 					if len(content) > 200 {
 						firstKeyword := findFirstKeyword(contentLower, normalizedKeywords)
@@ -224,7 +225,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 				}
 			}
 			if item.Example != nil {
-				// Check example layers
 				for _, layer := range item.Example.Layers {
 					codeMatches := countKeywordMatches(strings.ToLower(layer.Code), normalizedKeywords)
 					labelMatches := countKeywordMatches(strings.ToLower(layer.Label), normalizedKeywords)
@@ -236,13 +236,11 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 						break
 					}
 				}
-				// Also check result layer
 				resultMatches := countKeywordMatches(strings.ToLower(item.Example.Result.Code), normalizedKeywords)
 				if resultMatches > 0 {
 					score += resultMatches * 5
 				}
 			}
-			// Check simple code blocks
 			if item.Code != nil {
 				codeMatches := countKeywordMatches(strings.ToLower(item.Code.Code), normalizedKeywords)
 				if codeMatches > 0 {
@@ -252,7 +250,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 					}
 				}
 			}
-			// Check side-by-side code blocks
 			if item.SideBySide != nil {
 				leftMatches := countKeywordMatches(strings.ToLower(item.SideBySide.Left.Code), normalizedKeywords)
 				rightMatches := countKeywordMatches(strings.ToLower(item.SideBySide.Right.Code), normalizedKeywords)
