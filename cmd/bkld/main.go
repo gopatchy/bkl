@@ -13,6 +13,7 @@ import (
 type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"jsonl" choice:"toml" choice:"yaml"`
+	Selector     string          `short:"s" long:"selector" description:"selector expression to match documents (e.g. 'metadata.name')"`
 	Version      bool            `short:"v" long:"version" description:"print version and exit"`
 
 	Positional struct {
@@ -45,7 +46,7 @@ See https://bkl.gopatchy.io/#bkld for detailed documentation.`
 	}
 
 	fsys := os.DirFS("/")
-	enc, err := bkl.Diff(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "", opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.BasePath))
+	enc, err := bkl.Diff(fsys, string(opts.Positional.BasePath), string(opts.Positional.TargetPath), "/", "", opts.Selector, opts.OutputFormat, (*string)(opts.OutputPath), (*string)(&opts.Positional.BasePath))
 	if err != nil {
 		fatal(err)
 	}

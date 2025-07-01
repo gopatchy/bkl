@@ -3379,12 +3379,12 @@ errors = ["missing file"]
 "a.yaml" = "x: 1"
 
 [diffMultipleDocsSource]
-description = "Test diff with multiple documents in source file"
+description = "Test diff with multiple documents in source file without selector"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
 expected = ""
-errors = ["diff operates on exactly 1 source document per file"]
+errors = ["selector"]
 [diffMultipleDocsSource.files]
 "a.yaml" = '''
 ---
@@ -3395,12 +3395,12 @@ y: 2
 "b.yaml" = "x: 1"
 
 [diffMultipleDocsDest]
-description = "Test diff with multiple documents in destination file"
+description = "Test diff with multiple documents in destination file without selector"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
 expected = ""
-errors = ["diff operates on exactly 1 destination document per file"]
+errors = ["selector \"\" matches multiple"]
 [diffMultipleDocsDest.files]
 "a.yaml" = "x: 1"
 "b.yaml" = '''
@@ -3559,12 +3559,12 @@ errors = ["missing file"]
 "a.yaml" = "x: 1"
 
 [intersectMultipleDocs]
-description = "Test intersect with multiple documents in a file"
+description = "Test intersect with multiple documents in a file without selector"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
 expected = ""
-errors = ["intersect operates on exactly 1 document per file"]
+errors = ["selector"]
 [intersectMultipleDocs.files]
 "a.yaml" = '''
 ---
@@ -5157,4 +5157,196 @@ a:
   b: 1
   c: 2
 b: 3
+'''
+
+[diffWithSelector]
+description = "Test diff with selector matching documents by name"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+selector = "name"
+expected = '''
+$match: {}
+b: 3
+---
+$match: {}
+c: 4
+'''
+[diffWithSelector.files]
+"a.yaml" = '''
+---
+name: doc1
+a: 1
+---
+name: doc2
+c: 3
+'''
+"b.yaml" = '''
+---
+name: doc1
+a: 1
+b: 3
+---
+name: doc2
+c: 4
+'''
+
+[intersectWithSelector]
+description = "Test intersect with selector matching documents by id"
+eval = ["a.yaml", "b.yaml", "c.yaml"]
+format = "yaml"
+intersect = true
+selector = "id"
+expected = '''
+a: 1
+id: 1
+---
+b: 2
+id: 2
+'''
+[intersectWithSelector.files]
+"a.yaml" = '''
+---
+id: 1
+a: 1
+b: 2
+---
+id: 2
+b: 2
+c: 3
+'''
+"b.yaml" = '''
+---
+id: 1
+a: 1
+c: 3
+---
+id: 2
+b: 2
+d: 4
+'''
+"c.yaml" = '''
+---
+id: 1
+a: 1
+---
+id: 2
+b: 2
+'''
+
+[diffWithSelectorNestedPath]
+description = "Test diff with selector using nested path"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+selector = "metadata.name"
+expected = '''
+$match: {}
+metadata:
+  version: v2
+spec:
+  replicas: 3
+---
+$match: {}
+'''
+[diffWithSelectorNestedPath.files]
+"a.yaml" = '''
+---
+metadata:
+  name: service1
+  version: v1
+spec:
+  replicas: 2
+---
+metadata:
+  name: service2
+spec:
+  replicas: 1
+'''
+"b.yaml" = '''
+---
+metadata:
+  name: service1
+  version: v2
+spec:
+  replicas: 3
+---
+metadata:
+  name: service2
+spec:
+  replicas: 1
+'''
+
+[diffWithSelectorNoMatch]
+description = "Test diff with selector where destination has unmatched documents"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+selector = "id"
+expected = '''
+$match: {}
+---
+$match: {}
+---
+$match: null
+c: 3
+id: 3
+'''
+[diffWithSelectorNoMatch.files]
+"a.yaml" = '''
+---
+id: 1
+a: 1
+---
+id: 2
+b: 2
+'''
+"b.yaml" = '''
+---
+id: 1
+a: 1
+---
+id: 2
+b: 2
+---
+id: 3
+c: 3
+'''
+
+[diffEmptySelector]
+description = "Test diff with empty selector on single documents"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+selector = ""
+expected = '''
+$match: {}
+b: 2
+'''
+[diffEmptySelector.files]
+"a.yaml" = '''
+a: 1
+'''
+"b.yaml" = '''
+a: 1
+b: 2
+'''
+
+[intersectEmptySelector]
+description = "Test intersect with empty selector on single documents"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+selector = ""
+expected = '''
+a: 1
+'''
+[intersectEmptySelector.files]
+"a.yaml" = '''
+a: 1
+b: 2
+'''
+"b.yaml" = '''
+a: 1
+c: 3
 '''

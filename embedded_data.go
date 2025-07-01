@@ -30,6 +30,7 @@ type TestCase struct {
 	Intersect   bool              `toml:"intersect,omitempty"`
 	Required    bool              `toml:"required,omitempty"`
 	Benchmark   bool              `toml:"benchmark,omitempty"`
+	Selector    string            `toml:"selector,omitempty"`
 }
 
 type DocSection struct {

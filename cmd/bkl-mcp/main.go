@@ -108,6 +108,9 @@ func main() {
 			mcp.Required(),
 			mcp.Description("Target file path"),
 		),
+		mcp.WithString("selector",
+			mcp.Description("Selector expression to match documents (e.g. 'metadata.name')"),
+		),
 		formatParam,
 		fileSystemParam,
 		mcp.WithString("workingDir",
@@ -124,6 +127,9 @@ func main() {
 		mcp.WithString("files",
 			mcp.Required(),
 			mcp.Description("Comma-separated list of files to intersect (requires at least 2 files)"),
+		),
+		mcp.WithString("selector",
+			mcp.Description("Selector expression to match documents (e.g. 'metadata.name')"),
 		),
 		formatParam,
 		fileSystemParam,
@@ -721,7 +727,8 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Diff(fsys, baseFile, targetFile, rootPath, workingDir, &format)
+	selector := parseOptionalString(args, "selector", "")
+	output, err := bkl.Diff(fsys, baseFile, targetFile, rootPath, workingDir, selector, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
@@ -799,7 +806,8 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	if format == "" {
 		format = "yaml"
 	}
-	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, &format)
+	selector := parseOptionalString(args, "selector", "")
+	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, selector, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}

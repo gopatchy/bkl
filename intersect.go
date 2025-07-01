@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"reflect"
+	"sort"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
@@ -12,11 +13,7 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-// Intersect loads multiple files and returns their intersection.
-// It expects each file to contain exactly one document.
-// The files are loaded directly without processing, matching bkli behavior.
-// If format is nil, it infers the format from the formatPaths parameter.
-func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, format *string, formatPaths ...*string) ([]byte, error) {
+func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, selector string, format *string, formatPaths ...*string) ([]byte, error) {
 	preparedPaths, err := utils.PreparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -26,11 +23,11 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 		return nil, fmt.Errorf("intersect requires at least 2 files, got %d", len(paths))
 	}
 
-	var result any
 	fx2 := fsys.New(fx)
 
-	for i, path := range paths {
+	tracking := map[string]any{}
 
+	for i, path := range paths {
 		var docs []*document.Document
 
 		realPath, _, err := file.FileMatch(fx, path)
@@ -50,18 +47,56 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 			}
 		}
 
-		if len(docs) != 1 {
-			return nil, fmt.Errorf("intersect operates on exactly 1 document per file, got %d in %s", len(docs), path)
-		}
-
 		if i == 0 {
-			result = docs[0].Data
-			continue
-		}
+			for _, doc := range docs {
+				keyStr, err := evaluateSelector(doc, selector)
+				if err != nil {
+					return nil, fmt.Errorf("evaluating selector on document in %s: %w", path, err)
+				}
+				if _, exists := tracking[keyStr]; exists {
+					return nil, fmt.Errorf("selector %q matches multiple documents in %s", keyStr, path)
+				}
+				tracking[keyStr] = doc.Data
+			}
+		} else {
+			seen := map[string]bool{}
+			for _, doc := range docs {
+				keyStr, err := evaluateSelector(doc, selector)
+				if err != nil {
+					return nil, fmt.Errorf("evaluating selector on document in %s: %w", path, err)
+				}
+				if seen[keyStr] {
+					return nil, fmt.Errorf("selector %q matches multiple documents in %s", keyStr, path)
+				}
+				seen[keyStr] = true
 
-		result, err = intersect(result, docs[0].Data)
-		if err != nil {
-			return nil, err
+				if existing, found := tracking[keyStr]; found {
+					result, err := intersect(existing, doc.Data)
+					if err != nil {
+						return nil, err
+					}
+					tracking[keyStr] = result
+				}
+			}
+
+			for key := range tracking {
+				if !seen[key] {
+					delete(tracking, key)
+				}
+			}
+		}
+	}
+
+	results := []any{}
+	var keys []string
+	for key := range tracking {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		if data := tracking[key]; data != nil {
+			results = append(results, data)
 		}
 	}
 
@@ -69,7 +104,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, for
 	if err != nil {
 		return nil, err
 	}
-	return ft.MarshalStream([]any{result})
+	return ft.MarshalStream(results)
 }
 
 func intersect(a, b any) (any, error) {
@@ -102,7 +137,6 @@ func intersectMap(a map[string]any, b any) (any, error) {
 		return intersectMapMap(a, b2)
 
 	default:
-		// Different types but both defined
 		return "$required", nil
 	}
 }
@@ -143,7 +177,6 @@ func intersectList(a []any, b any) (any, error) {
 		return intersectListList(a, b2)
 
 	default:
-		// Different types but both defined
 		return "$required", nil
 	}
 }

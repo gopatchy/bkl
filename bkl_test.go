@@ -65,7 +65,7 @@ func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		output, err = bkl.Intersect(testFS, testCase.Eval, rootPath, rootPath, &testCase.Format, &testCase.Eval[0])
+		output, err = bkl.Intersect(testFS, testCase.Eval, rootPath, rootPath, testCase.Selector, &testCase.Format, &testCase.Eval[0])
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		output, err = bkl.Diff(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath, &testCase.Format, &testCase.Eval[0])
+		output, err = bkl.Diff(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath, testCase.Selector, &testCase.Format, &testCase.Eval[0])
 		if err != nil {
 			return nil, err
 		}
@@ -296,6 +296,10 @@ func TestCLI(t *testing.T) {
 
 			if testCase.Format != "" {
 				args = append(args, "--format", testCase.Format)
+			}
+
+			if testCase.Selector != "" && (testCase.Diff || testCase.Intersect) {
+				args = append(args, "--selector", testCase.Selector)
 			}
 
 			if testCase.RootPath != "" {

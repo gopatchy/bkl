@@ -6,6 +6,7 @@ import (
 	"maps"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
@@ -14,11 +15,7 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-// Diff loads two files and returns the diff between them.
-// It expects each file to contain exactly one document.
-// The files are loaded directly without processing, matching bkld behavior.
-// If format is nil, it infers the format from the paths parameter.
-func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string, format *string, paths ...*string) ([]byte, error) {
+func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string, selector string, format *string, paths ...*string) ([]byte, error) {
 	preparedPaths, err := utils.PreparePathsForParser([]string{srcPath, dstPath}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -45,10 +42,6 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		}
 	}
 
-	if len(srcDocs) != 1 {
-		return nil, fmt.Errorf("diff operates on exactly 1 source document per file, got %d", len(srcDocs))
-	}
-
 	var dstDocs []*document.Document
 
 	realDstPath, _, err := file.FileMatch(fx, dstPath)
@@ -69,42 +62,80 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		}
 	}
 
-	if len(dstDocs) != 1 {
-		return nil, fmt.Errorf("diff operates on exactly 1 destination document per file, got %d", len(dstDocs))
+	results := []any{}
+
+	srcMap := make(map[string]*document.Document)
+	var srcKeys []string
+	for _, doc := range srcDocs {
+		keyStr, err := evaluateSelector(doc, selector)
+		if err != nil {
+			return nil, fmt.Errorf("evaluating selector on source document: %w", err)
+		}
+		if _, exists := srcMap[keyStr]; exists {
+			return nil, fmt.Errorf("selector %q matches multiple source documents", keyStr)
+		}
+		srcMap[keyStr] = doc
+		srcKeys = append(srcKeys, keyStr)
 	}
 
-	result, err := diff(dstDocs[0].Data, srcDocs[0].Data)
-	if err != nil {
-		return nil, err
+	dstMap := make(map[string]*document.Document)
+	var dstKeys []string
+	for _, doc := range dstDocs {
+		keyStr, err := evaluateSelector(doc, selector)
+		if err != nil {
+			return nil, fmt.Errorf("evaluating selector on destination document: %w", err)
+		}
+		if _, exists := dstMap[keyStr]; exists {
+			return nil, fmt.Errorf("selector %q matches multiple destination documents", keyStr)
+		}
+		dstMap[keyStr] = doc
+		dstKeys = append(dstKeys, keyStr)
 	}
 
-	var finalResult any
-	switch result2 := result.(type) {
-	case map[string]any:
-		result2["$match"] = map[string]any{}
-		finalResult = result2
+	for _, keyStr := range dstKeys {
+		dstDoc := dstMap[keyStr]
+		srcDoc, found := srcMap[keyStr]
+		if !found {
+			switch d := dstDoc.Data.(type) {
+			case map[string]any:
+				d["$match"] = nil
+				results = append(results, d)
+			default:
+				results = append(results, dstDoc.Data)
+			}
+		} else {
+			result, err := diff(dstDoc.Data, srcDoc.Data)
+			if err != nil {
+				return nil, err
+			}
+			result = addMatchDirective(result)
+			results = append(results, result)
+		}
+	}
 
-	case []any:
-		result2 = append([]any{
-			map[string]any{
-				"$match": map[string]any{},
-			},
-		}, result2...)
-		finalResult = result2
+	for _, keyStr := range srcKeys {
+		srcDoc := srcMap[keyStr]
+		if _, found := dstMap[keyStr]; !found {
+			matchValue := map[string]any{}
+			if selector != "" {
+				parts := strings.Split(selector, ".")
+				val, _ := getPath(srcDoc.Data, parts)
+				setPath(matchValue, parts, val)
+			}
 
-	case nil:
-
-		finalResult = map[string]any{"$match": map[string]any{}}
-
-	default:
-		finalResult = result
+			result := map[string]any{
+				"$match":  matchValue,
+				"$output": false,
+			}
+			results = append(results, result)
+		}
 	}
 
 	ft, err := determineFormat(format, paths...)
 	if err != nil {
 		return nil, err
 	}
-	return ft.MarshalStream([]any{finalResult})
+	return ft.MarshalStream(results)
 }
 
 func diff(dst, src any) (any, error) {
@@ -210,7 +241,6 @@ outer2:
 			}
 			ret = append(ret, del)
 		} else {
-			// Give up patching individual entries, replace the whole list
 			dst = slices.Clone(dst)
 			dst = append(dst, map[string]any{"$replace": true})
 			return dst, nil
@@ -222,4 +252,72 @@ outer2:
 	}
 
 	return ret, nil
+}
+
+func evaluateSelector(doc *document.Document, selector string) (string, error) {
+	if selector == "" {
+		return "", nil
+	}
+	parts := strings.Split(selector, ".")
+	val, err := getPath(doc.Data, parts)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprint(val), nil
+}
+
+func getPath(data any, parts []string) (any, error) {
+	if len(parts) == 0 {
+		return data, nil
+	}
+
+	switch obj := data.(type) {
+	case map[string]any:
+		val, found := obj[parts[0]]
+		if !found {
+			return nil, fmt.Errorf("path not found: %v", parts[0])
+		}
+		return getPath(val, parts[1:])
+	default:
+		return nil, fmt.Errorf("cannot traverse path in %T", data)
+	}
+}
+
+func setPath(data map[string]any, parts []string, value any) {
+	if len(parts) == 0 {
+		return
+	}
+
+	if len(parts) == 1 {
+		data[parts[0]] = value
+		return
+	}
+
+	if _, exists := data[parts[0]]; !exists {
+		data[parts[0]] = map[string]any{}
+	}
+
+	if next, ok := data[parts[0]].(map[string]any); ok {
+		setPath(next, parts[1:], value)
+	}
+}
+
+func addMatchDirective(result any) any {
+	switch r := result.(type) {
+	case map[string]any:
+		if _, hasMatch := r["$match"]; !hasMatch {
+			r["$match"] = map[string]any{}
+		}
+		return r
+	case []any:
+		return append([]any{
+			map[string]any{
+				"$match": map[string]any{},
+			},
+		}, r...)
+	case nil:
+		return map[string]any{"$match": map[string]any{}}
+	default:
+		return result
+	}
 }

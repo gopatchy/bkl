@@ -167,23 +167,31 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 			return nil, fmt.Errorf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		result, err = client.CallTool(ctx, "intersect", map[string]any{
+		args := map[string]any{
 			"files":      strings.Join(testCase.Eval, ","),
 			"format":     format,
 			"fileSystem": fileSystem,
-		})
+		}
+		if testCase.Selector != "" {
+			args["selector"] = testCase.Selector
+		}
+		result, err = client.CallTool(ctx, "intersect", args)
 
 	case testCase.Diff:
 		if len(testCase.Eval) != 2 {
 			return nil, fmt.Errorf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		result, err = client.CallTool(ctx, "diff", map[string]any{
+		args := map[string]any{
 			"baseFile":   testCase.Eval[0],
 			"targetFile": testCase.Eval[1],
 			"format":     format,
 			"fileSystem": fileSystem,
-		})
+		}
+		if testCase.Selector != "" {
+			args["selector"] = testCase.Selector
+		}
+		result, err = client.CallTool(ctx, "diff", args)
 
 	default:
 		args := map[string]any{
