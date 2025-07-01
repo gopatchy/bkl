@@ -92,6 +92,9 @@ func main() {
 		mcp.WithString("workingDir",
 			mcp.Description("Working directory for file operations (default: current directory)"),
 		),
+		mcp.WithString("outputPath",
+			mcp.Description("Optional path to write the output to (in addition to returning it)"),
+		),
 	)
 	mcpServer.AddTool(evaluateTool, evaluateHandler)
 
@@ -110,6 +113,9 @@ func main() {
 		mcp.WithString("workingDir",
 			mcp.Description("Working directory for file operations (default: current directory)"),
 		),
+		mcp.WithString("outputPath",
+			mcp.Description("Optional path to write the output to (in addition to returning it)"),
+		),
 	)
 	mcpServer.AddTool(diffTool, diffHandler)
 
@@ -124,6 +130,9 @@ func main() {
 		mcp.WithString("workingDir",
 			mcp.Description("Working directory for file operations (default: current directory)"),
 		),
+		mcp.WithString("outputPath",
+			mcp.Description("Optional path to write the output to (in addition to returning it)"),
+		),
 	)
 	mcpServer.AddTool(intersectTool, intersectHandler)
 
@@ -137,6 +146,9 @@ func main() {
 		fileSystemParam,
 		mcp.WithString("workingDir",
 			mcp.Description("Working directory for file operations (default: current directory)"),
+		),
+		mcp.WithString("outputPath",
+			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
 	)
 	mcpServer.AddTool(requiredTool, requiredHandler)
@@ -641,6 +653,13 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}
 
+	outputPath := parseOptionalString(args, "outputPath", "")
+	if outputPath != "" {
+		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+		}
+	}
+
 	response := map[string]any{
 		"files":     files,
 		"format":    format,
@@ -650,6 +669,10 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	if len(env) > 0 {
 		response["environment"] = env
+	}
+
+	if outputPath != "" {
+		response["outputPath"] = outputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -703,12 +726,23 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
 
+	outputPath := parseOptionalString(args, "outputPath", "")
+	if outputPath != "" {
+		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+		}
+	}
+
 	response := map[string]any{
 		"baseFile":   baseFile,
 		"targetFile": targetFile,
 		"format":     format,
 		"output":     string(output),
 		"operation":  "diff",
+	}
+
+	if outputPath != "" {
+		response["outputPath"] = outputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -770,11 +804,22 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
 
+	outputPath := parseOptionalString(args, "outputPath", "")
+	if outputPath != "" {
+		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+		}
+	}
+
 	response := map[string]any{
 		"files":     files,
 		"format":    format,
 		"output":    string(output),
 		"operation": "intersect",
+	}
+
+	if outputPath != "" {
+		response["outputPath"] = outputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -823,11 +868,22 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
 
+	outputPath := parseOptionalString(args, "outputPath", "")
+	if outputPath != "" {
+		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+		}
+	}
+
 	response := map[string]any{
 		"file":      file,
 		"format":    format,
 		"output":    string(output),
 		"operation": "required",
+	}
+
+	if outputPath != "" {
+		response["outputPath"] = outputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
