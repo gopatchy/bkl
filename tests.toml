@@ -1870,8 +1870,8 @@ value: hello
 type: Type is true
 value: true
 ---
-type: Type is 3.140000104904175
-value: 3.140000104904175
+type: Type is 3.14
+value: 3.14
 '''
 files."a.yaml" = '''
 $repeat: [42, "hello", true, 3.14]

@@ -126,6 +126,7 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 			return strconv.ParseBool(node.Value)
 
 		case "!!int":
+			// TODO: Get away from 32-bit ints entirely
 			v, err := strconv.ParseInt(node.Value, 10, 32)
 			if err == nil {
 				return int(v), nil
@@ -134,11 +135,6 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 			return strconv.ParseInt(node.Value, 10, 64)
 
 		case "!!float":
-			v, err := strconv.ParseFloat(node.Value, 32)
-			if err == nil {
-				return v, nil
-			}
-
 			return strconv.ParseFloat(node.Value, 64)
 
 		case "!!null":
