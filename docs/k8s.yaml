@@ -1171,6 +1171,22 @@
                 $value: postgresql://produser:prodpass@prod-db-cluster.rds.amazonaws.com:5432/proddb
                 $encode: base64
             highlights: ["$encode: base64"]
+    - content: |
+        <p>Remove duplication between string fields with <highlight>$""</highlight>.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              labels:
+                environment: prod
+              namespace: api-prod
+          - languages: [[0, "yaml"]]
+            code: |
+              labels:
+                environment: prod
+              namespace: $"api-{labels.environment}"
+            highlights: ['$"api-{labels.environment}"']
 - id: plan
   title: Target layout
   items:

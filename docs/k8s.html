@@ -2257,6 +2257,54 @@ hunk-header {
 
 
 
+<p><p>Remove duplication between string fields with <highlight>$""</highlight>.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>labels</key>:
+  <key>environment</key>: <string>prod</string>
+<key>namespace</key>: <string>api-prod</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>labels</key>:
+  <key>environment</key>: <string>prod</string>
+<key>namespace</key>: <highlight><string>$"api-{labels.environment}"</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
 </section>
 
 <section id="plan">
