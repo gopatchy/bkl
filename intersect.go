@@ -72,11 +72,15 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 				seen[keyStr] = true
 
 				if existing, found := tracking[keyStr]; found {
-					result, err := intersect(existing, doc.Data)
+					result, include, err := intersect(existing, doc.Data)
 					if err != nil {
 						return nil, err
 					}
-					tracking[keyStr] = result
+					if include {
+						tracking[keyStr] = result
+					} else {
+						delete(tracking, keyStr)
+					}
 				}
 			}
 
@@ -90,7 +94,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 
 	results := []any{}
 	for _, key := range keyOrder {
-		if data, exists := tracking[key]; exists && data != nil {
+		if data, exists := tracking[key]; exists {
 			results = append(results, data)
 		}
 	}
@@ -102,9 +106,13 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 	return ft.MarshalStream(results)
 }
 
-func intersect(a, b any) (any, error) {
-	if b == nil {
-		return nil, nil
+func intersect(a, b any) (any, bool, error) {
+	if a == nil && b == nil {
+		return nil, true, nil
+	}
+
+	if a == nil || b == nil {
+		return nil, false, nil
 	}
 
 	switch a2 := a.(type) {
@@ -114,29 +122,26 @@ func intersect(a, b any) (any, error) {
 	case []any:
 		return intersectList(a2, b)
 
-	case nil:
-		return nil, nil
-
 	default:
 		if a == b {
-			return a, nil
+			return a, true, nil
 		}
 
-		return nil, nil
+		return nil, false, nil
 	}
 }
 
-func intersectMap(a map[string]any, b any) (any, error) {
+func intersectMap(a map[string]any, b any) (map[string]any, bool, error) {
 	switch b2 := b.(type) {
 	case map[string]any:
 		return intersectMapMap(a, b2)
 
 	default:
-		return nil, nil
+		return nil, false, nil
 	}
 }
 
-func intersectMapMap(a, b map[string]any) (map[string]any, error) {
+func intersectMapMap(a, b map[string]any) (map[string]any, bool, error) {
 	ret := map[string]any{}
 
 	for k, v := range a {
@@ -151,32 +156,34 @@ func intersectMapMap(a, b map[string]any) (map[string]any, error) {
 			continue
 		}
 
-		v2, err := intersect(v, v2)
+		result, include, err := intersect(v, v2)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
 
-		if v2 == nil {
-			continue
+		if include {
+			ret[k] = result
 		}
-
-		ret[k] = v2
 	}
 
-	return ret, nil
+	if len(ret) == 0 {
+		return nil, false, nil
+	}
+
+	return ret, true, nil
 }
 
-func intersectList(a []any, b any) (any, error) {
+func intersectList(a []any, b any) ([]any, bool, error) {
 	switch b2 := b.(type) {
 	case []any:
 		return intersectListList(a, b2)
 
 	default:
-		return nil, nil
+		return nil, false, nil
 	}
 }
 
-func intersectListList(a, b []any) ([]any, error) {
+func intersectListList(a, b []any) ([]any, bool, error) {
 	ret := []any{}
 
 	for _, v1 := range a {
@@ -187,7 +194,9 @@ func intersectListList(a, b []any) ([]any, error) {
 		}
 	}
 
-	// Empty list is valid, no $required marker
+	if len(ret) == 0 {
+		return nil, false, nil
+	}
 
-	return ret, nil
+	return ret, true, nil
 }
