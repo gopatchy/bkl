@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"io/fs"
 	"sort"
-	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/output"
+	"github.com/gopatchy/bkl/internal/path"
 	"github.com/gopatchy/bkl/internal/process"
 	"github.com/gopatchy/bkl/pkg/errors"
 	"github.com/gopatchy/bkl/pkg/log"
@@ -214,33 +214,10 @@ func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, err
 // sortOutputsByPath sorts the outputs slice by the value at the specified path
 func sortOutputsByPath(outputs []any, sortPath string) {
 	sort.SliceStable(outputs, func(i, j int) bool {
-		valI := getPathString(outputs[i], sortPath)
-		valJ := getPathString(outputs[j], sortPath)
+		valI := path.GetString(outputs[i], sortPath)
+		valJ := path.GetString(outputs[j], sortPath)
 		return valI < valJ
 	})
 }
 
 // getPathString retrieves a value from a nested structure and converts it to string
-func getPathString(data any, path string) string {
-	if path == "" {
-		return ""
-	}
-
-	parts := strings.Split(path, ".")
-	current := data
-
-	for _, part := range parts {
-		switch obj := current.(type) {
-		case map[string]any:
-			val, found := obj[part]
-			if !found {
-				return ""
-			}
-			current = val
-		default:
-			return ""
-		}
-	}
-
-	return fmt.Sprint(current)
-}

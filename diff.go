@@ -6,12 +6,12 @@ import (
 	"maps"
 	"reflect"
 	"slices"
-	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/merge"
+	"github.com/gopatchy/bkl/internal/path"
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
@@ -111,9 +111,9 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 
 			matchValue := map[string]any{}
 			if selector != "" {
-				parts := strings.Split(selector, ".")
-				val, _ := getPath(srcDoc.Data, parts)
-				setPath(matchValue, parts, val)
+				parts := path.SplitPath(selector)
+				val, _ := path.GetNoError(srcDoc.Data, parts)
+				path.Set(matchValue, parts, val)
 			}
 			result = addMatchDirective(result, matchValue)
 			results = append(results, result)
@@ -125,9 +125,9 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		if _, found := dstMap[keyStr]; !found {
 			matchValue := map[string]any{}
 			if selector != "" {
-				parts := strings.Split(selector, ".")
-				val, _ := getPath(srcDoc.Data, parts)
-				setPath(matchValue, parts, val)
+				parts := path.SplitPath(selector)
+				val, _ := path.GetNoError(srcDoc.Data, parts)
+				path.Set(matchValue, parts, val)
 			}
 
 			result := map[string]any{
@@ -265,48 +265,12 @@ func evaluateSelector(doc *document.Document, selector string) (string, error) {
 	if selector == "" {
 		return "", nil
 	}
-	parts := strings.Split(selector, ".")
-	val, err := getPath(doc.Data, parts)
+	parts := path.SplitPath(selector)
+	val, err := path.GetNoError(doc.Data, parts)
 	if err != nil {
 		return "", err
 	}
 	return fmt.Sprint(val), nil
-}
-
-func getPath(data any, parts []string) (any, error) {
-	if len(parts) == 0 {
-		return data, nil
-	}
-
-	switch obj := data.(type) {
-	case map[string]any:
-		val, found := obj[parts[0]]
-		if !found {
-			return nil, fmt.Errorf("path not found: %v", parts[0])
-		}
-		return getPath(val, parts[1:])
-	default:
-		return nil, fmt.Errorf("cannot traverse path in %T", data)
-	}
-}
-
-func setPath(data map[string]any, parts []string, value any) {
-	if len(parts) == 0 {
-		return
-	}
-
-	if len(parts) == 1 {
-		data[parts[0]] = value
-		return
-	}
-
-	if _, exists := data[parts[0]]; !exists {
-		data[parts[0]] = map[string]any{}
-	}
-
-	if next, ok := data[parts[0]].(map[string]any); ok {
-		setPath(next, parts[1:], value)
-	}
 }
 
 func addMatchDirective(result any, matchValue map[string]any) any {

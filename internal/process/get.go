@@ -2,10 +2,9 @@ package process
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
-
+	pathutil "github.com/gopatchy/bkl/internal/path"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
 	"gopkg.in/yaml.v3"
@@ -69,7 +68,7 @@ func getPathFromList(obj any, docs []*document.Document, path []any) (any, error
 		return nil, fmt.Errorf("%v: %w", path, err)
 	}
 
-	return getPath(obj, path2)
+	return pathutil.Get(obj, path2)
 }
 
 func getPathFromString(obj any, docs []*document.Document, path string) (any, error) {
@@ -81,33 +80,14 @@ func getPathFromString(obj any, docs []*document.Document, path string) (any, er
 
 	switch path3 := path2.(type) {
 	case string:
-		parts := strings.Split(path3, ".")
-		return getPath(obj, parts)
+		parts := pathutil.SplitPath(path3)
+		return pathutil.Get(obj, parts)
 
 	case []any:
 		return getPathFromList(obj, docs, path3)
 
 	default:
 		return nil, fmt.Errorf("%T as reference: %w", path2, errors.ErrInvalidType)
-	}
-}
-
-func getPath(obj any, parts []string) (any, error) {
-	if len(parts) == 0 {
-		return obj, nil
-	}
-
-	switch obj2 := obj.(type) {
-	case map[string]any:
-		val, found := obj2[parts[0]]
-		if !found {
-			return nil, fmt.Errorf("%v: %w", parts, errors.ErrRefNotFound)
-		}
-
-		return getPath(val, parts[1:])
-
-	default:
-		return nil, fmt.Errorf("%v: %w", parts, errors.ErrRefNotFound)
 	}
 }
 
