@@ -146,7 +146,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
     - Results ranked by relevance with content previews and URL fragments
     - Supports multiple keywords with enhanced scoring for matches
   - `get` - Get full content of a documentation section or test
-    - Takes `type` ("documentation" or "test") and `id` (section ID or test name)
+    - Takes `type` ("documentation" or "test"), `id` (section ID or test name), and optional `source` (for documentation only)
+    - `source` parameter filters documentation by source file (e.g., "index", "k8s")
     - Returns complete structured content including all details
   - `evaluate` - Evaluate bkl files with given environment and return results
     - Takes `files` (comma-separated list), `format`, `environment`, `fileSystem`, `rootPath`, `workingDir`
@@ -219,7 +220,8 @@ bkl is a flexible configuration templating language that simplifies configuratio
     - Results ranked by relevance with content previews and URL fragments
     - Supports multiple keywords with enhanced scoring for matches
   - `get` - Get full content of a documentation section or test
-    - Takes `type` ("documentation" or "test") and `id` (section ID or test name)
+    - Takes `type` ("documentation" or "test"), `id` (section ID or test name), and optional `source` (for documentation only)
+    - `source` parameter filters documentation by source file (e.g., "index", "k8s")
     - Returns complete structured content including all details
   - Uses embedded `tests.toml` and `docs/sections.yaml` for fast access
 - **language-server** (Model Context Protocol server for code analysis):

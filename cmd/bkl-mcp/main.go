@@ -75,6 +75,9 @@ func main() {
 			mcp.Required(),
 			mcp.Description("ID of documentation section or name of test"),
 		),
+		mcp.WithString("source",
+			mcp.Description("Source file for documentation (e.g., 'index', 'k8s'). Only applies to type='documentation'"),
+		),
 	)
 	mcpServer.AddTool(getTool, getHandler)
 
@@ -408,16 +411,28 @@ func getHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
+	args, ok := request.Params.Arguments.(map[string]any)
+	if !ok {
+		args = map[string]any{}
+	}
+	source := parseOptionalString(args, "source", "")
+
 	switch contentType {
 	case "documentation":
 		for _, section := range sections {
 			if section.ID == id {
+				if source != "" && section.Source != source {
+					continue
+				}
 				sectionJSON, err := json.MarshalIndent(section, "", "  ")
 				if err != nil {
 					return mcp.NewToolResultError(err.Error()), nil
 				}
 				return mcp.NewToolResultText(string(sectionJSON)), nil
 			}
+		}
+		if source != "" {
+			return mcp.NewToolResultText(fmt.Sprintf("Documentation section '%s' not found in source '%s'", id, source)), nil
 		}
 		return mcp.NewToolResultText(fmt.Sprintf("Documentation section '%s' not found", id)), nil
 
