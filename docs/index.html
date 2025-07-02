@@ -4843,7 +4843,7 @@ hunk-header {
 
 
 
-<p>Any fields that exist in all upper layers but have different values will be marked <highlight>$required</highlight>.
+<p>Fields that exist in all inputs with the same value are included in the result. Fields with different values are omitted.
 </p>
 
 
@@ -4897,8 +4897,7 @@ hunk-header {
 <div class="code-container">
 
 
-<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
-<key>b</key>: <string>$required</string></bkl-code>
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number></bkl-code>
 
 </div>
 

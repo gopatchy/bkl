@@ -3502,9 +3502,7 @@ description = "Test intersect of lists with no common elements"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-expected = '''
-- $required
-'''
+expected = '[]'
 files."a.yaml" = '''
 - a: 1
 '''
@@ -3519,7 +3517,6 @@ format = "yaml"
 intersect = true
 expected = '''
 a: 1
-b: $required
 '''
 files."a.yaml" = '''
 a: 1
@@ -3579,7 +3576,7 @@ description = "Test intersect with different types"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-expected = "$required"
+expected = ""
 [intersectDifferentTypes.files]
 "a.yaml" = "x: 1"
 "b.yaml" = '"string value"'
@@ -3590,7 +3587,7 @@ description = "Test intersect with list vs map"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-expected = "$required"
+expected = ""
 [intersectListVsMap.files]
 "a.yaml" = '''
 - a: 1
@@ -3602,7 +3599,7 @@ description = "Test intersect with primitive vs list"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-expected = "$required"
+expected = ""
 [intersectPrimitiveVsList.files]
 "a.yaml" = '"hello"'
 "b.yaml" = '''
@@ -3614,7 +3611,7 @@ description = "Test intersect with primitive vs map"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-expected = "$required"
+expected = ""
 [intersectPrimitiveVsMap.files]
 "a.yaml" = '"hello"'
 "b.yaml" = "x: 1"
@@ -5364,7 +5361,6 @@ description = "Test intersect with different types skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = ""
 [intersectSkipRequiredDifferentTypes.files]
 "a.yaml" = "x: 1"
@@ -5375,7 +5371,6 @@ description = "Test intersect with map value mismatch skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 x: 1
 '''
@@ -5394,7 +5389,6 @@ description = "Test intersect with no common list elements skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 items: []
 '''
@@ -5415,7 +5409,6 @@ description = "Test intersect with list vs map skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"  
 intersect = true
-skipRequired = true
 expected = '''
 {}
 '''
@@ -5437,7 +5430,6 @@ format = "yaml"
 intersect = true
 expected = '''
 x: {}
-"y": $required
 '''
 [intersectEmptyObjects.files]
 "a.yaml" = '''
@@ -5454,7 +5446,6 @@ description = "Test intersect with empty objects skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 x: {}
 '''
@@ -5475,7 +5466,6 @@ format = "yaml"
 intersect = true
 expected = '''
 x: null
-"y": $required
 '''
 [intersectNullValues.files]
 "a.yaml" = '''
@@ -5492,7 +5482,6 @@ description = "Test intersect with null values skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 x: null
 '''
@@ -5528,7 +5517,6 @@ description = "Test intersect empty object vs non-empty skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 x: {}
 '''
@@ -5577,7 +5565,6 @@ description = "Test intersect with only empty objects skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 {}
 '''
@@ -5590,7 +5577,6 @@ description = "Test intersect with no common fields skipping $required"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-skipRequired = true
 expected = '''
 {}
 '''

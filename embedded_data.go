@@ -18,21 +18,20 @@ var sectionsData []byte
 var k8sData []byte
 
 type TestCase struct {
-	Description  string            `toml:"description"`
-	Eval         []string          `toml:"eval"`
-	Format       string            `toml:"format"`
-	Expected     string            `toml:"expected,omitempty"`
-	Files        map[string]string `toml:"files"`
-	Errors       []string          `toml:"errors,omitempty"`
-	RootPath     string            `toml:"rootPath,omitempty"`
-	Env          map[string]string `toml:"env,omitempty"`
-	Diff         bool              `toml:"diff,omitempty"`
-	Intersect    bool              `toml:"intersect,omitempty"`
-	Required     bool              `toml:"required,omitempty"`
-	Benchmark    bool              `toml:"benchmark,omitempty"`
-	Selector     string            `toml:"selector,omitempty"`
-	SkipRequired bool              `toml:"skipRequired,omitempty"`
-	SortPath     string            `toml:"sortPath,omitempty"`
+	Description string            `toml:"description"`
+	Eval        []string          `toml:"eval"`
+	Format      string            `toml:"format"`
+	Expected    string            `toml:"expected,omitempty"`
+	Files       map[string]string `toml:"files"`
+	Errors      []string          `toml:"errors,omitempty"`
+	RootPath    string            `toml:"rootPath,omitempty"`
+	Env         map[string]string `toml:"env,omitempty"`
+	Diff        bool              `toml:"diff,omitempty"`
+	Intersect   bool              `toml:"intersect,omitempty"`
+	Required    bool              `toml:"required,omitempty"`
+	Benchmark   bool              `toml:"benchmark,omitempty"`
+	Selector    string            `toml:"selector,omitempty"`
+	SortPath    string            `toml:"sortPath,omitempty"`
 }
 
 type DocSection struct {

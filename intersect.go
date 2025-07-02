@@ -12,7 +12,7 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, selector string, format *string, skipRequired bool, formatPaths ...*string) ([]byte, error) {
+func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, selector string, format *string, formatPaths ...*string) ([]byte, error) {
 	preparedPaths, err := utils.PreparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 				seen[keyStr] = true
 
 				if existing, found := tracking[keyStr]; found {
-					result, err := intersect(existing, doc.Data, skipRequired)
+					result, err := intersect(existing, doc.Data)
 					if err != nil {
 						return nil, err
 					}
@@ -102,17 +102,17 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 	return ft.MarshalStream(results)
 }
 
-func intersect(a, b any, skipRequired bool) (any, error) {
+func intersect(a, b any) (any, error) {
 	if b == nil {
 		return nil, nil
 	}
 
 	switch a2 := a.(type) {
 	case map[string]any:
-		return intersectMap(a2, b, skipRequired)
+		return intersectMap(a2, b)
 
 	case []any:
-		return intersectList(a2, b, skipRequired)
+		return intersectList(a2, b)
 
 	case nil:
 		return nil, nil
@@ -122,27 +122,21 @@ func intersect(a, b any, skipRequired bool) (any, error) {
 			return a, nil
 		}
 
-		if skipRequired {
-			return nil, nil
-		}
-		return "$required", nil
+		return nil, nil
 	}
 }
 
-func intersectMap(a map[string]any, b any, skipRequired bool) (any, error) {
+func intersectMap(a map[string]any, b any) (any, error) {
 	switch b2 := b.(type) {
 	case map[string]any:
-		return intersectMapMap(a, b2, skipRequired)
+		return intersectMapMap(a, b2)
 
 	default:
-		if skipRequired {
-			return nil, nil
-		}
-		return "$required", nil
+		return nil, nil
 	}
 }
 
-func intersectMapMap(a, b map[string]any, skipRequired bool) (map[string]any, error) {
+func intersectMapMap(a, b map[string]any) (map[string]any, error) {
 	ret := map[string]any{}
 
 	for k, v := range a {
@@ -157,7 +151,7 @@ func intersectMapMap(a, b map[string]any, skipRequired bool) (map[string]any, er
 			continue
 		}
 
-		v2, err := intersect(v, v2, skipRequired)
+		v2, err := intersect(v, v2)
 		if err != nil {
 			return nil, err
 		}
@@ -172,20 +166,17 @@ func intersectMapMap(a, b map[string]any, skipRequired bool) (map[string]any, er
 	return ret, nil
 }
 
-func intersectList(a []any, b any, skipRequired bool) (any, error) {
+func intersectList(a []any, b any) (any, error) {
 	switch b2 := b.(type) {
 	case []any:
-		return intersectListList(a, b2, skipRequired)
+		return intersectListList(a, b2)
 
 	default:
-		if skipRequired {
-			return nil, nil
-		}
-		return "$required", nil
+		return nil, nil
 	}
 }
 
-func intersectListList(a, b []any, skipRequired bool) ([]any, error) {
+func intersectListList(a, b []any) ([]any, error) {
 	ret := []any{}
 
 	for _, v1 := range a {
@@ -196,9 +187,7 @@ func intersectListList(a, b []any, skipRequired bool) ([]any, error) {
 		}
 	}
 
-	if len(ret) == 0 && !skipRequired {
-		ret = append(ret, "$required")
-	}
+	// Empty list is valid, no $required marker
 
 	return ret, nil
 }

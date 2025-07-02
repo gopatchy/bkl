@@ -1538,7 +1538,7 @@
     - content: |
         <highlight>bkli</highlight> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <highlight><a href="#bkld">bkld</a></highlight>, it automates splitting existing configurations into layers.
     - content: |
-        Any fields that exist in all upper layers but have different values will be marked <highlight>$required</highlight>.
+        Fields that exist in all inputs with the same value are included in the result. Fields with different values are omitted.
     - example:
         operation: intersect
         layers:
@@ -1555,7 +1555,6 @@
         result:
           code: |
             a: 1
-            b: $required
           languages: [[0, "yaml"]]
     - example:
         operation: intersect

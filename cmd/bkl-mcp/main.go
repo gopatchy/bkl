@@ -811,7 +811,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		format = "yaml"
 	}
 	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, selector, &format, false)
+	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, selector, &format)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
