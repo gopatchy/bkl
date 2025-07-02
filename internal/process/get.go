@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gopatchy/bkl/internal/document"
-	pathutil "github.com/gopatchy/bkl/internal/path"
+	pathutil "github.com/gopatchy/bkl/internal/pathutil"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
 	"gopkg.in/yaml.v3"

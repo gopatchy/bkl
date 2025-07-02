@@ -12,7 +12,7 @@ import (
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/normalize"
-	pathutil "github.com/gopatchy/bkl/internal/path"
+	pathutil "github.com/gopatchy/bkl/internal/pathutil"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
 )
@@ -440,6 +440,7 @@ func process2StringInterp(obj string, mergeFrom *document.Document, mergeFromDoc
 
 	return obj, nil
 }
+
 func process2ValuesMap(obj map[string]any, nameKey string) ([]any, error) {
 	vals := []any{}
 

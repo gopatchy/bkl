@@ -10,7 +10,7 @@ import (
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/output"
-	"github.com/gopatchy/bkl/internal/path"
+	"github.com/gopatchy/bkl/internal/pathutil"
 	"github.com/gopatchy/bkl/internal/process"
 	"github.com/gopatchy/bkl/pkg/errors"
 	"github.com/gopatchy/bkl/pkg/log"
@@ -214,8 +214,8 @@ func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, err
 // sortOutputsByPath sorts the outputs slice by the value at the specified path
 func sortOutputsByPath(outputs []any, sortPath string) {
 	sort.SliceStable(outputs, func(i, j int) bool {
-		valI := path.GetString(outputs[i], sortPath)
-		valJ := path.GetString(outputs[j], sortPath)
+		valI := pathutil.GetString(outputs[i], sortPath)
+		valJ := pathutil.GetString(outputs[j], sortPath)
 		return valI < valJ
 	})
 }

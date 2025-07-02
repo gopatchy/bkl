@@ -11,7 +11,7 @@ import (
 	"github.com/gopatchy/bkl/internal/file"
 	"github.com/gopatchy/bkl/internal/fsys"
 	"github.com/gopatchy/bkl/internal/merge"
-	"github.com/gopatchy/bkl/internal/path"
+	"github.com/gopatchy/bkl/internal/pathutil"
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
@@ -111,9 +111,9 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 
 			matchValue := map[string]any{}
 			if selector != "" {
-				parts := path.SplitPath(selector)
-				val, _ := path.GetNoError(srcDoc.Data, parts)
-				path.Set(matchValue, parts, val)
+				parts := pathutil.SplitPath(selector)
+				val, _ := pathutil.GetNoError(srcDoc.Data, parts)
+				pathutil.Set(matchValue, parts, val)
 			}
 			result = addMatchDirective(result, matchValue)
 			results = append(results, result)
@@ -125,9 +125,9 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 		if _, found := dstMap[keyStr]; !found {
 			matchValue := map[string]any{}
 			if selector != "" {
-				parts := path.SplitPath(selector)
-				val, _ := path.GetNoError(srcDoc.Data, parts)
-				path.Set(matchValue, parts, val)
+				parts := pathutil.SplitPath(selector)
+				val, _ := pathutil.GetNoError(srcDoc.Data, parts)
+				pathutil.Set(matchValue, parts, val)
 			}
 
 			result := map[string]any{
@@ -265,8 +265,8 @@ func evaluateSelector(doc *document.Document, selector string) (string, error) {
 	if selector == "" {
 		return "", nil
 	}
-	parts := path.SplitPath(selector)
-	val, err := path.GetNoError(doc.Data, parts)
+	parts := pathutil.SplitPath(selector)
+	val, err := pathutil.GetNoError(doc.Data, parts)
 	if err != nil {
 		return "", err
 	}
