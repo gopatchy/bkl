@@ -1917,7 +1917,7 @@ hunk-header {
 
 
 
-<p><p>Make a copy of your original configs into a prep directory so we edit and compare:</p>
+<p><p>Make a copy of your original configs into a prep directory for editing and comparison:</p>
 </p>
 
 
@@ -1935,16 +1935,9 @@ hunk-header {
 
 
 
-<p><p>We'll transform patterns in the prep configs, using bkl features to make them easier to work with.</p>
+<p><p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
 
-<p>Convert lists of items to maps with names, then reverses it using <highlight>$encode: values</highlight>. This allows them to be overriden by upper layers using that name as a reference.</p>
-</p>
-
-
-
-
-
-<p><p>When the list items need to contain the key (e.g. <highlight>ports: name: http</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
+<p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers.</p>
 </p>
 
 
@@ -1962,13 +1955,9 @@ hunk-header {
 <div class="code-container">
 
 <bkl-code class="code-unlabeled"><key>ports</key>:
-  - <key>name</key>: <string>http</string>
-    <key>port</key>: <number>80</number>
-    <key>targetPort</key>: <number>8080</number>
+  - <key>port</key>: <number>80</number>
     <key>protocol</key>: <string>TCP</string>
-  - <key>name</key>: <string>https</string>
-    <key>port</key>: <number>443</number>
-    <key>targetPort</key>: <number>8081</number>
+  - <key>port</key>: <number>443</number>
     <key>protocol</key>: <string>TCP</string></bkl-code>
 </div>
 
@@ -1984,15 +1973,278 @@ hunk-header {
 <div class="code-container">
 
 <bkl-code class="code-unlabeled"><key>ports</key>:
-  <key>http</key>:
+  <highlight><key>http</key>:</highlight>
     <key>port</key>: <number>80</number>
-    <key>targetPort</key>: <number>8080</number>
     <key>protocol</key>: <string>TCP</string>
-  <key>https</key>:
+  <highlight><key>https</key>:</highlight>
     <key>port</key>: <number>443</number>
-    <key>targetPort</key>: <number>8081</number>
     <key>protocol</key>: <string>TCP</string>
-<key>$encode</key>: <string>values:name</string></bkl-code>
+  <highlight><key>$encode</key>: <string>values</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+<p><p>When the list items need to contain the key (e.g. <highlight>ports: { name: http }</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  - <highlight><key>name</key>: <string>http</string></highlight>
+    <key>port</key>: <number>80</number>
+    <key>protocol</key>: <string>TCP</string>
+  - <highlight><highlight><key>name</key>: <string>http</highlight>s</string></highlight>
+    <key>port</key>: <number>443</number>
+    <key>protocol</key>: <string>TCP</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  <highlight><key>http</key>:</highlight>
+    <key>port</key>: <number>80</number>
+    <key>protocol</key>: <string>TCP</string>
+  <highlight><key>https</key>:</highlight>
+    <key>port</key>: <number>443</number>
+    <key>protocol</key>: <string>TCP</string>
+  <highlight><key>$encode</key>: <string>values:name</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+<p><p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>args</key>:
+  - <string>--config=/app/config/app.properties</string>
+  - <string>--feature=auth</string>
+  - <string>--feature=metrics</string>
+  - <string>--feature=rate-limiting</string>
+  - <string>--log-format=json</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>args</key>:
+  <key>config</key>: <string>/app/config/app.properties</string>
+  <key>feature</key>:
+    - <string>auth</string>
+    - <string>metrics</string>
+    - <string>rate-limiting</string>
+  <key>log-format</key>: <string>json</string>
+  <highlight><key>$encode</key>: <string>flags</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+<p><p>Convert embedded JSON/YAML strings to structures with <highlight>$encode: json-pretty</highlight> or <highlight>$encode: yaml</highlight>.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>app.config.json</key>: <string>|</string>
+  <string>{</string>
+    <string><string>"apiUrl"</string>: "http://api-service",</string>
+    <string><string>"debugMode"</string>: true,</string>
+    <string><string>"environment"</string>: "development",</string>
+    <string><string>"features"</string>: {</string>
+      <string><string>"analytics"</string>: false,</string>
+      <string><string>"caching"</string>: false</string>
+    <string>}</string>
+  <string>}</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>app.config.json</key>:
+  <key>apiUrl</key>: <string>http://api-service</string>
+  <key>debugMode</key>: <bool>true</bool>
+  <key>environment</key>: <string>development</string>
+  <key>features</key>:
+    <key>analytics</key>: <bool>false</bool>
+    <key>caching</key>: <bool>false</bool>
+  <highlight><key>$encode</key>: <string>json-pretty</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>prometheus.yml</key>: <string>|</string>
+  <key>global</key>:
+    <key>evaluation_interval</key>: <string>15s</string>
+    <key>scrape_interval</key>: <string>15s</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>prometheus.yml</key>:
+  <key>global</key>:
+    <key>evaluation_interval</key>: <string>15s</string>
+    <key>scrape_interval</key>: <string>15s</string>
+  <highlight><key>$encode</key>: <string>yaml</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+<p><p>Convert embedded base64 strings to <highlight>$encode: base64</highlight>.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>database-url</key>: <string>cG9zdGdyZXNxbDovL3Byb2R1c2VyOnByb2RwYXNzQHByb2QtZGItY2x1c3Rlci5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3Byb2RkYg==</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>database-url</key>:
+  <key>$value</key>: <string>postgresql://produser:prodpass@prod-db-cluster.rds.amazonaws.com:5432/proddb</string>
+  <highlight><key>$encode</key>: <string>base64</string></highlight></bkl-code>
 </div>
 
 

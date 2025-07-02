@@ -1032,18 +1032,38 @@
   title: Prep
   items:
     - content: |
-        <p>Make a copy of your original configs into a prep directory so we edit and compare:</p>
+        <p>Make a copy of your original configs into a prep directory for editing and comparison:</p>
     - code:
         languages: [[0, "shell"]]
         code: |
           $ cp -r original prep
     - content: |
-        <p>We'll transform patterns in the prep configs, using bkl features to make them easier to work with.</p>
+        <p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
 
-        <p>Convert lists of items to maps with names, then reverses it using <highlight>$encode: values</highlight>. This allows them to be overriden by upper layers using that name as a reference.</p>
+        <p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers.</p>
     - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              ports:
+                - port: 80
+                  protocol: TCP
+                - port: 443
+                  protocol: TCP
+          - languages: [[0, "yaml"]]
+            code: |
+              ports:
+                http:
+                  port: 80
+                  protocol: TCP
+                https:
+                  port: 443
+                  protocol: TCP
+                $encode: values
+            highlights: ["http:", "https:", "$encode: values"]
     - content: |
-        <p>When the list items need to contain the key (e.g. <highlight>ports: name: http</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
+        <p>When the list items need to contain the key (e.g. <highlight>ports: { name: http }</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
     - example:
         operation: convert
         layers:
@@ -1051,25 +1071,106 @@
               ports:
                 - name: http
                   port: 80
-                  targetPort: 8080
                   protocol: TCP
                 - name: https
                   port: 443
-                  targetPort: 8081
                   protocol: TCP
             languages: [[0, "yaml"]]
+            highlights: ["name: http", "name: https"]
           - code: |
               ports:
                 http:
                   port: 80
-                  targetPort: 8080
                   protocol: TCP
                 https:
                   port: 443
-                  targetPort: 8081
                   protocol: TCP
-              $encode: values:name
+                $encode: values:name
             languages: [[0, "yaml"]]
+            highlights: ["http:", "https:", "$encode: values:name"]
+    - content: |
+        <p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              args:
+                - --config=/app/config/app.properties
+                - --feature=auth
+                - --feature=metrics
+                - --feature=rate-limiting
+                - --log-format=json
+          - languages: [[0, "yaml"]]
+            code: |
+              args:
+                config: /app/config/app.properties
+                feature:
+                  - auth
+                  - metrics
+                  - rate-limiting
+                log-format: json
+                $encode: flags
+            highlights: ["$encode: flags"]
+    - content: |
+        <p>Convert embedded JSON/YAML strings to structures with <highlight>$encode: json-pretty</highlight> or <highlight>$encode: yaml</highlight>.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              app.config.json: |
+                {
+                  "apiUrl": "http://api-service",
+                  "debugMode": true,
+                  "environment": "development",
+                  "features": {
+                    "analytics": false,
+                    "caching": false
+                  }
+                }
+          - languages: [[0, "yaml"]]
+            code: |
+              app.config.json:
+                apiUrl: http://api-service
+                debugMode: true
+                environment: development
+                features:
+                  analytics: false
+                  caching: false
+                $encode: json-pretty
+            highlights: ["$encode: json-pretty"]
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+                prometheus.yml: |
+                  global:
+                    evaluation_interval: 15s
+                    scrape_interval: 15s
+          - languages: [[0, "yaml"]]
+            code: |
+              prometheus.yml:
+                global:
+                  evaluation_interval: 15s
+                  scrape_interval: 15s
+                $encode: yaml
+            highlights: ["$encode: yaml"]
+    - content: |
+        <p>Convert embedded base64 strings to <highlight>$encode: base64</highlight>.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              database-url: cG9zdGdyZXNxbDovL3Byb2R1c2VyOnByb2RwYXNzQHByb2QtZGItY2x1c3Rlci5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3Byb2RkYg==
+          - languages: [[0, "yaml"]]
+            code: |
+              database-url:
+                $value: postgresql://produser:prodpass@prod-db-cluster.rds.amazonaws.com:5432/proddb
+                $encode: base64
+            highlights: ["$encode: base64"]
 - id: plan
   title: Target layout
   items:

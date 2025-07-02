@@ -380,7 +380,18 @@ func TestDocumentationExamples(t *testing.T) {
 				Env:         map[string]string{},
 			}
 
+			startIndex := 0
+			if example.Operation == "convert" {
+				if len(example.Layers) < 2 {
+					continue itemLoop
+				}
+				startIndex = 1
+			}
+
 			for i, layer := range example.Layers {
+				if example.Operation == "convert" && i < startIndex {
+					continue
+				}
 				if len(layer.Languages) != 1 {
 					continue itemLoop
 				}
@@ -391,19 +402,19 @@ func TestDocumentationExamples(t *testing.T) {
 
 				filename := fmt.Sprintf("file%d", i)
 				if example.Operation == "evaluate" {
-					// For evaluate, files are layered
 					if i == 0 {
 						filename = "base"
 					} else {
 						filename = fmt.Sprintf("base.layer%d", i)
 					}
+				} else if example.Operation == "convert" {
+					filename = fmt.Sprintf("file%d", i-startIndex+1)
 				}
 
 				filename += "." + layerLang
 
 				testCase.Files[filename] = layer.Code
 
-				// Parse environment variables from # export comments
 				lines := strings.Split(layer.Code, "\n")
 				for _, line := range lines {
 					if matches := exportRegex.FindStringSubmatch(line); matches != nil {
@@ -411,19 +422,26 @@ func TestDocumentationExamples(t *testing.T) {
 					}
 				}
 
-				// For diff and intersect operations, we need all files in eval list
 				if example.Operation == "diff" || example.Operation == "intersect" {
 					testCase.Eval = append(testCase.Eval, filename)
 				} else {
-					// For evaluate and required, only use the last file
 					testCase.Eval = []string{filename}
 				}
 			}
 
-			if len(example.Result.Languages) != 1 {
-				continue itemLoop
+			if example.Operation == "convert" {
+				if len(example.Layers) > 0 && len(example.Layers[0].Languages) == 1 {
+					testCase.Format = example.Layers[0].Languages[0][1].(string)
+				} else {
+					continue itemLoop
+				}
+			} else {
+				if len(example.Result.Languages) != 1 {
+					continue itemLoop
+				}
+				testCase.Format = example.Result.Languages[0][1].(string)
 			}
-			testCase.Format = example.Result.Languages[0][1].(string)
+
 			if !slices.Contains(acceptableLanguages, testCase.Format) {
 				continue itemLoop
 			}
@@ -436,18 +454,19 @@ func TestDocumentationExamples(t *testing.T) {
 			case "required":
 				testCase.Required = true
 			case "convert":
-				continue
 			}
 
-			// Special case for bklr tests - they need Required flag
 			if section.ID == "bklr" {
 				testCase.Required = true
 			}
-
 			t.Run(testName, func(t *testing.T) {
 				output, err := runTestCase(testCase)
 
 				expectedResult := strings.TrimSpace(example.Result.Code)
+				if example.Operation == "convert" && len(example.Layers) > 0 {
+					expectedResult = strings.TrimSpace(example.Layers[0].Code)
+				}
+
 				if expectedResult == "Error" {
 					if err == nil {
 						t.Errorf("Expected error but got none\nOutput: %s", output)
