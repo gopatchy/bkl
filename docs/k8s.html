@@ -737,6 +737,8 @@ hunk-header {
 
 	<li><a href="#original">Original config</a></li>
 
+	<li><a href="#prep">Prep</a></li>
+
 	<li><a href="#plan">Target layout</a></li>
 
 	<li><a href="#namespace">namespace</a></li>
@@ -773,7 +775,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">prod/namespace.yaml</label>
+<label class="label-spacing">original/prod/namespace.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -798,7 +800,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">prod/api-service.yaml</label>
+<label class="label-spacing">original/prod/api-service.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1023,7 +1025,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">prod/web-service.yaml</label>
+<label class="label-spacing">original/prod/web-service.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1245,7 +1247,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">staging/namespace.yaml</label>
+<label class="label-spacing">original/staging/namespace.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1270,7 +1272,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">staging/api-service.yaml</label>
+<label class="label-spacing">original/staging/api-service.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1441,7 +1443,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">staging/web-service.yaml</label>
+<label class="label-spacing">original/staging/web-service.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1602,7 +1604,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">dev/namespace.yaml</label>
+<label class="label-spacing">original/dev/namespace.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1627,7 +1629,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">dev/api-service.yaml</label>
+<label class="label-spacing">original/dev/api-service.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1763,7 +1765,7 @@ hunk-header {
 <div class="example-container expandable-container">
 
 <div class="label-container">
-<label class="label-spacing">dev/web-service.yaml</label>
+<label class="label-spacing">original/dev/web-service.yaml</label>
 <div class="code-wrapper">
 
 <button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
@@ -1904,6 +1906,101 @@ hunk-header {
 </div>
 
 </div>
+
+
+
+
+</section>
+
+<section id="prep">
+<h2><a name="prep">Prep</a></h2>
+
+
+
+<p><p>Make a copy of your original configs into a prep directory so we edit and compare:</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>cp</command> <flag>-r</flag> <argument>original</argument> <argument>prep</argument></bkl-code>
+</div>
+
+</div>
+
+
+
+
+<p><p>We'll transform patterns in the prep configs, using bkl features to make them easier to work with.</p>
+
+<p>Convert lists of items to maps with names, then reverses it using <highlight>$encode: values</highlight>. This allows them to be overriden by upper layers using that name as a reference.</p>
+</p>
+
+
+
+
+
+<p><p>When the list items need to contain the key (e.g. <highlight>ports: name: http</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  - <key>name</key>: <string>http</string>
+    <key>port</key>: <number>80</number>
+    <key>targetPort</key>: <number>8080</number>
+    <key>protocol</key>: <string>TCP</string>
+  - <key>name</key>: <string>https</string>
+    <key>port</key>: <number>443</number>
+    <key>targetPort</key>: <number>8081</number>
+    <key>protocol</key>: <string>TCP</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  <key>http</key>:
+    <key>port</key>: <number>80</number>
+    <key>targetPort</key>: <number>8080</number>
+    <key>protocol</key>: <string>TCP</string>
+  <key>https</key>:
+    <key>port</key>: <number>443</number>
+    <key>targetPort</key>: <number>8081</number>
+    <key>protocol</key>: <string>TCP</string>
+<key>$encode</key>: <string>values:name</string></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
 
 
 

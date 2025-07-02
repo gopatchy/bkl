@@ -435,6 +435,8 @@ func TestDocumentationExamples(t *testing.T) {
 				testCase.Intersect = true
 			case "required":
 				testCase.Required = true
+			case "convert":
+				continue
 			}
 
 			// Special case for bklr tests - they need Required flag

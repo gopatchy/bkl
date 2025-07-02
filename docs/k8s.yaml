@@ -7,7 +7,7 @@
   title: Original config
   items:
     - code:
-        label: prod/namespace.yaml
+        label: original/prod/namespace.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -19,7 +19,7 @@
             labels:
               environment: prod
     - code:
-        label: prod/api-service.yaml
+        label: original/prod/api-service.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -231,7 +231,7 @@
                 app: api
                 environment: prod
     - code:
-        label: prod/web-service.yaml
+        label: original/prod/web-service.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -440,7 +440,7 @@
                 app: web
                 environment: prod
     - code:
-        label: staging/namespace.yaml
+        label: original/staging/namespace.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -452,7 +452,7 @@
             labels:
               environment: staging
     - code:
-        label: staging/api-service.yaml
+        label: original/staging/api-service.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -610,7 +610,7 @@
                     type: Utilization
                     averageUtilization: 80
     - code:
-        label: staging/web-service.yaml
+        label: original/staging/web-service.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -758,7 +758,7 @@
                           port:
                             number: 80
     - code:
-        label: dev/namespace.yaml
+        label: original/dev/namespace.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -770,7 +770,7 @@
             labels:
               environment: dev
     - code:
-        label: dev/api-service.yaml
+        label: original/dev/api-service.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -893,7 +893,7 @@
                     configMap:
                       name: api-config
     - code:
-        label: dev/web-service.yaml
+        label: original/dev/web-service.yaml
         languages: [[0, "yaml"]]
         expandable: true
         collapsed: true
@@ -1028,6 +1028,48 @@
                           name: web-service
                           port:
                             number: 80
+- id: prep
+  title: Prep
+  items:
+    - content: |
+        <p>Make a copy of your original configs into a prep directory so we edit and compare:</p>
+    - code:
+        languages: [[0, "shell"]]
+        code: |
+          $ cp -r original prep
+    - content: |
+        <p>We'll transform patterns in the prep configs, using bkl features to make them easier to work with.</p>
+
+        <p>Convert lists of items to maps with names, then reverses it using <highlight>$encode: values</highlight>. This allows them to be overriden by upper layers using that name as a reference.</p>
+    - example:
+    - content: |
+        <p>When the list items need to contain the key (e.g. <highlight>ports: name: http</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
+    - example:
+        operation: convert
+        layers:
+          - code: |
+              ports:
+                - name: http
+                  port: 80
+                  targetPort: 8080
+                  protocol: TCP
+                - name: https
+                  port: 443
+                  targetPort: 8081
+                  protocol: TCP
+            languages: [[0, "yaml"]]
+          - code: |
+              ports:
+                http:
+                  port: 80
+                  targetPort: 8080
+                  protocol: TCP
+                https:
+                  port: 443
+                  targetPort: 8081
+                  protocol: TCP
+              $encode: values:name
+            languages: [[0, "yaml"]]
 - id: plan
   title: Target layout
   items:

@@ -54,6 +54,8 @@
   {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" .HasLabels}}
 {{else if eq .Operation "intersect"}}
   {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" .HasLabels}}
+{{else if eq .Operation "convert"}}
+  {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
 {{end}}
 {{end}}
 
@@ -76,6 +78,21 @@
 {{range $layer := $example.Layers}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
 {{if $example.Result.Label}}{{$hasLabels = true}}{{end}}
 {{$numLayers := len $example.Layers}}
+{{if eq $example.Operation "convert"}}
+<div class="example-container">
+<div class="grid-container grid-3-col">
+{{template "codeBlock" dict "Label" (index $example.Layers 0).Label "Code" (index $example.Layers 0 | formatLayer) "HasLabels" $hasLabels}}
+{{template "operatorSymbol" dict "Symbol" "→" "HasLabels" $hasLabels}}
+<div class="code-container" style="display: contents;">
+{{range $layerIndex, $layer := $example.Layers}}
+{{if eq $layerIndex 1}}
+{{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
+{{end}}
+{{end}}
+</div>
+</div>
+</div>
+{{else}}
 {{$numChildren := 0}}
 {{if eq $numLayers 1}}
   {{$numChildren = 3}}
@@ -99,6 +116,7 @@
 {{template "exampleResultBlock" dict "Result" $example.Result "HasLabels" $hasLabels}}
 </div>
 </div>
+{{end}}
 {{end}}
 
 <!DOCTYPE html>

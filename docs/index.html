@@ -1247,6 +1247,7 @@ hunk-header {
 
 
 
+
   
 
 <div class="example-container">
@@ -1296,6 +1297,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -1362,8 +1365,10 @@ hunk-header {
 
 
 
+
 <p>The supplied pattern can match multiple documents and the updates will be applied to all of them. <highlight>$match: {}</highlight> matches any documents with a map as their root element, regardless of parent.
 </p>
+
 
 
 
@@ -1434,8 +1439,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$invert: true</highlight> inside a <highlight>$match</highlight> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
 </p>
+
 
 
 
@@ -1502,8 +1509,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$match: null</highlight> forces the updates to apply to a new document.
 </p>
+
 
 
 
@@ -1565,6 +1574,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="maps">
@@ -1574,6 +1584,7 @@ hunk-header {
 
 <p>Maps are merged by default. Use <highlight>$replace: true</highlight> to replace the entire map or <highlight>$delete</highlight> to remove specific keys.
 </p>
+
 
 
 
@@ -1629,6 +1640,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -1697,6 +1710,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -1747,6 +1762,7 @@ hunk-header {
 
 
 
+
 <p>bkl returns an error if you use <highlight>$delete</highlight>, <highlight>$replace: true</highlight>, or a <highlight>key: value</highlight> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 </p>
 
@@ -1761,6 +1777,7 @@ hunk-header {
 
 <p>Lists are merged by default. Use <highlight>$replace: true</highlight> to replace the entire list or <highlight>$delete</highlight> to remove specific entries.
 </p>
+
 
 
 
@@ -1816,6 +1833,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -1884,6 +1903,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -1935,6 +1956,7 @@ hunk-header {
 
 
 
+
 <p>bkl returns an error if you use <highlight>$replace: true</highlight> or <highlight>$delete</highlight> when they don't override a value from a lower layer. This helps keep upper layers minimal.
 </p>
 
@@ -1942,6 +1964,7 @@ hunk-header {
 
 <p>To update a specific list item, use <highlight>$match</highlight>. For scalar values in lists, use <highlight>$value</highlight> to replace the entire item.
 </p>
+
 
 
 
@@ -2012,6 +2035,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2062,6 +2087,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="interp">
@@ -2071,6 +2097,7 @@ hunk-header {
 
 <p>Use <highlight>$""</highlight> to interpolate format strings with <a href="#merge"><highlight>$merge</highlight></a>-style references.
 </p>
+
 
 
 
@@ -2119,6 +2146,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="decode">
@@ -2128,6 +2156,7 @@ hunk-header {
 
 <p><highlight>$decode</highlight> transforms a string into a tree by parsing standard formats.
 </p>
+
 
 
 
@@ -2172,6 +2201,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="env">
@@ -2181,6 +2211,7 @@ hunk-header {
 
 <p>Use <highlight>$env:</highlight> to substitute environment variables. This is supported in keys and values.
 </p>
+
 
 
 
@@ -2232,6 +2263,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2264,6 +2297,7 @@ hunk-header {
 
 
 
+
 <p>Note that all <highlight>$env:</highlight> substitutions result in string values even if the substituted value is <highlight>true</highlight>, <highlight>false</highlight>, <highlight>null</highlight>, or all digits.
 </p>
 
@@ -2278,6 +2312,7 @@ hunk-header {
 
 <p><highlight>$encode</highlight> transforms the subtree into the specified format.
 </p>
+
 
 
 
@@ -2333,6 +2368,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2368,6 +2405,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -2432,6 +2471,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2464,6 +2505,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -2522,6 +2565,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2556,6 +2601,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -2614,6 +2661,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2646,6 +2695,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -2704,6 +2755,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2740,6 +2793,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -2802,6 +2857,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -2839,6 +2896,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="required">
@@ -2848,6 +2906,7 @@ hunk-header {
 
 <p>Use <highlight>$required</highlight> in lower layers to force upper layers to replace the value.
 </p>
+
 
 
 
@@ -2903,6 +2962,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -2974,6 +3035,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3019,6 +3082,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -3085,6 +3150,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="merge">
@@ -3094,6 +3160,7 @@ hunk-header {
 
 <p>Use <highlight>$merge</highlight> to merge the contents one subtree or scalar value into another.
 </p>
+
 
 
 
@@ -3142,6 +3209,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -3203,6 +3272,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3244,8 +3315,10 @@ hunk-header {
 
 
 
+
 <p>You can also merge across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
 </p>
+
 
 
 
@@ -3307,6 +3380,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3351,8 +3426,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$merge</highlight> supports a shorthand syntax: <highlight>$merge: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
 </p>
+
 
 
 
@@ -3412,6 +3489,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3453,6 +3532,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="replace">
@@ -3462,6 +3542,7 @@ hunk-header {
 
 <p>Use <highlight>$replace</highlight> to merge the contents of one subtree or scalar value with another.
 </p>
+
 
 
 
@@ -3509,6 +3590,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -3569,6 +3652,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3610,6 +3695,7 @@ hunk-header {
 
 
 
+
 <p>Note that <highlight>$merge</highlight> and <highlight>$replace</highlight> are equivalent for scalar values.
 </p>
 
@@ -3617,6 +3703,7 @@ hunk-header {
 
 <p>You can also replace across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
 </p>
+
 
 
 
@@ -3677,6 +3764,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3720,8 +3809,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$replace</highlight> supports a shorthand syntax: <highlight>$replace: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
 </p>
+
 
 
 
@@ -3780,6 +3871,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3820,6 +3913,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="output">
@@ -3829,6 +3923,7 @@ hunk-header {
 
 <p>Use <highlight>$output: true</highlight> to select a subtree for output instead of the document root.
 </p>
+
 
 
 
@@ -3884,6 +3979,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -3920,6 +4017,7 @@ hunk-header {
 
 
 
+
 <p>Multiple instances of <highlight>$output: true</highlight> in a document will generate multiple output documents (delimited with <highlight>---</highlight>).
 </p>
 
@@ -3927,6 +4025,7 @@ hunk-header {
 
 <p>Use <highlight>$output: false</highlight> to omit a subtree or entire document from the output.
 </p>
+
 
 
 
@@ -3970,6 +4069,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -4026,6 +4127,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -4060,6 +4163,7 @@ hunk-header {
 
 
 
+
 <p>Combine <highlight>$output</highlight> with <highlight>$merge</highlight> to create reusable template sections.
 </p>
 
@@ -4074,6 +4178,7 @@ hunk-header {
 
 <p><highlight>$repeat:</highlight> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <highlight>$repeat</highlight> can be used to reference the zero-based repeat index.
 </p>
+
 
 
 
@@ -4122,8 +4227,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$repeat:</highlight> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
 </p>
+
 
 
 
@@ -4179,8 +4286,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$repeat:</highlight> can contain a list of values to iterate over:
 </p>
+
 
 
 
@@ -4228,8 +4337,10 @@ hunk-header {
 
 
 
+
 <p><highlight>$repeat:</highlight> supports range parameters for numeric sequences:
 </p>
+
 
 
 
@@ -4279,6 +4390,7 @@ hunk-header {
 
 
 
+
 <p>Range parameters require exactly 2 of <highlight>$first</highlight>, <highlight>$last</highlight>, and <highlight>$count</highlight>. Optional <highlight>$step</highlight> defaults to 1.
 </p>
 
@@ -4286,6 +4398,7 @@ hunk-header {
 
 <p><highlight>$repeat:</highlight> also works at the object level within maps and lists:
 </p>
+
 
 
 
@@ -4337,8 +4450,10 @@ hunk-header {
 
 
 
+
 <p>Object-level repeat in lists:
 </p>
+
 
 
 
@@ -4386,6 +4501,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="defer">
@@ -4400,6 +4516,7 @@ hunk-header {
 
 <p>This allows operations on the final output after transformations like <highlight>$repeat</highlight> have been applied.
 </p>
+
 
 
 
@@ -4475,6 +4592,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="escape">
@@ -4484,6 +4602,7 @@ hunk-header {
 
 <p><highlight>$$</highlight> translates to a literal <highlight>$</highlight> in cases where it would otherwise trigger special handling.
 </p>
+
 
 
 
@@ -4522,6 +4641,7 @@ hunk-header {
 
 </div>
 </div>
+
 
 
 
@@ -4644,6 +4764,7 @@ hunk-header {
 
 
 
+
   
 
 <div class="example-container">
@@ -4694,6 +4815,8 @@ hunk-header {
 
 </div>
 </div>
+
+
 
 
 
@@ -4766,6 +4889,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -4818,6 +4943,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="bkli">
@@ -4845,6 +4971,7 @@ hunk-header {
 
 <p>Fields that exist in all inputs with the same value are included in the result. Fields with different values are omitted.
 </p>
+
 
 
 
@@ -4915,6 +5042,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -4966,6 +5095,7 @@ hunk-header {
 
 
 
+
 </section>
 
 <section id="bklr">
@@ -4988,6 +5118,7 @@ hunk-header {
 
 <p><highlight>bklr</highlight> extracts only <highlight>$required</highlight> fields and their parent paths. Use this output as a template for creating minimal upper layers.
 </p>
+
 
 
 
@@ -5041,6 +5172,8 @@ hunk-header {
 
 
 
+
+
   
 
 <div class="example-container">
@@ -5072,6 +5205,7 @@ hunk-header {
 
 </div>
 </div>
+
 
 
 
