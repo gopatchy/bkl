@@ -1262,6 +1262,78 @@ b: 2
 $encode: values:name
 '''
 
+[encodeValuesNestedPath]
+description = "Test values encoding sets key at nested path"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+- foo:
+    bar: item1
+  other: 1
+- foo:
+    bar: item2
+  other: 2
+'''
+files."a.yaml" = '''
+item1:
+  foo:
+    bar: 1
+  other: 1
+item2:
+  foo:
+    bar: 2
+  other: 2
+$encode: values:foo.bar
+'''
+
+[encodeValuesNestedPathMissing]
+description = "Test values encoding sets key at nested path creating intermediate maps"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+- foo:
+    bar: item1
+- foo:
+    bar: item2
+  other: 2
+'''
+files."a.yaml" = '''
+item1:
+  foo:
+    bar: 1
+item2:
+  other: 2
+$encode: values:foo.bar
+'''
+
+[encodeValuesDeepNestedPath]
+description = "Test values encoding sets key at deep nested path"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+- a:
+    b:
+      c:
+        d: item1
+- a:
+    b:
+      c:
+        d: item2
+'''
+files."a.yaml" = '''
+item1:
+  a:
+    b:
+      c:
+        d: 1
+item2:
+  a:
+    b:
+      c:
+        d: 2
+$encode: values:a.b.c.d
+'''
+
 [encodePrefix]
 description = "Test prefix encoding adds prefix to list items"
 eval = ["a.yaml"]

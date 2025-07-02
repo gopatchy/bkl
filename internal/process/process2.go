@@ -5,12 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"maps"
 	"regexp"
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/format"
 	"github.com/gopatchy/bkl/internal/normalize"
+	pathutil "github.com/gopatchy/bkl/internal/path"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/errors"
 )
@@ -438,7 +440,6 @@ func process2StringInterp(obj string, mergeFrom *document.Document, mergeFromDoc
 
 	return obj, nil
 }
-
 func process2ValuesMap(obj map[string]any, nameKey string) ([]any, error) {
 	vals := []any{}
 
@@ -447,16 +448,14 @@ func process2ValuesMap(obj map[string]any, nameKey string) ([]any, error) {
 			vals = append(vals, v)
 		}
 	} else {
+		parts := pathutil.SplitPath(nameKey)
 		for k, v := range utils.SortedMap(obj) {
 			vMap, ok := v.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("$encode: values:%s: value for key %q: %w (%T)", nameKey, k, errors.ErrInvalidType, v)
 			}
-
-			newMap := map[string]any{nameKey: k}
-			for k2, v2 := range vMap {
-				newMap[k2] = v2
-			}
+			newMap := maps.Clone(vMap)
+			pathutil.Set(newMap, parts, k)
 			vals = append(vals, newMap)
 		}
 	}
