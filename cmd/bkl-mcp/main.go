@@ -95,6 +95,9 @@ func main() {
 		mcp.WithString("outputPath",
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
+		mcp.WithString("sortPath",
+			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
+		),
 	)
 	mcpServer.AddTool(evaluateTool, evaluateHandler)
 
@@ -654,7 +657,8 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		workingDir = "."
 	}
 
-	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &format)
+	sortPath := parseOptionalString(args, "sortPath", "")
+	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &format, sortPath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}

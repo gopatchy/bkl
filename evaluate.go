@@ -68,7 +68,7 @@ import (
 // Evaluate processes the specified files and returns the formatted output.
 // If format is nil, it infers the format from the paths parameter (output path first, then input files).
 // If env is nil, it uses the current OS environment.
-func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, paths ...*string) ([]byte, error) {
+func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, sortPath string, paths ...*string) ([]byte, error) {
 	if env == nil {
 		env = getOSEnv()
 	}
@@ -98,7 +98,7 @@ func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env 
 		return nil, err
 	}
 
-	return merge.Files(fx, realFiles, ft, env)
+	return merge.Files(fx, realFiles, ft, env, sortPath)
 }
 
 // getOSEnv returns the current OS environment as a map.

@@ -32,6 +32,7 @@ type TestCase struct {
 	Benchmark    bool              `toml:"benchmark,omitempty"`
 	Selector     string            `toml:"selector,omitempty"`
 	SkipRequired bool              `toml:"skipRequired,omitempty"`
+	SortPath     string            `toml:"sortPath,omitempty"`
 }
 
 type DocSection struct {

@@ -16,6 +16,7 @@ type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"jsonl" choice:"toml" choice:"yaml"`
 	RootPath     string          `short:"r" long:"root-path" description:"restrict file access to this root directory" default:"/"`
+	SortPath     string          `short:"s" long:"sort" description:"sort output documents by path (e.g. 'metadata.name')"`
 	Verbose      bool            `short:"v" long:"verbose" description:"enable verbose logging"`
 	Version      bool            `short:"V" long:"version" description:"print version and exit"`
 
@@ -80,7 +81,7 @@ Related tools:
 	}
 	defer root.Close()
 
-	output, err := bkl.Evaluate(root.FS(), files, opts.RootPath, "", nil, opts.OutputFormat, (*string)(opts.OutputPath), &files[0])
+	output, err := bkl.Evaluate(root.FS(), files, opts.RootPath, "", nil, opts.OutputFormat, opts.SortPath, (*string)(opts.OutputPath), &files[0])
 	if err != nil {
 		fatal(err)
 	}

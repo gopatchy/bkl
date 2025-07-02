@@ -209,6 +209,10 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 			args["environment"] = testCase.Env
 		}
 
+		if testCase.SortPath != "" {
+			args["sortPath"] = testCase.SortPath
+		}
+
 		result, err = client.CallTool(ctx, "evaluate", args)
 	}
 

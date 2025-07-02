@@ -5601,3 +5601,66 @@ x: 1
 "b.yaml" = '''
 y: 2
 '''
+
+
+[evaluateSortByPath]
+description = "Test sorting output documents by path"
+eval = ["a.yaml"]
+format = "yaml"
+sortPath = "name"
+expected = '''
+name: alpha
+value: 2
+---
+name: mike
+value: 3
+---
+name: zulu
+value: 1
+'''
+[evaluateSortByPath.files]
+"a.yaml" = '''
+---
+name: zulu
+value: 1
+---
+name: alpha
+value: 2
+---
+name: mike
+value: 3
+'''
+
+[evaluateSortByNestedPath]
+description = "Test sorting output documents by nested path"
+eval = ["a.yaml"]
+format = "yaml"
+sortPath = "metadata.name"
+expected = '''
+metadata:
+  name: doc1
+  priority: 10
+---
+metadata:
+  name: doc2
+  priority: 1
+---
+metadata:
+  name: doc3
+  priority: 2
+'''
+[evaluateSortByNestedPath.files]
+"a.yaml" = '''
+---
+metadata:
+  name: doc1
+  priority: 10
+---
+metadata:
+  name: doc2
+  priority: 1
+---
+metadata:
+  name: doc3
+  priority: 2
+'''

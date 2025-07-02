@@ -3,6 +3,8 @@ package merge
 import (
 	"fmt"
 	"io/fs"
+	"sort"
+	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
@@ -116,7 +118,7 @@ func findMatches(docs []*document.Document, doc *document.Document, pat any) []*
 
 // Files merges multiple files and returns the result in the specified format.
 // If format is empty, it defaults to "json-pretty".
-func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string) ([]byte, error) {
+func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, sortPath string) ([]byte, error) {
 	var docs []*document.Document
 	var deferredDocs []*document.Document
 	fileSystem := fsys.New(fx)
@@ -183,6 +185,11 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string) (
 		outputs[i] = output.FinalizeOutput(out)
 	}
 
+	// Sort outputs by path if requested
+	if sortPath != "" {
+		sortOutputsByPath(outputs, sortPath)
+	}
+
 	return ft.MarshalStream(outputs)
 }
 
@@ -202,4 +209,38 @@ func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, err
 	}
 
 	return docs, nil
+}
+
+// sortOutputsByPath sorts the outputs slice by the value at the specified path
+func sortOutputsByPath(outputs []any, sortPath string) {
+	sort.SliceStable(outputs, func(i, j int) bool {
+		valI := getPathString(outputs[i], sortPath)
+		valJ := getPathString(outputs[j], sortPath)
+		return valI < valJ
+	})
+}
+
+// getPathString retrieves a value from a nested structure and converts it to string
+func getPathString(data any, path string) string {
+	if path == "" {
+		return ""
+	}
+
+	parts := strings.Split(path, ".")
+	current := data
+
+	for _, part := range parts {
+		switch obj := current.(type) {
+		case map[string]any:
+			val, found := obj[part]
+			if !found {
+				return ""
+			}
+			current = val
+		default:
+			return ""
+		}
+	}
+
+	return fmt.Sprint(current)
 }

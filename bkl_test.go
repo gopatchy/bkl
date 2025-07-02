@@ -81,7 +81,7 @@ func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 		}
 
 	default:
-		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, rootPath, testCase.Env, &testCase.Format, &testCase.Eval[0])
+		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, rootPath, testCase.Env, &testCase.Format, testCase.SortPath, &testCase.Eval[0])
 	}
 
 	return output, err
@@ -304,6 +304,10 @@ func TestCLI(t *testing.T) {
 
 			if testCase.SkipRequired && testCase.Intersect {
 				args = append(args, "--skip-required")
+			}
+
+			if testCase.SortPath != "" {
+				args = append(args, "--sort", testCase.SortPath)
 			}
 
 			if testCase.RootPath != "" {
