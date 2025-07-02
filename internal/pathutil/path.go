@@ -73,25 +73,6 @@ func Set(data map[string]any, parts []string, value any) {
 	}
 }
 
-// GetNoError retrieves a value without returning an error.
-// This is useful for cases where missing paths are expected.
-func GetNoError(data any, parts []string) (any, error) {
-	if len(parts) == 0 {
-		return data, nil
-	}
-
-	switch obj := data.(type) {
-	case map[string]any:
-		val, found := obj[parts[0]]
-		if !found {
-			return nil, fmt.Errorf("path not found: %v", parts[0])
-		}
-		return GetNoError(val, parts[1:])
-	default:
-		return nil, fmt.Errorf("cannot traverse path in %T", data)
-	}
-}
-
 // SplitPath splits a dot-separated path string into parts.
 func SplitPath(path string) []string {
 	if path == "" {

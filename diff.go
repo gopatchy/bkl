@@ -112,7 +112,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 			matchValue := map[string]any{}
 			if selector != "" {
 				parts := pathutil.SplitPath(selector)
-				val, _ := pathutil.GetNoError(srcDoc.Data, parts)
+				val, _ := pathutil.Get(srcDoc.Data, parts)
 				pathutil.Set(matchValue, parts, val)
 			}
 			result = addMatchDirective(result, matchValue)
@@ -126,7 +126,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 			matchValue := map[string]any{}
 			if selector != "" {
 				parts := pathutil.SplitPath(selector)
-				val, _ := pathutil.GetNoError(srcDoc.Data, parts)
+				val, _ := pathutil.Get(srcDoc.Data, parts)
 				pathutil.Set(matchValue, parts, val)
 			}
 
@@ -266,7 +266,7 @@ func evaluateSelector(doc *document.Document, selector string) (string, error) {
 		return "", nil
 	}
 	parts := pathutil.SplitPath(selector)
-	val, err := pathutil.GetNoError(doc.Data, parts)
+	val, err := pathutil.Get(doc.Data, parts)
 	if err != nil {
 		return "", err
 	}
