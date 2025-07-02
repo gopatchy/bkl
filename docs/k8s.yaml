@@ -53,6 +53,8 @@
               server.name=api-service
               server.port=8080
               server.workers=8
+              session.timeout=7200
+              session.cookie.secure=true
           ---
           apiVersion: v1
           kind: Secret
@@ -218,18 +220,6 @@
                   target:
                     type: Utilization
                     averageUtilization: 70
-          ---
-          apiVersion: policy/v1
-          kind: PodDisruptionBudget
-          metadata:
-            name: api-pdb
-            namespace: microservices-prod
-          spec:
-            minAvailable: 2
-            selector:
-              matchLabels:
-                app: api
-                environment: prod
     - code:
         label: original/prod/web-service.yaml
         languages: [[0, "yaml"]]
@@ -242,6 +232,27 @@
             name: web-config
             namespace: microservices-prod
           data:
+            app.properties: |
+              cache.enabled=true
+              cache.ttl=3600
+              cache.backend=redis-cluster
+              cache.max_size=1000
+              environment=production
+              logging.level=warn
+              logging.format=json
+              logging.output=stdout
+              logging.sample_rate=0.1
+              metrics.enabled=true
+              metrics.port=9090
+              metrics.path=/metrics
+              security.rate_limit=1000
+              security.csp_enabled=true
+              server.port=80
+              server.max_connections=1000
+              server.name=web-service
+              server.workers=8
+              session.timeout=7200
+              session.cookie.secure=true
             app.config.json: |
               {
                 "environment": "production",
@@ -257,6 +268,17 @@
                   "url": "https://cdn.example.com"
                 }
               }
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: web-secrets
+            namespace: microservices-prod
+          type: Opaque
+          data:
+            session-secret: cHJvZC1zZXNzaW9uLXNlY3JldC1rZXktcHJvZHVjdGlvbi0xMjM0NTY=
+            cdn-api-key: Y2RuLXByb2QtYXBpLWtleS1wcm9kdWN0aW9uLXh5ejEyMzQ1Ng==
+            analytics-key: YW5hbHl0aWNzLXByb2QtYXBpLWtleS05ODc2NTQzMjE=
           ---
           apiVersion: v1
           kind: Service
@@ -330,65 +352,68 @@
                         value: "https://api.example.com"
                       - name: APP_ENV
                         value: production
-                      - name: CDN_ENABLED
+                      - name: CACHE_ENABLED
                         value: "true"
-                      - name: CACHE_CONTROL
-                        value: "max-age=3600"
+                      - name: SESSION_SECRET
+                        valueFrom:
+                          secretKeyRef:
+                            name: web-secrets
+                            key: session-secret
+                      - name: CDN_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: web-secrets
+                            key: cdn-api-key
+                      - name: ANALYTICS_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: web-secrets
+                            key: analytics-key
                     resources:
                       requests:
-                        memory: "256Mi"
-                        cpu: "200m"
-                      limits:
                         memory: "512Mi"
                         cpu: "500m"
+                      limits:
+                        memory: "1Gi"
+                        cpu: "1000m"
                     livenessProbe:
                       httpGet:
                         path: /health
                         port: 80
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 30
                       periodSeconds: 10
                       timeoutSeconds: 5
                       failureThreshold: 3
                     readinessProbe:
                       httpGet:
-                        path: /health
+                        path: /ready
                         port: 80
                       initialDelaySeconds: 5
                       periodSeconds: 5
                       timeoutSeconds: 3
                       successThreshold: 1
                       failureThreshold: 3
-                    command: ["/app/web-server"]
                     args:
-                      - "serve"
-                      - "--port=80"
-                      - "--static-dir=/usr/share/nginx/html"
-                      - "--api-backend=https://api-service"
-                      - "--enable-compression"
-                      - "--enable-cache"
-                      - "--cache-ttl=3600"
-                      - "--enable-metrics"
-                      - "--metrics-port=9090"
-                      - "--enable-security-headers"
-                      - "--enable-rate-limiting"
-                      - "--rate-limit=100"
-                      - "--enable-access-log"
-                      - "--access-log-format=json"
-                      - "--enable-cdn"
-                      - "--cdn-url=https://cdn.example.com"
+                      - "server"
+                      - "--config=/app/config/app.properties"
+                      - "--workers=8"
+                      - "--feature=auth"
+                      - "--feature=metrics"
+                      - "--feature=rate-limiting"
+                      - "--feature=caching"
+                      - "--feature=compression"
+                      - "--feature=security-headers"
+                      - "--feature=cdn"
+                      - "--feature=analytics"
+                      - "--log-format=json"
                       - "--graceful-timeout=30s"
-                      - "--read-timeout=30s"
-                      - "--write-timeout=30s"
                     volumeMounts:
-                      - name: app-config
-                        mountPath: /usr/share/nginx/html/config
+                      - name: config
+                        mountPath: /app/config
                 volumes:
-                  - name: app-config
+                  - name: config
                     configMap:
                       name: web-config
-                      items:
-                        - key: app.config.json
-                          path: config.json
           ---
           apiVersion: networking.k8s.io/v1
           kind: Ingress
@@ -428,17 +453,37 @@
                           port:
                             number: 80
           ---
-          apiVersion: policy/v1
-          kind: PodDisruptionBudget
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
           metadata:
-            name: web-pdb
+            name: web-hpa
             namespace: microservices-prod
           spec:
-            minAvailable: 2
-            selector:
-              matchLabels:
-                app: web
-                environment: prod
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: web-deployment
+            minReplicas: 3
+            maxReplicas: 10
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 60
+              - type: Resource
+                resource:
+                  name: memory
+                  target:
+                    type: Utilization
+                    averageUtilization: 70
+
+              - code:
+                  label: original/staging/namespace.yaml
+                  languages: [[0, "yaml"]]
+                  expandable: true
+                  collapsed: true
     - code:
         label: original/staging/namespace.yaml
         languages: [[0, "yaml"]]
@@ -479,6 +524,8 @@
               server.port=8080
               server.name=api-service
               server.workers=4
+              session.timeout=3600
+              session.cookie.secure=true
           ---
           apiVersion: v1
           kind: Secret
@@ -621,6 +668,20 @@
             name: web-config
             namespace: microservices-staging
           data:
+            app.properties: |
+              server.port=80
+              server.name=web-service
+              logging.level=info
+              logging.format=json
+              logging.output=stdout
+              cache.enabled=true
+              cache.ttl=300
+              cache.backend=redis
+              session.timeout=3600
+              session.cookie.secure=true
+              metrics.enabled=true
+              metrics.port=9090
+              environment=staging
             app.config.json: |
               {
                 "environment": "staging",
@@ -632,6 +693,16 @@
                   "cdnEnabled": true
                 }
               }
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: web-secrets
+            namespace: microservices-staging
+          type: Opaque
+          data:
+            session-secret: c3RhZ2luZy1zZXNzaW9uLXNlY3JldC1rZXktYWJjZGVmZ2hpams=
+            cdn-api-key: Y2RuLXN0YWdpbmctYXBpLWtleS0xMjM0NTY3ODkw
           ---
           apiVersion: v1
           kind: Service
@@ -686,15 +757,25 @@
                         value: "http://api-service"
                       - name: APP_ENV
                         value: staging
-                      - name: CDN_ENABLED
+                      - name: CACHE_ENABLED
                         value: "true"
+                      - name: SESSION_SECRET
+                        valueFrom:
+                          secretKeyRef:
+                            name: web-secrets
+                            key: session-secret
+                      - name: CDN_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: web-secrets
+                            key: cdn-api-key
                     resources:
                       requests:
-                        memory: "128Mi"
-                        cpu: "100m"
-                      limits:
                         memory: "256Mi"
                         cpu: "200m"
+                      limits:
+                        memory: "512Mi"
+                        cpu: "500m"
                     livenessProbe:
                       httpGet:
                         path: /health
@@ -707,30 +788,23 @@
                         port: 80
                       initialDelaySeconds: 5
                       periodSeconds: 5
-                    command: ["/app/web-server"]
                     args:
-                      - "serve"
-                      - "--port=80"
-                      - "--static-dir=/usr/share/nginx/html"
-                      - "--api-backend=http://api-service"
-                      - "--enable-compression"
-                      - "--enable-cache"
-                      - "--cache-ttl=300"
-                      - "--enable-metrics"
-                      - "--metrics-port=9090"
-                      - "--access-log=/var/log/access.log"
-                      - "--error-log=/var/log/error.log"
-                      - "-v"
+                      - "server"
+                      - "--config=/app/config/app.properties"
+                      - "--workers=4"
+                      - "--feature=auth"
+                      - "--feature=metrics"
+                      - "--feature=rate-limiting"
+                      - "--feature=caching"
+                      - "--log-format=json"
+                      - "--graceful-timeout=30s"
                     volumeMounts:
-                      - name: app-config
-                        mountPath: /usr/share/nginx/html/config
+                      - name: config
+                        mountPath: /app/config
                 volumes:
-                  - name: app-config
+                  - name: config
                     configMap:
                       name: web-config
-                      items:
-                        - key: app.config.json
-                          path: config.json
           ---
           apiVersion: networking.k8s.io/v1
           kind: Ingress
@@ -757,6 +831,32 @@
                           name: web-service
                           port:
                             number: 80
+          ---
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+          metadata:
+            name: web-hpa
+            namespace: microservices-staging
+          spec:
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: web-deployment
+            minReplicas: 2
+            maxReplicas: 5
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 70
+              - type: Resource
+                resource:
+                  name: memory
+                  target:
+                    type: Utilization
+                    averageUtilization: 80
     - code:
         label: original/dev/namespace.yaml
         languages: [[0, "yaml"]]
@@ -790,6 +890,8 @@
               cache.ttl=300
               database.pool_size=5
               database.timeout=30
+              session.timeout=3600
+              session.cookie.secure=false
               environment=development
           ---
           apiVersion: v1
@@ -904,6 +1006,16 @@
             name: web-config
             namespace: microservices-dev
           data:
+            app.properties: |
+              server.port=80
+              server.name=web-service
+              logging.level=debug
+              logging.format=json
+              cache.enabled=false
+              cache.ttl=300
+              session.timeout=1800
+              session.cookie.secure=false
+              environment=development
             app.config.json: |
               {
                 "environment": "development",
@@ -911,9 +1023,19 @@
                 "debugMode": true,
                 "features": {
                   "analytics": false,
-                  "caching": false
+                  "caching": false,
+                  "cdn": false
                 }
               }
+          ---
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: web-secrets
+            namespace: microservices-dev
+          type: Opaque
+          data:
+            session-secret: ZGV2LXNlc3Npb24tc2VjcmV0LWtleS0xMjM0NTY3ODkw
           ---
           apiVersion: v1
           kind: Service
@@ -968,8 +1090,13 @@
                         value: "http://api-service"
                       - name: APP_ENV
                         value: development
-                      - name: DEBUG_MODE
+                      - name: DEBUG
                         value: "true"
+                      - name: SESSION_SECRET
+                        valueFrom:
+                          secretKeyRef:
+                            name: web-secrets
+                            key: session-secret
                     resources:
                       requests:
                         memory: "64Mi"
@@ -979,36 +1106,34 @@
                         cpu: "100m"
                     livenessProbe:
                       httpGet:
-                        path: /
+                        path: /health
                         port: 80
-                      initialDelaySeconds: 10
+                      initialDelaySeconds: 30
                       periodSeconds: 10
                     readinessProbe:
                       httpGet:
-                        path: /
+                        path: /ready
                         port: 80
                       initialDelaySeconds: 5
                       periodSeconds: 5
-                    command: ["/app/web-server"]
                     args:
-                      - "serve"
-                      - "--port=80"
-                      - "--static-dir=/usr/share/nginx/html"
-                      - "--api-backend=http://api-service"
-                      - "--enable-compression"
-                      - "--enable-cache"
-                      - "-v"
-                      - "-v"
+                      - "server"
+                      - "--config=/app/config/app.properties"
+                      - "--workers=2"
+                      - "--feature=compression"
+                      - "--feature=metrics"
+                      - "--verbose"
                     volumeMounts:
-                      - name: app-config
-                        mountPath: /usr/share/nginx/html/config
+                      - name: config
+                        mountPath: /app/config
+                      - name: static-content
+                        mountPath: /usr/share/nginx/html
                 volumes:
-                  - name: app-config
+                  - name: config
                     configMap:
                       name: web-config
-                      items:
-                        - key: app.config.json
-                          path: config.json
+                  - name: static-content
+                    emptyDir: {}
           ---
           apiVersion: networking.k8s.io/v1
           kind: Ingress

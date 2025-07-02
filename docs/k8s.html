@@ -836,6 +836,8 @@ hunk-header {
     <string>server.name=api-service</string>
     <string>server.port=8080</string>
     <string>server.workers=8</string>
+    <string>session.timeout=7200</string>
+    <string>session.cookie.secure=true</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -1000,19 +1002,7 @@ hunk-header {
         <key>name</key>: <string>memory</string>
         <key>target</key>:
           <key>type</key>: <string>Utilization</string>
-          <key>averageUtilization</key>: <number>70</number>
-<string>---</string>
-<key>apiVersion</key>: <string>policy/v1</string>
-<key>kind</key>: <string>PodDisruptionBudget</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-pdb</string>
-  <key>namespace</key>: <string>microservices-prod</string>
-<key>spec</key>:
-  <key>minAvailable</key>: <number>2</number>
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>api</string>
-      <key>environment</key>: <string>prod</string></bkl-code>
+          <key>averageUtilization</key>: <number>70</number></bkl-code>
 </div>
 </div>
 
@@ -1038,6 +1028,27 @@ hunk-header {
   <key>name</key>: <string>web-config</string>
   <key>namespace</key>: <string>microservices-prod</string>
 <key>data</key>:
+  <key>app.properties</key>: <string>|</string>
+    <string>cache.enabled=true</string>
+    <string>cache.ttl=3600</string>
+    <string>cache.backend=redis-cluster</string>
+    <string>cache.max_size=1000</string>
+    <string>environment=production</string>
+    <string>logging.level=warn</string>
+    <string>logging.format=json</string>
+    <string>logging.output=stdout</string>
+    <string>logging.sample_rate=0.1</string>
+    <string>metrics.enabled=true</string>
+    <string>metrics.port=9090</string>
+    <string>metrics.path=/metrics</string>
+    <string>security.rate_limit=1000</string>
+    <string>security.csp_enabled=true</string>
+    <string>server.port=80</string>
+    <string>server.max_connections=1000</string>
+    <string>server.name=web-service</string>
+    <string>server.workers=8</string>
+    <string>session.timeout=7200</string>
+    <string>session.cookie.secure=true</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
       <string><string>"environment"</string>: "production",</string>
@@ -1053,6 +1064,17 @@ hunk-header {
         <string><string>"url"</string>: "https://cdn.example.com"</string>
       <string>}</string>
     <string>}</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-secrets</string>
+  <key>namespace</key>: <string>microservices-prod</string>
+<key>type</key>: <string>Opaque</string>
+<key>data</key>:
+  <key>session-secret</key>: <string>cHJvZC1zZXNzaW9uLXNlY3JldC1rZXktcHJvZHVjdGlvbi0xMjM0NTY=</string>
+  <key>cdn-api-key</key>: <string>Y2RuLXByb2QtYXBpLWtleS1wcm9kdWN0aW9uLXh5ejEyMzQ1Ng==</string>
+  <key>analytics-key</key>: <string>YW5hbHl0aWNzLXByb2QtYXBpLWtleS05ODc2NTQzMjE=</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Service</string>
@@ -1126,65 +1148,68 @@ hunk-header {
               <key>value</key>: <string>"https://api.example.com"</string>
             - <key>name</key>: <string>APP_ENV</string>
               <key>value</key>: <string>production</string>
-            - <key>name</key>: <string>CDN_ENABLED</string>
+            - <key>name</key>: <string>CACHE_ENABLED</string>
               <key>value</key>: <string>"true"</string>
-            - <key>name</key>: <string>CACHE_CONTROL</string>
-              <key>value</key>: <string>"max-age=3600"</string>
+            - <key>name</key>: <string>SESSION_SECRET</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>session-secret</string>
+            - <key>name</key>: <string>CDN_API_KEY</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>cdn-api-key</string>
+            - <key>name</key>: <string>ANALYTICS_KEY</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>analytics-key</string>
           <key>resources</key>:
             <key>requests</key>:
-              <key>memory</key>: <string>"256Mi"</string>
-              <key>cpu</key>: <string>"200m"</string>
-            <key>limits</key>:
               <key>memory</key>: <string>"512Mi"</string>
               <key>cpu</key>: <string>"500m"</string>
+            <key>limits</key>:
+              <key>memory</key>: <string>"1Gi"</string>
+              <key>cpu</key>: <string>"1000m"</string>
           <key>livenessProbe</key>:
             <key>httpGet</key>:
               <key>path</key>: <string>/health</string>
               <key>port</key>: <number>80</number>
-            <key>initialDelaySeconds</key>: <number>10</number>
+            <key>initialDelaySeconds</key>: <number>30</number>
             <key>periodSeconds</key>: <number>10</number>
             <key>timeoutSeconds</key>: <number>5</number>
             <key>failureThreshold</key>: <number>3</number>
           <key>readinessProbe</key>:
             <key>httpGet</key>:
-              <key>path</key>: <string>/health</string>
+              <key>path</key>: <string>/ready</string>
               <key>port</key>: <number>80</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
             <key>timeoutSeconds</key>: <number>3</number>
             <key>successThreshold</key>: <number>1</number>
             <key>failureThreshold</key>: <number>3</number>
-          <key>command</key>: <string>["/app/web-server"]</string>
           <key>args</key>:
-            - <string>"serve"</string>
-            - <string>"--port=80"</string>
-            - <string>"--static-dir=/usr/share/nginx/html"</string>
-            - <string>"--api-backend=https://api-service"</string>
-            - <string>"--enable-compression"</string>
-            - <string>"--enable-cache"</string>
-            - <string>"--cache-ttl=3600"</string>
-            - <string>"--enable-metrics"</string>
-            - <string>"--metrics-port=9090"</string>
-            - <string>"--enable-security-headers"</string>
-            - <string>"--enable-rate-limiting"</string>
-            - <string>"--rate-limit=100"</string>
-            - <string>"--enable-access-log"</string>
-            - <string>"--access-log-format=json"</string>
-            - <string>"--enable-cdn"</string>
-            - <string>"--cdn-url=https://cdn.example.com"</string>
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=8"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--feature=rate-limiting"</string>
+            - <string>"--feature=caching"</string>
+            - <string>"--feature=compression"</string>
+            - <string>"--feature=security-headers"</string>
+            - <string>"--feature=cdn"</string>
+            - <string>"--feature=analytics"</string>
+            - <string>"--log-format=json"</string>
             - <string>"--graceful-timeout=30s"</string>
-            - <string>"--read-timeout=30s"</string>
-            - <string>"--write-timeout=30s"</string>
           <key>volumeMounts</key>:
-            - <key>name</key>: <string>app-config</string>
-              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
+            - <key>name</key>: <string>config</string>
+              <key>mountPath</key>: <string>/app/config</string>
       <key>volumes</key>:
-        - <key>name</key>: <string>app-config</string>
+        - <key>name</key>: <string>config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>app.config.json</string>
-                <key>path</key>: <string>config.json</string>
 <string>---</string>
 <key>apiVersion</key>: <string>networking.k8s.io/v1</string>
 <key>kind</key>: <string>Ingress</string>
@@ -1224,17 +1249,37 @@ hunk-header {
                 <key>port</key>:
                   <key>number</key>: <number>80</number>
 <string>---</string>
-<key>apiVersion</key>: <string>policy/v1</string>
-<key>kind</key>: <string>PodDisruptionBudget</string>
+<key>apiVersion</key>: <string>autoscaling/v2</string>
+<key>kind</key>: <string>HorizontalPodAutoscaler</string>
 <key>metadata</key>:
-  <key>name</key>: <string>web-pdb</string>
+  <key>name</key>: <string>web-hpa</string>
   <key>namespace</key>: <string>microservices-prod</string>
 <key>spec</key>:
-  <key>minAvailable</key>: <number>2</number>
-  <key>selector</key>:
-    <key>matchLabels</key>:
-      <key>app</key>: <string>web</string>
-      <key>environment</key>: <string>prod</string></bkl-code>
+  <key>scaleTargetRef</key>:
+    <key>apiVersion</key>: <string>apps/v1</string>
+    <key>kind</key>: <string>Deployment</string>
+    <key>name</key>: <string>web-deployment</string>
+  <key>minReplicas</key>: <number>3</number>
+  <key>maxReplicas</key>: <number>10</number>
+  <key>metrics</key>:
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>cpu</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>60</number>
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>memory</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>70</number>
+
+    - <key>code</key>:
+        <key>label</key>: <string>original/staging/namespace.yaml</string>
+        <key>languages</key>: <string>[[0, "yaml"]]</string>
+        <key>expandable</key>: <bool>true</bool>
+        <key>collapsed</key>: <bool>true</bool></bkl-code>
 </div>
 </div>
 
@@ -1301,6 +1346,8 @@ hunk-header {
     <string>server.port=8080</string>
     <string>server.name=api-service</string>
     <string>server.workers=4</string>
+    <string>session.timeout=3600</string>
+    <string>session.cookie.secure=true</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -1456,6 +1503,20 @@ hunk-header {
   <key>name</key>: <string>web-config</string>
   <key>namespace</key>: <string>microservices-staging</string>
 <key>data</key>:
+  <key>app.properties</key>: <string>|</string>
+    <string>server.port=80</string>
+    <string>server.name=web-service</string>
+    <string>logging.level=info</string>
+    <string>logging.format=json</string>
+    <string>logging.output=stdout</string>
+    <string>cache.enabled=true</string>
+    <string>cache.ttl=300</string>
+    <string>cache.backend=redis</string>
+    <string>session.timeout=3600</string>
+    <string>session.cookie.secure=true</string>
+    <string>metrics.enabled=true</string>
+    <string>metrics.port=9090</string>
+    <string>environment=staging</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
       <string><string>"environment"</string>: "staging",</string>
@@ -1467,6 +1528,16 @@ hunk-header {
         <string><string>"cdnEnabled"</string>: true</string>
       <string>}</string>
     <string>}</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-secrets</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+<key>type</key>: <string>Opaque</string>
+<key>data</key>:
+  <key>session-secret</key>: <string>c3RhZ2luZy1zZXNzaW9uLXNlY3JldC1rZXktYWJjZGVmZ2hpams=</string>
+  <key>cdn-api-key</key>: <string>Y2RuLXN0YWdpbmctYXBpLWtleS0xMjM0NTY3ODkw</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Service</string>
@@ -1521,15 +1592,25 @@ hunk-header {
               <key>value</key>: <string>"http://api-service"</string>
             - <key>name</key>: <string>APP_ENV</string>
               <key>value</key>: <string>staging</string>
-            - <key>name</key>: <string>CDN_ENABLED</string>
+            - <key>name</key>: <string>CACHE_ENABLED</string>
               <key>value</key>: <string>"true"</string>
+            - <key>name</key>: <string>SESSION_SECRET</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>session-secret</string>
+            - <key>name</key>: <string>CDN_API_KEY</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>cdn-api-key</string>
           <key>resources</key>:
             <key>requests</key>:
-              <key>memory</key>: <string>"128Mi"</string>
-              <key>cpu</key>: <string>"100m"</string>
-            <key>limits</key>:
               <key>memory</key>: <string>"256Mi"</string>
               <key>cpu</key>: <string>"200m"</string>
+            <key>limits</key>:
+              <key>memory</key>: <string>"512Mi"</string>
+              <key>cpu</key>: <string>"500m"</string>
           <key>livenessProbe</key>:
             <key>httpGet</key>:
               <key>path</key>: <string>/health</string>
@@ -1542,30 +1623,23 @@ hunk-header {
               <key>port</key>: <number>80</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
-          <key>command</key>: <string>["/app/web-server"]</string>
           <key>args</key>:
-            - <string>"serve"</string>
-            - <string>"--port=80"</string>
-            - <string>"--static-dir=/usr/share/nginx/html"</string>
-            - <string>"--api-backend=http://api-service"</string>
-            - <string>"--enable-compression"</string>
-            - <string>"--enable-cache"</string>
-            - <string>"--cache-ttl=300"</string>
-            - <string>"--enable-metrics"</string>
-            - <string>"--metrics-port=9090"</string>
-            - <string>"--access-log=/var/log/access.log"</string>
-            - <string>"--error-log=/var/log/error.log"</string>
-            - <string>"-v"</string>
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=4"</string>
+            - <string>"--feature=auth"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--feature=rate-limiting"</string>
+            - <string>"--feature=caching"</string>
+            - <string>"--log-format=json"</string>
+            - <string>"--graceful-timeout=30s"</string>
           <key>volumeMounts</key>:
-            - <key>name</key>: <string>app-config</string>
-              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
+            - <key>name</key>: <string>config</string>
+              <key>mountPath</key>: <string>/app/config</string>
       <key>volumes</key>:
-        - <key>name</key>: <string>app-config</string>
+        - <key>name</key>: <string>config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>app.config.json</string>
-                <key>path</key>: <string>config.json</string>
 <string>---</string>
 <key>apiVersion</key>: <string>networking.k8s.io/v1</string>
 <key>kind</key>: <string>Ingress</string>
@@ -1591,7 +1665,33 @@ hunk-header {
               <key>service</key>:
                 <key>name</key>: <string>web-service</string>
                 <key>port</key>:
-                  <key>number</key>: <number>80</number></bkl-code>
+                  <key>number</key>: <number>80</number>
+<string>---</string>
+<key>apiVersion</key>: <string>autoscaling/v2</string>
+<key>kind</key>: <string>HorizontalPodAutoscaler</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-hpa</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+<key>spec</key>:
+  <key>scaleTargetRef</key>:
+    <key>apiVersion</key>: <string>apps/v1</string>
+    <key>kind</key>: <string>Deployment</string>
+    <key>name</key>: <string>web-deployment</string>
+  <key>minReplicas</key>: <number>2</number>
+  <key>maxReplicas</key>: <number>5</number>
+  <key>metrics</key>:
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>cpu</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>70</number>
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>memory</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>80</number></bkl-code>
 </div>
 </div>
 
@@ -1651,6 +1751,8 @@ hunk-header {
     <string>cache.ttl=300</string>
     <string>database.pool_size=5</string>
     <string>database.timeout=30</string>
+    <string>session.timeout=3600</string>
+    <string>session.cookie.secure=false</string>
     <string>environment=development</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
@@ -1778,6 +1880,16 @@ hunk-header {
   <key>name</key>: <string>web-config</string>
   <key>namespace</key>: <string>microservices-dev</string>
 <key>data</key>:
+  <key>app.properties</key>: <string>|</string>
+    <string>server.port=80</string>
+    <string>server.name=web-service</string>
+    <string>logging.level=debug</string>
+    <string>logging.format=json</string>
+    <string>cache.enabled=false</string>
+    <string>cache.ttl=300</string>
+    <string>session.timeout=1800</string>
+    <string>session.cookie.secure=false</string>
+    <string>environment=development</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
       <string><string>"environment"</string>: "development",</string>
@@ -1785,9 +1897,19 @@ hunk-header {
       <string><string>"debugMode"</string>: true,</string>
       <string><string>"features"</string>: {</string>
         <string><string>"analytics"</string>: false,</string>
-        <string><string>"caching"</string>: false</string>
+        <string><string>"caching"</string>: false,</string>
+        <string><string>"cdn"</string>: false</string>
       <string>}</string>
     <string>}</string>
+<string>---</string>
+<key>apiVersion</key>: <string>v1</string>
+<key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-secrets</string>
+  <key>namespace</key>: <string>microservices-dev</string>
+<key>type</key>: <string>Opaque</string>
+<key>data</key>:
+  <key>session-secret</key>: <string>ZGV2LXNlc3Npb24tc2VjcmV0LWtleS0xMjM0NTY3ODkw</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Service</string>
@@ -1842,8 +1964,13 @@ hunk-header {
               <key>value</key>: <string>"http://api-service"</string>
             - <key>name</key>: <string>APP_ENV</string>
               <key>value</key>: <string>development</string>
-            - <key>name</key>: <string>DEBUG_MODE</string>
+            - <key>name</key>: <string>DEBUG</string>
               <key>value</key>: <string>"true"</string>
+            - <key>name</key>: <string>SESSION_SECRET</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>session-secret</string>
           <key>resources</key>:
             <key>requests</key>:
               <key>memory</key>: <string>"64Mi"</string>
@@ -1853,36 +1980,34 @@ hunk-header {
               <key>cpu</key>: <string>"100m"</string>
           <key>livenessProbe</key>:
             <key>httpGet</key>:
-              <key>path</key>: <string>/</string>
+              <key>path</key>: <string>/health</string>
               <key>port</key>: <number>80</number>
-            <key>initialDelaySeconds</key>: <number>10</number>
+            <key>initialDelaySeconds</key>: <number>30</number>
             <key>periodSeconds</key>: <number>10</number>
           <key>readinessProbe</key>:
             <key>httpGet</key>:
-              <key>path</key>: <string>/</string>
+              <key>path</key>: <string>/ready</string>
               <key>port</key>: <number>80</number>
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
-          <key>command</key>: <string>["/app/web-server"]</string>
           <key>args</key>:
-            - <string>"serve"</string>
-            - <string>"--port=80"</string>
-            - <string>"--static-dir=/usr/share/nginx/html"</string>
-            - <string>"--api-backend=http://api-service"</string>
-            - <string>"--enable-compression"</string>
-            - <string>"--enable-cache"</string>
-            - <string>"-v"</string>
-            - <string>"-v"</string>
+            - <string>"server"</string>
+            - <string>"--config=/app/config/app.properties"</string>
+            - <string>"--workers=2"</string>
+            - <string>"--feature=compression"</string>
+            - <string>"--feature=metrics"</string>
+            - <string>"--verbose"</string>
           <key>volumeMounts</key>:
-            - <key>name</key>: <string>app-config</string>
-              <key>mountPath</key>: <string>/usr/share/nginx/html/config</string>
+            - <key>name</key>: <string>config</string>
+              <key>mountPath</key>: <string>/app/config</string>
+            - <key>name</key>: <string>static-content</string>
+              <key>mountPath</key>: <string>/usr/share/nginx/html</string>
       <key>volumes</key>:
-        - <key>name</key>: <string>app-config</string>
+        - <key>name</key>: <string>config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
-            <key>items</key>:
-              - <key>key</key>: <string>app.config.json</string>
-                <key>path</key>: <string>config.json</string>
+        - <key>name</key>: <string>static-content</string>
+          <key>emptyDir</key>: <string>{}</string>
 <string>---</string>
 <key>apiVersion</key>: <string>networking.k8s.io/v1</string>
 <key>kind</key>: <string>Ingress</string>
