@@ -186,8 +186,8 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, s
 	}
 
 	// Sort outputs by path if requested
-	if sortPath != "" {
-		sortOutputsByPath(outputs, sortPath)
+	if err := sortOutputsByPath(outputs, sortPath); err != nil {
+		return nil, err
 	}
 
 	return ft.MarshalStream(outputs)
@@ -212,12 +212,25 @@ func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, err
 }
 
 // sortOutputsByPath sorts the outputs slice by the value at the specified path
-func sortOutputsByPath(outputs []any, sortPath string) {
+func sortOutputsByPath(outputs []any, sortPath string) error {
+	var sortErr error
 	sort.SliceStable(outputs, func(i, j int) bool {
-		valI := pathutil.GetString(outputs[i], sortPath)
-		valJ := pathutil.GetString(outputs[j], sortPath)
+		if sortErr != nil {
+			return false
+		}
+		valI, errI := pathutil.GetString(outputs[i], sortPath)
+		if errI != nil {
+			sortErr = fmt.Errorf("failed to get sort key at path %q from document %d: %w", sortPath, i, errI)
+			return false
+		}
+		valJ, errJ := pathutil.GetString(outputs[j], sortPath)
+		if errJ != nil {
+			sortErr = fmt.Errorf("failed to get sort key at path %q from document %d: %w", sortPath, j, errJ)
+			return false
+		}
 		return valI < valJ
 	})
+	return sortErr
 }
 
 // getPathString retrieves a value from a nested structure and converts it to string

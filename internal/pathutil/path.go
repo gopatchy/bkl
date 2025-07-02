@@ -27,10 +27,10 @@ func Get(data any, parts []string) (any, error) {
 }
 
 // GetString retrieves a value from a nested structure using a dot-separated path string
-// and converts it to a string. Returns empty string if path not found.
-func GetString(data any, path string) string {
+// and converts it to a string. Returns an error if the path is not found or cannot be traversed.
+func GetString(data any, path string) (string, error) {
 	if path == "" {
-		return ""
+		return "", nil
 	}
 
 	parts := strings.Split(path, ".")
@@ -41,15 +41,15 @@ func GetString(data any, path string) string {
 		case map[string]any:
 			val, found := obj[part]
 			if !found {
-				return ""
+				return "", fmt.Errorf("key %q not found in path %q: %w", part, path, errors.ErrRefNotFound)
 			}
 			current = val
 		default:
-			return ""
+			return "", fmt.Errorf("cannot traverse %q in non-map type %T: %w", part, current, errors.ErrRefNotFound)
 		}
 	}
 
-	return fmt.Sprint(current)
+	return fmt.Sprint(current), nil
 }
 
 // Set sets a value at a path in a nested map structure.
