@@ -4,4 +4,4 @@ integration-coverage.out
 integration-coverage.html
 out
 .idea
-tmp
+tmp*
