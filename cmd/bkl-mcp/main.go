@@ -14,9 +14,7 @@ import (
 	"github.com/gopatchy/bkl"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/version"
-	"github.com/hexops/gotextdiff"
-	"github.com/hexops/gotextdiff/myers"
-	"github.com/hexops/gotextdiff/span"
+
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -1150,33 +1148,25 @@ func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	finalFormat := determineFormatWithPaths(format, "", []string{file1, file2})
 	sortPath := parseOptionalString(args, "sortPath", "")
 
-	output1, err := bkl.Evaluate(fsys, []string{file1}, "/", workingDir, env, &finalFormat, sortPath)
+	result, err := bkl.Compare(fsys, file1, file2, "/", workingDir, env, &finalFormat, sortPath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to evaluate %s: %v", file1, err)), nil
+		return mcp.NewToolResultError(err.Error()), nil
 	}
-
-	output2, err := bkl.Evaluate(fsys, []string{file2}, "/", workingDir, env, &finalFormat, sortPath)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to evaluate %s: %v", file2, err)), nil
-	}
-
-	edits := myers.ComputeEdits(span.URIFromPath(file1), string(output1), string(output2))
-	unified := fmt.Sprint(gotextdiff.ToUnified(file1, file2, string(output1), edits))
 
 	response := map[string]any{
-		"file1":     file1,
-		"file2":     file2,
-		"format":    finalFormat,
-		"diff":      unified,
+		"file1":     result.File1,
+		"file2":     result.File2,
+		"format":    result.Format,
+		"diff":      result.Diff,
 		"operation": "compare_files",
 	}
 
-	if len(env) > 0 {
-		response["environment"] = env
+	if len(result.Environment) > 0 {
+		response["environment"] = result.Environment
 	}
 
-	if sortPath != "" {
-		response["sortPath"] = sortPath
+	if result.SortPath != "" {
+		response["sortPath"] = result.SortPath
 	}
 
 	jsonResult, err := json.MarshalIndent(response, "", "  ")
