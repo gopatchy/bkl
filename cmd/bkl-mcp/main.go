@@ -93,9 +93,6 @@ func main() {
 			mcp.Description("Environment variables as key-value pairs"),
 		),
 		fileSystemParam,
-		mcp.WithString("workingDir",
-			mcp.Description("Working directory for file operations (default: current directory)"),
-		),
 		mcp.WithString("outputPath",
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
@@ -120,9 +117,6 @@ func main() {
 		),
 		formatParam,
 		fileSystemParam,
-		mcp.WithString("workingDir",
-			mcp.Description("Working directory for file operations (default: current directory)"),
-		),
 		mcp.WithString("outputPath",
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
@@ -140,9 +134,6 @@ func main() {
 		),
 		formatParam,
 		fileSystemParam,
-		mcp.WithString("workingDir",
-			mcp.Description("Working directory for file operations (default: current directory)"),
-		),
 		mcp.WithString("outputPath",
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
@@ -157,9 +148,6 @@ func main() {
 		),
 		formatParam,
 		fileSystemParam,
-		mcp.WithString("workingDir",
-			mcp.Description("Working directory for file operations (default: current directory)"),
-		),
 		mcp.WithString("outputPath",
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
@@ -595,15 +583,11 @@ func createTestFS(fileSystem map[string]string) (fs.FS, error) {
 	return fsys, nil
 }
 
-func getFileSystem(fileSystem map[string]string, workingDir string) (fs.FS, error) {
+func getFileSystem(fileSystem map[string]string) (fs.FS, error) {
 	if fileSystem != nil {
 		return createTestFS(fileSystem)
 	}
-
-	if workingDir == "" {
-		workingDir = "."
-	}
-	return os.DirFS(workingDir), nil
+	return os.DirFS("/"), nil
 }
 
 func parseEnvironment(args map[string]any) (map[string]string, error) {
@@ -623,29 +607,23 @@ func parseEnvironment(args map[string]any) (map[string]string, error) {
 	return nil, nil
 }
 
-// determineFormatWithPaths determines the format to use, checking explicit format first,
-// then inferring from outputPath, and finally from input file paths.
 func determineFormatWithPaths(explicitFormat string, outputPath string, inputPaths []string) string {
-	// If explicit format is provided, use it
 	if explicitFormat != "" {
 		return explicitFormat
 	}
 
-	// Try to infer from output path
 	if outputPath != "" {
 		if ext := utils.Ext(outputPath); ext != "" {
 			return ext
 		}
 	}
 
-	// Try to infer from input paths
 	for _, path := range inputPaths {
 		if ext := utils.Ext(path); ext != "" {
 			return ext
 		}
 	}
 
-	// Default to empty string (will use default format in bkl)
 	return ""
 }
 
@@ -686,25 +664,20 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	workingDir := parseOptionalString(args, "workingDir", ".")
+	workingDir := ""
+	if fileSystem != nil {
+		workingDir = "/"
+	}
 
-	fsys, err := getFileSystem(fileSystem, workingDir)
+	fsys, err := getFileSystem(fileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "."
-	if fileSystem != nil {
-		// For in-memory filesystem, use current directory as root
-		// since files are already in the correct format
-		workingDir = "."
-	}
-
-	// Determine format using the helper function
 	finalFormat := determineFormatWithPaths(format, outputPath, files)
 
 	sortPath := parseOptionalString(args, "sortPath", "")
-	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &finalFormat, sortPath)
+	output, err := bkl.Evaluate(fsys, files, "/", workingDir, env, &finalFormat, sortPath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}
@@ -760,27 +733,22 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 
 	format := parseOptionalString(args, "format", "")
 	outputPath := parseOptionalString(args, "outputPath", "")
-	workingDir := parseOptionalString(args, "workingDir", ".")
+	workingDir := ""
+	if fileSystem != nil {
+		workingDir = "/"
+	}
 
-	fsys, err := getFileSystem(fileSystem, workingDir)
+	fsys, err := getFileSystem(fileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "."
-	if fileSystem != nil {
-		// For in-memory filesystem, use current directory as root
-		// since files are already in the correct format
-		workingDir = "."
-	}
-
-	// Determine format using the helper function, with default fallback to yaml
 	finalFormat := determineFormatWithPaths(format, outputPath, []string{baseFile, targetFile})
 	if finalFormat == "" {
 		finalFormat = "yaml"
 	}
 	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Diff(fsys, baseFile, targetFile, rootPath, workingDir, selector, &finalFormat)
+	output, err := bkl.Diff(fsys, baseFile, targetFile, "/", workingDir, selector, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
@@ -841,27 +809,22 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 
 	format := parseOptionalString(args, "format", "")
 	outputPath := parseOptionalString(args, "outputPath", "")
-	workingDir := parseOptionalString(args, "workingDir", ".")
+	workingDir := ""
+	if fileSystem != nil {
+		workingDir = "/"
+	}
 
-	fsys, err := getFileSystem(fileSystem, workingDir)
+	fsys, err := getFileSystem(fileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "."
-	if fileSystem != nil {
-		// For in-memory filesystem, use current directory as root
-		// since files are already in the correct format
-		workingDir = "."
-	}
-
-	// Determine format using the helper function, with default fallback to yaml
 	finalFormat := determineFormatWithPaths(format, outputPath, files)
 	if finalFormat == "" {
 		finalFormat = "yaml"
 	}
 	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, selector, &finalFormat)
+	output, err := bkl.Intersect(fsys, files, "/", workingDir, selector, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
@@ -908,26 +871,21 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	format := parseOptionalString(args, "format", "")
 	outputPath := parseOptionalString(args, "outputPath", "")
-	workingDir := parseOptionalString(args, "workingDir", ".")
+	workingDir := ""
+	if fileSystem != nil {
+		workingDir = "/"
+	}
 
-	fsys, err := getFileSystem(fileSystem, workingDir)
+	fsys, err := getFileSystem(fileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	rootPath := "."
-	if fileSystem != nil {
-		// For in-memory filesystem, use current directory as root
-		// since files are already in the correct format
-		workingDir = "."
-	}
-
-	// Determine format using the helper function, with default fallback to yaml
 	finalFormat := determineFormatWithPaths(format, outputPath, []string{file})
 	if finalFormat == "" {
 		finalFormat = "yaml"
 	}
-	output, err := bkl.Required(fsys, file, rootPath, workingDir, &finalFormat)
+	output, err := bkl.Required(fsys, file, "/", workingDir, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
@@ -1028,11 +986,15 @@ Update your Todos to do these steps in order:
 5) Create remaining layers (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
 6) Validate all bkl leaf layers against the original configs (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
 
-Tips:
+Tools:
 * To query documentation: mcp__bkl-mcp__query keywords="repeat,list,iteration"
 * Instead of bkl, use: mcp__bkl-mcp__evaluate files="prep/prod/namespace.yaml" outputPath="bkl/namespace.yaml"
 * Instead of bkli, use: mcp__bkl-mcp__intersect files="prep/prod/api-service.yaml,prep/prod/web-service.yaml" outputPath="bkl/base.yaml" selector="kind"
 * Instead of bkld, use: mcp__bkl-mcp__diff baseFile="bkl/namespace.yaml" targetFile="prep/staging/namespace.yaml" outputPath="bkl/namespace.staging.yaml" selector="kind"
+
+Rules:
+* ALWAYS stack environments: dev on staging on prod
+* NEVER put the environment name in an environment variable
 `
 
 	return mcp.NewToolResultText(prompt), nil
