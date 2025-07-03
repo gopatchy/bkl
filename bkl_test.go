@@ -206,9 +206,7 @@ func BenchmarkBKL(b *testing.B) {
 	}
 }
 
-func TestCLI(t *testing.T) {
-	t.Parallel()
-
+func getFilteredTests(t *testing.T) (map[string]*bkl.TestCase, map[string]bool, map[string]bool) {
 	tests, err := bkl.GetTests()
 	if err != nil {
 		t.Fatalf("Failed to get tests: %v", err)
@@ -240,6 +238,211 @@ func TestCLI(t *testing.T) {
 		}
 	}
 
+	return tests, filterTests, excludeTests
+}
+
+func setupCLITestFiles(t *testing.T, testCase *bkl.TestCase) string {
+	tmpDir := t.TempDir()
+
+	for filename, content := range testCase.Files {
+		fullPath := filepath.Join(tmpDir, filename)
+		dir := filepath.Dir(fullPath)
+		if dir != tmpDir && dir != "." {
+			err := os.MkdirAll(dir, 0o755)
+			if err != nil {
+				t.Fatalf("Failed to create directory %s: %v", dir, err)
+			}
+		}
+		err := os.WriteFile(fullPath, []byte(content), 0o644)
+		if err != nil {
+			t.Fatalf("Failed to write test file %s: %v", filename, err)
+		}
+	}
+
+	return tmpDir
+}
+
+func executeCLICommand(t *testing.T, cmdPath string, args []string, testCase *bkl.TestCase, tmpDir string) []byte {
+	if testCase.Format != "" {
+		args = append(args, "--format", testCase.Format)
+	}
+
+	if testCase.Selector != "" && (testCase.Diff || testCase.Intersect) {
+		args = append(args, "--selector", testCase.Selector)
+	}
+
+	if testCase.SortPath != "" {
+		args = append(args, "--sort", testCase.SortPath)
+	}
+
+	if testCase.RootPath != "" {
+		args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
+	}
+
+	cmdArgs := append([]string{"run", cmdPath}, args...)
+	cmd := exec.Command("go", cmdArgs...)
+	cmd.Dir = "."
+
+	if testCase.Env != nil {
+		cmd.Env = os.Environ()
+		for k, v := range testCase.Env {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+		}
+	}
+
+	output, err := cmd.CombinedOutput()
+
+	if len(testCase.Errors) > 0 {
+		if err == nil {
+			t.Fatalf("Expected error containing one of %v, but got no error", testCase.Errors)
+		}
+
+		errorFound := false
+		for _, expectedError := range testCase.Errors {
+			if strings.Contains(string(output), expectedError) || strings.Contains(err.Error(), expectedError) {
+				errorFound = true
+				break
+			}
+		}
+
+		if !errorFound {
+			t.Fatalf("Expected error containing one of %v, but got: %v\nOutput: %s", testCase.Errors, err, output)
+		}
+		return nil
+	}
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v\nOutput: %s", err, output)
+	}
+
+	return output
+}
+
+func checkCLIOutput(t *testing.T, output []byte, expected string, trimDiffHeaders bool) {
+	expectedBytes := bytes.TrimSpace([]byte(expected))
+	outputBytes := bytes.TrimSpace(output)
+
+	if trimDiffHeaders {
+		// Split by newlines and remove first two lines if they exist
+		outputLines := bytes.Split(outputBytes, []byte("\n"))
+		expectedLines := bytes.Split(expectedBytes, []byte("\n"))
+
+		if len(outputLines) > 2 {
+			outputBytes = bytes.Join(outputLines[2:], []byte("\n"))
+		}
+		if len(expectedLines) > 2 {
+			expectedBytes = bytes.Join(expectedLines[2:], []byte("\n"))
+		}
+	}
+
+	if !bytes.Equal(outputBytes, expectedBytes) {
+		t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedBytes, outputBytes)
+	}
+}
+
+func runCLIEvaluateTest(t *testing.T, testName string, testCase *bkl.TestCase) {
+	t.Run(testName, func(t *testing.T) {
+		t.Parallel()
+		tmpDir := setupCLITestFiles(t, testCase)
+
+		var args []string
+		for _, evalFile := range testCase.Eval {
+			args = append(args, filepath.Join(tmpDir, evalFile))
+		}
+
+		output := executeCLICommand(t, "./cmd/bkl", args, testCase, tmpDir)
+		if output != nil {
+			checkCLIOutput(t, output, testCase.Expected, false)
+		}
+	})
+}
+
+func runCLIDiffTest(t *testing.T, testName string, testCase *bkl.TestCase) {
+	t.Run(testName, func(t *testing.T) {
+		t.Parallel()
+		tmpDir := setupCLITestFiles(t, testCase)
+
+		if len(testCase.Eval) != 2 {
+			t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
+		}
+
+		args := []string{
+			filepath.Join(tmpDir, testCase.Eval[0]),
+			filepath.Join(tmpDir, testCase.Eval[1]),
+		}
+
+		output := executeCLICommand(t, "./cmd/bkld", args, testCase, tmpDir)
+		if output != nil {
+			checkCLIOutput(t, output, testCase.Expected, false)
+		}
+	})
+}
+
+func runCLIIntersectTest(t *testing.T, testName string, testCase *bkl.TestCase) {
+	t.Run(testName, func(t *testing.T) {
+		t.Parallel()
+		tmpDir := setupCLITestFiles(t, testCase)
+
+		if len(testCase.Eval) < 2 {
+			t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
+		}
+
+		var args []string
+		for _, evalFile := range testCase.Eval {
+			args = append(args, filepath.Join(tmpDir, evalFile))
+		}
+
+		output := executeCLICommand(t, "./cmd/bkli", args, testCase, tmpDir)
+		if output != nil {
+			checkCLIOutput(t, output, testCase.Expected, false)
+		}
+	})
+}
+
+func runCLIRequiredTest(t *testing.T, testName string, testCase *bkl.TestCase) {
+	t.Run(testName, func(t *testing.T) {
+		t.Parallel()
+		tmpDir := setupCLITestFiles(t, testCase)
+
+		if len(testCase.Eval) != 1 {
+			t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
+		}
+
+		args := []string{filepath.Join(tmpDir, testCase.Eval[0])}
+
+		output := executeCLICommand(t, "./cmd/bklr", args, testCase, tmpDir)
+		if output != nil {
+			checkCLIOutput(t, output, testCase.Expected, false)
+		}
+	})
+}
+
+func runCLICompareTest(t *testing.T, testName string, testCase *bkl.TestCase) {
+	t.Run(testName, func(t *testing.T) {
+		t.Parallel()
+		tmpDir := setupCLITestFiles(t, testCase)
+
+		if len(testCase.Eval) != 2 {
+			t.Fatalf("Compare tests require exactly 2 eval files, got %d", len(testCase.Eval))
+		}
+
+		args := []string{
+			filepath.Join(tmpDir, testCase.Eval[0]),
+			filepath.Join(tmpDir, testCase.Eval[1]),
+		}
+
+		output := executeCLICommand(t, "./cmd/bklc", args, testCase, tmpDir)
+		if output != nil {
+			checkCLIOutput(t, output, testCase.Expected, true) // true to trim diff headers
+		}
+	})
+}
+
+func TestCLI(t *testing.T) {
+	t.Parallel()
+
+	tests, filterTests, excludeTests := getFilteredTests(t)
+
 	for testName, testCase := range tests {
 		if len(filterTests) > 0 && !filterTests[testName] {
 			continue
@@ -253,138 +456,18 @@ func TestCLI(t *testing.T) {
 			continue
 		}
 
-		t.Run(testName, func(t *testing.T) {
-			t.Parallel()
-
-			tmpDir := t.TempDir()
-
-			for filename, content := range testCase.Files {
-				fullPath := filepath.Join(tmpDir, filename)
-				dir := filepath.Dir(fullPath)
-				if dir != tmpDir && dir != "." {
-					err := os.MkdirAll(dir, 0o755)
-					if err != nil {
-						t.Fatalf("Failed to create directory %s: %v", dir, err)
-					}
-				}
-				err := os.WriteFile(fullPath, []byte(content), 0o644)
-				if err != nil {
-					t.Fatalf("Failed to write test file %s: %v", filename, err)
-				}
-			}
-
-			var cmdPath string
-			var args []string
-
-			switch {
-			case testCase.Diff:
-				cmdPath = "./cmd/bkld"
-				if len(testCase.Eval) != 2 {
-					t.Fatalf("Diff tests require exactly 2 eval files, got %d", len(testCase.Eval))
-				}
-				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
-				args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
-			case testCase.Intersect:
-				cmdPath = "./cmd/bkli"
-				if len(testCase.Eval) < 2 {
-					t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Eval))
-				}
-				for _, evalFile := range testCase.Eval {
-					args = append(args, filepath.Join(tmpDir, evalFile))
-				}
-			case testCase.Required:
-				cmdPath = "./cmd/bklr"
-				if len(testCase.Eval) != 1 {
-					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
-				}
-				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
-			case testCase.Compare:
-				cmdPath = "./cmd/bklc"
-				if len(testCase.Eval) != 2 {
-					t.Fatalf("Compare tests require exactly 2 eval files, got %d", len(testCase.Eval))
-				}
-				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
-				args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
-			default:
-				cmdPath = "./cmd/bkl"
-				for _, evalFile := range testCase.Eval {
-					args = append(args, filepath.Join(tmpDir, evalFile))
-				}
-			}
-
-			if testCase.Format != "" {
-				args = append(args, "--format", testCase.Format)
-			}
-
-			if testCase.Selector != "" && (testCase.Diff || testCase.Intersect) {
-				args = append(args, "--selector", testCase.Selector)
-			}
-
-			if testCase.SortPath != "" {
-				args = append(args, "--sort", testCase.SortPath)
-			}
-
-			if testCase.RootPath != "" {
-				args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
-			}
-
-			cmdArgs := append([]string{"run", cmdPath}, args...)
-			cmd := exec.Command("go", cmdArgs...)
-			cmd.Dir = "."
-
-			if testCase.Env != nil {
-				cmd.Env = os.Environ()
-				for k, v := range testCase.Env {
-					cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
-				}
-			}
-
-			output, err := cmd.CombinedOutput()
-
-			if len(testCase.Errors) > 0 {
-				if err == nil {
-					t.Fatalf("Expected error containing one of %v, but got no error", testCase.Errors)
-				}
-
-				errorFound := false
-				for _, expectedError := range testCase.Errors {
-					if strings.Contains(string(output), expectedError) || strings.Contains(err.Error(), expectedError) {
-						errorFound = true
-						break
-					}
-				}
-
-				if !errorFound {
-					t.Fatalf("Expected error containing one of %v, but got: %v\nOutput: %s", testCase.Errors, err, output)
-				}
-				return
-			}
-
-			if err != nil {
-				t.Fatalf("Unexpected error: %v\nOutput: %s", err, output)
-			}
-
-			// For compare tests, trim the first two lines (file paths) from both output and expected
-			expectedBytes := bytes.TrimSpace([]byte(testCase.Expected))
-			outputBytes := bytes.TrimSpace(output)
-
-			if testCase.Compare {
-				// Split by newlines and remove first two lines if they exist
-				outputLines := bytes.Split(outputBytes, []byte("\n"))
-				expectedLines := bytes.Split(expectedBytes, []byte("\n"))
-
-				if len(outputLines) > 2 {
-					outputBytes = bytes.Join(outputLines[2:], []byte("\n"))
-				}
-				if len(expectedLines) > 2 {
-					expectedBytes = bytes.Join(expectedLines[2:], []byte("\n"))
-				}
-			}
-
-			if !bytes.Equal(outputBytes, expectedBytes) {
-				t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedBytes, outputBytes)
-			}
-		})
+		switch {
+		case testCase.Compare:
+			runCLICompareTest(t, testName, testCase)
+		case testCase.Required:
+			runCLIRequiredTest(t, testName, testCase)
+		case testCase.Intersect:
+			runCLIIntersectTest(t, testName, testCase)
+		case testCase.Diff:
+			runCLIDiffTest(t, testName, testCase)
+		default:
+			runCLIEvaluateTest(t, testName, testCase)
+		}
 	}
 }
 
