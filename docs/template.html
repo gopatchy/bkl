@@ -58,6 +58,8 @@
   {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
 {{else if eq .Operation "fixit"}}
   {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
+{{else if eq .Operation "compare"}}
+  {{template "operatorSymbol" dict "Symbol" "↔" "HasLabels" .HasLabels}}
 {{end}}
 {{end}}
 

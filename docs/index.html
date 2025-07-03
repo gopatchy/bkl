@@ -835,13 +835,11 @@ hunk-header {
 
 	<li><a href="#bklr">bklr</a></li>
 
+	<li><a href="#bklc">bklc</a></li>
+
 	<li><a href="#kubectl-bkl">kubectl bkl</a></li>
 
-	<li><a href="#diff">Comparing Files</a></li>
-
 	<li><a href="#migrate">Migrate</a></li>
-
-	<li><a href="#comparison">Comparison</a></li>
 
 </ol>
 </div>
@@ -4793,7 +4791,7 @@ hunk-header {
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkld</command> <operator>&lt;</operator><argument>base_layer_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkld</command> <argument>[--selector</argument> <argument>path]</argument> <operator>&lt;</operator><argument>base_layer_path<operator></argument>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator></bkl-code>
 </div>
 
 </div>
@@ -4802,6 +4800,11 @@ hunk-header {
 
 
 <p><highlight>bkld</highlight> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <highlight><a href="#bkli">bkli</a></highlight>, it automates splitting existing configurations into layers.
+</p>
+
+
+
+<p>Use <highlight>--selector</highlight> to limit processing to documents matching a specific path.
 </p>
 
 
@@ -5006,7 +5009,7 @@ hunk-header {
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkli</command> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkli</command> <argument>[--selector</argument> <argument>path]</argument> <operator>&lt;</operator><argument>target_output_path<operator></argument>&gt;</operator> <operator>&lt;</operator><argument>target_output_path</argument><operator>&gt;</operator> <command>...</command></bkl-code>
 </div>
 
 </div>
@@ -5020,6 +5023,11 @@ hunk-header {
 
 
 <p>Fields that exist in all inputs with the same value are included in the result. Fields with different values are omitted.
+</p>
+
+
+
+<p>Use <highlight>--selector</highlight> to limit processing to documents matching a specific path.
 </p>
 
 
@@ -5171,47 +5179,28 @@ hunk-header {
 
 
 
+</section>
+
+<section id="bklc">
+<h2><a name="bklc">bklc</a></h2>
 
 
 
-
-
-
-
-
-
-  
 
 <div class="example-container">
-<div class="grid-container grid-3-col">
 
+<div class="code-wrapper">
 
-
-<div class="code-container">
-
-<bkl-code class="code-unlabeled"><key>a</key>:
-  <key>b</key>: <string>$required</string>
-  <key>c</key>: <number>3</number></bkl-code>
-</div>
-
-
-
-
-<div class="operator-symbol">=</div>
-
-
-<div class="code-container">
-
-
-<bkl-code class="code-unlabeled"><key>a</key>:
-  <key>b</key>: <string>$required</string></bkl-code>
-
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <argument>[--color]</argument> <argument>[--sort</argument> <argument>path]</argument> <operator>&lt;<argument></operator>file1</argument><operator>&gt;</operator> <operator>&lt;</operator><argument>file2</argument><operator>&gt;</operator></bkl-code>
 </div>
 
 </div>
-</div>
 
 
+
+
+<p><highlight>bklc</highlight> (c for "compare") compares two bkl files and shows colorized text differences between their evaluated outputs. Use <highlight>--color</highlight> to enable colored output. Use <highlight>--sort</highlight> to order documents by a specific path before comparison.
+</p>
 
 
 
@@ -5227,16 +5216,34 @@ hunk-header {
   
 
 <div class="example-container">
-<div class="grid-container grid-3-col">
+<div class="grid-container grid-5-col">
 
 
 
 <div class="code-container">
 
-<bkl-code class="code-unlabeled"><key>a</key>:
-  - <string>$required</string>
-<key>b</key>:
-  - <number>2</number></bkl-code>
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
+<key>b</key>: <number>2</number>
+<key>c</key>: <number>3</number></bkl-code>
+</div>
+
+
+
+  
+
+  
+<div class="operator-symbol">↔</div>
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>a</key>: <number>1</number>
+<key>b</key>: <number>4</number>
+<key>c</key>: <number>3</number>
+<key>d</key>: <number>5</number></bkl-code>
 </div>
 
 
@@ -5248,8 +5255,14 @@ hunk-header {
 <div class="code-container">
 
 
-<bkl-code class="code-unlabeled"><key>a</key>:
-  - <string>$required</string></bkl-code>
+<bkl-code class="code-unlabeled"><file-header>--- file1</file-header>
+<file-header>+++ file2</file-header>
+<hunk-header>@@ -1,3 +1,4 @@</hunk-header>
+ a: 1
+<deletion>-b: 2</deletion>
+<addition>+b: 4</addition>
+ c: 3
+<addition>+d: 5</addition></bkl-code>
 
 </div>
 
@@ -5302,208 +5315,12 @@ hunk-header {
 
 </section>
 
-<section id="diff">
-<h2><a name="diff">Comparing Files</a></h2>
-
-
-
-<p>Compare evaluated bkl files using standard diff tools:
-</p>
-
-
-
-
-<div class="example-container">
-
-<div class="code-wrapper">
-
-<bkl-code class="code-unlabeled"><prompt>$ <highlight></prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>a.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>b.yaml</argument><operator>)</operator></highlight>
-<file-header>--- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700</file-header>
-<file-header>+++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700</file-header>
-<hunk-header>@@ -1,3 +1,2 @@</hunk-header>
- a: 1
-<deletion>-b: 2</deletion>
- c: 3
-
-<prompt>$ <highlight></prompt><command>diff</command> <flag>-y</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>a.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>b.yaml</argument><operator>)</operator></highlight>
-a: 1                              a: 1
-b: 2                            &lt;
-c: 3                              c: 3</bkl-code>
-</div>
-
-</div>
-
-
-
-
-</section>
-
 <section id="migrate">
 <h2><a name="migrate">Migrate</a></h2>
 
 
 
-<p>Below is an example process for migrating an existing set of configurations to <highlight>bkl</highlight>. It contains some Kubernetes-specific items but the use of the <highlight>bkl*</highlight> tools applies to any configuration source.
-</p>
-
-
-
-<p>We assume you start with two K8s deployments called <highlight>deploy-dev</highlight> and <highlight>deploy-prod</highlight> which are similar but not identical.
-</p>
-
-
-
-<p>First, install tools:
-
-<ul>
-<li><a href="#install">bkl</a></li>
-<li><a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a></li>
-<li><a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/">krew</a></li>
-<li><a href="https://github.com/itaysk/kubectl-neat#installation">neat</a></li>
-</ul>
-</p>
-
-
-
-<p>It's possible to export configuration directly from existing templating systems (e.g. <highlight>kustomize build</highlight>, <highlight>helm install --dry-run --debug</highlight>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
-</p>
-
-
-
-
-<div class="example-container">
-
-<div class="label-container">
-<label class="label-spacing">Export Existing Config</label>
-<div class="code-wrapper">
-
-<bkl-code class="code-labeled"><comment># "kubectl neat" removes status and default value fields</comment>
-<prompt>$ </prompt><command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-dev</argument> <operator>&gt;</operator> <command>deploy-dev-orig.yaml</command>
-<prompt>$ </prompt><command>kubectl</command> <argument>neat</argument> <argument>get</argument> <flag>--</flag> <argument>deploy</argument> <argument>deploy-prod</argument> <operator>&gt;</operator> <command>deploy-prod-orig.yaml</command></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container">
-
-<div class="label-container">
-<label class="label-spacing">Generate Base Layer</label>
-<div class="code-wrapper">
-
-<bkl-code class="code-labeled"><comment># See bkli details <a href="#bkli">here</a></comment>
-<prompt>$ </prompt><command>bkli</command> <flag>-o</flag> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container">
-
-<div class="label-container">
-<label class="label-spacing">Generate Service Layers</label>
-<div class="code-wrapper">
-
-<bkl-code class="code-labeled"><comment># See bkld details <a href="#bkld">here</a></comment>
-<prompt>$ </prompt><command>bkld</command> <flag>-o</flag> <argument>deploy.dev.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-dev-orig.yaml</argument>
-<prompt>$ </prompt><command>bkld</command> <flag>-o</flag> <argument>deploy.prod.yaml</argument> <argument>deploy.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container">
-
-<div class="label-container">
-<label class="label-spacing">Check Results</label>
-<div class="code-wrapper">
-
-<bkl-code class="code-labeled"><comment># Should show no diff</comment>
-<prompt>$ </prompt><command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.dev.yaml</argument>
-<prompt>$ </prompt><command>kubectl</command> <argument>bkl</argument> <argument>diff</argument> <flag>-f</flag> <argument>deploy.prod.yaml</argument></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container">
-
-<div class="label-container">
-<label class="label-spacing">Clean Up</label>
-<div class="code-wrapper">
-
-<bkl-code class="code-labeled"><prompt>$ <command></prompt>rm</command> <argument>deploy-dev-orig.yaml</argument> <argument>deploy-prod-orig.yaml</argument></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-<p>You now have 3 bkl files:
-
-<ul>
-<li><highlight>deploy.yaml</highlight> is the base layer containing values common to both deployments</li>
-<li><highlight>deploy.dev.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-dev</highlight></li>
-<li><highlight>deploy.prod.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-prod</highlight></li>
-</ul>
-</p>
-
-
-
-<p>The migration process isn't deterministic; there are design and aesthetic considerations. Here are some general tips:
-
-<ul>
-<li>Start with the most similar examples to maximize base layer size</li>
-<li>Consider intermediate layers that make sense (e.g. <highlight>deploy.yaml</highlight> → <highlight>deploy.frontend.yaml</highlight> → <highlight>deploy.frontend.prod.yaml</highlight>)</li>
-<li>Split large configurations into logical subfiles; bkl can merge across file boundaries</li>
-<li>Iterate by diffing your evaluated layers against production (e.g. <highlight>kubectl bkl diff -f</highlight>), making small changes, then diffing again.</li>
-<li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
-<li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
-<li>Remove duplication with <highlight>$merge:</highlight> but avoid chained merge paths.</li>
-<li>Avoid using hidden <highlight>$output: false</highlight> trees as template variables; prefer overriding values in-place.</li>
-<li><highlight>bkld</highlight> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <highlight>containers</highlight>) that could be trivially patched. Use <highlight>$match:</highlight> to select the container and override values within it.</li>
-</ul>
-</p>
-
-
-
-</section>
-
-<section id="comparison">
-<h2><a name="comparison">Comparison</a></h2>
-
-
-
-<p>bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:
-
-<ul>
-<li>Configuration and templating/layering should be generic, not service-specific.</li>
-<li>Configuration and templating/layering should be separate from deployment tooling.</li>
-<li>Configuration files should be written in standard formats (JSON, YAML, TOML) and parseable by their standard parsers.</li>
-<li>Basic functionality should be available without learning custom syntax.</li>
-<li>Non-templatized configuration (e.g. StackOverflow answers) should be usable without modification.</li>
-<li>File composition should be accomplished without meta configuration (e.g. manifest files).</li>
-<li>Templating/layering behavior should be intuitive and produce expected results.</li>
-<li>Documentation and examples should be excellent.</li>
-</ul>
+<p>For Kubernetes migration examples and best practices, see <a href="/k8s.html">Kubernetes with bkl</a>.
 </p>
 
 

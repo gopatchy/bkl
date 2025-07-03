@@ -1467,10 +1467,12 @@
   items:
     - code:
         code: |
-          $ bkld &lt;base_layer_path&gt; &lt;target_output_path&gt;
+          $ bkld [--selector path] &lt;base_layer_path&gt; &lt;target_output_path&gt;
         languages: [[0, "shell"]]
     - content: |
         <highlight>bkld</highlight> (d for "diff") generates the minimal intermediate layer needed to create the target output from the base layer. Along with <highlight><a href="#bkli">bkli</a></highlight>, it automates splitting existing configurations into layers.
+    - content: |
+        Use <highlight>--selector</highlight> to limit processing to documents matching a specific path.
     - example:
         operation: diff
         layers:
@@ -1533,12 +1535,14 @@
   items:
     - code:
         code: |
-          $ bkli &lt;target_output_path&gt; &lt;target_output_path&gt; ...
+          $ bkli [--selector path] &lt;target_output_path&gt; &lt;target_output_path&gt; ...
         languages: [[0, "shell"]]
     - content: |
         <highlight>bkli</highlight> (i for "intersect") generates the maximal base layer that the specified targets have in common. Along with <highlight><a href="#bkld">bkld</a></highlight>, it automates splitting existing configurations into layers.
     - content: |
         Fields that exist in all inputs with the same value are included in the result. Fields with different values are omitted.
+    - content: |
+        Use <highlight>--selector</highlight> to limit processing to documents matching a specific path.
     - example:
         operation: intersect
         layers:
@@ -1583,33 +1587,41 @@
         languages: [[0, "shell"]]
     - content: |
         <highlight>bklr</highlight> extracts only <highlight>$required</highlight> fields and their parent paths. Use this output as a template for creating minimal upper layers.
+
+- id: bklc
+  title: bklc
+  items:
+    - code:
+        code: |
+          $ bklc [--color] [--sort path] &lt;file1&gt; &lt;file2&gt;
+        languages: [[0, "shell"]]
+    - content: |
+        <highlight>bklc</highlight> (c for "compare") compares two bkl files and shows colorized text differences between their evaluated outputs. Use <highlight>--color</highlight> to enable colored output. Use <highlight>--sort</highlight> to order documents by a specific path before comparison.
     - example:
-        operation: evaluate
+        operation: compare
         layers:
           - code: |
-              a:
-                b: $required
-                c: 3
+              a: 1
+              b: 2
+              c: 3
+            languages: [[0, "yaml"]]
+          - code: |
+              a: 1
+              b: 4
+              c: 3
+              d: 5
             languages: [[0, "yaml"]]
         result:
           code: |
-            a:
-              b: $required
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a:
-                - $required
-              b:
-                - 2
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a:
-              - $required
-          languages: [[0, "yaml"]]
+            --- file1
+            +++ file2
+            @@ -1,3 +1,4 @@
+             a: 1
+            -b: 2
+            +b: 4
+             c: 3
+            +d: 5
+          languages: [[0, "diff"]]
 
 - id: kubectl-bkl
   title: kubectl bkl
@@ -1628,114 +1640,9 @@
           deployment.apps/deploy-dev unchanged
         languages: [[0, "shell"]]
 
-- id: diff
-  title: Comparing Files
-  items:
-    - content: |
-        Compare evaluated bkl files using standard diff tools:
-    - code:
-        code: |
-          $ diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)
-          --- /dev/fd/63  2023-07-12 21:00:55.412475845 -0700
-          +++ /dev/fd/62  2023-07-12 21:00:55.412475845 -0700
-          @@ -1,3 +1,2 @@
-           a: 1
-          -b: 2
-           c: 3
-          
-          $ diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)
-          a: 1                              a: 1
-          b: 2                            &lt;
-          c: 3                              c: 3
-        languages: [[0, "shell"], [1, "diff"], [8, "shell"], [9, "diff"]]
-        highlights: ["diff -ud --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)", "diff -y --color &lt;(bkl a.yaml) &lt;(bkl b.yaml)"]
 
 - id: migrate
   title: Migrate
   items:
     - content: |
-        Below is an example process for migrating an existing set of configurations to <highlight>bkl</highlight>. It contains some Kubernetes-specific items but the use of the <highlight>bkl*</highlight> tools applies to any configuration source.
-    - content: |
-        We assume you start with two K8s deployments called <highlight>deploy-dev</highlight> and <highlight>deploy-prod</highlight> which are similar but not identical.
-    - content: |
-        First, install tools:
-        
-        <ul>
-        <li><a href="#install">bkl</a></li>
-        <li><a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a></li>
-        <li><a href="https://krew.sigs.k8s.io/docs/user-guide/setup/install/">krew</a></li>
-        <li><a href="https://github.com/itaysk/kubectl-neat#installation">neat</a></li>
-        </ul>
-    - content: |
-        It's possible to export configuration directly from existing templating systems (e.g. <highlight>kustomize build</highlight>, <highlight>helm install --dry-run --debug</highlight>). Instead, we do this in a generic way and make sure we get the latest configuration by fetching it directly from the K8s API server.
-    - code:
-        label: Export Existing Config
-        code: |
-          # "kubectl neat" removes status and default value fields
-          $ kubectl neat get -- deploy deploy-dev &gt; deploy-dev-orig.yaml
-          $ kubectl neat get -- deploy deploy-prod &gt; deploy-prod-orig.yaml
-        languages: [[0, "shell"]]
-    - code:
-        label: Generate Base Layer
-        code: |
-          # See bkli details <a href="#bkli">here</a>
-          $ bkli -o deploy.yaml deploy-dev-orig.yaml deploy-prod-orig.yaml
-        languages: [[0, "shell"]]
-    - code:
-        label: Generate Service Layers
-        code: |
-          # See bkld details <a href="#bkld">here</a>
-          $ bkld -o deploy.dev.yaml deploy.yaml deploy-dev-orig.yaml
-          $ bkld -o deploy.prod.yaml deploy.yaml deploy-prod-orig.yaml
-        languages: [[0, "shell"]]
-    - code:
-        label: Check Results
-        code: |
-          # Should show no diff
-          $ kubectl bkl diff -f deploy.dev.yaml
-          $ kubectl bkl diff -f deploy.prod.yaml
-        languages: [[0, "shell"]]
-    - code:
-        label: Clean Up
-        code: |
-          $ rm deploy-dev-orig.yaml deploy-prod-orig.yaml
-        languages: [[0, "shell"]]
-    - content: |
-        You now have 3 bkl files:
-        
-        <ul>
-        <li><highlight>deploy.yaml</highlight> is the base layer containing values common to both deployments</li>
-        <li><highlight>deploy.dev.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-dev</highlight></li>
-        <li><highlight>deploy.prod.yaml</highlight> is the upper layer containing values specific to <highlight>deploy-prod</highlight></li>
-        </ul>
-    - content: |
-        The migration process isn't deterministic; there are design and aesthetic considerations. Here are some general tips:
-        
-        <ul>
-        <li>Start with the most similar examples to maximize base layer size</li>
-        <li>Consider intermediate layers that make sense (e.g. <highlight>deploy.yaml</highlight> → <highlight>deploy.frontend.yaml</highlight> → <highlight>deploy.frontend.prod.yaml</highlight>)</li>
-        <li>Split large configurations into logical subfiles; bkl can merge across file boundaries</li>
-        <li>Iterate by diffing your evaluated layers against production (e.g. <highlight>kubectl bkl diff -f</highlight>), making small changes, then diffing again.</li>
-        <li>Migrate as much as possible to the lowest layer to reduce duplication and complexity.</li>
-        <li>Consider making your base layer match your production configuration then overriding values for dev/test configurations. This makes it very clear where you're drifting away from production.</li>
-        <li>Remove duplication with <highlight>$merge:</highlight> but avoid chained merge paths.</li>
-        <li>Avoid using hidden <highlight>$output: false</highlight> trees as template variables; prefer overriding values in-place.</li>
-        <li><highlight>bkld</highlight> doesn't know how to match entries within lists, so it may remove and replace large entries (e.g. K8s <highlight>containers</highlight>) that could be trivially patched. Use <highlight>$match:</highlight> to select the container and override values within it.</li>
-        </ul>
-
-- id: comparison
-  title: Comparison
-  items:
-    - content: |
-        bkl has some overlap with other configuration templating tools (e.g. <a href="https://helm.sh/">Helm</a>, <a href="https://kustomize.io/">Kustomize</a>, <a href="https://www.puppet.com/docs/puppet/8/hiera_intro.html">Hiera</a>). We believe that bkl has a combination of project goals that aren't fully served by any of the alternatives:
-        
-        <ul>
-        <li>Configuration and templating/layering should be generic, not service-specific.</li>
-        <li>Configuration and templating/layering should be separate from deployment tooling.</li>
-        <li>Configuration files should be written in standard formats (JSON, YAML, TOML) and parseable by their standard parsers.</li>
-        <li>Basic functionality should be available without learning custom syntax.</li>
-        <li>Non-templatized configuration (e.g. StackOverflow answers) should be usable without modification.</li>
-        <li>File composition should be accomplished without meta configuration (e.g. manifest files).</li>
-        <li>Templating/layering behavior should be intuitive and produce expected results.</li>
-        <li>Documentation and examples should be excellent.</li>
-        </ul>
+        For Kubernetes migration examples and best practices, see <a href="/k8s.html">Kubernetes with bkl</a>.
