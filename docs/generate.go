@@ -6,11 +6,9 @@ import (
 	"html/template"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/gopatchy/bkl"
-	"gopkg.in/yaml.v3"
 )
 
 type TemplateData struct {
@@ -18,13 +16,14 @@ type TemplateData struct {
 }
 
 func main() {
-	yamlFiles, err := filepath.Glob("*.yaml")
+	allSections, err := bkl.GetDocSections()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if len(yamlFiles) == 0 {
-		log.Fatal("No YAML files found in the current directory")
+	sectionsBySource := make(map[string][]bkl.DocSection)
+	for _, section := range allSections {
+		sectionsBySource[section.Source] = append(sectionsBySource[section.Source], section)
 	}
 
 	templateContent, err := os.ReadFile("template.html")
@@ -38,36 +37,24 @@ func main() {
 		"dict":          dict,
 	}).Parse(string(templateContent)))
 
-	for _, yamlFile := range yamlFiles {
-		data, err := os.ReadFile(yamlFile)
-		if err != nil {
-			log.Printf("Error reading %s: %v", yamlFile, err)
-			continue
-		}
-
-		var sections []bkl.DocSection
-		if err := yaml.Unmarshal(data, &sections); err != nil {
-			log.Printf("Error unmarshaling %s: %v", yamlFile, err)
-			continue
-		}
-
+	for source, sections := range sectionsBySource {
 		templateData := TemplateData{
 			Sections: sections,
 		}
 
 		var buf bytes.Buffer
 		if err := tmpl.Execute(&buf, templateData); err != nil {
-			log.Printf("Error executing template for %s: %v", yamlFile, err)
+			log.Printf("Error executing template for %s: %v", source, err)
 			continue
 		}
 
-		outputFile := strings.TrimSuffix(yamlFile, filepath.Ext(yamlFile)) + ".html"
+		outputFile := source + ".html"
 		if err := os.WriteFile(outputFile, buf.Bytes(), 0o644); err != nil {
 			log.Printf("Error writing %s: %v", outputFile, err)
 			continue
 		}
 
-		fmt.Printf("Generated %s from %s\n", outputFile, yamlFile)
+		fmt.Printf("Generated %s from embedded %s.yaml\n", outputFile, source)
 	}
 }
 
@@ -84,7 +71,6 @@ func formatLayer(layer bkl.DocLayer) template.HTML {
 	return template.HTML(result)
 }
 
-// dict creates a map from pairs of arguments (key1, value1, key2, value2, ...)
 func dict(values ...any) map[string]any {
 	if len(values)%2 != 0 {
 		panic("dict requires an even number of arguments")

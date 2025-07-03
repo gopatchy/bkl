@@ -1,0 +1,137 @@
+- id: fixit-duplicate-keys
+  title: Duplicate Keys in Maps
+  content: |
+    When a map contains duplicate keys, only the last value is retained. This is standard YAML behavior.
+  example: |
+    # Input
+    name: Alice
+    name: Bob
+    
+    # Result
+    name: Bob
+  tags: [common-issues, yaml]
+
+- id: fixit-trailing-spaces
+  title: Trailing Spaces in YAML
+  content: |
+    Trailing spaces in YAML can cause parsing issues. Remove them to ensure clean parsing.
+  example: |
+    # Problematic (has trailing spaces)
+    key: value   
+    
+    # Fixed
+    key: value
+  tags: [common-issues, yaml, formatting]
+
+- id: fixit-tab-indentation
+  title: Tab Characters in YAML
+  content: |
+    YAML does not allow tab characters for indentation. Use spaces instead.
+  example: |
+    # Wrong (uses tabs)
+    parent:
+    	child: value
+    
+    # Correct (uses spaces)
+    parent:
+      child: value
+  tags: [common-issues, yaml, formatting]
+
+- id: fixit-missing-parent
+  title: Missing Parent File
+  content: |
+    When using `$parent` directive, ensure the parent file exists in the expected location.
+  example: |
+    # service.dev.yaml
+    $parent: service.yaml  # service.yaml must exist
+    
+    # Error if parent not found
+    # Error: missing file: service.yaml
+  tags: [inheritance, errors]
+
+- id: fixit-circular-reference
+  title: Circular Parent References
+  content: |
+    Avoid circular references in parent chains. Each file should have a clear inheritance hierarchy.
+  example: |
+    # a.yaml
+    $parent: b.yaml
+    
+    # b.yaml
+    $parent: a.yaml
+    
+    # Error: circular reference detected
+  tags: [inheritance, errors]
+
+- id: fixit-undefined-variable
+  title: Undefined Variable in Interpolation
+  content: |
+    Variables used in string interpolation must be defined in the current scope.
+  example: |
+    # Missing variable
+    greeting: $"Hello {name}"
+    
+    # Fixed
+    name: World
+    greeting: $"Hello {name}"
+  tags: [interpolation, errors]
+
+- id: fixit-invalid-env-var
+  title: Invalid Environment Variable Syntax
+  content: |
+    Environment variables must use the correct syntax: `$env:VARNAME`
+  example: |
+    # Wrong
+    value: $ENV:HOME
+    value: ${HOME}
+    
+    # Correct
+    value: $env:HOME
+  tags: [environment, syntax]
+
+- id: fixit-merge-type-conflict
+  title: Type Conflicts in Merge
+  content: |
+    When merging documents, conflicting types cannot be merged and will result in an error.
+  example: |
+    # Base
+    config: "string value"
+    
+    # Override attempting to merge
+    config:
+      $merge: true
+      key: value
+    
+    # Error: cannot merge string with map
+  tags: [merge, errors]
+
+- id: fixit-empty-repeat
+  title: Empty Repeat Value
+  content: |
+    The `$repeat` directive requires a non-empty value (count, list, or map).
+  example: |
+    # Wrong
+    items:
+      $repeat: 0
+      name: item
+    
+    # Correct
+    items:
+      $repeat: 3
+      name: $"item-{$repeat}"
+  tags: [repeat, errors]
+
+- id: fixit-invalid-match
+  title: Invalid Match Pattern
+  content: |
+    Match patterns must be valid structures that can match against documents.
+  example: |
+    # Match by map structure
+    $match: {kind: Service}
+    
+    # Match by value
+    $match: production
+    
+    # Invalid (cannot match function)
+    $match: $env:INVALID
+  tags: [match, syntax]

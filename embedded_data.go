@@ -17,6 +17,9 @@ var sectionsData []byte
 //go:embed docs/k8s.yaml
 var k8sData []byte
 
+//go:embed docs/fixit.yaml
+var fixitData []byte
+
 type TestCase struct {
 	Description string            `toml:"description"`
 	Eval        []string          `toml:"eval"`
@@ -82,6 +85,7 @@ func GetDocSections() ([]DocSection, error) {
 	files := map[string][]byte{
 		"index": sectionsData,
 		"k8s":   k8sData,
+		"fixit": fixitData,
 	}
 
 	for name, data := range files {
