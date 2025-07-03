@@ -747,6 +747,8 @@ hunk-header {
 
 	<li><a href="#api-service">api-service</a></li>
 
+	<li><a href="#web-service">web-service</a></li>
+
 </ol>
 </div>
 </nav>
@@ -836,8 +838,8 @@ hunk-header {
     <string>server.name=api-service</string>
     <string>server.port=8080</string>
     <string>server.workers=8</string>
-    <string>session.timeout=7200</string>
     <string>session.cookie.secure=true</string>
+    <string>session.timeout=7200</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -915,22 +917,22 @@ hunk-header {
             - <key>containerPort</key>: <number>8080</number>
               <key>name</key>: <string>http</string>
           <key>env</key>:
+            - <key>name</key>: <string>API_KEY</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>api-secrets</string>
+                  <key>key</key>: <string>api-key</string>
             - <key>name</key>: <string>APP_ENV</string>
               <key>value</key>: <string>production</string>
             - <key>name</key>: <string>CACHE_ENABLED</string>
-              <key>value</key>: <string>"true"</string>
-            - <key>name</key>: <string>METRICS_ENABLED</string>
               <key>value</key>: <string>"true"</string>
             - <key>name</key>: <string>DATABASE_URL</string>
               <key>valueFrom</key>:
                 <key>secretKeyRef</key>:
                   <key>name</key>: <string>api-secrets</string>
                   <key>key</key>: <string>database-url</string>
-            - <key>name</key>: <string>API_KEY</string>
-              <key>valueFrom</key>:
-                <key>secretKeyRef</key>:
-                  <key>name</key>: <string>api-secrets</string>
-                  <key>key</key>: <string>api-key</string>
+            - <key>name</key>: <string>METRICS_ENABLED</string>
+              <key>value</key>: <string>"true"</string>
           <key>resources</key>:
             <key>requests</key>:
               <key>memory</key>: <string>"512Mi"</string>
@@ -956,20 +958,21 @@ hunk-header {
             <key>successThreshold</key>: <number>1</number>
             <key>failureThreshold</key>: <number>3</number>
           <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=8"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--feature=rate-limiting"</string>
-            - <string>"--feature=caching"</string>
-            - <string>"--feature=circuit-breaker"</string>
-            - <string>"--feature=request-tracing"</string>
-            - <string>"--log-format=json"</string>
-            - <string>"--log-sample-rate=0.1"</string>
-            - <string>"--graceful-timeout=60s"</string>
-            - <string>"--max-request-size=10MB"</string>
-            - <string>"--request-timeout=30s"</string>
+            - <string>--config=/app/config/app.properties</string>
+            - <string>--feature=auth</string>
+            - <string>--feature=metrics</string>
+            - <string>--feature=rate-limiting</string>
+            - <string>--feature=caching</string>
+            - <string>--feature=circuit-breaker</string>
+            - <string>--feature=request-tracing</string>
+            - <string>--graceful-timeout=60s</string>
+            - <string>--log-format=json</string>
+            - <string>--log-sample-rate=0.1</string>
+            - <string>--max-request-size=10MB</string>
+            - <string>--request-timeout=30s</string>
+            - <string>--workers=8</string>
+          <key>command</key>:
+            - <string>server</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1029,39 +1032,39 @@ hunk-header {
   <key>namespace</key>: <string>microservices-prod</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
-    <string>cache.enabled=true</string>
-    <string>cache.ttl=3600</string>
     <string>cache.backend=redis-cluster</string>
+    <string>cache.enabled=true</string>
     <string>cache.max_size=1000</string>
+    <string>cache.ttl=3600</string>
     <string>environment=production</string>
-    <string>logging.level=warn</string>
     <string>logging.format=json</string>
+    <string>logging.level=warn</string>
     <string>logging.output=stdout</string>
     <string>logging.sample_rate=0.1</string>
     <string>metrics.enabled=true</string>
-    <string>metrics.port=9090</string>
     <string>metrics.path=/metrics</string>
-    <string>security.rate_limit=1000</string>
+    <string>metrics.port=9090</string>
     <string>security.csp_enabled=true</string>
-    <string>server.port=80</string>
+    <string>security.rate_limit=1000</string>
     <string>server.max_connections=1000</string>
     <string>server.name=web-service</string>
+    <string>server.port=80</string>
     <string>server.workers=8</string>
-    <string>session.timeout=7200</string>
     <string>session.cookie.secure=true</string>
+    <string>session.timeout=7200</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
-      <string><string>"environment"</string>: "production",</string>
       <string><string>"apiUrl"</string>: "https://api.example.com",</string>
+      <string><string>"cdn"</string>: {</string>
+        <string><string>"url"</string>: "https://cdn.example.com"</string>
+      <string>},</string>
       <string><string>"debugMode"</string>: false,</string>
+      <string><string>"environment"</string>: "production",</string>
       <string><string>"features"</string>: {</string>
         <string><string>"analytics"</string>: true,</string>
         <string><string>"caching"</string>: true,</string>
         <string><string>"cdnEnabled"</string>: true,</string>
         <string><string>"performanceMonitoring"</string>: true</string>
-      <string>},</string>
-      <string><string>"cdn"</string>: {</string>
-        <string><string>"url"</string>: "https://cdn.example.com"</string>
       <string>}</string>
     <string>}</string>
 <string>---</string>
@@ -1144,27 +1147,27 @@ hunk-header {
             - <key>containerPort</key>: <number>80</number>
               <key>name</key>: <string>http</string>
           <key>env</key>:
+            - <key>name</key>: <string>ANALYTICS_KEY</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>analytics-key</string>
             - <key>name</key>: <string>API_URL</string>
               <key>value</key>: <string>"https://api.example.com"</string>
             - <key>name</key>: <string>APP_ENV</string>
               <key>value</key>: <string>production</string>
             - <key>name</key>: <string>CACHE_ENABLED</string>
               <key>value</key>: <string>"true"</string>
-            - <key>name</key>: <string>SESSION_SECRET</string>
-              <key>valueFrom</key>:
-                <key>secretKeyRef</key>:
-                  <key>name</key>: <string>web-secrets</string>
-                  <key>key</key>: <string>session-secret</string>
             - <key>name</key>: <string>CDN_API_KEY</string>
               <key>valueFrom</key>:
                 <key>secretKeyRef</key>:
                   <key>name</key>: <string>web-secrets</string>
                   <key>key</key>: <string>cdn-api-key</string>
-            - <key>name</key>: <string>ANALYTICS_KEY</string>
+            - <key>name</key>: <string>SESSION_SECRET</string>
               <key>valueFrom</key>:
                 <key>secretKeyRef</key>:
                   <key>name</key>: <string>web-secrets</string>
-                  <key>key</key>: <string>analytics-key</string>
+                  <key>key</key>: <string>session-secret</string>
           <key>resources</key>:
             <key>requests</key>:
               <key>memory</key>: <string>"512Mi"</string>
@@ -1190,19 +1193,20 @@ hunk-header {
             <key>successThreshold</key>: <number>1</number>
             <key>failureThreshold</key>: <number>3</number>
           <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=8"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--feature=rate-limiting"</string>
-            - <string>"--feature=caching"</string>
-            - <string>"--feature=compression"</string>
-            - <string>"--feature=security-headers"</string>
-            - <string>"--feature=cdn"</string>
-            - <string>"--feature=analytics"</string>
-            - <string>"--log-format=json"</string>
-            - <string>"--graceful-timeout=30s"</string>
+            - <string>--config=/app/config/app.properties</string>
+            - <string>--feature=auth</string>
+            - <string>--feature=metrics</string>
+            - <string>--feature=rate-limiting</string>
+            - <string>--feature=caching</string>
+            - <string>--feature=compression</string>
+            - <string>--feature=security-headers</string>
+            - <string>--feature=cdn</string>
+            - <string>--feature=analytics</string>
+            - <string>--graceful-timeout=30s</string>
+            - <string>--log-format=json</string>
+            - <string>--workers=8</string>
+          <key>command</key>:
+            - <string>server</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1210,6 +1214,32 @@ hunk-header {
         - <key>name</key>: <string>config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
+<string>---</string>
+<key>apiVersion</key>: <string>autoscaling/v2</string>
+<key>kind</key>: <string>HorizontalPodAutoscaler</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-hpa</string>
+  <key>namespace</key>: <string>microservices-prod</string>
+<key>spec</key>:
+  <key>scaleTargetRef</key>:
+    <key>apiVersion</key>: <string>apps/v1</string>
+    <key>kind</key>: <string>Deployment</string>
+    <key>name</key>: <string>web-deployment</string>
+  <key>minReplicas</key>: <number>3</number>
+  <key>maxReplicas</key>: <number>10</number>
+  <key>metrics</key>:
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>cpu</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>60</number>
+    - <key>type</key>: <string>Resource</string>
+      <key>resource</key>:
+        <key>name</key>: <string>memory</string>
+        <key>target</key>:
+          <key>type</key>: <string>Utilization</string>
+          <key>averageUtilization</key>: <number>70</number>
 <string>---</string>
 <key>apiVersion</key>: <string>networking.k8s.io/v1</string>
 <key>kind</key>: <string>Ingress</string>
@@ -1247,39 +1277,7 @@ hunk-header {
               <key>service</key>:
                 <key>name</key>: <string>web-service</string>
                 <key>port</key>:
-                  <key>number</key>: <number>80</number>
-<string>---</string>
-<key>apiVersion</key>: <string>autoscaling/v2</string>
-<key>kind</key>: <string>HorizontalPodAutoscaler</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-hpa</string>
-  <key>namespace</key>: <string>microservices-prod</string>
-<key>spec</key>:
-  <key>scaleTargetRef</key>:
-    <key>apiVersion</key>: <string>apps/v1</string>
-    <key>kind</key>: <string>Deployment</string>
-    <key>name</key>: <string>web-deployment</string>
-  <key>minReplicas</key>: <number>3</number>
-  <key>maxReplicas</key>: <number>10</number>
-  <key>metrics</key>:
-    - <key>type</key>: <string>Resource</string>
-      <key>resource</key>:
-        <key>name</key>: <string>cpu</string>
-        <key>target</key>:
-          <key>type</key>: <string>Utilization</string>
-          <key>averageUtilization</key>: <number>60</number>
-    - <key>type</key>: <string>Resource</string>
-      <key>resource</key>:
-        <key>name</key>: <string>memory</string>
-        <key>target</key>:
-          <key>type</key>: <string>Utilization</string>
-          <key>averageUtilization</key>: <number>70</number>
-
-    - <key>code</key>:
-        <key>label</key>: <string>original/staging/namespace.yaml</string>
-        <key>languages</key>: <string>[[0, "yaml"]]</string>
-        <key>expandable</key>: <bool>true</bool>
-        <key>collapsed</key>: <bool>true</bool></bkl-code>
+                  <key>number</key>: <number>80</number></bkl-code>
 </div>
 </div>
 
@@ -1331,23 +1329,23 @@ hunk-header {
   <key>namespace</key>: <string>microservices-staging</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
+    <string>cache.backend=redis</string>
     <string>cache.enabled=true</string>
     <string>cache.ttl=300</string>
-    <string>cache.backend=redis</string>
+    <string>database.max_idle=5</string>
     <string>database.pool_size=10</string>
     <string>database.timeout=30</string>
-    <string>database.max_idle=5</string>
     <string>environment=staging</string>
-    <string>logging.level=info</string>
     <string>logging.format=json</string>
+    <string>logging.level=info</string>
     <string>logging.output=stdout</string>
     <string>metrics.enabled=true</string>
     <string>metrics.port=9090</string>
-    <string>server.port=8080</string>
     <string>server.name=api-service</string>
+    <string>server.port=8080</string>
     <string>server.workers=4</string>
-    <string>session.timeout=3600</string>
     <string>session.cookie.secure=true</string>
+    <string>session.timeout=3600</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -1436,15 +1434,16 @@ hunk-header {
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
           <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=4"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--feature=rate-limiting"</string>
-            - <string>"--feature=caching"</string>
-            - <string>"--log-format=json"</string>
-            - <string>"--graceful-timeout=30s"</string>
+            - <string>--config=/app/config/app.properties</string>
+            - <string>--feature=auth</string>
+            - <string>--feature=metrics</string>
+            - <string>--feature=rate-limiting</string>
+            - <string>--feature=caching</string>
+            - <string>--graceful-timeout=30s</string>
+            - <string>--log-format=json</string>
+            - <string>--workers=4</string>
+          <key>command</key>:
+            - <string>server</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1504,24 +1503,24 @@ hunk-header {
   <key>namespace</key>: <string>microservices-staging</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
-    <string>server.port=80</string>
-    <string>server.name=web-service</string>
-    <string>logging.level=info</string>
-    <string>logging.format=json</string>
-    <string>logging.output=stdout</string>
+    <string>cache.backend=redis</string>
     <string>cache.enabled=true</string>
     <string>cache.ttl=300</string>
-    <string>cache.backend=redis</string>
-    <string>session.timeout=3600</string>
-    <string>session.cookie.secure=true</string>
+    <string>environment=staging</string>
+    <string>logging.format=json</string>
+    <string>logging.level=info</string>
+    <string>logging.output=stdout</string>
     <string>metrics.enabled=true</string>
     <string>metrics.port=9090</string>
-    <string>environment=staging</string>
+    <string>server.name=web-service</string>
+    <string>server.port=80</string>
+    <string>session.cookie.secure=true</string>
+    <string>session.timeout=3600</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
-      <string><string>"environment"</string>: "staging",</string>
       <string><string>"apiUrl"</string>: "http://api-service",</string>
       <string><string>"debugMode"</string>: false,</string>
+      <string><string>"environment"</string>: "staging",</string>
       <string><string>"features"</string>: {</string>
         <string><string>"analytics"</string>: true,</string>
         <string><string>"caching"</string>: true,</string>
@@ -1594,16 +1593,16 @@ hunk-header {
               <key>value</key>: <string>staging</string>
             - <key>name</key>: <string>CACHE_ENABLED</string>
               <key>value</key>: <string>"true"</string>
-            - <key>name</key>: <string>SESSION_SECRET</string>
-              <key>valueFrom</key>:
-                <key>secretKeyRef</key>:
-                  <key>name</key>: <string>web-secrets</string>
-                  <key>key</key>: <string>session-secret</string>
             - <key>name</key>: <string>CDN_API_KEY</string>
               <key>valueFrom</key>:
                 <key>secretKeyRef</key>:
                   <key>name</key>: <string>web-secrets</string>
                   <key>key</key>: <string>cdn-api-key</string>
+            - <key>name</key>: <string>SESSION_SECRET</string>
+              <key>valueFrom</key>:
+                <key>secretKeyRef</key>:
+                  <key>name</key>: <string>web-secrets</string>
+                  <key>key</key>: <string>session-secret</string>
           <key>resources</key>:
             <key>requests</key>:
               <key>memory</key>: <string>"256Mi"</string>
@@ -1624,15 +1623,16 @@ hunk-header {
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
           <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=4"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--feature=rate-limiting"</string>
-            - <string>"--feature=caching"</string>
-            - <string>"--log-format=json"</string>
-            - <string>"--graceful-timeout=30s"</string>
+            - <string>--config=/app/config/app.properties</string>
+            - <string>--feature=auth</string>
+            - <string>--feature=metrics</string>
+            - <string>--feature=rate-limiting</string>
+            - <string>--feature=caching</string>
+            - <string>--graceful-timeout=30s</string>
+            - <string>--log-format=json</string>
+            - <string>--workers=4</string>
+          <key>command</key>:
+            - <string>server</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1640,32 +1640,6 @@ hunk-header {
         - <key>name</key>: <string>config</string>
           <key>configMap</key>:
             <key>name</key>: <string>web-config</string>
-<string>---</string>
-<key>apiVersion</key>: <string>networking.k8s.io/v1</string>
-<key>kind</key>: <string>Ingress</string>
-<key>metadata</key>:
-  <key>name</key>: <string>web-ingress</string>
-  <key>namespace</key>: <string>microservices-staging</string>
-  <key>annotations</key>:
-    <key>nginx.ingress.kubernetes.io/ssl-redirect</key>: <string>"true"</string>
-    <key>cert-manager.io/cluster-issuer</key>: <string>"letsencrypt-staging"</string>
-<key>spec</key>:
-  <key>ingressClassName</key>: <string>nginx</string>
-  <key>tls</key>:
-    - <key>hosts</key>:
-        - <string>staging.app.example.com</string>
-      <key>secretName</key>: <string>staging-tls-cert</string>
-  <key>rules</key>:
-    - <key>host</key>: <string>staging.app.example.com</string>
-      <key>http</key>:
-        <key>paths</key>:
-          - <key>path</key>: <string>/</string>
-            <key>pathType</key>: <string>Prefix</string>
-            <key>backend</key>:
-              <key>service</key>:
-                <key>name</key>: <string>web-service</string>
-                <key>port</key>:
-                  <key>number</key>: <number>80</number>
 <string>---</string>
 <key>apiVersion</key>: <string>autoscaling/v2</string>
 <key>kind</key>: <string>HorizontalPodAutoscaler</string>
@@ -1691,7 +1665,33 @@ hunk-header {
         <key>name</key>: <string>memory</string>
         <key>target</key>:
           <key>type</key>: <string>Utilization</string>
-          <key>averageUtilization</key>: <number>80</number></bkl-code>
+          <key>averageUtilization</key>: <number>80</number>
+<string>---</string>
+<key>apiVersion</key>: <string>networking.k8s.io/v1</string>
+<key>kind</key>: <string>Ingress</string>
+<key>metadata</key>:
+  <key>name</key>: <string>web-ingress</string>
+  <key>namespace</key>: <string>microservices-staging</string>
+  <key>annotations</key>:
+    <key>nginx.ingress.kubernetes.io/ssl-redirect</key>: <string>"true"</string>
+    <key>cert-manager.io/cluster-issuer</key>: <string>"letsencrypt-staging"</string>
+<key>spec</key>:
+  <key>ingressClassName</key>: <string>nginx</string>
+  <key>tls</key>:
+    - <key>hosts</key>:
+        - <string>staging.app.example.com</string>
+      <key>secretName</key>: <string>staging-tls-cert</string>
+  <key>rules</key>:
+    - <key>host</key>: <string>staging.app.example.com</string>
+      <key>http</key>:
+        <key>paths</key>:
+          - <key>path</key>: <string>/</string>
+            <key>pathType</key>: <string>Prefix</string>
+            <key>backend</key>:
+              <key>service</key>:
+                <key>name</key>: <string>web-service</string>
+                <key>port</key>:
+                  <key>number</key>: <number>80</number></bkl-code>
 </div>
 </div>
 
@@ -1743,17 +1743,17 @@ hunk-header {
   <key>namespace</key>: <string>microservices-dev</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
-    <string>server.port=8080</string>
-    <string>server.name=api-service</string>
-    <string>logging.level=debug</string>
-    <string>logging.format=json</string>
     <string>cache.enabled=false</string>
     <string>cache.ttl=300</string>
     <string>database.pool_size=5</string>
     <string>database.timeout=30</string>
-    <string>session.timeout=3600</string>
-    <string>session.cookie.secure=false</string>
     <string>environment=development</string>
+    <string>logging.format=json</string>
+    <string>logging.level=debug</string>
+    <string>server.name=api-service</string>
+    <string>server.port=8080</string>
+    <string>session.cookie.secure=false</string>
+    <string>session.timeout=3600</string>
 <string>---</string>
 <key>apiVersion</key>: <string>v1</string>
 <key>kind</key>: <string>Secret</string>
@@ -1815,13 +1815,13 @@ hunk-header {
           <key>env</key>:
             - <key>name</key>: <string>APP_ENV</string>
               <key>value</key>: <string>development</string>
-            - <key>name</key>: <string>DEBUG</string>
-              <key>value</key>: <string>"true"</string>
             - <key>name</key>: <string>DATABASE_URL</string>
               <key>valueFrom</key>:
                 <key>secretKeyRef</key>:
                   <key>name</key>: <string>api-secrets</string>
                   <key>key</key>: <string>database-url</string>
+            - <key>name</key>: <string>DEBUG</string>
+              <key>value</key>: <string>"true"</string>
           <key>resources</key>:
             <key>requests</key>:
               <key>memory</key>: <string>"64Mi"</string>
@@ -1842,12 +1842,13 @@ hunk-header {
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
           <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=2"</string>
-            - <string>"--feature=auth"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--verbose"</string>
+            - <string>--config=/app/config/app.properties</string>
+            - <string>--feature=auth</string>
+            - <string>--feature=metrics</string>
+            - <string>--verbose</string>
+            - <string>--workers=2</string>
+          <key>command</key>:
+            - <string>server</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -1881,20 +1882,20 @@ hunk-header {
   <key>namespace</key>: <string>microservices-dev</string>
 <key>data</key>:
   <key>app.properties</key>: <string>|</string>
-    <string>server.port=80</string>
-    <string>server.name=web-service</string>
-    <string>logging.level=debug</string>
-    <string>logging.format=json</string>
     <string>cache.enabled=false</string>
     <string>cache.ttl=300</string>
-    <string>session.timeout=1800</string>
-    <string>session.cookie.secure=false</string>
     <string>environment=development</string>
+    <string>logging.format=json</string>
+    <string>logging.level=debug</string>
+    <string>server.name=web-service</string>
+    <string>server.port=80</string>
+    <string>session.cookie.secure=false</string>
+    <string>session.timeout=1800</string>
   <key>app.config.json</key>: <string>|</string>
     <string>{</string>
-      <string><string>"environment"</string>: "development",</string>
       <string><string>"apiUrl"</string>: "http://api-service",</string>
       <string><string>"debugMode"</string>: true,</string>
+      <string><string>"environment"</string>: "development",</string>
       <string><string>"features"</string>: {</string>
         <string><string>"analytics"</string>: false,</string>
         <string><string>"caching"</string>: false,</string>
@@ -1991,12 +1992,13 @@ hunk-header {
             <key>initialDelaySeconds</key>: <number>5</number>
             <key>periodSeconds</key>: <number>5</number>
           <key>args</key>:
-            - <string>"server"</string>
-            - <string>"--config=/app/config/app.properties"</string>
-            - <string>"--workers=2"</string>
-            - <string>"--feature=compression"</string>
-            - <string>"--feature=metrics"</string>
-            - <string>"--verbose"</string>
+            - <string>--config=/app/config/app.properties</string>
+            - <string>--feature=compression</string>
+            - <string>--feature=metrics</string>
+            - <string>--verbose</string>
+            - <string>--workers=2</string>
+          <key>command</key>:
+            - <string>server</string>
           <key>volumeMounts</key>:
             - <key>name</key>: <string>config</string>
               <key>mountPath</key>: <string>/app/config</string>
@@ -2042,7 +2044,7 @@ hunk-header {
 
 
 
-<p><p>Make a copy of your original configs into a prep directory for editing and comparison:</p>
+<p><p>Make a copy of your original configs into a prep directory for editing and comparison.</p>
 </p>
 
 
@@ -2437,9 +2439,11 @@ hunk-header {
 
 
 
-<p><p>We'll start with a plan for the target layout of the bkl configs. We'll keep the original <highlight>namespace</highlight>/<highlight>api-service</highlight>/<highlight>web-service</highlight> split to match the ways users were used to working with the config.</p>
+<p><p>Plan a file/layer structure for the bkl configs (since bkl uses filenames to determine layer structure).</p>
 
-<p>The <highlight>namespace</highlight> configs are small and self-contained; we'll keep those independent. We can compare the <highlight>api-service</highlight> and <highlight>web-service</highlight> configs to see if they should have a common base layer:</p>
+<p>Keep the original <highlight>namespace</highlight>/<highlight>api-service</highlight>/<highlight>web-service</highlight> structure to match the existing user expectations.</p>
+
+<p>The <highlight>namespace</highlight> configs are small and self-contained; keep those independent. Compare the <highlight>api-service</highlight> and <highlight>web-service</highlight> configs to see if they should have a common base layer.</p>
 </p>
 
 
@@ -2449,7 +2453,7 @@ hunk-header {
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>diff</command> <flag>-ud</flag> <flag>--color</flag> <argument>prod/api-service.yaml</argument> <argument>prod/web-service.yaml</argument></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>bkli</command> <flag>--selector=kind</flag> <argument>prep/prod/api-service.yaml</argument> <argument>prep/prod/web-service.yaml</argument></bkl-code>
 </div>
 
 </div>
@@ -2457,7 +2461,7 @@ hunk-header {
 
 
 
-<p><p>The configs are similar enough to have a common base layer. We'll use the following bkl config structure:</p>
+<p><p>The configs are similar enough to have a common base layer. Use the following bkl config structure:</p>
 
 <pre>
 namespace.yaml
@@ -2472,8 +2476,23 @@ base.yaml
       base.web-service.staging.dev.yaml
 </pre>
 
-<p>We'll use the production version of each config as the base layer. This means that all other environments are expressed as differences from production, encouraging minimizing those differences.</p>
+<p>Use the production version of each config as the base layer. This means that all other environments are expressed as differences from production, encouraging minimizing those differences.</p>
+
+<p>Create a directory to put these in.</p>
 </p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>mkdir</command> <flag>-p</flag> <argument>bkl</argument></bkl-code>
+</div>
+
+</div>
+
 
 
 
@@ -2484,89 +2503,7 @@ base.yaml
 
 
 
-<p><p>This conversion is simple enough to do by hand. We'll use tools for some of the more complex later transformations.</p>
-
-<p>We'll use <highlight>$""</highlight> interpolation to set the namespace name based on the environment.</p>
-</p>
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">bkl/namespace.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>Namespace</string>
-<key>metadata</key>:
-  <key>name</key>: <string>$"microservices-{metadata.labels.environment}"</string>
-  <key>labels</key>:
-    <key>environment</key>: <string>prod</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">bkl/namespace.staging.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>$match</key>:
-  <key>kind</key>: <string>Namespace</string>
-<key>metadata</key>:
-  <key>labels</key>:
-    <key>environment</key>: <string>staging</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-
-<div class="example-container expandable-container">
-
-<div class="label-container">
-<label class="label-spacing">bkl/namespace.staging.dev.yaml</label>
-<div class="code-wrapper">
-
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>$match</key>:
-  <key>kind</key>: <string>Namespace</string>
-<key>metadata</key>:
-  <key>labels</key>:
-    <key>environment</key>: <string>dev</string></bkl-code>
-</div>
-</div>
-
-</div>
-
-
-
-
-<p><p>Once we have bkl files that look correct and parse, we validate them against the original configs.</p>
-
-<p>Using <highlight>yq</highlight> to sort keys eliminates diffs that are just about ordering.</p>
+<p><p>Use <highlight>bkl</highlight> to sort keys in plain YAML files. Use <highlight>bkld</highlight> to produce a diff of two plain YAML or bkl files.</p>
 </p>
 
 
@@ -2576,9 +2513,29 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>staging/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.staging.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>yq</command> <string>'sort_keys(..)'</string> <argument>dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>bkl/namespace.staging.dev.yaml</argument><operator>)</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkl</command> <argument>prep/prod/namespace.yaml</argument> <flag>--output=bkl/namespace.yaml</flag>
+<prompt>$ <command></prompt>bkld</command> <flag>--selector=kind</flag> <argument>bkl/namespace.yaml</argument> <argument>prep/staging/namespace.yaml</argument> <flag>--output=bkl/namespace.staging.yaml</flag>
+<prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/namespace.yaml</argument> <argument>prep/dev/namespace.yaml</argument> <flag>--output=bkl/namespace.staging.dev.yaml</flag></bkl-code>
+</div>
+
+</div>
+
+
+
+
+<p><p>Validate the combined bkl file layers against the original configs.</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/namespace.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/namespace.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/namespace.staging.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.staging.dev.yaml</argument><operator>)</operator></bkl-code>
 </div>
 
 </div>
@@ -2593,7 +2550,7 @@ base.yaml
 
 
 
-<p><p>We'll use <highlight>bkli</highlight> to create a minimal base layer for the services. First, we need to split the configs into files named by resource type.</p>
+<p><p>Use <highlight>bkli</highlight> to create a minimal base layer for the services.</p>
 </p>
 
 
@@ -2603,15 +2560,7 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>pushd</command> <argument>prod</argument>
-<prompt>$ </prompt><command>mkdir</command> <flag>-p</flag> <argument>api-service</argument> <argument>web-service</argument>
-<prompt>$ </prompt><command>pushd</command> <argument>api-service</argument>
-<prompt>$ </prompt><command>yq</command> <flag>-s</flag> <string>'.kind'</string> <argument>../api-service.yaml</argument>
-<prompt>$ </prompt><command>popd</command>
-<prompt>$ </prompt><command>pushd</command> <argument>web-service</argument>
-<prompt>$ </prompt><command>yq</command> <flag>-s</flag> <string>'.kind'</string> <argument>../web-service.yaml</argument>
-<prompt>$ </prompt><command>popd</command>
-<prompt>$ </prompt><command>popd</command></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ <command></prompt>bkli</command> <flag>--selector=kind</flag> <argument>prep/prod/api-service.yaml</argument> <argument>prep/prod/web-service.yaml</argument> <flag>--output=bkl/base.yaml</flag></bkl-code>
 </div>
 
 </div>
@@ -2626,9 +2575,7 @@ base.yaml
 
 
 
-<p><p>Next, we'll convert the <highlight>api-service.yaml</highlight> files.</p>
-
-<p>Use <highlight>yq</highlight> to split the config into files named by resource type:</p>
+<p><p>Use <highlight>bkld</highlight> to produce a diff of two plain YAML or bkl files.</p>
 </p>
 
 
@@ -2638,7 +2585,9 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><operator>(</operator><command>cd</command> <argument>prod</argument> <argument>&&</argument> <argument>yq</argument> <flag>-s</flag> <string>'.kind'</string> <argument>api-service.yaml</argument><operator>)</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/base.yaml</argument> <argument>prep/prod/api-service.yaml</argument> <flag>--output=bkl/base.api-service.yaml</flag>
+<prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/base.api-service.yaml</argument> <argument>prep/staging/api-service.yaml</argument> <flag>--output=bkl/base.api-service.staging.yaml</flag>
+<prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/base.api-service.staging.yaml</argument> <argument>prep/dev/api-service.yaml</argument> <flag>--output=bkl/base.api-service.staging.dev.yaml</flag></bkl-code>
 </div>
 
 </div>
@@ -2646,59 +2595,66 @@ base.yaml
 
 
 
-<p><p>For the ConfigMap, we'll use <highlight>$encode: properties</highlight> to convert a map to an embedded properties string.</p>
+<p><p>Validate the combined bkl file layers against the original configs.</p>
 </p>
 
 
 
 
-<div class="example-container expandable-container">
+<div class="example-container">
 
-<div class="label-container">
-<label class="label-spacing">bkl/configmap.yaml</label>
 <div class="code-wrapper">
 
-<button class="expand-toggle" onclick="toggleExpand(this)" aria-expanded="false">
-›
-</button>
-
-<bkl-code class="code-labeled collapsed"><key>apiVersion</key>: <string>v1</string>
-<key>kind</key>: <string>ConfigMap</string>
-<key>metadata</key>:
-  <key>name</key>: <string>api-config</string>
-  <key>namespace</key>: <string>microservices-prod</string>
-<key>data</key>:
-  <key>app.properties</key>:
-    <key>$encode</key>: <string>properties</string>
-    <key>server</key>:
-      <key>port</key>: <number>8080</number>
-      <key>name</key>: <string>api-service</string>
-      <key>workers</key>: <number>8</number>
-      <key>max_connections</key>: <number>1000</number>
-    <key>logging</key>:
-      <key>level</key>: <string>warn</string>
-      <key>format</key>: <string>json</string>
-      <key>output</key>: <string>stdout</string>
-      <key>sample_rate</key>: <number>0.1</number>
-    <key>cache</key>:
-      <key>enabled</key>: <bool>true</bool>
-      <key>ttl</key>: <number>3600</number>
-      <key>backend</key>: <string>redis-cluster</string>
-      <key>max_size</key>: <number>1000</number>
-    <key>database</key>:
-      <key>pool_size</key>: <number>20</number>
-      <key>max_pool_size</key>: <number>50</number>
-      <key>timeout</key>: <number>30</number>
-      <key>max_idle</key>: <number>10</number>
-    <key>metrics</key>:
-      <key>enabled</key>: <bool>true</bool>
-      <key>port</key>: <number>9090</number>
-      <key>path</key>: <string>/metrics</string>
-    <key>security</key>:
-      <key>rate_limit</key>: <number>1000</number>
-      <key>jwt_expiry</key>: <number>3600</number>
-    <key>environment</key>: <string>production</string></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.api-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/api-service.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.api-service.staging.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/dev/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/base.api-service.staging.dev.yaml</argument><operator>)</operator></bkl-code>
 </div>
+
+</div>
+
+
+
+
+</section>
+
+<section id="web-service">
+<h2><a name="web-service">web-service</a></h2>
+
+
+
+<p><p>Use <highlight>bkld</highlight> to produce a diff of two plain YAML or bkl files.</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/base.yaml</argument> <argument>prep/prod/web-service.yaml</argument> <flag>--output=bkl/base.web-service.yaml</flag>
+<prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/base.web-service.yaml</argument> <argument>prep/staging/web-service.yaml</argument> <flag>--output=bkl/base.web-service.staging.yaml</flag>
+<prompt>$ </prompt><command>bkld</command> <flag>--selector=kind</flag> <argument>bkl/base.web-service.staging.yaml</argument> <argument>prep/dev/web-service.yaml</argument> <flag>--output=bkl/base.web-service.staging.dev.yaml</flag></bkl-code>
+</div>
+
+</div>
+
+
+
+
+<p><p>Validate the combined bkl file layers against the original configs.</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.web-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/web-service.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.web-service.staging.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/dev/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/base.web-service.staging.dev.yaml</argument><operator>)</operator></bkl-code>
 </div>
 
 </div>
