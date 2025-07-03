@@ -14,6 +14,9 @@ import (
 	"github.com/gopatchy/bkl"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/version"
+	"github.com/hexops/gotextdiff"
+	"github.com/hexops/gotextdiff/myers"
+	"github.com/hexops/gotextdiff/span"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -168,6 +171,24 @@ func main() {
 		mcp.WithDescription("Get guidance for converting YAML files to bkl format with layering"),
 	)
 	mcpServer.AddTool(convertToBklTool, convertToBklHandler)
+
+	compareFilesTool := mcp.NewTool("compare_files",
+		mcp.WithDescription("Evaluate two bkl files and show text differences between their outputs"),
+		mcp.WithString("file1",
+			mcp.Required(),
+			mcp.Description("First file path to evaluate"),
+		),
+		mcp.WithString("file2",
+			mcp.Required(),
+			mcp.Description("Second file path to evaluate"),
+		),
+		formatParam,
+		fileSystemParam,
+		mcp.WithObject("environment",
+			mcp.Description("Environment variables as key-value pairs"),
+		),
+	)
+	mcpServer.AddTool(compareFilesTool, compareFilesHandler)
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
@@ -1007,4 +1028,77 @@ Rules:
 `
 
 	return mcp.NewToolResultText(prompt), nil
+}
+
+func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	file1, err := request.RequireString("file1")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	file2, err := request.RequireString("file2")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	args, ok := request.Params.Arguments.(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Invalid arguments format"), nil
+	}
+
+	fileSystem, err := parseFileSystem(args)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	format := parseOptionalString(args, "format", "")
+
+	env, err := parseEnvironment(args)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	workingDir := ""
+	if fileSystem != nil {
+		workingDir = "/"
+	}
+
+	fsys, err := getFileSystem(fileSystem)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	finalFormat := determineFormatWithPaths(format, "", []string{file1, file2})
+
+	output1, err := bkl.Evaluate(fsys, []string{file1}, "/", workingDir, env, &finalFormat, "")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to evaluate %s: %v", file1, err)), nil
+	}
+
+	output2, err := bkl.Evaluate(fsys, []string{file2}, "/", workingDir, env, &finalFormat, "")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to evaluate %s: %v", file2, err)), nil
+	}
+
+	edits := myers.ComputeEdits(span.URIFromPath(file1), string(output1), string(output2))
+	unified := fmt.Sprint(gotextdiff.ToUnified(file1, file2, string(output1), edits))
+
+	response := map[string]any{
+		"file1":     file1,
+		"file2":     file2,
+		"format":    finalFormat,
+		"diff":      unified,
+		"operation": "compare_files",
+	}
+
+	if len(env) > 0 {
+		response["environment"] = env
+	}
+
+	jsonResult, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal result: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonResult)), nil
 }

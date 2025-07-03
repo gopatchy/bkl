@@ -3,6 +3,7 @@ module github.com/gopatchy/bkl
 go 1.24.0
 
 require (
+	github.com/hexops/gotextdiff v1.0.3
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/magiconair/properties v1.8.10
 	github.com/mark3labs/mcp-go v0.32.0
