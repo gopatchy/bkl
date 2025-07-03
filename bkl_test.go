@@ -353,6 +353,202 @@ func TestCLI(t *testing.T) {
 	}
 }
 
+func extractEnvVars(code string) map[string]string {
+	env := make(map[string]string)
+	lines := strings.Split(code, "\n")
+	for _, line := range lines {
+		if matches := exportRegex.FindStringSubmatch(line); matches != nil {
+			env[matches[1]] = matches[2]
+		}
+	}
+	return env
+}
+
+func validateLanguage(layers []bkl.DocLayer, acceptableLanguages []string) bool {
+	for _, layer := range layers {
+		if len(layer.Languages) != 1 {
+			return false
+		}
+		lang := layer.Languages[0][1].(string)
+		if !slices.Contains(acceptableLanguages, lang) {
+			return false
+		}
+	}
+	return true
+}
+
+func processEvaluateExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+	if !validateLanguage(example.Layers, acceptableLanguages) {
+		return nil, false
+	}
+
+	testCase := &bkl.TestCase{
+		Files: map[string]string{},
+		Eval:  []string{},
+		Env:   map[string]string{},
+	}
+
+	for i, layer := range example.Layers {
+		lang := layer.Languages[0][1].(string)
+		filename := "base"
+		if i > 0 {
+			filename = fmt.Sprintf("base.layer%d", i)
+		}
+		filename += "." + lang
+
+		testCase.Files[filename] = layer.Code
+		testCase.Eval = []string{filename}
+
+		for k, v := range extractEnvVars(layer.Code) {
+			testCase.Env[k] = v
+		}
+	}
+
+	if len(example.Result.Languages) != 1 {
+		return nil, false
+	}
+	testCase.Format = example.Result.Languages[0][1].(string)
+
+	return testCase, true
+}
+
+func processConvertExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+	if len(example.Layers) < 2 {
+		return nil, false
+	}
+
+	inputLayers := example.Layers[1:]
+	if !validateLanguage(inputLayers, acceptableLanguages) {
+		return nil, false
+	}
+
+	testCase := &bkl.TestCase{
+		Files: map[string]string{},
+		Eval:  []string{},
+		Env:   map[string]string{},
+	}
+
+	for i, layer := range inputLayers {
+		lang := layer.Languages[0][1].(string)
+		filename := fmt.Sprintf("file%d.%s", i+1, lang)
+
+		testCase.Files[filename] = layer.Code
+		testCase.Eval = []string{filename}
+
+		for k, v := range extractEnvVars(layer.Code) {
+			testCase.Env[k] = v
+		}
+	}
+
+	if len(example.Layers[0].Languages) != 1 {
+		return nil, false
+	}
+	testCase.Format = example.Layers[0].Languages[0][1].(string)
+
+	return testCase, true
+}
+
+func processFixitExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+	if len(example.Layers) < 2 {
+		return nil, false
+	}
+
+	goodLayer := example.Layers[1]
+	if len(goodLayer.Languages) != 1 {
+		return nil, false
+	}
+
+	lang := goodLayer.Languages[0][1].(string)
+	if !slices.Contains(acceptableLanguages, lang) {
+		return nil, false
+	}
+
+	testCase := &bkl.TestCase{
+		Files:  map[string]string{},
+		Eval:   []string{},
+		Env:    map[string]string{},
+		Format: lang,
+	}
+
+	filename := "good." + lang
+	testCase.Files[filename] = goodLayer.Code
+	testCase.Eval = []string{filename}
+	testCase.Env = extractEnvVars(goodLayer.Code)
+
+	return testCase, true
+}
+
+func processDiffOrIntersectExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+	if !validateLanguage(example.Layers, acceptableLanguages) {
+		return nil, false
+	}
+
+	testCase := &bkl.TestCase{
+		Files: map[string]string{},
+		Eval:  []string{},
+		Env:   map[string]string{},
+	}
+
+	for i, layer := range example.Layers {
+		lang := layer.Languages[0][1].(string)
+		filename := fmt.Sprintf("file%d.%s", i, lang)
+
+		testCase.Files[filename] = layer.Code
+		testCase.Eval = append(testCase.Eval, filename)
+
+		for k, v := range extractEnvVars(layer.Code) {
+			testCase.Env[k] = v
+		}
+	}
+
+	if len(example.Result.Languages) != 1 {
+		return nil, false
+	}
+	testCase.Format = example.Result.Languages[0][1].(string)
+
+	return testCase, true
+}
+
+func processRequiredExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+	testCase, ok := processEvaluateExample(example, acceptableLanguages)
+	if ok {
+		testCase.Required = true
+	}
+	return testCase, ok
+}
+
+func runDocumentationTest(t *testing.T, testCase *bkl.TestCase, example *bkl.DocExample) {
+	output, err := runTestCase(testCase)
+
+	if example.Operation == "fixit" {
+		if err != nil {
+			t.Errorf("Fixit good code failed to evaluate: %v\nOutput: %s", err, output)
+		}
+		return
+	}
+
+	expectedResult := strings.TrimSpace(example.Result.Code)
+	if example.Operation == "convert" && len(example.Layers) > 0 {
+		expectedResult = strings.TrimSpace(example.Layers[0].Code)
+	}
+
+	if expectedResult == "Error" {
+		if err == nil {
+			t.Errorf("Expected error but got none\nOutput: %s", output)
+		}
+		return
+	}
+
+	if err != nil {
+		t.Errorf("Unexpected error: %v\nOutput: %s", err, output)
+		return
+	}
+
+	if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(expectedResult))) {
+		t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedResult, output)
+	}
+}
+
 func TestDocumentationExamples(t *testing.T) {
 	t.Parallel()
 
@@ -364,7 +560,6 @@ func TestDocumentationExamples(t *testing.T) {
 	acceptableLanguages := []string{"yaml", "toml", "json"}
 
 	for _, section := range sections {
-	itemLoop:
 		for itemIdx, item := range section.Items {
 			if item.Example == nil {
 				continue
@@ -373,115 +568,47 @@ func TestDocumentationExamples(t *testing.T) {
 			example := item.Example
 			testName := fmt.Sprintf("%s_item%d", section.ID, itemIdx)
 
-			testCase := &bkl.TestCase{
-				Description: fmt.Sprintf("Doc example from %s", section.Title),
-				Files:       map[string]string{},
-				Eval:        []string{},
-				Env:         map[string]string{},
-			}
-
-			startIndex := 0
-			if example.Operation == "convert" {
-				if len(example.Layers) < 2 {
-					continue itemLoop
-				}
-				startIndex = 1
-			}
-
-			for i, layer := range example.Layers {
-				if example.Operation == "convert" && i < startIndex {
-					continue
-				}
-				if len(layer.Languages) != 1 {
-					continue itemLoop
-				}
-				layerLang := layer.Languages[0][1].(string)
-				if !slices.Contains(acceptableLanguages, layerLang) {
-					continue itemLoop
-				}
-
-				filename := fmt.Sprintf("file%d", i)
-				if example.Operation == "evaluate" {
-					if i == 0 {
-						filename = "base"
-					} else {
-						filename = fmt.Sprintf("base.layer%d", i)
-					}
-				} else if example.Operation == "convert" {
-					filename = fmt.Sprintf("file%d", i-startIndex+1)
-				}
-
-				filename += "." + layerLang
-
-				testCase.Files[filename] = layer.Code
-
-				lines := strings.Split(layer.Code, "\n")
-				for _, line := range lines {
-					if matches := exportRegex.FindStringSubmatch(line); matches != nil {
-						testCase.Env[matches[1]] = matches[2]
-					}
-				}
-
-				if example.Operation == "diff" || example.Operation == "intersect" {
-					testCase.Eval = append(testCase.Eval, filename)
-				} else {
-					testCase.Eval = []string{filename}
-				}
-			}
-
-			if example.Operation == "convert" {
-				if len(example.Layers) > 0 && len(example.Layers[0].Languages) == 1 {
-					testCase.Format = example.Layers[0].Languages[0][1].(string)
-				} else {
-					continue itemLoop
-				}
-			} else {
-				if len(example.Result.Languages) != 1 {
-					continue itemLoop
-				}
-				testCase.Format = example.Result.Languages[0][1].(string)
-			}
-
-			if !slices.Contains(acceptableLanguages, testCase.Format) {
-				continue itemLoop
-			}
+			var testCase *bkl.TestCase
+			var ok bool
 
 			switch example.Operation {
-			case "diff":
-				testCase.Diff = true
-			case "intersect":
-				testCase.Intersect = true
-			case "required":
-				testCase.Required = true
+			case "evaluate":
+				testCase, ok = processEvaluateExample(example, acceptableLanguages)
 			case "convert":
+				testCase, ok = processConvertExample(example, acceptableLanguages)
+			case "fixit":
+				testCase, ok = processFixitExample(example, acceptableLanguages)
+			case "diff", "intersect":
+				testCase, ok = processDiffOrIntersectExample(example, acceptableLanguages)
+				if ok {
+					if example.Operation == "diff" {
+						testCase.Diff = true
+					} else {
+						testCase.Intersect = true
+					}
+				}
+			case "required":
+				testCase, ok = processRequiredExample(example, acceptableLanguages)
+			default:
+				continue
 			}
+
+			if !ok {
+				continue
+			}
+
+			testCase.Description = fmt.Sprintf("Doc example from %s", section.Title)
 
 			if section.ID == "bklr" {
 				testCase.Required = true
 			}
+
+			if !slices.Contains(acceptableLanguages, testCase.Format) {
+				continue
+			}
+
 			t.Run(testName, func(t *testing.T) {
-				output, err := runTestCase(testCase)
-
-				expectedResult := strings.TrimSpace(example.Result.Code)
-				if example.Operation == "convert" && len(example.Layers) > 0 {
-					expectedResult = strings.TrimSpace(example.Layers[0].Code)
-				}
-
-				if expectedResult == "Error" {
-					if err == nil {
-						t.Errorf("Expected error but got none\nOutput: %s", output)
-					}
-					return
-				}
-
-				if err != nil {
-					t.Errorf("Unexpected error: %v\nOutput: %s", err, output)
-					return
-				}
-
-				if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(expectedResult))) {
-					t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedResult, output)
-				}
+				runDocumentationTest(t, testCase, example)
 			})
 		}
 	}

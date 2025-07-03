@@ -56,6 +56,8 @@
   {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" .HasLabels}}
 {{else if eq .Operation "convert"}}
   {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
+{{else if eq .Operation "fixit"}}
+  {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
 {{end}}
 {{end}}
 
@@ -84,6 +86,22 @@
 {{template "codeBlock" dict "Label" (index $example.Layers 0).Label "Code" (index $example.Layers 0 | formatLayer) "HasLabels" $hasLabels}}
 {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" $hasLabels}}
 <div class="code-container" style="display: contents;">
+{{range $layerIndex, $layer := $example.Layers}}
+{{if eq $layerIndex 1}}
+{{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
+{{end}}
+{{end}}
+</div>
+</div>
+</div>
+{{else if eq $example.Operation "fixit"}}
+<div class="example-container">
+<div class="grid-container grid-3-col">
+<div class="code-container fixit-bad">
+{{template "codeBlock" dict "Label" (index $example.Layers 0).Label "Code" (index $example.Layers 0 | formatLayer) "HasLabels" $hasLabels}}
+</div>
+{{template "operatorSymbol" dict "Symbol" "→" "HasLabels" $hasLabels}}
+<div class="code-container fixit-good">
 {{range $layerIndex, $layer := $example.Layers}}
 {{if eq $layerIndex 1}}
 {{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
@@ -609,6 +627,56 @@ file-header {
 hunk-header {
 	color: var(--vivid5);
 	font-weight: 500;
+}
+
+/* Fixit operation styles */
+.fixit-bad bkl-code,
+.fixit-good bkl-code {
+	position: relative;
+}
+
+.fixit-bad bkl-code::before {
+	content: '✗';
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	color: var(--red5);
+	font-size: 20px;
+	font-weight: bold;
+	z-index: 10;
+}
+
+.fixit-bad bkl-code {
+	border: 2px solid var(--red3);
+}
+
+.fixit-good bkl-code::before {
+	content: '✓';
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	color: var(--green5);
+	font-size: 20px;
+	font-weight: bold;
+	z-index: 10;
+}
+
+.fixit-good bkl-code {
+	border: 2px solid var(--green3);
+}
+
+/* Make fixit code blocks equal height */
+.grid-container .fixit-bad,
+.grid-container .fixit-good {
+	display: flex;
+	flex-direction: column;
+}
+
+.grid-container .fixit-bad .code-container,
+.grid-container .fixit-good .code-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 }
 
 /* Mobile menu button default styles */
