@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"testing/fstest"
@@ -89,8 +88,16 @@ func main() {
 	evaluateTool := mcp.NewTool("evaluate",
 		mcp.WithDescription("Evaluate bkl files with given environment and return results"),
 		mcp.WithString("files",
-			mcp.Required(),
-			mcp.Description("Comma-separated list of files to evaluate (relative paths)"),
+			mcp.Description("Comma-separated list of files to evaluate (relative paths). Leave empty when using directory parameter."),
+		),
+		mcp.WithString("directory",
+			mcp.Description("Directory path to evaluate all files within (alternative to files parameter)"),
+		),
+		mcp.WithString("pattern",
+			mcp.Description("File pattern to match when using directory mode (e.g. '*.yaml', '*.bkl')"),
+		),
+		mcp.WithBoolean("includeOutput",
+			mcp.Description("Include evaluated output for successful files when in directory mode (default: true)"),
 		),
 		formatParam,
 		mcp.WithObject("environment",
@@ -193,25 +200,6 @@ func main() {
 		),
 	)
 	mcpServer.AddTool(compareFilesTool, compareFilesHandler)
-
-	validateDirectoryTool := mcp.NewTool("validate_directory",
-		mcp.WithDescription("Walk a directory tree, evaluate all bkl files, and report any errors"),
-		mcp.WithString("directory",
-			mcp.Required(),
-			mcp.Description("Directory path to validate"),
-		),
-		mcp.WithString("pattern",
-			mcp.Description("File pattern to match (e.g. '*.yaml', '*.bkl'). If not specified, evaluates all files"),
-		),
-		formatParam,
-		mcp.WithObject("environment",
-			mcp.Description("Environment variables as key-value pairs"),
-		),
-		mcp.WithBoolean("includeOutput",
-			mcp.Description("Include evaluated output for successful files (default: false, only show errors)"),
-		),
-	)
-	mcpServer.AddTool(validateDirectoryTool, validateDirectoryHandler)
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
@@ -672,27 +660,21 @@ func determineFormatWithPaths(explicitFormat string, outputPath string, inputPat
 }
 
 func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	filesStr, err := request.RequireString("files")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	fileFields := strings.Split(filesStr, ",")
-	var files []string
-	for _, f := range fileFields {
-		trimmed := strings.TrimSpace(f)
-		if trimmed != "" {
-			files = append(files, trimmed)
-		}
-	}
-
-	if len(files) == 0 {
-		return mcp.NewToolResultError("No files provided"), nil
-	}
-
 	args, ok := request.Params.Arguments.(map[string]any)
 	if !ok {
 		return mcp.NewToolResultError("Invalid arguments format"), nil
+	}
+
+	// Check if this is directory mode or files mode
+	directory := parseOptionalString(args, "directory", "")
+	filesStr := parseOptionalString(args, "files", "")
+
+	if directory != "" && filesStr != "" {
+		return mcp.NewToolResultError("Cannot specify both files and directory parameters"), nil
+	}
+
+	if directory == "" && filesStr == "" {
+		return mcp.NewToolResultError("Must specify either files or directory parameter"), nil
 	}
 
 	fileSystem, err := parseFileSystem(args)
@@ -716,6 +698,78 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	fsys, err := getFileSystem(fileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	if directory != "" {
+		pattern := parseOptionalString(args, "pattern", "")
+		includeOutput := true
+		if val := args["includeOutput"]; val != nil {
+			if b, ok := val.(bool); ok {
+				includeOutput = b
+			}
+		}
+
+		results, err := bkl.EvaluateTree(fsys, directory, pattern, env, &format)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Directory evaluation failed: %v", err)), nil
+		}
+
+		var successCount, errorCount int
+		for _, result := range results {
+			if result.Error == nil {
+				successCount++
+			} else {
+				errorCount++
+			}
+		}
+
+		var finalResults []any
+		for _, result := range results {
+			resultMap := map[string]any{
+				"path": result.Path,
+			}
+			if result.Error != nil {
+				resultMap["error"] = result.Error.Error()
+			}
+			if includeOutput && result.Output != "" {
+				resultMap["output"] = result.Output
+			}
+			finalResults = append(finalResults, resultMap)
+		}
+
+		response := map[string]any{
+			"directory":    directory,
+			"pattern":      pattern,
+			"totalFiles":   len(results),
+			"successCount": successCount,
+			"errorCount":   errorCount,
+			"results":      finalResults,
+			"operation":    "evaluate_tree",
+		}
+
+		if len(env) > 0 {
+			response["environment"] = env
+		}
+
+		resultJSON, err := json.MarshalIndent(response, "", "  ")
+		if err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
+		}
+		return mcp.NewToolResultText(string(resultJSON)), nil
+	}
+
+	// Files mode (original behavior)
+	fileFields := strings.Split(filesStr, ",")
+	var files []string
+	for _, f := range fileFields {
+		trimmed := strings.TrimSpace(f)
+		if trimmed != "" {
+			files = append(files, trimmed)
+		}
+	}
+
+	if len(files) == 0 {
+		return mcp.NewToolResultError("No files provided"), nil
 	}
 
 	finalFormat := determineFormatWithPaths(format, outputPath, files)
@@ -1123,132 +1177,6 @@ func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp
 
 	if sortPath != "" {
 		response["sortPath"] = sortPath
-	}
-
-	jsonResult, err := json.MarshalIndent(response, "", "  ")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal result: %v", err)), nil
-	}
-
-	return mcp.NewToolResultText(string(jsonResult)), nil
-}
-
-func validateDirectoryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	directory, err := request.RequireString("directory")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		return mcp.NewToolResultError("Invalid arguments format"), nil
-	}
-
-	pattern := parseOptionalString(args, "pattern", "")
-	format := parseOptionalString(args, "format", "")
-
-	includeOutput := false
-	if val := args["includeOutput"]; val != nil {
-		if b, ok := val.(bool); ok {
-			includeOutput = b
-		}
-	}
-
-	env, err := parseEnvironment(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	fsys := os.DirFS("/")
-
-	type fileResult struct {
-		Path    string `json:"path"`
-		Success bool   `json:"success"`
-		Error   string `json:"error,omitempty"`
-		Output  string `json:"output,omitempty"`
-		Format  string `json:"format,omitempty"`
-	}
-
-	var results []fileResult
-	var successCount, errorCount int
-
-	walkDir := directory
-	if strings.HasPrefix(walkDir, "/") {
-		walkDir = walkDir[1:]
-	}
-
-	err = fs.WalkDir(fsys, walkDir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			results = append(results, fileResult{
-				Path:    "/" + path,
-				Success: false,
-				Error:   fmt.Sprintf("Failed to access: %v", err),
-			})
-			errorCount++
-			return nil
-		}
-
-		if d.IsDir() {
-			return nil
-		}
-
-		fullPath := "/" + path
-
-		if pattern != "" {
-			matched, err := filepath.Match(pattern, filepath.Base(fullPath))
-			if err != nil || !matched {
-				return nil
-			}
-		}
-
-		fileFormat := format
-		if fileFormat == "" {
-			fileFormat = utils.Ext(fullPath)
-			if fileFormat == "" {
-				return nil
-			}
-		}
-
-		output, err := bkl.Evaluate(fsys, []string{fullPath}, "/", "/", env, &fileFormat, "")
-		if err != nil {
-			results = append(results, fileResult{
-				Path:    fullPath,
-				Success: false,
-				Error:   err.Error(),
-				Format:  fileFormat,
-			})
-			errorCount++
-		} else {
-			successCount++
-			result := fileResult{
-				Path:    fullPath,
-				Success: true,
-				Format:  fileFormat,
-			}
-			if includeOutput {
-				result.Output = string(output)
-			}
-			results = append(results, result)
-		}
-
-		return nil
-	})
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to walk directory: %v", err)), nil
-	}
-
-	response := map[string]any{
-		"directory":    directory,
-		"pattern":      pattern,
-		"totalFiles":   len(results),
-		"successCount": successCount,
-		"errorCount":   errorCount,
-		"results":      results,
-		"operation":    "validate_directory",
-	}
-
-	if len(env) > 0 {
-		response["environment"] = env
 	}
 
 	jsonResult, err := json.MarshalIndent(response, "", "  ")

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gopatchy/bkl/internal/file"
@@ -99,6 +100,59 @@ func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env 
 	}
 
 	return merge.Files(fx, realFiles, ft, env, sortPath)
+}
+
+func EvaluateTree(fx fs.FS, directory string, pattern string, env map[string]string, format *string) ([]TreeResult, error) {
+	if env == nil {
+		env = getOSEnv()
+	}
+
+	var results []TreeResult
+
+	walkDir := strings.TrimPrefix(directory, "/")
+
+	err := fs.WalkDir(fx, walkDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			results = append(results, TreeResult{
+				Path:  "/" + path,
+				Error: fmt.Errorf("failed to access: %w", err),
+			})
+			return nil
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		fullPath := "/" + path
+
+		if pattern != "" {
+			matched, err := filepath.Match(pattern, filepath.Base(fullPath))
+			if err != nil || !matched {
+				return nil
+			}
+		}
+
+		output, err := Evaluate(fx, []string{fullPath}, "/", "/", env, format, "", &fullPath)
+		results = append(results, TreeResult{
+			Path:   fullPath,
+			Error:  err,
+			Output: string(output),
+		})
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to walk directory: %w", err)
+	}
+
+	return results, nil
+}
+
+type TreeResult struct {
+	Path   string `json:"path"`
+	Error  error  `json:"error,omitempty"`
+	Output string `json:"output,omitempty"`
 }
 
 // getOSEnv returns the current OS environment as a map.
