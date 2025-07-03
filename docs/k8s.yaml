@@ -1259,6 +1259,7 @@
                 - --feature=metrics
                 - --feature=rate-limiting
                 - --log-format=json
+                - --verbose
           - languages: [[0, "yaml"]]
             code: |
               args:
@@ -1268,6 +1269,7 @@
                   - metrics
                   - rate-limiting
                 log-format: json
+                verbose: ""
                 $encode: flags
             highlights: ["$encode: flags"]
     - content: |
@@ -1345,6 +1347,23 @@
                 environment: prod
               namespace: $"api-{labels.environment}"
             highlights: ['$"api-{labels.environment}"']
+- id: prep-validate
+  title: Validate
+  items:
+    - content: |
+        <p>Validate the prepped files against the original configs before continuing.</p>
+    - code:
+        languages: [[0, "shell"]]
+        code: |
+          $ diff -ud --color &lt;(bkl original/prod/namespace.yaml) &lt;(bkl prep/prod/namespace.yaml)
+          $ diff -ud --color &lt;(bkl original/prod/api-service.yaml) &lt;(bkl prep/prod/api-service.yaml)
+          $ diff -ud --color &lt;(bkl original/prod/web-service.yaml) &lt;(bkl prep/prod/web-service.yaml)
+          $ diff -ud --color &lt;(bkl original/staging/namespace.yaml) &lt;(bkl prep/staging/namespace.yaml)
+          $ diff -ud --color &lt;(bkl original/staging/api-service.yaml) &lt;(bkl prep/staging/api-service.yaml)
+          $ diff -ud --color &lt;(bkl original/staging/web-service.yaml) &lt;(bkl prep/staging/web-service.yaml)
+          $ diff -ud --color &lt;(bkl original/dev/namespace.yaml) &lt;(bkl prep/dev/namespace.yaml)
+          $ diff -ud --color &lt;(bkl original/dev/api-service.yaml) &lt;(bkl prep/dev/api-service.yaml)
+          $ diff -ud --color &lt;(bkl original/dev/web-service.yaml) &lt;(bkl prep/dev/web-service.yaml)
 - id: plan
   title: Target layout
   items:

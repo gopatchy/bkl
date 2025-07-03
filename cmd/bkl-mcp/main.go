@@ -981,10 +981,11 @@ These instructions help you convert a set of Kubernetes YAML files into bkl form
 Update your Todos to do these steps in order:
 1) Find all input files
 2) Prep files for bkl (see mcp__bkl-mcp__get type="documentation" id="prep" source="k8s")
-3) Determine a target layout (see mcp__bkl-mcp__get type="documentation" id="plan" source="k8s")
-4) Create base layers (see mcp__bkl-mcp__get type="documentation" id="base" source="k8s")
-5) Create remaining layers (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
-6) Validate all bkl leaf layers against the original configs (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
+3) Validate prepped files (see mcp__bkl-mcp__get type="documentation" id="prep-validate" source="k8s")
+4) Determine a target layout (see mcp__bkl-mcp__get type="documentation" id="plan" source="k8s")
+5) Create base layers (see mcp__bkl-mcp__get type="documentation" id="base" source="k8s")
+6) Create remaining layers (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
+7) Validate all bkl leaf layers against the original configs (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
 
 Tools:
 * To query documentation: mcp__bkl-mcp__query keywords="repeat,list,iteration"
@@ -994,8 +995,15 @@ Tools:
 
 Rules:
 * ALWAYS consider & examine EVERY file during the prep step
+* ALWAYS convert every list that might need overriding (containers, env, ports, etc.) to a map
 * ALWAYS stack environments: dev on staging on prod
+* ALWAYS name files to indicate their layering: layer1.layer2.layer3.yaml
+* ALWAYS use mcp__bkl-mcp__evaluate to evaluate EACH file after you create it, and fix any errors before continuing
 * NEVER put the environment name in an environment variable
+* NEVER use $parent to specify inheritance
+* NEVER put bkl files in multiple directories; put them all in a single directory
+* NEVER use mcp__bkl-mcp__evaluate with multiple files at once
+* NEVER use external scripts to split, alter, or parse files
 `
 
 	return mcp.NewToolResultText(prompt), nil

@@ -739,6 +739,8 @@ hunk-header {
 
 	<li><a href="#prep">Prep</a></li>
 
+	<li><a href="#prep-validate">Validate</a></li>
+
 	<li><a href="#plan">Target layout</a></li>
 
 	<li><a href="#namespace">namespace</a></li>
@@ -2260,7 +2262,8 @@ hunk-header {
   - <string>--feature=auth</string>
   - <string>--feature=metrics</string>
   - <string>--feature=rate-limiting</string>
-  - <string>--log-format=json</string></bkl-code>
+  - <string>--log-format=json</string>
+  - <string>--verbose</string></bkl-code>
 </div>
 
 
@@ -2281,6 +2284,7 @@ hunk-header {
     - <string>metrics</string>
     - <string>rate-limiting</string>
   <key>log-format</key>: <string>json</string>
+  <key>verbose</key>: <string>""</string>
   <highlight><key>$encode</key>: <string>flags</string></highlight></bkl-code>
 </div>
 
@@ -2490,6 +2494,39 @@ hunk-header {
 </div>
 </div>
 
+
+
+
+
+</section>
+
+<section id="prep-validate">
+<h2><a name="prep-validate">Validate</a></h2>
+
+
+
+<p><p>Validate the prepped files against the original configs before continuing.</p>
+</p>
+
+
+
+
+<div class="example-container">
+
+<div class="code-wrapper">
+
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/prod/namespace.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/prod/api-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/prod/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/prod/web-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/staging/namespace.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/api-service.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/staging/api-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/staging/web-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/dev/namespace.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/dev/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/dev/api-service.yaml</argument><operator>)</operator>
+<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/dev/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/dev/web-service.yaml</argument><operator>)</operator></bkl-code>
+</div>
+
+</div>
 
 
 
