@@ -993,6 +993,7 @@ Tools:
 * Instead of bkld, use: mcp__bkl-mcp__diff baseFile="bkl/namespace.yaml" targetFile="prep/staging/namespace.yaml" outputPath="bkl/namespace.staging.yaml" selector="kind"
 
 Rules:
+* ALWAYS consider & examine EVERY file during the prep step
 * ALWAYS stack environments: dev on staging on prod
 * NEVER put the environment name in an environment variable
 `

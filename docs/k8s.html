@@ -2176,6 +2176,68 @@ hunk-header {
 
 
 
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled">- <key>resource</key>:
+    <key>name</key>: <string>cpu</string>
+    <key>target</key>:
+      <key>averageUtilization</key>: <number>70</number>
+      <key>type</key>: <string>Utilization</string>
+  <key>type</key>: <string>Resource</string>
+- <key>resource</key>:
+    <key>name</key>: <string>memory</string>
+    <key>target</key>:
+      <key>averageUtilization</key>: <number>80</number>
+      <key>type</key>: <string>Utilization</string>
+  <key>type</key>: <string>Resource</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>cpu</key>:
+  <key>resource</key>:
+    <key>target</key>:
+      <key>averageUtilization</key>: <number>70</number>
+      <key>type</key>: <string>Utilization</string>
+  <key>type</key>: <string>Resource</string>
+<key>memory</key>:
+  <key>resource</key>:
+    <key>target</key>:
+      <key>averageUtilization</key>: <number>80</number>
+      <key>type</key>: <string>Utilization</string>
+  <key>type</key>: <string>Resource</string>
+<highlight><key>$encode</key>: <string>values:resource.name</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
 <p><p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
 </p>
 

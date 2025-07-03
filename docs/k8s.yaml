@@ -1213,6 +1213,39 @@
                 $encode: values:name
             languages: [[0, "yaml"]]
             highlights: ["http:", "https:", "$encode: values:name"]
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              - resource:
+                  name: cpu
+                  target:
+                    averageUtilization: 70
+                    type: Utilization
+                type: Resource
+              - resource:
+                  name: memory
+                  target:
+                    averageUtilization: 80
+                    type: Utilization
+                type: Resource
+          - languages: [[0, "yaml"]]
+            code: |
+              cpu:
+                resource:
+                  target:
+                    averageUtilization: 70
+                    type: Utilization
+                type: Resource
+              memory:
+                resource:
+                  target:
+                    averageUtilization: 80
+                    type: Utilization
+                type: Resource
+              $encode: values:resource.name
+            highlights: ["$encode: values:resource.name"]
     - content: |
         <p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
     - example:
