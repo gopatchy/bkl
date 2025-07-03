@@ -5688,3 +5688,30 @@ metadata:
   name: doc3
   priority: 2
 '''
+
+###############################################################################
+# Compare Operations
+###############################################################################
+
+[compareSimple]
+description = "Test compare of two files with differences"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+compare = true
+expected = '''
+--- a.yaml
++++ b.yaml
+@@ -1,2 +1,2 @@
+ a: 1
+-b: 2
++b: 3
+'''
+[compareSimple.files]
+"a.yaml" = '''
+a: 1
+b: 2
+'''
+"b.yaml" = '''
+a: 1
+b: 3
+'''

@@ -2565,15 +2565,15 @@ hunk-header {
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/prod/namespace.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/prod/api-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/prod/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/prod/web-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/staging/namespace.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/api-service.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/staging/api-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/staging/web-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/dev/namespace.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/dev/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/dev/api-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/dev/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>prep/dev/web-service.yaml</argument><operator>)</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/namespace.yaml</argument> <argument>prep/prod/namespace.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/api-service.yaml</argument> <argument>prep/prod/api-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/web-service.yaml</argument> <argument>prep/prod/web-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/namespace.yaml</argument> <argument>prep/staging/namespace.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/api-service.yaml</argument> <argument>prep/staging/api-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/web-service.yaml</argument> <argument>prep/staging/web-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/namespace.yaml</argument> <argument>prep/dev/namespace.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/api-service.yaml</argument> <argument>prep/dev/api-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/web-service.yaml</argument> <argument>prep/dev/web-service.yaml</argument></bkl-code>
 </div>
 
 </div>
@@ -2682,9 +2682,9 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/namespace.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/namespace.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/namespace.staging.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/dev/namespace.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/namespace.staging.dev.yaml</argument><operator>)</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/namespace.yaml</argument> <argument>bkl/namespace.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/namespace.yaml</argument> <argument>bkl/namespace.staging.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/namespace.yaml</argument> <argument>bkl/namespace.staging.dev.yaml</argument></bkl-code>
 </div>
 
 </div>
@@ -2754,9 +2754,9 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.api-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/api-service.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.api-service.staging.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/dev/api-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/base.api-service.staging.dev.yaml</argument><operator>)</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/api-service.yaml</argument> <argument>bkl/base.api-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/api-service.yaml</argument> <argument>bkl/base.api-service.staging.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/api-service.yaml</argument> <argument>bkl/base.api-service.staging.dev.yaml</argument></bkl-code>
 </div>
 
 </div>
@@ -2801,9 +2801,9 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/prod/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.web-service.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>original/staging/web-service.yaml<operator></argument>)</operator> <operator>&lt;</operator><operator>(</operator><command>bkl</command> <argument>bkl/base.web-service.staging.yaml</argument><operator>)</operator>
-<prompt>$ </prompt><command>diff</command> <flag>-ud</flag> <flag>--color</flag> <operator>&lt;<operator></operator>(</operator><command>bkl</command> <argument>original/dev/web-service.yaml</argument><operator>)</operator> <operator>&lt;</operator><operator>(<command></operator>bkl</command> <argument>bkl/base.web-service.staging.dev.yaml</argument><operator>)</operator></bkl-code>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/web-service.yaml</argument> <argument>bkl/base.web-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/web-service.yaml</argument> <argument>bkl/base.web-service.staging.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/web-service.yaml</argument> <argument>bkl/base.web-service.staging.dev.yaml</argument></bkl-code>
 </div>
 
 </div>

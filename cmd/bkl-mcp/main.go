@@ -178,7 +178,7 @@ func main() {
 	)
 	mcpServer.AddTool(convertToBklTool, convertToBklHandler)
 
-	compareFilesTool := mcp.NewTool("compare_files",
+	compareTool := mcp.NewTool("compare",
 		mcp.WithDescription("Evaluate two bkl files and show text differences between their outputs"),
 		mcp.WithString("file1",
 			mcp.Required(),
@@ -197,7 +197,7 @@ func main() {
 			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
 		),
 	)
-	mcpServer.AddTool(compareFilesTool, compareFilesHandler)
+	mcpServer.AddTool(compareTool, compareHandler)
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
@@ -1089,7 +1089,7 @@ Tools:
 * Instead of bkl, use: mcp__bkl-mcp__evaluate files="prep/prod/namespace.yaml" outputPath="bkl/namespace.yaml"
 * Instead of bkli, use: mcp__bkl-mcp__intersect files="prep/prod/api-service.yaml,prep/prod/web-service.yaml" outputPath="bkl/base.yaml" selector="kind"
 * Instead of bkld, use: mcp__bkl-mcp__diff baseFile="bkl/namespace.yaml" targetFile="prep/staging/namespace.yaml" outputPath="bkl/namespace.staging.yaml" selector="kind"
-* Instead of diff <(bkl ...) <(bkl ...), use: mcp__bkl-mcp__compare_files file1="original/prod/namespace.yaml" file2="prep/prod//namespace.yaml"
+* Instead of bklc, use: mcp__bkl-mcp__compare file1="original/prod/namespace.yaml" file2="prep/prod/namespace.yaml"
 
 Rules:
 * ALWAYS consider & examine EVERY file during the prep step
@@ -1107,7 +1107,7 @@ Rules:
 	return mcp.NewToolResultText(prompt), nil
 }
 
-func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func compareHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	file1, err := request.RequireString("file1")
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
@@ -1158,7 +1158,7 @@ func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		"file2":     result.File2,
 		"format":    result.Format,
 		"diff":      result.Diff,
-		"operation": "compare_files",
+		"operation": "compare",
 	}
 
 	if len(result.Environment) > 0 {

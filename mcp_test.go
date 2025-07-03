@@ -193,6 +193,25 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 		}
 		result, err = client.CallTool(ctx, "diff", args)
 
+	case testCase.Compare:
+		if len(testCase.Eval) != 2 {
+			return nil, fmt.Errorf("Compare tests require exactly 2 eval files, got %d", len(testCase.Eval))
+		}
+
+		args := map[string]any{
+			"file1":      testCase.Eval[0],
+			"file2":      testCase.Eval[1],
+			"format":     format,
+			"fileSystem": fileSystem,
+		}
+		if len(testCase.Env) > 0 {
+			args["environment"] = testCase.Env
+		}
+		if testCase.SortPath != "" {
+			args["sortPath"] = testCase.SortPath
+		}
+		result, err = client.CallTool(ctx, "compare", args)
+
 	default:
 		args := map[string]any{
 			"files":      strings.Join(testCase.Eval, ","),
@@ -236,7 +255,11 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 				return []byte(output), nil
 			}
 
-			return nil, fmt.Errorf("no output field in response")
+			if diff, ok := response["diff"].(string); ok {
+				return []byte(diff), nil
+			}
+
+			return nil, fmt.Errorf("no output or diff field in response")
 		}
 	}
 

@@ -1355,15 +1355,15 @@
     - code:
         languages: [[0, "shell"]]
         code: |
-          $ diff -ud --color &lt;(bkl original/prod/namespace.yaml) &lt;(bkl prep/prod/namespace.yaml)
-          $ diff -ud --color &lt;(bkl original/prod/api-service.yaml) &lt;(bkl prep/prod/api-service.yaml)
-          $ diff -ud --color &lt;(bkl original/prod/web-service.yaml) &lt;(bkl prep/prod/web-service.yaml)
-          $ diff -ud --color &lt;(bkl original/staging/namespace.yaml) &lt;(bkl prep/staging/namespace.yaml)
-          $ diff -ud --color &lt;(bkl original/staging/api-service.yaml) &lt;(bkl prep/staging/api-service.yaml)
-          $ diff -ud --color &lt;(bkl original/staging/web-service.yaml) &lt;(bkl prep/staging/web-service.yaml)
-          $ diff -ud --color &lt;(bkl original/dev/namespace.yaml) &lt;(bkl prep/dev/namespace.yaml)
-          $ diff -ud --color &lt;(bkl original/dev/api-service.yaml) &lt;(bkl prep/dev/api-service.yaml)
-          $ diff -ud --color &lt;(bkl original/dev/web-service.yaml) &lt;(bkl prep/dev/web-service.yaml)
+          $ bklc --sort=kind --color original/prod/namespace.yaml prep/prod/namespace.yaml
+          $ bklc --sort=kind --color original/prod/api-service.yaml prep/prod/api-service.yaml
+          $ bklc --sort=kind --color original/prod/web-service.yaml prep/prod/web-service.yaml
+          $ bklc --sort=kind --color original/staging/namespace.yaml prep/staging/namespace.yaml
+          $ bklc --sort=kind --color original/staging/api-service.yaml prep/staging/api-service.yaml
+          $ bklc --sort=kind --color original/staging/web-service.yaml prep/staging/web-service.yaml
+          $ bklc --sort=kind --color original/dev/namespace.yaml prep/dev/namespace.yaml
+          $ bklc --sort=kind --color original/dev/api-service.yaml prep/dev/api-service.yaml
+          $ bklc --sort=kind --color original/dev/web-service.yaml prep/dev/web-service.yaml
 - id: plan
   title: Target layout
   items:
@@ -1416,9 +1416,9 @@
     - code:
         languages: [[0, "shell"]]
         code: |
-          $ diff -ud --color &lt;(bkl original/prod/namespace.yaml) &lt;(bkl bkl/namespace.yaml)
-          $ diff -ud --color &lt;(bkl original/staging/namespace.yaml) &lt;(bkl bkl/namespace.staging.yaml)
-          $ diff -ud --color &lt;(bkl original/dev/namespace.yaml) &lt;(bkl bkl/namespace.staging.dev.yaml)
+          $ bklc --sort=kind --color original/prod/namespace.yaml bkl/namespace.yaml
+          $ bklc --sort=kind --color original/staging/namespace.yaml bkl/namespace.staging.yaml
+          $ bklc --sort=kind --color original/dev/namespace.yaml bkl/namespace.staging.dev.yaml
 - id: base
   title: Base layer
   items:
@@ -1444,9 +1444,9 @@
     - code:
         languages: [[0, "shell"]]
         code: |
-          $ diff -ud --color &lt;(bkl original/prod/api-service.yaml) &lt;(bkl bkl/base.api-service.yaml)
-          $ diff -ud --color &lt;(bkl original/staging/api-service.yaml) &lt;(bkl bkl/base.api-service.staging.yaml)
-          $ diff -ud --color &lt;(bkl original/dev/api-service.yaml) &lt;(bkl bkl/base.api-service.staging.dev.yaml)
+          $ bklc --sort=kind --color original/prod/api-service.yaml bkl/base.api-service.yaml
+          $ bklc --sort=kind --color original/staging/api-service.yaml bkl/base.api-service.staging.yaml
+          $ bklc --sort=kind --color original/dev/api-service.yaml bkl/base.api-service.staging.dev.yaml
 - id: web-service
   title: web-service
   items:
@@ -1463,6 +1463,6 @@
     - code:
         languages: [[0, "shell"]]
         code: |
-          $ diff -ud --color &lt;(bkl original/prod/web-service.yaml) &lt;(bkl bkl/base.web-service.yaml)
-          $ diff -ud --color &lt;(bkl original/staging/web-service.yaml) &lt;(bkl bkl/base.web-service.staging.yaml)
-          $ diff -ud --color &lt;(bkl original/dev/web-service.yaml) &lt;(bkl bkl/base.web-service.staging.dev.yaml)
+          $ bklc --sort=kind --color original/prod/web-service.yaml bkl/base.web-service.yaml
+          $ bklc --sort=kind --color original/staging/web-service.yaml bkl/base.web-service.staging.yaml
+          $ bklc --sort=kind --color original/dev/web-service.yaml bkl/base.web-service.staging.dev.yaml

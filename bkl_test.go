@@ -80,6 +80,17 @@ func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 			return nil, err
 		}
 
+	case testCase.Compare:
+		if len(testCase.Eval) != 2 {
+			return nil, fmt.Errorf("Compare tests require exactly 2 eval files, got %d", len(testCase.Eval))
+		}
+
+		result, err := bkl.Compare(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath, testCase.Env, &testCase.Format, testCase.SortPath)
+		if err != nil {
+			return nil, err
+		}
+		output = []byte(result.Diff)
+
 	default:
 		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, rootPath, testCase.Env, &testCase.Format, testCase.SortPath, &testCase.Eval[0])
 	}
@@ -287,6 +298,13 @@ func TestCLI(t *testing.T) {
 					t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Eval))
 				}
 				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
+			case testCase.Compare:
+				cmdPath = "./cmd/bklc"
+				if len(testCase.Eval) != 2 {
+					t.Fatalf("Compare tests require exactly 2 eval files, got %d", len(testCase.Eval))
+				}
+				args = append(args, filepath.Join(tmpDir, testCase.Eval[0]))
+				args = append(args, filepath.Join(tmpDir, testCase.Eval[1]))
 			default:
 				cmdPath = "./cmd/bkl"
 				for _, evalFile := range testCase.Eval {
@@ -346,8 +364,25 @@ func TestCLI(t *testing.T) {
 				t.Fatalf("Unexpected error: %v\nOutput: %s", err, output)
 			}
 
-			if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(testCase.Expected))) {
-				t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", testCase.Expected, output)
+			// For compare tests, trim the first two lines (file paths) from both output and expected
+			expectedBytes := bytes.TrimSpace([]byte(testCase.Expected))
+			outputBytes := bytes.TrimSpace(output)
+
+			if testCase.Compare {
+				// Split by newlines and remove first two lines if they exist
+				outputLines := bytes.Split(outputBytes, []byte("\n"))
+				expectedLines := bytes.Split(expectedBytes, []byte("\n"))
+
+				if len(outputLines) > 2 {
+					outputBytes = bytes.Join(outputLines[2:], []byte("\n"))
+				}
+				if len(expectedLines) > 2 {
+					expectedBytes = bytes.Join(expectedLines[2:], []byte("\n"))
+				}
+			}
+
+			if !bytes.Equal(outputBytes, expectedBytes) {
+				t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedBytes, outputBytes)
 			}
 		})
 	}

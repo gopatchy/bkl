@@ -32,6 +32,7 @@ type TestCase struct {
 	Diff        bool              `toml:"diff,omitempty"`
 	Intersect   bool              `toml:"intersect,omitempty"`
 	Required    bool              `toml:"required,omitempty"`
+	Compare     bool              `toml:"compare,omitempty"`
 	Benchmark   bool              `toml:"benchmark,omitempty"`
 	Selector    string            `toml:"selector,omitempty"`
 	SortPath    string            `toml:"sortPath,omitempty"`
