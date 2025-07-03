@@ -12,6 +12,7 @@ import (
 	"testing/fstest"
 
 	"github.com/gopatchy/bkl"
+	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/version"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -622,6 +623,32 @@ func parseEnvironment(args map[string]any) (map[string]string, error) {
 	return nil, nil
 }
 
+// determineFormatWithPaths determines the format to use, checking explicit format first,
+// then inferring from outputPath, and finally from input file paths.
+func determineFormatWithPaths(explicitFormat string, outputPath string, inputPaths []string) string {
+	// If explicit format is provided, use it
+	if explicitFormat != "" {
+		return explicitFormat
+	}
+
+	// Try to infer from output path
+	if outputPath != "" {
+		if ext := utils.Ext(outputPath); ext != "" {
+			return ext
+		}
+	}
+
+	// Try to infer from input paths
+	for _, path := range inputPaths {
+		if ext := utils.Ext(path); ext != "" {
+			return ext
+		}
+	}
+
+	// Default to empty string (will use default format in bkl)
+	return ""
+}
+
 func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	filesStr, err := request.RequireString("files")
 	if err != nil {
@@ -652,6 +679,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	format := parseOptionalString(args, "format", "")
+	outputPath := parseOptionalString(args, "outputPath", "")
 
 	env, err := parseEnvironment(args)
 	if err != nil {
@@ -672,13 +700,15 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		workingDir = "."
 	}
 
+	// Determine format using the helper function
+	finalFormat := determineFormatWithPaths(format, outputPath, files)
+
 	sortPath := parseOptionalString(args, "sortPath", "")
-	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &format, sortPath)
+	output, err := bkl.Evaluate(fsys, files, rootPath, workingDir, env, &finalFormat, sortPath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}
 
-	outputPath := parseOptionalString(args, "outputPath", "")
 	if outputPath != "" {
 		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
@@ -687,7 +717,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	response := map[string]any{
 		"files":     files,
-		"format":    format,
+		"format":    finalFormat,
 		"output":    string(output),
 		"operation": "evaluate",
 	}
@@ -729,6 +759,7 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	}
 
 	format := parseOptionalString(args, "format", "")
+	outputPath := parseOptionalString(args, "outputPath", "")
 	workingDir := parseOptionalString(args, "workingDir", ".")
 
 	fsys, err := getFileSystem(fileSystem, workingDir)
@@ -743,16 +774,17 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		workingDir = "."
 	}
 
-	if format == "" {
-		format = "yaml"
+	// Determine format using the helper function, with default fallback to yaml
+	finalFormat := determineFormatWithPaths(format, outputPath, []string{baseFile, targetFile})
+	if finalFormat == "" {
+		finalFormat = "yaml"
 	}
 	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Diff(fsys, baseFile, targetFile, rootPath, workingDir, selector, &format)
+	output, err := bkl.Diff(fsys, baseFile, targetFile, rootPath, workingDir, selector, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
 
-	outputPath := parseOptionalString(args, "outputPath", "")
 	if outputPath != "" {
 		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
@@ -762,7 +794,7 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	response := map[string]any{
 		"baseFile":   baseFile,
 		"targetFile": targetFile,
-		"format":     format,
+		"format":     finalFormat,
 		"output":     string(output),
 		"operation":  "diff",
 	}
@@ -808,6 +840,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	format := parseOptionalString(args, "format", "")
+	outputPath := parseOptionalString(args, "outputPath", "")
 	workingDir := parseOptionalString(args, "workingDir", ".")
 
 	fsys, err := getFileSystem(fileSystem, workingDir)
@@ -822,16 +855,17 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		workingDir = "."
 	}
 
-	if format == "" {
-		format = "yaml"
+	// Determine format using the helper function, with default fallback to yaml
+	finalFormat := determineFormatWithPaths(format, outputPath, files)
+	if finalFormat == "" {
+		finalFormat = "yaml"
 	}
 	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, selector, &format)
+	output, err := bkl.Intersect(fsys, files, rootPath, workingDir, selector, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
 
-	outputPath := parseOptionalString(args, "outputPath", "")
 	if outputPath != "" {
 		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
@@ -840,7 +874,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 
 	response := map[string]any{
 		"files":     files,
-		"format":    format,
+		"format":    finalFormat,
 		"output":    string(output),
 		"operation": "intersect",
 	}
@@ -873,6 +907,7 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	format := parseOptionalString(args, "format", "")
+	outputPath := parseOptionalString(args, "outputPath", "")
 	workingDir := parseOptionalString(args, "workingDir", ".")
 
 	fsys, err := getFileSystem(fileSystem, workingDir)
@@ -887,15 +922,16 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		workingDir = "."
 	}
 
-	if format == "" {
-		format = "yaml"
+	// Determine format using the helper function, with default fallback to yaml
+	finalFormat := determineFormatWithPaths(format, outputPath, []string{file})
+	if finalFormat == "" {
+		finalFormat = "yaml"
 	}
-	output, err := bkl.Required(fsys, file, rootPath, workingDir, &format)
+	output, err := bkl.Required(fsys, file, rootPath, workingDir, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
 
-	outputPath := parseOptionalString(args, "outputPath", "")
 	if outputPath != "" {
 		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
@@ -904,7 +940,7 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	response := map[string]any{
 		"file":      file,
-		"format":    format,
+		"format":    finalFormat,
 		"output":    string(output),
 		"operation": "required",
 	}
