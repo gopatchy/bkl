@@ -187,6 +187,9 @@ func main() {
 		mcp.WithObject("environment",
 			mcp.Description("Environment variables as key-value pairs"),
 		),
+		mcp.WithString("sortPath",
+			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
+		),
 	)
 	mcpServer.AddTool(compareFilesTool, compareFilesHandler)
 
@@ -1013,6 +1016,7 @@ Tools:
 * Instead of bkl, use: mcp__bkl-mcp__evaluate files="prep/prod/namespace.yaml" outputPath="bkl/namespace.yaml"
 * Instead of bkli, use: mcp__bkl-mcp__intersect files="prep/prod/api-service.yaml,prep/prod/web-service.yaml" outputPath="bkl/base.yaml" selector="kind"
 * Instead of bkld, use: mcp__bkl-mcp__diff baseFile="bkl/namespace.yaml" targetFile="prep/staging/namespace.yaml" outputPath="bkl/namespace.staging.yaml" selector="kind"
+* Instead of diff <(bkl ...) <(bkl ...), use: mcp__bkl-mcp__compare_files file1="original/prod/namespace.yaml" file2="prep/prod//namespace.yaml"
 
 Rules:
 * ALWAYS consider & examine EVERY file during the prep step
@@ -1069,13 +1073,14 @@ func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	finalFormat := determineFormatWithPaths(format, "", []string{file1, file2})
+	sortPath := parseOptionalString(args, "sortPath", "")
 
-	output1, err := bkl.Evaluate(fsys, []string{file1}, "/", workingDir, env, &finalFormat, "")
+	output1, err := bkl.Evaluate(fsys, []string{file1}, "/", workingDir, env, &finalFormat, sortPath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to evaluate %s: %v", file1, err)), nil
 	}
 
-	output2, err := bkl.Evaluate(fsys, []string{file2}, "/", workingDir, env, &finalFormat, "")
+	output2, err := bkl.Evaluate(fsys, []string{file2}, "/", workingDir, env, &finalFormat, sortPath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to evaluate %s: %v", file2, err)), nil
 	}
@@ -1093,6 +1098,10 @@ func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp
 
 	if len(env) > 0 {
 		response["environment"] = env
+	}
+
+	if sortPath != "" {
+		response["sortPath"] = sortPath
 	}
 
 	jsonResult, err := json.MarshalIndent(response, "", "  ")
