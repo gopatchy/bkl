@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing/fstest"
@@ -192,6 +193,25 @@ func main() {
 		),
 	)
 	mcpServer.AddTool(compareFilesTool, compareFilesHandler)
+
+	validateDirectoryTool := mcp.NewTool("validate_directory",
+		mcp.WithDescription("Walk a directory tree, evaluate all bkl files, and report any errors"),
+		mcp.WithString("directory",
+			mcp.Required(),
+			mcp.Description("Directory path to validate"),
+		),
+		mcp.WithString("pattern",
+			mcp.Description("File pattern to match (e.g. '*.yaml', '*.bkl'). If not specified, evaluates all files"),
+		),
+		formatParam,
+		mcp.WithObject("environment",
+			mcp.Description("Environment variables as key-value pairs"),
+		),
+		mcp.WithBoolean("includeOutput",
+			mcp.Description("Include evaluated output for successful files (default: false, only show errors)"),
+		),
+	)
+	mcpServer.AddTool(validateDirectoryTool, validateDirectoryHandler)
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
@@ -1013,6 +1033,7 @@ Update your Todos to do these steps in order:
 
 Tools:
 * To query documentation: mcp__bkl-mcp__query keywords="repeat,list,iteration"
+* To validate a directory tree: mcp__bkl-mcp__validate_directory directory="prep" pattern="*.yaml"
 * Instead of bkl, use: mcp__bkl-mcp__evaluate files="prep/prod/namespace.yaml" outputPath="bkl/namespace.yaml"
 * Instead of bkli, use: mcp__bkl-mcp__intersect files="prep/prod/api-service.yaml,prep/prod/web-service.yaml" outputPath="bkl/base.yaml" selector="kind"
 * Instead of bkld, use: mcp__bkl-mcp__diff baseFile="bkl/namespace.yaml" targetFile="prep/staging/namespace.yaml" outputPath="bkl/namespace.staging.yaml" selector="kind"
@@ -1023,7 +1044,7 @@ Rules:
 * ALWAYS convert every list that might need overriding (containers, env, ports, etc.) to a map
 * ALWAYS stack environments: dev on staging on prod
 * ALWAYS name files to indicate their layering: layer1.layer2.layer3.yaml
-* ALWAYS use mcp__bkl-mcp__evaluate to evaluate EACH file after you create it, and fix any errors before continuing
+* ALWAYS use mcp__bkl-mcp__evaluate to evaluate EACH file after you create it, and fix any errors before continuing. VALIDATE VALIDATE VALIDATE
 * NEVER put the environment name in an environment variable
 * NEVER use $parent to specify inheritance
 * NEVER put bkl files in multiple directories; put them all in a single directory
@@ -1102,6 +1123,132 @@ func compareFilesHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp
 
 	if sortPath != "" {
 		response["sortPath"] = sortPath
+	}
+
+	jsonResult, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal result: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonResult)), nil
+}
+
+func validateDirectoryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	directory, err := request.RequireString("directory")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	args, ok := request.Params.Arguments.(map[string]any)
+	if !ok {
+		return mcp.NewToolResultError("Invalid arguments format"), nil
+	}
+
+	pattern := parseOptionalString(args, "pattern", "")
+	format := parseOptionalString(args, "format", "")
+
+	includeOutput := false
+	if val := args["includeOutput"]; val != nil {
+		if b, ok := val.(bool); ok {
+			includeOutput = b
+		}
+	}
+
+	env, err := parseEnvironment(args)
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	fsys := os.DirFS("/")
+
+	type fileResult struct {
+		Path    string `json:"path"`
+		Success bool   `json:"success"`
+		Error   string `json:"error,omitempty"`
+		Output  string `json:"output,omitempty"`
+		Format  string `json:"format,omitempty"`
+	}
+
+	var results []fileResult
+	var successCount, errorCount int
+
+	walkDir := directory
+	if strings.HasPrefix(walkDir, "/") {
+		walkDir = walkDir[1:]
+	}
+
+	err = fs.WalkDir(fsys, walkDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			results = append(results, fileResult{
+				Path:    "/" + path,
+				Success: false,
+				Error:   fmt.Sprintf("Failed to access: %v", err),
+			})
+			errorCount++
+			return nil
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		fullPath := "/" + path
+
+		if pattern != "" {
+			matched, err := filepath.Match(pattern, filepath.Base(fullPath))
+			if err != nil || !matched {
+				return nil
+			}
+		}
+
+		fileFormat := format
+		if fileFormat == "" {
+			fileFormat = utils.Ext(fullPath)
+			if fileFormat == "" {
+				return nil
+			}
+		}
+
+		output, err := bkl.Evaluate(fsys, []string{fullPath}, "/", "/", env, &fileFormat, "")
+		if err != nil {
+			results = append(results, fileResult{
+				Path:    fullPath,
+				Success: false,
+				Error:   err.Error(),
+				Format:  fileFormat,
+			})
+			errorCount++
+		} else {
+			successCount++
+			result := fileResult{
+				Path:    fullPath,
+				Success: true,
+				Format:  fileFormat,
+			}
+			if includeOutput {
+				result.Output = string(output)
+			}
+			results = append(results, result)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to walk directory: %v", err)), nil
+	}
+
+	response := map[string]any{
+		"directory":    directory,
+		"pattern":      pattern,
+		"totalFiles":   len(results),
+		"successCount": successCount,
+		"errorCount":   errorCount,
+		"results":      results,
+		"operation":    "validate_directory",
+	}
+
+	if len(env) > 0 {
+		response["environment"] = env
 	}
 
 	jsonResult, err := json.MarshalIndent(response, "", "  ")
