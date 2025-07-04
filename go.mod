@@ -1,15 +1,16 @@
 module github.com/gopatchy/bkl
 
-go 1.24.0
+go 1.24.4
 
 require (
+	github.com/gopatchy/taskcp v0.0.0-20250704061546-3dadea457aa7
 	github.com/hexops/gotextdiff v1.0.3
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/magiconair/properties v1.8.10
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/metoro-io/mcp-golang v0.13.0
 	github.com/pelletier/go-toml/v2 v2.2.4
-	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
 	gopkg.in/yaml.v3 v3.0.1
 )
 

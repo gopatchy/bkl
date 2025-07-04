@@ -14,14 +14,16 @@ import (
 	"github.com/gopatchy/bkl"
 	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/version"
+	"github.com/gopatchy/taskcp"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
 var (
-	tests    map[string]*bkl.TestCase
-	sections []bkl.DocSection
+	tests       map[string]*bkl.TestCase
+	sections    []bkl.DocSection
+	taskService *taskcp.Service
 )
 
 func loadData() error {
@@ -44,6 +46,9 @@ func main() {
 	if err := loadData(); err != nil {
 		log.Fatalf("Failed to load data: %v", err)
 	}
+
+	// Initialize taskcp service
+	taskService = taskcp.New()
 
 	mcpServer := server.NewMCPServer(
 		"bkl-mcp",
@@ -198,6 +203,54 @@ func main() {
 		),
 	)
 	mcpServer.AddTool(compareTool, compareHandler)
+
+	// Taskcp tools
+	getNextTaskTool := mcp.NewTool("get_next_task",
+		mcp.WithDescription("Get the next available task from the project"),
+		mcp.WithString("project_id",
+			mcp.Required(),
+			mcp.Description("ID of the project"),
+		),
+	)
+	mcpServer.AddTool(getNextTaskTool, getNextTaskHandler)
+
+	setTaskSuccessTool := mcp.NewTool("set_task_success",
+		mcp.WithDescription("Mark a task as successfully completed"),
+		mcp.WithString("project_id",
+			mcp.Required(),
+			mcp.Description("ID of the project"),
+		),
+		mcp.WithString("task_id",
+			mcp.Required(),
+			mcp.Description("ID of the task to mark as successful"),
+		),
+		mcp.WithString("result",
+			mcp.Description("Optional result data for the successful task"),
+		),
+		mcp.WithString("notes",
+			mcp.Description("Optional notes about the task completion"),
+		),
+	)
+	mcpServer.AddTool(setTaskSuccessTool, setTaskSuccessHandler)
+
+	setTaskFailureTool := mcp.NewTool("set_task_failure",
+		mcp.WithDescription("Mark a task as failed"),
+		mcp.WithString("project_id",
+			mcp.Required(),
+			mcp.Description("ID of the project"),
+		),
+		mcp.WithString("task_id",
+			mcp.Required(),
+			mcp.Description("ID of the task to mark as failed"),
+		),
+		mcp.WithString("error",
+			mcp.Description("Error message describing why the task failed"),
+		),
+		mcp.WithString("notes",
+			mcp.Description("Optional notes about the task failure"),
+		),
+	)
+	mcpServer.AddTool(setTaskFailureTool, setTaskFailureHandler)
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
@@ -1175,4 +1228,124 @@ func compareHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 	}
 
 	return mcp.NewToolResultText(string(jsonResult)), nil
+}
+
+func getNextTaskHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	projectID, err := request.RequireString("project_id")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	project, err := taskService.GetProject(projectID)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Project not found: %v", err)), nil
+	}
+
+	task := project.GetNextTask()
+	if task == nil {
+		return mcp.NewToolResultText("No tasks available in project"), nil
+	}
+
+	response := map[string]any{
+		"project_id":   projectID,
+		"task_id":      task.ID,
+		"instructions": task.Instructions,
+		"state":        task.State,
+	}
+
+	resultJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	return mcp.NewToolResultText(string(resultJSON)), nil
+}
+
+func setTaskSuccessHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	projectID, err := request.RequireString("project_id")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	taskID, err := request.RequireString("task_id")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	args, ok := request.Params.Arguments.(map[string]any)
+	if !ok {
+		args = map[string]any{}
+	}
+	result := parseOptionalString(args, "result", "")
+	notes := parseOptionalString(args, "notes", "")
+
+	project, err := taskService.GetProject(projectID)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Project not found: %v", err)), nil
+	}
+
+	nextTask := project.SetTaskSuccess(taskID, result, notes)
+
+	response := map[string]any{
+		"project_id": projectID,
+		"task_id":    taskID,
+		"status":     "success",
+		"result":     result,
+		"notes":      notes,
+	}
+
+	if nextTask != nil {
+		response["next_task"] = map[string]any{
+			"task_id":      nextTask.ID,
+			"instructions": nextTask.Instructions,
+		}
+	}
+
+	resultJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	return mcp.NewToolResultText(string(resultJSON)), nil
+}
+
+func setTaskFailureHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	projectID, err := request.RequireString("project_id")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	taskID, err := request.RequireString("task_id")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	args, ok := request.Params.Arguments.(map[string]any)
+	if !ok {
+		args = map[string]any{}
+	}
+	errorMsg := parseOptionalString(args, "error", "")
+	notes := parseOptionalString(args, "notes", "")
+
+	project, err := taskService.GetProject(projectID)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Project not found: %v", err)), nil
+	}
+
+	project.SetTaskFailure(taskID, errorMsg, notes)
+
+	response := map[string]any{
+		"project_id": projectID,
+		"task_id":    taskID,
+		"status":     "failure",
+		"error":      errorMsg,
+		"notes":      notes,
+	}
+
+	resultJSON, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
+	}
+
+	return mcp.NewToolResultText(string(resultJSON)), nil
 }
