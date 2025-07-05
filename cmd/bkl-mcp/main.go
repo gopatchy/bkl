@@ -26,6 +26,61 @@ var (
 	taskService *taskcp.Service
 )
 
+type queryArgs struct {
+	Keywords string `json:"keywords"`
+}
+
+type getArgs struct {
+	Type   string `json:"type"`
+	ID     string `json:"id"`
+	Source string `json:"source,omitempty"`
+}
+
+type evaluateArgs struct {
+	Files         string            `json:"files,omitempty"`
+	Directory     string            `json:"directory,omitempty"`
+	Pattern       string            `json:"pattern,omitempty"`
+	IncludeOutput *bool             `json:"includeOutput,omitempty"`
+	Format        string            `json:"format,omitempty"`
+	Environment   map[string]string `json:"environment,omitempty"`
+	FileSystem    map[string]string `json:"fileSystem,omitempty"`
+	OutputPath    string            `json:"outputPath,omitempty"`
+	SortPath      string            `json:"sortPath,omitempty"`
+}
+
+type diffArgs struct {
+	BaseFile   string            `json:"baseFile"`
+	TargetFile string            `json:"targetFile"`
+	Selector   string            `json:"selector,omitempty"`
+	Format     string            `json:"format,omitempty"`
+	FileSystem map[string]string `json:"fileSystem,omitempty"`
+	OutputPath string            `json:"outputPath,omitempty"`
+}
+
+type intersectArgs struct {
+	Files      string            `json:"files"`
+	Selector   string            `json:"selector,omitempty"`
+	Format     string            `json:"format,omitempty"`
+	FileSystem map[string]string `json:"fileSystem,omitempty"`
+	OutputPath string            `json:"outputPath,omitempty"`
+}
+
+type requiredArgs struct {
+	File       string            `json:"file"`
+	Format     string            `json:"format,omitempty"`
+	FileSystem map[string]string `json:"fileSystem,omitempty"`
+	OutputPath string            `json:"outputPath,omitempty"`
+}
+
+type compareArgs struct {
+	File1       string            `json:"file1"`
+	File2       string            `json:"file2"`
+	Format      string            `json:"format,omitempty"`
+	FileSystem  map[string]string `json:"fileSystem,omitempty"`
+	Environment map[string]string `json:"environment,omitempty"`
+	SortPath    string            `json:"sortPath,omitempty"`
+}
+
 func loadData() error {
 	var err error
 
@@ -47,7 +102,6 @@ func main() {
 		log.Fatalf("Failed to load data: %v", err)
 	}
 
-	// Initialize taskcp service
 	taskService = taskcp.New()
 
 	mcpServer := server.NewMCPServer(
@@ -204,7 +258,6 @@ func main() {
 	)
 	mcpServer.AddTool(compareTool, compareHandler)
 
-	// Register taskcp tools
 	if err := taskcp.RegisterMCPTools(mcpServer, taskService); err != nil {
 		log.Fatalf("Failed to register taskcp tools: %v", err)
 	}
@@ -215,12 +268,12 @@ func main() {
 }
 
 func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	keywordsStr, err := request.RequireString("keywords")
-	if err != nil {
+	args := queryArgs{}
+	if err := request.BindArguments(&args); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	keywordFields := strings.Split(keywordsStr, ",")
+	keywordFields := strings.Split(args.Keywords, ",")
 	var keywords []string
 	for _, kw := range keywordFields {
 		trimmed := strings.TrimSpace(kw)
@@ -352,7 +405,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 			if fileMatches > bestFileMatches {
 				bestFileMatches = fileMatches
 				details["matching_file"] = filename
-				// Extract snippet around first matching keyword
+
 				if len(content) > 150 {
 					firstKeyword := findFirstKeyword(contentLower, normalizedKeywords)
 					if firstKeyword != "" {
@@ -391,18 +444,16 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		}
 	}
 
-	// Sort all results by score descending, then by type (docs first)
 	sort.Slice(allResults, func(i, j int) bool {
 		scoreI := allResults[i]["score"].(int)
 		scoreJ := allResults[j]["score"].(int)
 		if scoreI == scoreJ {
-			// If scores are equal, prioritize documentation
+
 			typeI := allResults[i]["type"].(string)
 			typeJ := allResults[j]["type"].(string)
 			if typeI != typeJ {
 				return typeI == "documentation"
 			}
-			// Then sort by name/title
 			if typeI == "documentation" {
 				return allResults[i]["title"].(string) < allResults[j]["title"].(string)
 			}
@@ -430,27 +481,16 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 }
 
 func getHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	contentType, err := request.RequireString("type")
-	if err != nil {
+	args := getArgs{}
+	if err := request.BindArguments(&args); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	id, err := request.RequireString("id")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		args = map[string]any{}
-	}
-	source := parseOptionalString(args, "source", "")
-
-	switch contentType {
+	switch args.Type {
 	case "documentation":
 		for _, section := range sections {
-			if section.ID == id {
-				if source != "" && section.Source != source {
+			if section.ID == args.ID {
+				if args.Source != "" && section.Source != args.Source {
 					continue
 				}
 				sectionJSON, err := json.MarshalIndent(section, "", "  ")
@@ -460,15 +500,15 @@ func getHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 				return mcp.NewToolResultText(string(sectionJSON)), nil
 			}
 		}
-		if source != "" {
-			return mcp.NewToolResultText(fmt.Sprintf("Documentation section '%s' not found in source '%s'", id, source)), nil
+		if args.Source != "" {
+			return mcp.NewToolResultText(fmt.Sprintf("Documentation section '%s' not found in source '%s'", args.ID, args.Source)), nil
 		}
-		return mcp.NewToolResultText(fmt.Sprintf("Documentation section '%s' not found", id)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Documentation section '%s' not found", args.ID)), nil
 
 	case "test":
-		test, exists := tests[id]
+		test, exists := tests[args.ID]
 		if !exists {
-			return mcp.NewToolResultText(fmt.Sprintf("Test '%s' not found", id)), nil
+			return mcp.NewToolResultText(fmt.Sprintf("Test '%s' not found", args.ID)), nil
 		}
 
 		testJSON, err := json.MarshalIndent(test, "", "  ")
@@ -478,7 +518,7 @@ func getHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 		return mcp.NewToolResultText(string(testJSON)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid type '%s'. Must be 'documentation' or 'test'", contentType)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid type '%s'. Must be 'documentation' or 'test'", args.Type)), nil
 	}
 }
 
@@ -554,7 +594,6 @@ func max(a, b int) int {
 	return b
 }
 
-// countKeywordMatches counts how many keywords from the list are found in the text
 func countKeywordMatches(text string, keywords []string) int {
 	count := 0
 	for _, keyword := range keywords {
@@ -565,7 +604,6 @@ func countKeywordMatches(text string, keywords []string) int {
 	return count
 }
 
-// findFirstKeyword returns the first keyword found in the text
 func findFirstKeyword(text string, keywords []string) string {
 	firstPos := len(text)
 	firstKeyword := ""
@@ -578,38 +616,6 @@ func findFirstKeyword(text string, keywords []string) string {
 	}
 
 	return firstKeyword
-}
-
-func parseFileSystem(args map[string]any) (map[string]string, error) {
-	fileSystemRaw := args["fileSystem"]
-	if fileSystemRaw == nil {
-		return nil, nil
-	}
-
-	fileSystemMap, ok := fileSystemRaw.(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("fileSystem must be an object")
-	}
-
-	fileSystem := make(map[string]string)
-	for k, v := range fileSystemMap {
-		if str, ok := v.(string); ok {
-			fileSystem[k] = str
-		} else {
-			return nil, fmt.Errorf("fileSystem[%s] must be a string, got %T", k, v)
-		}
-	}
-
-	return fileSystem, nil
-}
-
-func parseOptionalString(args map[string]any, key string, defaultValue string) string {
-	if val := args[key]; val != nil {
-		if str, ok := val.(string); ok && str != "" {
-			return str
-		}
-	}
-	return defaultValue
 }
 
 func createTestFS(fileSystem map[string]string) (fs.FS, error) {
@@ -628,23 +634,6 @@ func getFileSystem(fileSystem map[string]string) (fs.FS, error) {
 		return createTestFS(fileSystem)
 	}
 	return os.DirFS("/"), nil
-}
-
-func parseEnvironment(args map[string]any) (map[string]string, error) {
-	if envRaw := args["environment"]; envRaw != nil {
-		if envMap, ok := envRaw.(map[string]any); ok {
-			env := make(map[string]string)
-			for k, v := range envMap {
-				if str, ok := v.(string); ok {
-					env[k] = str
-				} else {
-					return nil, fmt.Errorf("environment[%s] must be a string, got %T", k, v)
-				}
-			}
-			return env, nil
-		}
-	}
-	return nil, nil
 }
 
 func determineFormatWithPaths(explicitFormat string, outputPath string, inputPaths []string) string {
@@ -668,56 +657,36 @@ func determineFormatWithPaths(explicitFormat string, outputPath string, inputPat
 }
 
 func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		return mcp.NewToolResultError("Invalid arguments format"), nil
+	args := evaluateArgs{}
+	if err := request.BindArguments(&args); err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	// Check if this is directory mode or files mode
-	directory := parseOptionalString(args, "directory", "")
-	filesStr := parseOptionalString(args, "files", "")
-
-	if directory != "" && filesStr != "" {
+	if args.Directory != "" && args.Files != "" {
 		return mcp.NewToolResultError("Cannot specify both files and directory parameters"), nil
 	}
 
-	if directory == "" && filesStr == "" {
+	if args.Directory == "" && args.Files == "" {
 		return mcp.NewToolResultError("Must specify either files or directory parameter"), nil
 	}
 
-	fileSystem, err := parseFileSystem(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	format := parseOptionalString(args, "format", "")
-	outputPath := parseOptionalString(args, "outputPath", "")
-
-	env, err := parseEnvironment(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
 	workingDir := ""
-	if fileSystem != nil {
+	if args.FileSystem != nil {
 		workingDir = "/"
 	}
 
-	fsys, err := getFileSystem(fileSystem)
+	fsys, err := getFileSystem(args.FileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	if directory != "" {
-		pattern := parseOptionalString(args, "pattern", "")
+	if args.Directory != "" {
 		includeOutput := true
-		if val := args["includeOutput"]; val != nil {
-			if b, ok := val.(bool); ok {
-				includeOutput = b
-			}
+		if args.IncludeOutput != nil {
+			includeOutput = *args.IncludeOutput
 		}
 
-		results, err := bkl.EvaluateTree(fsys, directory, pattern, env, &format)
+		results, err := bkl.EvaluateTree(fsys, args.Directory, args.Pattern, args.Environment, &args.Format)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Directory evaluation failed: %v", err)), nil
 		}
@@ -746,8 +715,8 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 
 		response := map[string]any{
-			"directory":    directory,
-			"pattern":      pattern,
+			"directory":    args.Directory,
+			"pattern":      args.Pattern,
 			"totalFiles":   len(results),
 			"successCount": successCount,
 			"errorCount":   errorCount,
@@ -755,8 +724,8 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 			"operation":    "evaluate_tree",
 		}
 
-		if len(env) > 0 {
-			response["environment"] = env
+		if len(args.Environment) > 0 {
+			response["environment"] = args.Environment
 		}
 
 		resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -766,8 +735,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultText(string(resultJSON)), nil
 	}
 
-	// Files mode (original behavior)
-	fileFields := strings.Split(filesStr, ",")
+	fileFields := strings.Split(args.Files, ",")
 	var files []string
 	for _, f := range fileFields {
 		trimmed := strings.TrimSpace(f)
@@ -780,17 +748,16 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return mcp.NewToolResultError("No files provided"), nil
 	}
 
-	finalFormat := determineFormatWithPaths(format, outputPath, files)
+	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, files)
 
-	sortPath := parseOptionalString(args, "sortPath", "")
-	output, err := bkl.Evaluate(fsys, files, "/", workingDir, env, &finalFormat, sortPath)
+	output, err := bkl.Evaluate(fsys, files, "/", workingDir, args.Environment, &finalFormat, args.SortPath)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Evaluation failed: %v", err)), nil
 	}
 
-	if outputPath != "" {
-		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+	if args.OutputPath != "" {
+		if err := os.WriteFile(args.OutputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", args.OutputPath, err)), nil
 		}
 	}
 
@@ -801,12 +768,12 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		"operation": "evaluate",
 	}
 
-	if len(env) > 0 {
-		response["environment"] = env
+	if len(args.Environment) > 0 {
+		response["environment"] = args.Environment
 	}
 
-	if outputPath != "" {
-		response["outputPath"] = outputPath
+	if args.OutputPath != "" {
+		response["outputPath"] = args.OutputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -817,64 +784,45 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 }
 
 func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	baseFile, err := request.RequireString("baseFile")
-	if err != nil {
+	args := diffArgs{}
+	if err := request.BindArguments(&args); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-
-	targetFile, err := request.RequireString("targetFile")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		return mcp.NewToolResultError("Invalid arguments format"), nil
-	}
-
-	fileSystem, err := parseFileSystem(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	format := parseOptionalString(args, "format", "")
-	outputPath := parseOptionalString(args, "outputPath", "")
 	workingDir := ""
-	if fileSystem != nil {
+	if args.FileSystem != nil {
 		workingDir = "/"
 	}
 
-	fsys, err := getFileSystem(fileSystem)
+	fsys, err := getFileSystem(args.FileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	finalFormat := determineFormatWithPaths(format, outputPath, []string{baseFile, targetFile})
+	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, []string{args.BaseFile, args.TargetFile})
 	if finalFormat == "" {
 		finalFormat = "yaml"
 	}
-	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Diff(fsys, baseFile, targetFile, "/", workingDir, selector, &finalFormat)
+	output, err := bkl.Diff(fsys, args.BaseFile, args.TargetFile, "/", workingDir, args.Selector, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Diff operation failed: %v", err)), nil
 	}
 
-	if outputPath != "" {
-		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+	if args.OutputPath != "" {
+		if err := os.WriteFile(args.OutputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", args.OutputPath, err)), nil
 		}
 	}
 
 	response := map[string]any{
-		"baseFile":   baseFile,
-		"targetFile": targetFile,
+		"baseFile":   args.BaseFile,
+		"targetFile": args.TargetFile,
 		"format":     finalFormat,
 		"output":     string(output),
 		"operation":  "diff",
 	}
 
-	if outputPath != "" {
-		response["outputPath"] = outputPath
+	if args.OutputPath != "" {
+		response["outputPath"] = args.OutputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -885,12 +833,12 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 }
 
 func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	filesStr, err := request.RequireString("files")
-	if err != nil {
+	args := intersectArgs{}
+	if err := request.BindArguments(&args); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	fileFields := strings.Split(filesStr, ",")
+	fileFields := strings.Split(args.Files, ",")
 	var files []string
 	for _, f := range fileFields {
 		trimmed := strings.TrimSpace(f)
@@ -902,42 +850,28 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	if len(files) < 2 {
 		return mcp.NewToolResultError("Intersect operation requires at least 2 files"), nil
 	}
-
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		return mcp.NewToolResultError("Invalid arguments format"), nil
-	}
-
-	fileSystem, err := parseFileSystem(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	format := parseOptionalString(args, "format", "")
-	outputPath := parseOptionalString(args, "outputPath", "")
 	workingDir := ""
-	if fileSystem != nil {
+	if args.FileSystem != nil {
 		workingDir = "/"
 	}
 
-	fsys, err := getFileSystem(fileSystem)
+	fsys, err := getFileSystem(args.FileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	finalFormat := determineFormatWithPaths(format, outputPath, files)
+	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, files)
 	if finalFormat == "" {
 		finalFormat = "yaml"
 	}
-	selector := parseOptionalString(args, "selector", "")
-	output, err := bkl.Intersect(fsys, files, "/", workingDir, selector, &finalFormat)
+	output, err := bkl.Intersect(fsys, files, "/", workingDir, args.Selector, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Intersect operation failed: %v", err)), nil
 	}
 
-	if outputPath != "" {
-		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+	if args.OutputPath != "" {
+		if err := os.WriteFile(args.OutputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", args.OutputPath, err)), nil
 		}
 	}
 
@@ -948,8 +882,8 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		"operation": "intersect",
 	}
 
-	if outputPath != "" {
-		response["outputPath"] = outputPath
+	if args.OutputPath != "" {
+		response["outputPath"] = args.OutputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -960,57 +894,44 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 }
 
 func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	file, err := request.RequireString("file")
-	if err != nil {
+	args := requiredArgs{}
+	if err := request.BindArguments(&args); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
-
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		return mcp.NewToolResultError("Invalid arguments format"), nil
-	}
-
-	fileSystem, err := parseFileSystem(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	format := parseOptionalString(args, "format", "")
-	outputPath := parseOptionalString(args, "outputPath", "")
 	workingDir := ""
-	if fileSystem != nil {
+	if args.FileSystem != nil {
 		workingDir = "/"
 	}
 
-	fsys, err := getFileSystem(fileSystem)
+	fsys, err := getFileSystem(args.FileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	finalFormat := determineFormatWithPaths(format, outputPath, []string{file})
+	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, []string{args.File})
 	if finalFormat == "" {
 		finalFormat = "yaml"
 	}
-	output, err := bkl.Required(fsys, file, "/", workingDir, &finalFormat)
+	output, err := bkl.Required(fsys, args.File, "/", workingDir, &finalFormat)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Required operation failed: %v", err)), nil
 	}
 
-	if outputPath != "" {
-		if err := os.WriteFile(outputPath, output, 0o644); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", outputPath, err)), nil
+	if args.OutputPath != "" {
+		if err := os.WriteFile(args.OutputPath, output, 0o644); err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to write output to %s: %v", args.OutputPath, err)), nil
 		}
 	}
 
 	response := map[string]any{
-		"file":      file,
+		"file":      args.File,
 		"format":    finalFormat,
 		"output":    string(output),
 		"operation": "required",
 	}
 
-	if outputPath != "" {
-		response["outputPath"] = outputPath
+	if args.OutputPath != "" {
+		response["outputPath"] = args.OutputPath
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -1118,47 +1039,24 @@ Rules:
 }
 
 func compareHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	file1, err := request.RequireString("file1")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	file2, err := request.RequireString("file2")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	args, ok := request.Params.Arguments.(map[string]any)
-	if !ok {
-		return mcp.NewToolResultError("Invalid arguments format"), nil
-	}
-
-	fileSystem, err := parseFileSystem(args)
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-
-	format := parseOptionalString(args, "format", "")
-
-	env, err := parseEnvironment(args)
-	if err != nil {
+	args := compareArgs{}
+	if err := request.BindArguments(&args); err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
 	workingDir := ""
-	if fileSystem != nil {
+	if args.FileSystem != nil {
 		workingDir = "/"
 	}
 
-	fsys, err := getFileSystem(fileSystem)
+	fsys, err := getFileSystem(args.FileSystem)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	finalFormat := determineFormatWithPaths(format, "", []string{file1, file2})
-	sortPath := parseOptionalString(args, "sortPath", "")
+	finalFormat := determineFormatWithPaths(args.Format, "", []string{args.File1, args.File2})
 
-	result, err := bkl.Compare(fsys, file1, file2, "/", workingDir, env, &finalFormat, sortPath)
+	result, err := bkl.Compare(fsys, args.File1, args.File2, "/", workingDir, args.Environment, &finalFormat, args.SortPath)
 	if err != nil {
 		return mcp.NewToolResultError(err.Error()), nil
 	}
