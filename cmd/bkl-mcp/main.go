@@ -81,9 +81,84 @@ type compareArgs struct {
 	SortPath    string            `json:"sortPath,omitempty"`
 }
 
+type queryResult struct {
+	Type           string   `json:"type"`
+	ID             string   `json:"id,omitempty"`
+	Name           string   `json:"name,omitempty"`
+	Title          string   `json:"title,omitempty"`
+	Description    string   `json:"description,omitempty"`
+	Score          int      `json:"score"`
+	URLFragment    string   `json:"url_fragment,omitempty"`
+	ContentPreview string   `json:"content_preview,omitempty"`
+	ExampleLabel   string   `json:"example_label,omitempty"`
+	MatchingFile   string   `json:"matching_file,omitempty"`
+	Features       []string `json:"features,omitempty"`
+}
+
+type queryResponse struct {
+	Keywords []string      `json:"keywords"`
+	Results  []queryResult `json:"results"`
+	Count    int           `json:"count"`
+}
+
+type evaluateResponse struct {
+	Files        []string          `json:"files,omitempty"`
+	Directory    string            `json:"directory,omitempty"`
+	Pattern      string            `json:"pattern,omitempty"`
+	TotalFiles   int               `json:"totalFiles,omitempty"`
+	SuccessCount int               `json:"successCount,omitempty"`
+	ErrorCount   int               `json:"errorCount,omitempty"`
+	Results      []evaluateResult  `json:"results,omitempty"`
+	Format       string            `json:"format"`
+	Output       string            `json:"output"`
+	Operation    string            `json:"operation"`
+	Environment  map[string]string `json:"environment,omitempty"`
+	OutputPath   string            `json:"outputPath,omitempty"`
+}
+
+type evaluateResult struct {
+	Path   string `json:"path"`
+	Error  string `json:"error,omitempty"`
+	Output string `json:"output,omitempty"`
+}
+
+type diffResponse struct {
+	BaseFile   string `json:"baseFile"`
+	TargetFile string `json:"targetFile"`
+	Format     string `json:"format"`
+	Output     string `json:"output"`
+	Operation  string `json:"operation"`
+	OutputPath string `json:"outputPath,omitempty"`
+}
+
+type intersectResponse struct {
+	Files      []string `json:"files"`
+	Format     string   `json:"format"`
+	Output     string   `json:"output"`
+	Operation  string   `json:"operation"`
+	OutputPath string   `json:"outputPath,omitempty"`
+}
+
+type requiredResponse struct {
+	File       string `json:"file"`
+	Format     string `json:"format"`
+	Output     string `json:"output"`
+	Operation  string `json:"operation"`
+	OutputPath string `json:"outputPath,omitempty"`
+}
+
+type compareResponse struct {
+	File1       string            `json:"file1"`
+	File2       string            `json:"file2"`
+	Format      string            `json:"format"`
+	Diff        string            `json:"diff"`
+	Operation   string            `json:"operation"`
+	Environment map[string]string `json:"environment,omitempty"`
+	SortPath    string            `json:"sortPath,omitempty"`
+}
+
 func loadData() error {
 	var err error
-
 	tests, err = bkl.GetTests()
 	if err != nil {
 		return fmt.Errorf("failed to load tests: %v", err)
@@ -274,7 +349,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 	}
 
 	keywordFields := strings.Split(args.Keywords, ",")
-	var keywords []string
+	keywords := []string{}
 	for _, kw := range keywordFields {
 		trimmed := strings.TrimSpace(kw)
 		if trimmed != "" {
@@ -291,11 +366,11 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		normalizedKeywords[i] = strings.ToLower(keyword)
 	}
 
-	var allResults []map[string]any
+	allResults := []queryResult{}
 
 	for _, section := range sections {
 		score := 0
-		details := map[string]any{}
+		exampleLabel, contentPreview := "", ""
 
 		titleLower := strings.ToLower(section.Title)
 		idLower := strings.ToLower(section.ID)
@@ -308,7 +383,6 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		score += idMatches * 15
 		score += sourceMatches * 30
 
-		matchingContent := []string{}
 		for _, item := range section.Items {
 			if item.Content != "" {
 				contentLower := strings.ToLower(item.Content)
@@ -327,7 +401,9 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 							}
 						}
 					}
-					matchingContent = append(matchingContent, content)
+					if contentPreview == "" {
+						contentPreview = content
+					}
 				}
 			}
 			if item.Example != nil {
@@ -337,7 +413,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 					if codeMatches > 0 || labelMatches > 0 {
 						score += (codeMatches + labelMatches) * 5
 						if layer.Label != "" {
-							details["example_label"] = layer.Label
+							exampleLabel = layer.Label
 						}
 						break
 					}
@@ -352,7 +428,7 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 				if codeMatches > 0 {
 					score += codeMatches * 5
 					if item.Code.Label != "" {
-						details["example_label"] = item.Code.Label
+						exampleLabel = item.Code.Label
 					}
 				}
 			}
@@ -366,18 +442,14 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		}
 
 		if score > 0 {
-			result := map[string]any{
-				"type":         "documentation",
-				"id":           section.ID,
-				"title":        section.Title,
-				"score":        score,
-				"url_fragment": "#" + section.ID,
-			}
-			if len(matchingContent) > 0 {
-				result["content_preview"] = matchingContent[0]
-			}
-			for k, v := range details {
-				result[k] = v
+			result := queryResult{
+				Type:           "documentation",
+				ID:             section.ID,
+				Title:          section.Title,
+				Score:          score,
+				URLFragment:    "#" + section.ID,
+				ContentPreview: contentPreview,
+				ExampleLabel:   exampleLabel,
 			}
 			allResults = append(allResults, result)
 		}
@@ -389,22 +461,20 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		}
 
 		score := 0
-		details := map[string]any{}
+		matchingFile, matchingFileContent := "", ""
 
 		nameLower := strings.ToLower(name)
 		descLower := strings.ToLower(test.Description)
 
 		nameMatches := countKeywordMatches(nameLower, normalizedKeywords)
 		descMatches := countKeywordMatches(descLower, normalizedKeywords)
-
-		var matchingFileContent string
-		var bestFileMatches int
+		bestFileMatches := 0
 		for filename, content := range test.Files {
 			contentLower := strings.ToLower(content)
 			fileMatches := countKeywordMatches(contentLower, normalizedKeywords)
 			if fileMatches > bestFileMatches {
 				bestFileMatches = fileMatches
-				details["matching_file"] = filename
+				matchingFile = filename
 
 				if len(content) > 150 {
 					firstKeyword := findFirstKeyword(contentLower, normalizedKeywords)
@@ -427,49 +497,40 @@ func queryHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		score += bestFileMatches * 10
 
 		if score > 0 {
-			result := map[string]any{
-				"type":        "test",
-				"name":        name,
-				"description": test.Description,
-				"score":       score,
-				"features":    getTestFeatures(test),
-			}
-			if matchingFileContent != "" {
-				result["content_preview"] = matchingFileContent
-			}
-			for k, v := range details {
-				result[k] = v
+			result := queryResult{
+				Type:           "test",
+				Name:           name,
+				Description:    test.Description,
+				Score:          score,
+				Features:       getTestFeatures(test),
+				ContentPreview: matchingFileContent,
+				MatchingFile:   matchingFile,
 			}
 			allResults = append(allResults, result)
 		}
 	}
 
 	sort.Slice(allResults, func(i, j int) bool {
-		scoreI := allResults[i]["score"].(int)
-		scoreJ := allResults[j]["score"].(int)
-		if scoreI == scoreJ {
-
-			typeI := allResults[i]["type"].(string)
-			typeJ := allResults[j]["type"].(string)
-			if typeI != typeJ {
-				return typeI == "documentation"
+		if allResults[i].Score == allResults[j].Score {
+			if allResults[i].Type != allResults[j].Type {
+				return allResults[i].Type == "documentation"
 			}
-			if typeI == "documentation" {
-				return allResults[i]["title"].(string) < allResults[j]["title"].(string)
+			if allResults[i].Type == "documentation" {
+				return allResults[i].Title < allResults[j].Title
 			}
-			return allResults[i]["name"].(string) < allResults[j]["name"].(string)
+			return allResults[i].Name < allResults[j].Name
 		}
-		return scoreI > scoreJ
+		return allResults[i].Score > allResults[j].Score
 	})
 
 	if len(allResults) > 15 {
 		allResults = allResults[:15]
 	}
 
-	response := map[string]any{
-		"keywords": keywords,
-		"results":  allResults,
-		"count":    len(allResults),
+	response := queryResponse{
+		Keywords: keywords,
+		Results:  allResults,
+		Count:    len(allResults),
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -523,7 +584,7 @@ func getHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 }
 
 func getTestFeatures(test *bkl.TestCase) []string {
-	var features []string
+	features := []string{}
 
 	if test.Diff {
 		features = append(features, "diff")
@@ -691,7 +752,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 			return mcp.NewToolResultError(fmt.Sprintf("Directory evaluation failed: %v", err)), nil
 		}
 
-		var successCount, errorCount int
+		successCount, errorCount := 0, 0
 		for _, result := range results {
 			if result.Error == nil {
 				successCount++
@@ -700,32 +761,29 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 			}
 		}
 
-		var finalResults []any
+		finalResults := []evaluateResult{}
 		for _, result := range results {
-			resultMap := map[string]any{
-				"path": result.Path,
+			r := evaluateResult{
+				Path: result.Path,
 			}
 			if result.Error != nil {
-				resultMap["error"] = result.Error.Error()
+				r.Error = result.Error.Error()
 			}
 			if includeOutput && result.Output != "" {
-				resultMap["output"] = result.Output
+				r.Output = result.Output
 			}
-			finalResults = append(finalResults, resultMap)
+			finalResults = append(finalResults, r)
 		}
 
-		response := map[string]any{
-			"directory":    args.Directory,
-			"pattern":      args.Pattern,
-			"totalFiles":   len(results),
-			"successCount": successCount,
-			"errorCount":   errorCount,
-			"results":      finalResults,
-			"operation":    "evaluate_tree",
-		}
-
-		if len(args.Environment) > 0 {
-			response["environment"] = args.Environment
+		response := evaluateResponse{
+			Directory:    args.Directory,
+			Pattern:      args.Pattern,
+			TotalFiles:   len(results),
+			SuccessCount: successCount,
+			ErrorCount:   errorCount,
+			Results:      finalResults,
+			Operation:    "evaluate_tree",
+			Environment:  args.Environment,
 		}
 
 		resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -736,7 +794,7 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	fileFields := strings.Split(args.Files, ",")
-	var files []string
+	files := []string{}
 	for _, f := range fileFields {
 		trimmed := strings.TrimSpace(f)
 		if trimmed != "" {
@@ -761,19 +819,13 @@ func evaluateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 	}
 
-	response := map[string]any{
-		"files":     files,
-		"format":    finalFormat,
-		"output":    string(output),
-		"operation": "evaluate",
-	}
-
-	if len(args.Environment) > 0 {
-		response["environment"] = args.Environment
-	}
-
-	if args.OutputPath != "" {
-		response["outputPath"] = args.OutputPath
+	response := evaluateResponse{
+		Files:       files,
+		Format:      finalFormat,
+		Output:      string(output),
+		Operation:   "evaluate",
+		Environment: args.Environment,
+		OutputPath:  args.OutputPath,
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -813,16 +865,13 @@ func diffHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		}
 	}
 
-	response := map[string]any{
-		"baseFile":   args.BaseFile,
-		"targetFile": args.TargetFile,
-		"format":     finalFormat,
-		"output":     string(output),
-		"operation":  "diff",
-	}
-
-	if args.OutputPath != "" {
-		response["outputPath"] = args.OutputPath
+	response := diffResponse{
+		BaseFile:   args.BaseFile,
+		TargetFile: args.TargetFile,
+		Format:     finalFormat,
+		Output:     string(output),
+		Operation:  "diff",
+		OutputPath: args.OutputPath,
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -839,7 +888,7 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	fileFields := strings.Split(args.Files, ",")
-	var files []string
+	files := []string{}
 	for _, f := range fileFields {
 		trimmed := strings.TrimSpace(f)
 		if trimmed != "" {
@@ -875,15 +924,12 @@ func intersectHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		}
 	}
 
-	response := map[string]any{
-		"files":     files,
-		"format":    finalFormat,
-		"output":    string(output),
-		"operation": "intersect",
-	}
-
-	if args.OutputPath != "" {
-		response["outputPath"] = args.OutputPath
+	response := intersectResponse{
+		Files:      files,
+		Format:     finalFormat,
+		Output:     string(output),
+		Operation:  "intersect",
+		OutputPath: args.OutputPath,
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -923,15 +969,12 @@ func requiredHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 	}
 
-	response := map[string]any{
-		"file":      args.File,
-		"format":    finalFormat,
-		"output":    string(output),
-		"operation": "required",
-	}
-
-	if args.OutputPath != "" {
-		response["outputPath"] = args.OutputPath
+	response := requiredResponse{
+		File:       args.File,
+		Format:     finalFormat,
+		Output:     string(output),
+		Operation:  "required",
+		OutputPath: args.OutputPath,
 	}
 
 	resultJSON, err := json.MarshalIndent(response, "", "  ")
@@ -1061,20 +1104,14 @@ func compareHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 		return mcp.NewToolResultError(err.Error()), nil
 	}
 
-	response := map[string]any{
-		"file1":     result.File1,
-		"file2":     result.File2,
-		"format":    result.Format,
-		"diff":      result.Diff,
-		"operation": "compare",
-	}
-
-	if len(result.Environment) > 0 {
-		response["environment"] = result.Environment
-	}
-
-	if result.SortPath != "" {
-		response["sortPath"] = result.SortPath
+	response := compareResponse{
+		File1:       result.File1,
+		File2:       result.File2,
+		Format:      result.Format,
+		Diff:        result.Diff,
+		Operation:   "compare",
+		Environment: result.Environment,
+		SortPath:    result.SortPath,
 	}
 
 	jsonResult, err := json.MarshalIndent(response, "", "  ")
