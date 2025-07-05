@@ -238,17 +238,14 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 		if content.Type == "text" && content.TextContent != nil {
 			text := content.TextContent.Text
 
-			if strings.Contains(text, "Evaluation failed:") || strings.Contains(text, "operation failed:") {
-				var errResponse map[string]any
-				if err := json.Unmarshal([]byte(text), &errResponse); err == nil {
-					return nil, fmt.Errorf("%s", text)
-				}
-				return nil, fmt.Errorf("%s", text)
-			}
-
 			var response map[string]any
 			if err := json.Unmarshal([]byte(text), &response); err != nil {
 				return nil, fmt.Errorf("failed to parse JSON response: %v", err)
+			}
+
+			// Check for error field first
+			if errMsg, ok := response["error"].(string); ok {
+				return nil, fmt.Errorf("%s", errMsg)
 			}
 
 			if output, ok := response["output"].(string); ok {
