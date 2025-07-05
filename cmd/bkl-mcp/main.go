@@ -22,11 +22,11 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-var (
+type Server struct {
 	tests       map[string]*bkl.TestCase
 	sections    []bkl.DocSection
 	taskService *taskcp.Service
-)
+}
 
 type queryArgs struct {
 	Keywords string `json:"keywords"`
@@ -174,19 +174,22 @@ type getResponse struct {
 	FormatsConverted bool            `json:"formatsConverted,omitempty"`
 }
 
-func loadData() error {
-	var err error
-	tests, err = bkl.GetTests()
+func NewServer() (*Server, error) {
+	tests, err := bkl.GetTests()
 	if err != nil {
-		return fmt.Errorf("failed to load tests: %v", err)
+		return nil, fmt.Errorf("failed to load tests: %v", err)
 	}
 
-	sections, err = bkl.GetDocSections()
+	sections, err := bkl.GetDocSections()
 	if err != nil {
-		return fmt.Errorf("failed to load documentation sections: %v", err)
+		return nil, fmt.Errorf("failed to load documentation sections: %v", err)
 	}
 
-	return nil
+	return &Server{
+		tests:       tests,
+		sections:    sections,
+		taskService: taskcp.New("bkl-mcp"),
+	}, nil
 }
 
 type HandlerFunc[TArgs any, TResponse any] func(ctx context.Context, args TArgs) (*TResponse, error)
@@ -216,11 +219,10 @@ func wrapHandler[TArgs any, TResponse any](handler HandlerFunc[TArgs, TResponse]
 }
 
 func main() {
-	if err := loadData(); err != nil {
-		log.Fatalf("Failed to load data: %v", err)
+	srv, err := NewServer()
+	if err != nil {
+		log.Fatalf("Failed to create server: %v", err)
 	}
-
-	taskService = taskcp.New()
 
 	mcpServer := server.NewMCPServer(
 		"bkl-mcp",
@@ -242,7 +244,7 @@ func main() {
 			mcp.Description("Keywords to search for (comma-separated) in documentation sections and test examples"),
 		),
 	)
-	mcpServer.AddTool(queryTool, wrapHandler(queryHandler))
+	mcpServer.AddTool(queryTool, wrapHandler(srv.queryHandler))
 
 	getTool := mcp.NewTool("get",
 		mcp.WithDescription("Get full content of a documentation section or test"),
@@ -258,7 +260,7 @@ func main() {
 			mcp.Description("Source file for documentation (e.g., 'index', 'k8s'). Only applies to type='documentation'"),
 		),
 	)
-	mcpServer.AddTool(getTool, wrapHandler(getHandler))
+	mcpServer.AddTool(getTool, wrapHandler(srv.getHandler))
 
 	evaluateTool := mcp.NewTool("evaluate",
 		mcp.WithDescription("Evaluate bkl files with given environment and return results"),
@@ -286,7 +288,7 @@ func main() {
 			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
 		),
 	)
-	mcpServer.AddTool(evaluateTool, wrapHandler(evaluateHandler))
+	mcpServer.AddTool(evaluateTool, wrapHandler(srv.evaluateHandler))
 
 	diffTool := mcp.NewTool("diff",
 		mcp.WithDescription("Generate the minimal intermediate layer needed to create the target output from the base layer"),
@@ -307,7 +309,7 @@ func main() {
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
 	)
-	mcpServer.AddTool(diffTool, wrapHandler(diffHandler))
+	mcpServer.AddTool(diffTool, wrapHandler(srv.diffHandler))
 
 	intersectTool := mcp.NewTool("intersect",
 		mcp.WithDescription("Generate the maximal base layer that the specified targets have in common"),
@@ -324,7 +326,7 @@ func main() {
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
 	)
-	mcpServer.AddTool(intersectTool, wrapHandler(intersectHandler))
+	mcpServer.AddTool(intersectTool, wrapHandler(srv.intersectHandler))
 
 	requiredTool := mcp.NewTool("required",
 		mcp.WithDescription("Generate a document containing just the required fields and their ancestors from the lower layer"),
@@ -338,22 +340,22 @@ func main() {
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
 	)
-	mcpServer.AddTool(requiredTool, wrapHandler(requiredHandler))
+	mcpServer.AddTool(requiredTool, wrapHandler(srv.requiredHandler))
 
 	versionTool := mcp.NewTool("version",
 		mcp.WithDescription("Get version and build information for bkl"),
 	)
-	mcpServer.AddTool(versionTool, wrapHandler(versionHandler))
+	mcpServer.AddTool(versionTool, wrapHandler(srv.versionHandler))
 
 	issuePromptTool := mcp.NewTool("issue_prompt",
 		mcp.WithDescription("Get guidance for filing an issue with minimal reproduction case"),
 	)
-	mcpServer.AddTool(issuePromptTool, wrapHandler(issuePromptHandler))
+	mcpServer.AddTool(issuePromptTool, wrapHandler(srv.issuePromptHandler))
 
 	convertToBklTool := mcp.NewTool("convert_to_bkl",
 		mcp.WithDescription("Get guidance for converting YAML files to bkl format with layering"),
 	)
-	mcpServer.AddTool(convertToBklTool, wrapHandler(convertToBklHandler))
+	mcpServer.AddTool(convertToBklTool, wrapHandler(srv.convertToBklHandler))
 
 	compareTool := mcp.NewTool("compare",
 		mcp.WithDescription("Evaluate two bkl files and show text differences between their outputs"),
@@ -374,9 +376,9 @@ func main() {
 			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
 		),
 	)
-	mcpServer.AddTool(compareTool, wrapHandler(compareHandler))
+	mcpServer.AddTool(compareTool, wrapHandler(srv.compareHandler))
 
-	if err := taskcp.RegisterMCPTools(mcpServer, taskService); err != nil {
+	if err := srv.taskService.RegisterMCPTools(mcpServer); err != nil {
 		log.Fatalf("Failed to register taskcp tools: %v", err)
 	}
 
@@ -385,7 +387,7 @@ func main() {
 	}
 }
 
-func queryHandler(ctx context.Context, args queryArgs) (*queryResponse, error) {
+func (s *Server) queryHandler(ctx context.Context, args queryArgs) (*queryResponse, error) {
 	keywordFields := strings.Split(args.Keywords, ",")
 	keywords := []string{}
 	for _, kw := range keywordFields {
@@ -406,7 +408,7 @@ func queryHandler(ctx context.Context, args queryArgs) (*queryResponse, error) {
 
 	allResults := []queryResult{}
 
-	for _, section := range sections {
+	for _, section := range s.sections {
 		score := 0
 		exampleLabel, contentPreview := "", ""
 
@@ -493,7 +495,7 @@ func queryHandler(ctx context.Context, args queryArgs) (*queryResponse, error) {
 		}
 	}
 
-	for name, test := range tests {
+	for name, test := range s.tests {
 		if strings.HasSuffix(name, ".files") {
 			continue
 		}
@@ -700,7 +702,7 @@ func convertTestCaseCodeBlocks(test *bkl.TestCase) bool {
 	return converted
 }
 
-func getHandler(ctx context.Context, args getArgs) (*getResponse, error) {
+func (s *Server) getHandler(ctx context.Context, args getArgs) (*getResponse, error) {
 	convertToJSON := true
 	if args.ConvertToJSON != nil {
 		convertToJSON = *args.ConvertToJSON
@@ -710,7 +712,7 @@ func getHandler(ctx context.Context, args getArgs) (*getResponse, error) {
 
 	switch args.Type {
 	case "documentation":
-		for _, section := range sections {
+		for _, section := range s.sections {
 			if section.ID == args.ID {
 				if args.Source != "" && section.Source != args.Source {
 					continue
@@ -732,7 +734,7 @@ func getHandler(ctx context.Context, args getArgs) (*getResponse, error) {
 		return nil, fmt.Errorf("documentation section '%s' not found", args.ID)
 
 	case "test":
-		test, exists := tests[args.ID]
+		test, exists := s.tests[args.ID]
 		if !exists {
 			return nil, fmt.Errorf("test '%s' not found", args.ID)
 		}
@@ -885,7 +887,7 @@ func determineFormatWithPaths(explicitFormat string, outputPath string, inputPat
 	return ""
 }
 
-func evaluateHandler(ctx context.Context, args evaluateArgs) (*evaluateResponse, error) {
+func (s *Server) evaluateHandler(ctx context.Context, args evaluateArgs) (*evaluateResponse, error) {
 	if args.Directory != "" && args.Files != "" {
 		return nil, fmt.Errorf("cannot specify both files and directory parameters")
 	}
@@ -986,7 +988,7 @@ func evaluateHandler(ctx context.Context, args evaluateArgs) (*evaluateResponse,
 	}, nil
 }
 
-func diffHandler(ctx context.Context, args diffArgs) (*diffResponse, error) {
+func (s *Server) diffHandler(ctx context.Context, args diffArgs) (*diffResponse, error) {
 	workingDir := ""
 	if args.FileSystem != nil {
 		workingDir = "/"
@@ -1022,7 +1024,7 @@ func diffHandler(ctx context.Context, args diffArgs) (*diffResponse, error) {
 	}, nil
 }
 
-func intersectHandler(ctx context.Context, args intersectArgs) (*intersectResponse, error) {
+func (s *Server) intersectHandler(ctx context.Context, args intersectArgs) (*intersectResponse, error) {
 	fileFields := strings.Split(args.Files, ",")
 	files := []string{}
 	for _, f := range fileFields {
@@ -1069,7 +1071,7 @@ func intersectHandler(ctx context.Context, args intersectArgs) (*intersectRespon
 	}, nil
 }
 
-func requiredHandler(ctx context.Context, args requiredArgs) (*requiredResponse, error) {
+func (s *Server) requiredHandler(ctx context.Context, args requiredArgs) (*requiredResponse, error) {
 	workingDir := ""
 	if args.FileSystem != nil {
 		workingDir = "/"
@@ -1104,7 +1106,7 @@ func requiredHandler(ctx context.Context, args requiredArgs) (*requiredResponse,
 	}, nil
 }
 
-func versionHandler(ctx context.Context, args struct{}) (*debug.BuildInfo, error) {
+func (s *Server) versionHandler(ctx context.Context, args struct{}) (*debug.BuildInfo, error) {
 	bi := version.GetVersion()
 	if bi == nil {
 		return nil, fmt.Errorf("failed to get build information")
@@ -1112,7 +1114,7 @@ func versionHandler(ctx context.Context, args struct{}) (*debug.BuildInfo, error
 	return bi, nil
 }
 
-func issuePromptHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
+func (s *Server) issuePromptHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
 	prompt := `# Filing a bkl Issue - Steps
 
 1. **Create a minimal reproduction case**:
@@ -1158,45 +1160,37 @@ Tips for minimal reproductions:
 	return &promptResponse{Prompt: prompt}, nil
 }
 
-func convertToBklHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
-	prompt := `# Converting Kubernetes YAML files to bkl format
+func (s *Server) convertToBklHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
+	project := s.taskService.AddProject()
+	task := project.InsertTaskBefore(
+		"",
+		`Find all of the configuration files you need to convert.
 
-These instructions help you convert a set of Kubernetes YAML files into bkl format with proper layering. They can also be used for non-Kubernetes YAML files.
+{SUCCESS_PROMPT}
 
-Update your Todos to do these steps in order:
-1) Find all input files
-2) Prep files for bkl (see mcp__bkl-mcp__get type="documentation" id="prep" source="k8s")
-3) Validate prepped files (see mcp__bkl-mcp__get type="documentation" id="prep-validate" source="k8s")
-4) Determine a target layout (see mcp__bkl-mcp__get type="documentation" id="plan" source="k8s")
-5) Create base layers (see mcp__bkl-mcp__get type="documentation" id="base" source="k8s")
-6) Create remaining layers (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
-7) Validate all bkl leaf layers against the original configs (see mcp__bkl-mcp__get type="documentation" id="api-service" source="k8s")
+where result contains a JSON encoding in the following format:
 
-Tools:
-* To query documentation: mcp__bkl-mcp__query keywords="repeat,list,iteration"
-* To validate a directory tree: mcp__bkl-mcp__validate_directory directory="prep" pattern="*.yaml"
-* Instead of bkl, use: mcp__bkl-mcp__evaluate files="prep/prod/namespace.yaml" outputPath="bkl/namespace.yaml"
-* Instead of bkli, use: mcp__bkl-mcp__intersect files="prep/prod/api-service.yaml,prep/prod/web-service.yaml" outputPath="bkl/base.yaml" selector="kind"
-* Instead of bkld, use: mcp__bkl-mcp__diff baseFile="bkl/namespace.yaml" targetFile="prep/staging/namespace.yaml" outputPath="bkl/namespace.staging.yaml" selector="kind"
-* Instead of bklc, use: mcp__bkl-mcp__compare file1="original/prod/namespace.yaml" file2="prep/prod/namespace.yaml"
+{
+	"files": [
+		"path/to/file1.yaml",
+		"path/to/file2.yaml"
+	]
+}
+`, func(t *taskcp.Task) {
+			fmt.Fprintf(os.Stderr, "task complete! %+v\n", t)
+		})
 
-Rules:
-* ALWAYS consider & examine EVERY file during the prep step
-* ALWAYS convert every list that might need overriding (containers, env, ports, etc.) to a map
-* ALWAYS stack environments: dev on staging on prod
-* ALWAYS name files to indicate their layering: layer1.layer2.layer3.yaml
-* ALWAYS use mcp__bkl-mcp__evaluate to evaluate EACH file after you create it, and fix any errors before continuing. VALIDATE VALIDATE VALIDATE
-* NEVER put the environment name in an environment variable
-* NEVER use $parent to specify inheritance
-* NEVER put bkl files in multiple directories; put them all in a single directory
-* NEVER use mcp__bkl-mcp__evaluate with multiple files at once
-* NEVER use external scripts to split, alter, or parse files
-`
+	prompt := fmt.Sprintf(`# Converting Kubernetes configuration files to bkl format
+
+I'll walk you through this process step by step.
+
+%s
+`, task.Instructions)
 
 	return &promptResponse{Prompt: prompt}, nil
 }
 
-func compareHandler(ctx context.Context, args compareArgs) (*compareResponse, error) {
+func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compareResponse, error) {
 	workingDir := ""
 	if args.FileSystem != nil {
 		workingDir = "/"
