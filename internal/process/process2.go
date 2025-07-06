@@ -473,6 +473,15 @@ func process2ValuesMap(obj map[string]any, nameKey string, valueKey string) ([]a
 			vals = append(vals, newMap)
 		}
 
+	case nameKey == "" && valueKey != "":
+		// $encode: values::value
+		valueParts := pathutil.SplitPath(valueKey)
+		for _, v := range utils.SortedMap(obj) {
+			newMap := map[string]any{}
+			pathutil.Set(newMap, valueParts, v)
+			vals = append(vals, newMap)
+		}
+
 	case nameKey != "" && valueKey != "":
 		// $encode: values:name:value
 		nameParts := pathutil.SplitPath(nameKey)
@@ -485,7 +494,7 @@ func process2ValuesMap(obj map[string]any, nameKey string, valueKey string) ([]a
 		}
 
 	default:
-		return nil, fmt.Errorf("$encode: values with valueKey but no nameKey: %w", errors.ErrInvalidArguments)
+		return nil, fmt.Errorf("$encode: values with invalid combination of nameKey and valueKey: %w", errors.ErrInvalidArguments)
 	}
 
 	return vals, nil

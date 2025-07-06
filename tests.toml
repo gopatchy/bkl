@@ -1593,6 +1593,20 @@ b: 2
 $encode: values:metadata.name:spec.value
 '''
 
+[encodeValuesOnlyValue]
+description = "Encode values with only value key using double colon"
+eval = ["test.yaml"]
+format = "yaml"
+expected = '''
+- containerPort: 8080
+- containerPort: 8081
+'''
+files."test.yaml" = '''
+api: 8080
+web: 8081
+$encode: values::containerPort
+'''
+
 [encodeBase64]
 description = "Test base64 encoding with $encode directive"
 eval = ["a.yaml"]

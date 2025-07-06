@@ -795,6 +795,8 @@ hunk-header {
 
 	<li><a href="#unnamed-ports">Unnamed ports</a></li>
 
+	<li><a href="#env-keys-values">env keys and values</a></li>
+
 </ol>
 </div>
 </nav>
@@ -846,9 +848,72 @@ hunk-header {
 <div class="code-container">
 
 <bkl-code class="code-unlabeled"><key>ports</key>:
-  <key>api</key>:
-    <key>containerPort</key>: <number>8080</number>
-  <key>$encode</key>: <string>values</string></bkl-code>
+  <key>api</key>: <number>8080</number>
+  <highlight><key>$encode</key>: <string>values::containerPort</string></highlight></bkl-code>
+</div>
+
+</div>
+</div>
+
+</div>
+
+
+
+
+
+
+</section>
+
+<section id="env-keys-values">
+<h2><a name="env-keys-values">env keys and values</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="example-container fixit-3-layer">
+
+<div class="code-container">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>env</key>:
+  - <key>name</key>: <string>DB_HOST</string>
+    <key>value</key>: <string>postgres</string>
+  - <key>name</key>: <string>DB_PORT</string>
+    <key>value</key>: <string>"5432"</string></bkl-code>
+</div>
+
+</div>
+<div style="text-align: center; margin: 5px 0; font-size: 30px; color: var(--neutral5);">↓</div>
+<div class="grid-container grid-2-col">
+<div class="code-container fixit-bad">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>env</key>:
+  <key>DB_HOST</key>: <string>postgres</string>
+  <key>DB_PORT</key>: <string>"5432"</string>
+  <key>$encode</key>: <string>values:name</string></bkl-code>
+</div>
+
+</div>
+<div class="code-container fixit-good">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>env</key>:
+  <key>DB_HOST</key>: <string>postgres</string>
+  <key>DB_PORT</key>: <string>"5432"</string>
+  <highlight><key>$encode</key>: <string>values:name:value</string></highlight></bkl-code>
 </div>
 
 </div>

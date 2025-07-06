@@ -16,7 +16,33 @@
             languages: [[0, "yaml"]]
           - code: |
               ports:
-                api:
-                  containerPort: 8080
-                $encode: values
+                api: 8080
+                $encode: values::containerPort
+            highlights: ["$encode: values::containerPort"]
             languages: [[0, "yaml"]]
+- id: env-keys-values
+  title: env keys and values
+  items:
+    - example:
+        operation: fixit
+        layers:
+          - code: |
+              env:
+                - name: DB_HOST
+                  value: postgres
+                - name: DB_PORT
+                  value: "5432"
+            languages: [[0, "yaml"]]
+          - code: |
+              env:
+                DB_HOST: postgres
+                DB_PORT: "5432"
+                $encode: values:name
+            languages: [[0, "yaml"]]
+          - code: |
+              env:
+                DB_HOST: postgres
+                DB_PORT: "5432"
+                $encode: values:name:value
+            languages: [[0, "yaml"]]
+            highlights: ["$encode: values:name:value"]
