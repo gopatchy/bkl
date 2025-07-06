@@ -1247,6 +1247,25 @@
               $encode: values:resource.name
             highlights: ["$encode: values:resource.name"]
     - content: |
+        <p>Convert environment variable lists to maps for easier overriding and use <highlight>$encode: values:name:value</highlight> to transform them back.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              env:
+                - name: DB_HOST
+                  value: postgres
+                - name: DB_PORT
+                  value: "5432"
+          - languages: [[0, "yaml"]]
+            code: |
+              env:
+                DB_HOST: postgres
+                DB_PORT: "5432"
+                $encode: values:name:value
+            highlights: ["$encode: values:name:value"]
+    - content: |
         <p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
     - example:
         operation: convert

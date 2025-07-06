@@ -1557,6 +1557,42 @@ _prefix: foo
 $encode: values
 '''
 
+[encodeValuesNameValue]
+description = "Test values encoding with name:value format"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+- name: a
+  value: 1
+- name: b
+  value: 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: values:name:value
+'''
+
+[encodeValuesNameValueNested]
+description = "Test values encoding with nested paths for name:value format"
+eval = ["a.yaml"]
+format = "yaml"
+expected = '''
+- metadata:
+    name: a
+  spec:
+    value: 1
+- metadata:
+    name: b
+  spec:
+    value: 2
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+$encode: values:metadata.name:spec.value
+'''
+
 [encodeBase64]
 description = "Test base64 encoding with $encode directive"
 eval = ["a.yaml"]

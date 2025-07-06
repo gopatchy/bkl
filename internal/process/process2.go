@@ -227,10 +227,19 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 		return process2ToListMap(obj, delim)
 
 	case "values":
-		nameKey := ""
-		if len(parts) == 2 {
+		var nameKey, valueKey string
+
+		switch len(parts) {
+		case 1:
+			// $encode: values
+		case 2:
+			// $encode: values:name
 			nameKey = parts[1]
-		} else if len(parts) != 1 {
+		case 3:
+			// $encode: values:name:value
+			nameKey = parts[1]
+			valueKey = parts[2]
+		default:
 			return nil, fmt.Errorf("$encode: %s: %w", v, errors.ErrInvalidArguments)
 		}
 
@@ -239,7 +248,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 			return nil, fmt.Errorf("$encode: %s: %w (%T)", v, errors.ErrInvalidType, obj)
 		}
 
-		return process2ValuesMap(obj2, nameKey)
+		return process2ValuesMap(obj2, nameKey, valueKey)
 
 	default:
 		if len(parts) != 1 {
@@ -441,14 +450,18 @@ func process2StringInterp(obj string, mergeFrom *document.Document, mergeFromDoc
 	return obj, nil
 }
 
-func process2ValuesMap(obj map[string]any, nameKey string) ([]any, error) {
+func process2ValuesMap(obj map[string]any, nameKey string, valueKey string) ([]any, error) {
 	vals := []any{}
 
-	if nameKey == "" {
+	switch {
+	case nameKey == "" && valueKey == "":
+		// $encode: values
 		for _, v := range utils.SortedMap(obj) {
 			vals = append(vals, v)
 		}
-	} else {
+
+	case nameKey != "" && valueKey == "":
+		// $encode: values:name
 		parts := pathutil.SplitPath(nameKey)
 		for k, v := range utils.SortedMap(obj) {
 			vMap, ok := v.(map[string]any)
@@ -459,6 +472,20 @@ func process2ValuesMap(obj map[string]any, nameKey string) ([]any, error) {
 			pathutil.Set(newMap, parts, k)
 			vals = append(vals, newMap)
 		}
+
+	case nameKey != "" && valueKey != "":
+		// $encode: values:name:value
+		nameParts := pathutil.SplitPath(nameKey)
+		valueParts := pathutil.SplitPath(valueKey)
+		for k, v := range utils.SortedMap(obj) {
+			newMap := map[string]any{}
+			pathutil.Set(newMap, nameParts, k)
+			pathutil.Set(newMap, valueParts, v)
+			vals = append(vals, newMap)
+		}
+
+	default:
+		return nil, fmt.Errorf("$encode: values with valueKey but no nameKey: %w", errors.ErrInvalidArguments)
 	}
 
 	return vals, nil

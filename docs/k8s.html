@@ -2290,6 +2290,57 @@ hunk-header {
 
 
 
+<p><p>Convert environment variable lists to maps for easier overriding and use <highlight>$encode: values:name:value</highlight> to transform them back.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>env</key>:
+  - <key>name</key>: <string>DB_HOST</string>
+    <key>value</key>: <string>postgres</string>
+  - <key>name</key>: <string>DB_PORT</string>
+    <key>value</key>: <string>"5432"</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>env</key>:
+  <key>DB_HOST</key>: <string>postgres</string>
+  <key>DB_PORT</key>: <string>"5432"</string>
+  <highlight><key>$encode</key>: <string>values:name:value</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
 <p><p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
 </p>
 

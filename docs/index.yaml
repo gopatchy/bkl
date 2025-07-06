@@ -721,6 +721,23 @@
     - example:
         operation: evaluate
         layers:
+          - label: values:name:value
+            code: |
+              a: 1
+              b: 2
+              $encode: values:name:value
+            highlights: ["$encode: values:name:value"]
+            languages: [[0, "yaml"]]
+        result:
+          code: |
+            - name: a
+              value: 1
+            - name: b
+              value: 2
+          languages: [[0, "yaml"]]
+    - example:
+        operation: evaluate
+        layers:
           - label: Stacking
             code: |
               a: 1
@@ -1645,4 +1662,4 @@
   title: Migrate
   items:
     - content: |
-        For Kubernetes migration examples and best practices, see <a href="/k8s.html">Kubernetes with bkl</a>.
+        For Kubernetes migration examples and best practices, see <a href="k8s.html">Kubernetes with bkl</a>.
