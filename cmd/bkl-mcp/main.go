@@ -1217,6 +1217,7 @@ func (s *Server) convertToBklOnFiles(project *taskcp.Project, t *taskcp.Task) er
 			return fmt.Errorf("failed to read file %s: %w", file, err)
 		}
 
+		originalContent := string(content)
 		task := project.InsertTaskBefore(
 			"",
 			`Convert the content in data["original_file"] to bkl patterns.
@@ -1238,23 +1239,96 @@ Return the converted bkl file contents in the results field of:
 {SUCCESS_PROMPT}
 `,
 			func(t *taskcp.Task) error {
-				return s.convertToBklOnPrepFile(prepFile, t)
+				return s.convertToBklOnPrepFile(project, prepFile, t)
 			},
 		)
 
-		task.Data["original_file"] = string(content)
+		task.Data["original_file"] = originalContent
 	}
 
 	return nil
 }
 
-func (s *Server) convertToBklOnPrepFile(targetPath string, t *taskcp.Task) error {
+func (s *Server) convertToBklOnPrepFile(project *taskcp.Project, targetPath string, t *taskcp.Task) error {
+	originalContent, ok := t.Data["original_file"].(string)
+	if !ok {
+		return fmt.Errorf("original_file not found in task data")
+	}
+
+	preppedContent := t.Result
+	if preppedContent == "" {
+		if prepped, ok := t.Data["prepped_file"].(string); ok {
+			preppedContent = prepped
+		}
+	}
+
+	if preppedContent == "" {
+		return fmt.Errorf("no prepped content provided")
+	}
+	fsys := fstest.MapFS{
+		"original.yaml": &fstest.MapFile{Data: []byte(originalContent)},
+		"prepped.yaml":  &fstest.MapFile{Data: []byte(preppedContent)},
+	}
+
+	compareResult, err := bkl.Compare(fsys, "original.yaml", "prepped.yaml", "/", "/", nil, nil, "")
+	if err != nil {
+		fixTask := project.InsertTaskBefore(
+			"",
+			fmt.Sprintf(`The comparison failed. Please fix the prepped file.
+
+The original file content is in data["original_file"].
+The prepped file content that failed is in data["prepped_file"].
+The error is in data["error"].
+
+Return the corrected bkl file contents in the result field of:
+{SUCCESS_PROMPT}`),
+			func(fixTask *taskcp.Task) error {
+				return s.convertToBklOnPrepFile(project, targetPath, fixTask)
+			},
+		)
+
+		fixTask.Data["original_file"] = originalContent
+		fixTask.Data["prepped_file"] = preppedContent
+		fixTask.Data["error"] = err.Error()
+
+		return nil
+	}
+
+	if compareResult.Diff != "" && t.Result != "" {
+		verifyTask := project.InsertTaskBefore(
+			"",
+			fmt.Sprintf(`The conversion resulted in different output. Please verify the changes are correct.
+
+The original file content is in data["original_file"].
+The prepped file content is in data["prepped_file"].
+The diff is in data["diff"].
+
+If the changes are correct, respond with an empty string in the result field of:
+{SUCCESS_PROMPT}
+
+If you need to modify the conversion, provide the corrected bkl file contents in the result field.`),
+			func(verifyTask *taskcp.Task) error {
+				return s.convertToBklOnPrepFile(project, targetPath, verifyTask)
+			},
+		)
+
+		verifyTask.Data["original_file"] = originalContent
+		verifyTask.Data["prepped_file"] = preppedContent
+		verifyTask.Data["diff"] = compareResult.Diff
+
+		return nil
+	}
+
+	return s.writeConvertedFile(targetPath, preppedContent)
+}
+
+func (s *Server) writeConvertedFile(targetPath string, content string) error {
 	dir := filepath.Dir(targetPath)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("failed to create directory %s: %w", dir, err)
 	}
 
-	if err := os.WriteFile(targetPath, []byte(t.Result), 0o644); err != nil {
+	if err := os.WriteFile(targetPath, []byte(content), 0o644); err != nil {
 		return fmt.Errorf("failed to write file %s: %w", targetPath, err)
 	}
 
