@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -1176,18 +1177,96 @@ where result contains a JSON encoding in the following format:
 		"path/to/file2.yaml"
 	]
 }
-`, func(t *taskcp.Task) {
-			fmt.Fprintf(os.Stderr, "task complete! %+v\n", t)
+`, func(t *taskcp.Task) error {
+			return s.convertToBklOnFiles(project, t)
 		})
 
-	prompt := fmt.Sprintf(`# Converting Kubernetes configuration files to bkl format
+	return &promptResponse{
+		Prompt: `# Converting Kubernetes configuration files to bkl format
 
-I'll walk you through this process step by step.
+I'll walk you through this process step by step. Follow EXACTLY these steps -- do not attempt to do the conversion yourself or follow any steps that are not EXACTLY what I tell you to do.
 
-%s
-`, task.Instructions)
+` + task.String(),
+	}, nil
+}
 
-	return &promptResponse{Prompt: prompt}, nil
+type filesResult struct {
+	Files []string `json:"files"`
+}
+
+func (s *Server) convertToBklOnFiles(project *taskcp.Project, t *taskcp.Task) error {
+	result := filesResult{}
+
+	if err := json.Unmarshal([]byte(t.Result), &result); err != nil {
+		return fmt.Errorf("failed to parse file list: %w", err)
+	}
+
+	if len(result.Files) == 0 {
+		return fmt.Errorf("no files provided")
+	}
+
+	commonPrefix := findCommonPrefix(result.Files)
+
+	for _, file := range result.Files {
+		prepFile := "prep/" + strings.TrimPrefix(file, commonPrefix)
+
+		content, err := os.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("failed to read file %s: %w", file, err)
+		}
+
+		task := project.InsertTaskBefore(
+			"",
+			`Convert the content in data["original_file"] to bkl patterns.
+
+You can read the pattern documentation with:
+
+mcp__bkl-mcp__get type="documentation" id="prep" source="k8s"
+
+Return the converted bkl file contents in the results field of:
+
+{SUCCESS_PROMPT}
+`,
+			func(t *taskcp.Task) error {
+				return s.convertToBklOnPrepFile(prepFile, t)
+			},
+		)
+
+		task.Data["original_file"] = string(content)
+	}
+
+	return nil
+}
+
+func (s *Server) convertToBklOnPrepFile(targetPath string, t *taskcp.Task) error {
+	dir := filepath.Dir(targetPath)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	if err := os.WriteFile(targetPath, []byte(t.Result), 0o644); err != nil {
+		return fmt.Errorf("failed to write file %s: %w", targetPath, err)
+	}
+
+	return nil
+}
+
+func findCommonPrefix(files []string) string {
+	dir, _ := filepath.Split(files[0])
+	commonParts := strings.Split(dir, string(filepath.Separator))
+
+	for _, file := range files[1:] {
+		dir, _ := filepath.Split(file)
+		parts := strings.Split(dir, string(filepath.Separator))
+
+		i := 0
+		for i < len(commonParts) && i < len(parts) && commonParts[i] == parts[i] {
+			i++
+		}
+		commonParts = commonParts[:i]
+	}
+
+	return strings.Join(commonParts, string(filepath.Separator))
 }
 
 func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compareResponse, error) {
