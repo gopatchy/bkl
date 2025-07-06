@@ -12,6 +12,12 @@
 
 
 
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,6 +293,10 @@ op {
 	flex-direction: column;
 	gap: var(--gap-small);
 	margin: var(--gap-large) 0;
+}
+
+.example-container.fixit-3-layer {
+	gap: 5px;
 }
 
 .grid-container {
@@ -783,25 +793,7 @@ hunk-header {
 <div class="nav-scroll-container">
 <ol>
 
-	<li><a href="#fixit-duplicate-keys">Duplicate Keys in Maps</a></li>
-
-	<li><a href="#fixit-trailing-spaces">Trailing Spaces in YAML</a></li>
-
-	<li><a href="#fixit-tab-indentation">Tab Characters in YAML</a></li>
-
-	<li><a href="#fixit-missing-parent">Missing Parent File</a></li>
-
-	<li><a href="#fixit-circular-reference">Circular Parent References</a></li>
-
-	<li><a href="#fixit-undefined-variable">Undefined Variable in Interpolation</a></li>
-
-	<li><a href="#fixit-invalid-env-var">Invalid Environment Variable Syntax</a></li>
-
-	<li><a href="#fixit-merge-type-conflict">Type Conflicts in Merge</a></li>
-
-	<li><a href="#fixit-empty-repeat">Empty Repeat Value</a></li>
-
-	<li><a href="#fixit-invalid-match">Invalid Match Pattern</a></li>
+	<li><a href="#unnamed-ports">Unnamed ports</a></li>
 
 </ol>
 </div>
@@ -810,71 +802,62 @@ hunk-header {
 <main>
 
 
-<section id="fixit-duplicate-keys">
-<h2><a name="fixit-duplicate-keys">Duplicate Keys in Maps</a></h2>
+<section id="unnamed-ports">
+<h2><a name="unnamed-ports">Unnamed ports</a></h2>
 
 
 
-</section>
-
-<section id="fixit-trailing-spaces">
-<h2><a name="fixit-trailing-spaces">Trailing Spaces in YAML</a></h2>
 
 
 
-</section>
-
-<section id="fixit-tab-indentation">
-<h2><a name="fixit-tab-indentation">Tab Characters in YAML</a></h2>
 
 
 
-</section>
-
-<section id="fixit-missing-parent">
-<h2><a name="fixit-missing-parent">Missing Parent File</a></h2>
 
 
 
-</section>
 
-<section id="fixit-circular-reference">
-<h2><a name="fixit-circular-reference">Circular Parent References</a></h2>
+<div class="example-container fixit-3-layer">
+
+<div class="code-container">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  - <key>containerPort</key>: <number>8080</number></bkl-code>
+</div>
+
+</div>
+<div style="text-align: center; margin: 5px 0; font-size: 30px; color: var(--neutral5);">↓</div>
+<div class="grid-container grid-2-col">
+<div class="code-container fixit-bad">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  <key>api</key>:
+    <key>containerPort</key>: <number>8080</number>
+  <key>$encode</key>: <string>values:containerPort</string></bkl-code>
+</div>
+
+</div>
+<div class="code-container fixit-good">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>ports</key>:
+  <key>api</key>:
+    <key>containerPort</key>: <number>8080</number>
+  <key>$encode</key>: <string>values</string></bkl-code>
+</div>
+
+</div>
+</div>
+
+</div>
 
 
 
-</section>
-
-<section id="fixit-undefined-variable">
-<h2><a name="fixit-undefined-variable">Undefined Variable in Interpolation</a></h2>
-
-
-
-</section>
-
-<section id="fixit-invalid-env-var">
-<h2><a name="fixit-invalid-env-var">Invalid Environment Variable Syntax</a></h2>
-
-
-
-</section>
-
-<section id="fixit-merge-type-conflict">
-<h2><a name="fixit-merge-type-conflict">Type Conflicts in Merge</a></h2>
-
-
-
-</section>
-
-<section id="fixit-empty-repeat">
-<h2><a name="fixit-empty-repeat">Empty Repeat Value</a></h2>
-
-
-
-</section>
-
-<section id="fixit-invalid-match">
-<h2><a name="fixit-invalid-match">Invalid Match Pattern</a></h2>
 
 
 

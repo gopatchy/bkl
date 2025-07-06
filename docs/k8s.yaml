@@ -1153,8 +1153,8 @@
                           name: web-service
                           port:
                             number: 80
-- id: prep
-  title: Prep
+- id: pre-prep
+  title: Create prep dir
   items:
     - content: |
         <p>Make a copy of your original configs into a prep directory for editing and comparison.</p>
@@ -1162,6 +1162,9 @@
         languages: [[0, "shell"]]
         code: |
           $ cp -r original prep
+- id: prep
+  title: Prep
+  items:
     - content: |
         <p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
 

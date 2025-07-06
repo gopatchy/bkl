@@ -12,6 +12,12 @@
 
 
 
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,6 +293,10 @@ op {
 	flex-direction: column;
 	gap: var(--gap-small);
 	margin: var(--gap-large) 0;
+}
+
+.example-container.fixit-3-layer {
+	gap: 5px;
 }
 
 .grid-container {
@@ -786,6 +796,8 @@ hunk-header {
 	<li><a href="#intro">K8s migration</a></li>
 
 	<li><a href="#original">Original config</a></li>
+
+	<li><a href="#pre-prep">Create prep dir</a></li>
 
 	<li><a href="#prep">Prep</a></li>
 
@@ -2091,8 +2103,8 @@ hunk-header {
 
 </section>
 
-<section id="prep">
-<h2><a name="prep">Prep</a></h2>
+<section id="pre-prep">
+<h2><a name="pre-prep">Create prep dir</a></h2>
 
 
 
@@ -2114,10 +2126,19 @@ hunk-header {
 
 
 
+</section>
+
+<section id="prep">
+<h2><a name="prep">Prep</a></h2>
+
+
+
 <p><p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
 
 <p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers.</p>
 </p>
+
+
 
 
 
@@ -2171,8 +2192,11 @@ hunk-header {
 
 
 
+
 <p><p>When the list items need to contain the key (e.g. <highlight>ports: { name: http }</highlight>), we can use <highlight>$encode: values:name</highlight> reduce duplication.</p>
 </p>
+
+
 
 
 
@@ -2223,6 +2247,9 @@ hunk-header {
 </div>
 </div>
 </div>
+
+
+
 
 
 
@@ -2290,8 +2317,11 @@ hunk-header {
 
 
 
+
 <p><p>Convert environment variable lists to maps for easier overriding and use <highlight>$encode: values:name:value</highlight> to transform them back.</p>
 </p>
+
+
 
 
 
@@ -2341,8 +2371,11 @@ hunk-header {
 
 
 
+
 <p><p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>.</p>
 </p>
+
+
 
 
 
@@ -2399,8 +2432,11 @@ hunk-header {
 
 
 
+
 <p><p>Convert embedded JSON/YAML strings to structures with <highlight>$encode: json-pretty</highlight> or <highlight>$encode: yaml</highlight>.</p>
 </p>
+
+
 
 
 
@@ -2466,6 +2502,9 @@ hunk-header {
 
 
 
+
+
+
 <div class="example-container">
 <div class="grid-container grid-3-col">
 
@@ -2505,8 +2544,11 @@ hunk-header {
 
 
 
+
 <p><p>Convert embedded base64 strings to <highlight>$encode: base64</highlight>.</p>
 </p>
+
+
 
 
 
@@ -2551,8 +2593,11 @@ hunk-header {
 
 
 
+
 <p><p>Remove duplication between string fields with <highlight>$""</highlight>.</p>
 </p>
+
+
 
 
 
@@ -2594,6 +2639,7 @@ hunk-header {
 </div>
 </div>
 </div>
+
 
 
 

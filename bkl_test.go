@@ -571,7 +571,17 @@ func processFixitExample(example *bkl.DocExample, acceptableLanguages []string) 
 		return nil, false
 	}
 
-	goodLayer := example.Layers[1]
+	// For 2-layer fixit: layer 0 is bad, layer 1 is good
+	// For 3-layer fixit: layer 0 is original, layer 1 is bad, layer 2 is good
+	var goodLayer bkl.DocLayer
+	if len(example.Layers) == 2 {
+		goodLayer = example.Layers[1]
+	} else if len(example.Layers) >= 3 {
+		goodLayer = example.Layers[2]
+	} else {
+		goodLayer = example.Layers[1] // fallback
+	}
+
 	if len(goodLayer.Languages) != 1 {
 		return nil, false
 	}
@@ -641,6 +651,19 @@ func runDocumentationTest(t *testing.T, testCase *bkl.TestCase, example *bkl.Doc
 	if example.Operation == "fixit" {
 		if err != nil {
 			t.Errorf("Fixit good code failed to evaluate: %v\nOutput: %s", err, output)
+			return
+		}
+
+		// For 3-layer fixit, verify that the good code produces the same output as the original
+		if len(example.Layers) >= 3 {
+			// The original code is in layer 0
+			originalCode := strings.TrimSpace(example.Layers[0].Code)
+			actualOutput := strings.TrimSpace(string(output))
+
+			// Compare the evaluated output with the original code
+			if actualOutput != originalCode {
+				t.Errorf("Fixit good code output doesn't match original\nOriginal:\n%s\nActual output:\n%s", originalCode, actualOutput)
+			}
 		}
 		return
 	}
