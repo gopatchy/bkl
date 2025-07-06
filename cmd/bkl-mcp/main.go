@@ -96,6 +96,7 @@ type queryResult struct {
 	ContentPreview string   `json:"content_preview,omitempty"`
 	ExampleLabel   string   `json:"example_label,omitempty"`
 	MatchingFile   string   `json:"matching_file,omitempty"`
+	Source         string   `json:"source,omitempty"`
 	Features       []string `json:"features,omitempty"`
 }
 
@@ -491,6 +492,7 @@ func (s *Server) queryHandler(ctx context.Context, args queryArgs) (*queryRespon
 				URLFragment:    "#" + section.ID,
 				ContentPreview: contentPreview,
 				ExampleLabel:   exampleLabel,
+				Source:         section.Source,
 			}
 			allResults = append(allResults, result)
 		}
@@ -1222,6 +1224,14 @@ func (s *Server) convertToBklOnFiles(project *taskcp.Project, t *taskcp.Task) er
 You can read the pattern documentation with:
 
 mcp__bkl-mcp__get type="documentation" id="prep" source="k8s"
+
+You should also read the fixit documentation:
+
+mcp__bkl-mcp__query keywords="fixit"
+
+You can look up other documentation and tests as needed:
+
+mcp__bkl-mcp__query keywords="..."
 
 Return the converted bkl file contents in the results field of:
 
