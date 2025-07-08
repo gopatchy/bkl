@@ -1273,7 +1273,7 @@ func (s *Server) convertToBklOnPrepFile(project *taskcp.Project, targetPath stri
 	compareResult, err := bkl.Compare(fsys, "original.yaml", "prepped.yaml", "/", "/", nil, nil, "")
 	if err != nil {
 		fixTask := project.InsertTaskBefore(
-			"",
+			t.NextTaskID,
 			fmt.Sprintf(`The comparison failed. Please fix the prepped file.
 
 The original file content is in data["original_file"].
@@ -1296,7 +1296,7 @@ Return the corrected bkl file contents in the result field of:
 
 	if compareResult.Diff != "" && t.Result != "" {
 		verifyTask := project.InsertTaskBefore(
-			"",
+			t.NextTaskID,
 			fmt.Sprintf(`The conversion resulted in different output. Please verify the changes are correct.
 
 The original file content is in data["original_file"].

@@ -3,7 +3,7 @@ module github.com/gopatchy/bkl
 go 1.24.4
 
 require (
-	github.com/gopatchy/taskcp v0.0.0-20250706050224-b663adfdc65d
+	github.com/gopatchy/taskcp v0.0.0-20250706063713-3cde954b6f15
 	github.com/hexops/gotextdiff v1.0.3
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/magiconair/properties v1.8.10
