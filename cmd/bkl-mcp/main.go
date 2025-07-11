@@ -1164,10 +1164,12 @@ Tips for minimal reproductions:
 }
 
 func (s *Server) convertToBklHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
-	project := s.taskService.AddProject()
-	task := project.InsertTaskBefore(
+	p := s.taskService.AddProject()
+
+	task := p.InsertTaskBefore(
 		"",
-		`Find all of the configuration files you need to convert.
+		"Find configuration files",
+		`Find all the configuration files you need to convert. Then call:
 
 {SUCCESS_PROMPT}
 
@@ -1179,14 +1181,18 @@ where result contains a JSON encoding in the following format:
 		"path/to/file2.yaml"
 	]
 }
-`, func(t *taskcp.Task) error {
-			return s.convertToBklOnFiles(project, t)
-		})
+`,
+		func(p *taskcp.Project, task *taskcp.Task) error {
+			return s.convertToBklOnFiles(p, task)
+		},
+	)
 
 	return &promptResponse{
 		Prompt: `# Converting Kubernetes configuration files to bkl format
 
-I'll walk you through this process step by step. Follow EXACTLY these steps -- do not attempt to do the conversion yourself or follow any steps that are not EXACTLY what I tell you to do.
+I'll walk you through this process step by step. Follow EXACTLY these steps -- do not attempt to do the conversion yourself or follow any steps that are not EXACTLY what I tell you to do. DO NOT invent a TODO list -- just execute the tasks as I tell you to do them.
+
+First execute:
 
 ` + task.String(),
 	}, nil
@@ -1196,7 +1202,7 @@ type filesResult struct {
 	Files []string `json:"files"`
 }
 
-func (s *Server) convertToBklOnFiles(project *taskcp.Project, t *taskcp.Task) error {
+func (s *Server) convertToBklOnFiles(p *taskcp.Project, t *taskcp.Task) error {
 	result := filesResult{}
 
 	if err := json.Unmarshal([]byte(t.Result), &result); err != nil {
@@ -1209,8 +1215,11 @@ func (s *Server) convertToBklOnFiles(project *taskcp.Project, t *taskcp.Task) er
 
 	commonPrefix := findCommonPrefix(result.Files)
 
+	prepFiles := []string{}
+
 	for _, file := range result.Files {
-		prepFile := "prep/" + strings.TrimPrefix(file, commonPrefix)
+		prepFile := filepath.Join("prep", strings.TrimPrefix(file, commonPrefix))
+		prepFiles = append(prepFiles, prepFile)
 
 		content, err := os.ReadFile(file)
 		if err != nil {
@@ -1218,38 +1227,76 @@ func (s *Server) convertToBklOnFiles(project *taskcp.Project, t *taskcp.Task) er
 		}
 
 		originalContent := string(content)
-		task := project.InsertTaskBefore(
+		task := p.InsertTaskBefore(
 			"",
+			"Convert to bkl",
 			`Convert the content in data["original_file"] to bkl patterns.
 
 You can read the pattern documentation with:
 
 mcp__bkl-mcp__get type="documentation" id="prep" source="k8s"
 
-You should also read the fixit documentation:
-
-mcp__bkl-mcp__query keywords="fixit"
-
 You can look up other documentation and tests as needed:
 
 mcp__bkl-mcp__query keywords="..."
+
+Hints:
+* Try to convert ALL lists to maps with names plus $encode: values[:name[:value]].
 
 Return the converted bkl file contents in the results field of:
 
 {SUCCESS_PROMPT}
 `,
-			func(t *taskcp.Task) error {
-				return s.convertToBklOnPrepFile(project, prepFile, t)
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.convertToBklOnPrepFile(p, prepFile, t)
 			},
 		)
 
 		task.Data["original_file"] = originalContent
 	}
 
+	task := p.InsertTaskBefore(
+		"",
+		"Determine bkl file structure",
+		`Read the documentation for file structure:
+
+mcp__bkl-mcp__get type="documentation" id="plan" source="k8s"
+
+The list of converted files is in data["prep_files"].
+
+Use the following command instead of bkli to examine file intersection:
+
+mcp__bkl-mcp__intersect selector="kind" files="prep/file1.yaml,prep/file2.yaml"
+
+Once you've determined the file structure, call:
+
+{SUCCESS_PROMPT}
+
+where the result is a JSON encoding in the following format:
+
+{
+	"files":
+		"prep/file1.yaml": "bkl/base.file1.yaml",
+		"prep/file2.yaml": "bkl/base.file1.file2.yaml",
+		"prep/file3.yaml": "bkl/base.file3.yaml"
+	]
+}
+
+I'll figure out which files are in the base layer and which are in the derived layers.
+
+DO NOT create directories or files -- just use the tools to determine the file structure and tell me.
+`,
+		func(p *taskcp.Project, t *taskcp.Task) error {
+			return s.convertToBklOnPlan(p, t)
+		},
+	)
+
+	task.Data["prep_files"] = prepFiles
+
 	return nil
 }
 
-func (s *Server) convertToBklOnPrepFile(project *taskcp.Project, targetPath string, t *taskcp.Task) error {
+func (s *Server) convertToBklOnPrepFile(p *taskcp.Project, targetPath string, t *taskcp.Task) error {
 	originalContent, ok := t.Data["original_file"].(string)
 	if !ok {
 		return fmt.Errorf("original_file not found in task data")
@@ -1272,18 +1319,20 @@ func (s *Server) convertToBklOnPrepFile(project *taskcp.Project, targetPath stri
 
 	compareResult, err := bkl.Compare(fsys, "original.yaml", "prepped.yaml", "/", "/", nil, nil, "")
 	if err != nil {
-		fixTask := project.InsertTaskBefore(
+		fixTask := p.InsertTaskBefore(
 			t.NextTaskID,
-			fmt.Sprintf(`The comparison failed. Please fix the prepped file.
+			"Fix the prepped file",
+			`The comparison failed. Please fi	x the prepped file.
 
 The original file content is in data["original_file"].
 The prepped file content that failed is in data["prepped_file"].
 The error is in data["error"].
 
 Return the corrected bkl file contents in the result field of:
-{SUCCESS_PROMPT}`),
-			func(fixTask *taskcp.Task) error {
-				return s.convertToBklOnPrepFile(project, targetPath, fixTask)
+
+{SUCCESS_PROMPT}`,
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.convertToBklOnPrepFile(p, targetPath, t)
 			},
 		)
 
@@ -1295,9 +1344,10 @@ Return the corrected bkl file contents in the result field of:
 	}
 
 	if compareResult.Diff != "" && t.Result != "" {
-		verifyTask := project.InsertTaskBefore(
+		verifyTask := p.InsertTaskBefore(
 			t.NextTaskID,
-			fmt.Sprintf(`The conversion resulted in different output. Please verify the changes are correct.
+			"Verify the conversion",
+			`The conversion resulted in different output. Please verify the changes are correct.
 
 The original file content is in data["original_file"].
 The prepped file content is in data["prepped_file"].
@@ -1306,9 +1356,9 @@ The diff is in data["diff"].
 If the changes are correct, respond with an empty string in the result field of:
 {SUCCESS_PROMPT}
 
-If you need to modify the conversion, provide the corrected bkl file contents in the result field.`),
-			func(verifyTask *taskcp.Task) error {
-				return s.convertToBklOnPrepFile(project, targetPath, verifyTask)
+If you need to modify the conversion, provide the corrected bkl file contents in the result field.`,
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.convertToBklOnPrepFile(p, targetPath, t)
 			},
 		)
 
@@ -1320,6 +1370,10 @@ If you need to modify the conversion, provide the corrected bkl file contents in
 	}
 
 	return s.writeConvertedFile(targetPath, preppedContent)
+}
+
+func (s *Server) convertToBklOnPlan(p *taskcp.Project, t *taskcp.Task) error {
+	return nil
 }
 
 func (s *Server) writeConvertedFile(targetPath string, content string) error {
