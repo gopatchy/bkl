@@ -901,7 +901,7 @@ original/
 
 
 
-<p><p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers. Use keys that make sense for the values, but remember that they must be valid YAML.</p>
+<p><p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers.</p>
 </p>
 
 
@@ -1187,6 +1187,84 @@ original/
   <key>API_URL</key>:
     <key>value</key>: <string>https://api.example.com</string>
   <highlight><key>$encode</key>: <string>values:name</string></highlight></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+<p><p>Use keys that make sense for the values. Remember that unusual characters are permitted in keys, but sometimes must be quoted.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>paths</key>:
+  - <key>backend</key>:
+      <key>service</key>:
+        <key>name</key>: <string>api-service</string>
+    <key>path</key>: <string>/api(/|$)(.*)</string>
+    <key>pathType</key>: <string>Prefix</string>
+  - <key>backend</key>:
+      <key>service</key>:
+        <key>name</key>: <string>auth-service</string>
+    <key>path</key>: <string>/auth(/|$)(.*)</string>
+    <key>pathType</key>: <string>Prefix</string>
+  - <key>backend</key>:
+      <key>service</key>:
+        <key>name</key>: <string>frontend-service</string>
+    <key>path</key>: <string>/static</string>
+    <key>pathType</key>: <string>Prefix</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>paths</key>:
+  <key>/static</key>:
+    <key>backend</key>:
+      <key>service</key>:
+        <key>name</key>: <string>frontend-service</string>
+    <key>pathType</key>: <string>Prefix</string>
+  <key>/api(/|$)(.*)</key>:
+    <key>backend</key>:
+      <key>service</key>:
+        <key>name</key>: <string>api-service</string>
+    <key>pathType</key>: <string>Prefix</string>
+  <key>/auth(/|$)(.*)</key>:
+    <key>backend</key>:
+      <key>service</key>:
+        <key>name</key>: <string>auth-service</string>
+    <key>pathType</key>: <string>Prefix</string>
+  <highlight><key>$encode</key>: <string>values:path</string></highlight></bkl-code>
 </div>
 
 

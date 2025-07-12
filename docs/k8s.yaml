@@ -39,7 +39,7 @@
     - content: |
         <p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
     - content: |
-        <p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers. Use keys that make sense for the values, but remember that they must be valid YAML.</p>
+        <p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers.</p>
     - example:
         operation: convert
         layers:
@@ -166,6 +166,49 @@
                   value: https://api.example.com
                 $encode: values:name
             highlights: ["$encode: values:name"]
+    - content: |
+        <p>Use keys that make sense for the values. Remember that unusual characters are permitted in keys, but sometimes must be quoted.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              paths:
+                - backend:
+                    service:
+                      name: api-service
+                  path: /api(/|$)(.*)
+                  pathType: Prefix
+                - backend:
+                    service:
+                      name: auth-service
+                  path: /auth(/|$)(.*)
+                  pathType: Prefix
+                - backend:
+                    service:
+                      name: frontend-service
+                  path: /static
+                  pathType: Prefix
+          - languages: [[0, "yaml"]]
+            code: |
+              paths:
+                /static:
+                  backend:
+                    service:
+                      name: frontend-service
+                  pathType: Prefix
+                /api(/|$)(.*):
+                  backend:
+                    service:
+                      name: api-service
+                  pathType: Prefix
+                /auth(/|$)(.*):
+                  backend:
+                    service:
+                      name: auth-service
+                  pathType: Prefix
+                $encode: values:path
+            highlights: ["$encode: values:path"]
     - content: |
         <p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>. Values are converted to strings automatically, so you don't need to quote them.</p>
     - example:
