@@ -1152,10 +1152,10 @@ original/
   - <key>name</key>: <string>ANALYTICS_KEY</string>
     <key>valueFrom</key>:
       <key>secretKeyRef</key>:
-        <key>name</key>: <string>web-secrets</string>
         <key>key</key>: <string>analytics-key</string>
+        <key>name</key>: <string>web-secrets</string>
   - <key>name</key>: <string>API_URL</string>
-    <key>value</key>: <string>"https://api.example.com"</string></bkl-code>
+    <key>value</key>: <string>https://api.example.com</string></bkl-code>
 </div>
 
 
@@ -1173,10 +1173,10 @@ original/
   <key>ANALYTICS_KEY</key>:
     <key>valueFrom</key>:
       <key>secretKeyRef</key>:
-        <key>name</key>: <string>web-secrets</string>
         <key>key</key>: <string>analytics-key</string>
+        <key>name</key>: <string>web-secrets</string>
   <key>API_URL</key>:
-    <key>value</key>: <string>"https://api.example.com"</string>
+    <key>value</key>: <string>https://api.example.com</string>
   <highlight><key>$encode</key>: <string>values:name</string></highlight></bkl-code>
 </div>
 

@@ -18,15 +18,11 @@ func FormatOutput(data any, format *string, paths ...*string) ([]byte, error) {
 	return ft.MarshalStream([]any{data})
 }
 
-// determineFormat determines the format to use based on the provided format pointer and paths.
-// If format is nil or points to an empty string, it infers from the paths.
-// Returns an error if no format can be determined.
 func determineFormat(formatName *string, paths ...*string) (*format.Format, error) {
 	if formatName != nil && *formatName != "" {
 		return format.Get(*formatName)
 	}
 
-	// Try to infer from paths
 	for _, path := range paths {
 		if path != nil && *path != "" {
 			if name := utils.Ext(*path); name != "" {

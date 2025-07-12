@@ -15,7 +15,6 @@ import (
 
 	"github.com/gopatchy/bkl"
 	"github.com/gopatchy/bkl/internal/format"
-	"github.com/gopatchy/bkl/internal/utils"
 	"github.com/gopatchy/bkl/pkg/version"
 	"github.com/gopatchy/taskcp"
 
@@ -114,7 +113,6 @@ type evaluateResponse struct {
 	SuccessCount int               `json:"successCount,omitempty"`
 	ErrorCount   int               `json:"errorCount,omitempty"`
 	Results      []evaluateResult  `json:"results,omitempty"`
-	Format       string            `json:"format"`
 	Output       string            `json:"output"`
 	Operation    string            `json:"operation"`
 	Environment  map[string]string `json:"environment,omitempty"`
@@ -130,7 +128,6 @@ type evaluateResult struct {
 type diffResponse struct {
 	BaseFile   string `json:"baseFile"`
 	TargetFile string `json:"targetFile"`
-	Format     string `json:"format"`
 	Output     string `json:"output"`
 	Operation  string `json:"operation"`
 	OutputPath string `json:"outputPath,omitempty"`
@@ -138,7 +135,6 @@ type diffResponse struct {
 
 type intersectResponse struct {
 	Files      []string `json:"files"`
-	Format     string   `json:"format"`
 	Output     string   `json:"output"`
 	Operation  string   `json:"operation"`
 	OutputPath string   `json:"outputPath,omitempty"`
@@ -146,7 +142,6 @@ type intersectResponse struct {
 
 type requiredResponse struct {
 	File       string `json:"file"`
-	Format     string `json:"format"`
 	Output     string `json:"output"`
 	Operation  string `json:"operation"`
 	OutputPath string `json:"outputPath,omitempty"`
@@ -155,7 +150,6 @@ type requiredResponse struct {
 type compareResponse struct {
 	File1       string            `json:"file1"`
 	File2       string            `json:"file2"`
-	Format      string            `json:"format"`
 	Diff        string            `json:"diff"`
 	Operation   string            `json:"operation"`
 	Environment map[string]string `json:"environment,omitempty"`
@@ -870,26 +864,6 @@ func getFileSystem(fileSystem map[string]string) (fs.FS, error) {
 	return os.DirFS("/"), nil
 }
 
-func determineFormatWithPaths(explicitFormat string, outputPath string, inputPaths []string) string {
-	if explicitFormat != "" {
-		return explicitFormat
-	}
-
-	if outputPath != "" {
-		if ext := utils.Ext(outputPath); ext != "" {
-			return ext
-		}
-	}
-
-	for _, path := range inputPaths {
-		if ext := utils.Ext(path); ext != "" {
-			return ext
-		}
-	}
-
-	return ""
-}
-
 func (s *Server) evaluateHandler(ctx context.Context, args evaluateArgs) (*evaluateResponse, error) {
 	if args.Directory != "" && args.Files != "" {
 		return nil, fmt.Errorf("cannot specify both files and directory parameters")
@@ -968,9 +942,12 @@ func (s *Server) evaluateHandler(ctx context.Context, args evaluateArgs) (*evalu
 		return nil, fmt.Errorf("no files provided")
 	}
 
-	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, files)
+	paths := []*string{}
+	for _, file := range files {
+		paths = append(paths, &file)
+	}
 
-	output, err := bkl.Evaluate(fsys, files, "/", workingDir, args.Environment, &finalFormat, args.SortPath)
+	output, err := bkl.Evaluate(fsys, files, "/", workingDir, args.Environment, &args.Format, args.SortPath, paths...)
 	if err != nil {
 		return nil, fmt.Errorf("evaluation failed: %v", err)
 	}
@@ -983,7 +960,6 @@ func (s *Server) evaluateHandler(ctx context.Context, args evaluateArgs) (*evalu
 
 	return &evaluateResponse{
 		Files:       files,
-		Format:      finalFormat,
 		Output:      string(output),
 		Operation:   "evaluate",
 		Environment: args.Environment,
@@ -1002,11 +978,7 @@ func (s *Server) diffHandler(ctx context.Context, args diffArgs) (*diffResponse,
 		return nil, err
 	}
 
-	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, []string{args.BaseFile, args.TargetFile})
-	if finalFormat == "" {
-		finalFormat = "yaml"
-	}
-	output, err := bkl.Diff(fsys, args.BaseFile, args.TargetFile, "/", workingDir, args.Selector, &finalFormat)
+	output, err := bkl.Diff(fsys, args.BaseFile, args.TargetFile, "/", workingDir, args.Selector, &args.Format, &args.BaseFile, &args.TargetFile)
 	if err != nil {
 		return nil, fmt.Errorf("diff operation failed: %v", err)
 	}
@@ -1020,7 +992,6 @@ func (s *Server) diffHandler(ctx context.Context, args diffArgs) (*diffResponse,
 	return &diffResponse{
 		BaseFile:   args.BaseFile,
 		TargetFile: args.TargetFile,
-		Format:     finalFormat,
 		Output:     string(output),
 		Operation:  "diff",
 		OutputPath: args.OutputPath,
@@ -1030,10 +1001,12 @@ func (s *Server) diffHandler(ctx context.Context, args diffArgs) (*diffResponse,
 func (s *Server) intersectHandler(ctx context.Context, args intersectArgs) (*intersectResponse, error) {
 	fileFields := strings.Split(args.Files, ",")
 	files := []string{}
+	paths := []*string{}
 	for _, f := range fileFields {
 		trimmed := strings.TrimSpace(f)
 		if trimmed != "" {
 			files = append(files, trimmed)
+			paths = append(paths, &trimmed)
 		}
 	}
 
@@ -1050,11 +1023,7 @@ func (s *Server) intersectHandler(ctx context.Context, args intersectArgs) (*int
 		return nil, err
 	}
 
-	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, files)
-	if finalFormat == "" {
-		finalFormat = "yaml"
-	}
-	output, err := bkl.Intersect(fsys, files, "/", workingDir, args.Selector, &finalFormat)
+	output, err := bkl.Intersect(fsys, files, "/", workingDir, args.Selector, &args.Format, paths...)
 	if err != nil {
 		return nil, fmt.Errorf("intersect operation failed: %v", err)
 	}
@@ -1067,7 +1036,6 @@ func (s *Server) intersectHandler(ctx context.Context, args intersectArgs) (*int
 
 	return &intersectResponse{
 		Files:      files,
-		Format:     finalFormat,
 		Output:     string(output),
 		Operation:  "intersect",
 		OutputPath: args.OutputPath,
@@ -1085,11 +1053,7 @@ func (s *Server) requiredHandler(ctx context.Context, args requiredArgs) (*requi
 		return nil, err
 	}
 
-	finalFormat := determineFormatWithPaths(args.Format, args.OutputPath, []string{args.File})
-	if finalFormat == "" {
-		finalFormat = "yaml"
-	}
-	output, err := bkl.Required(fsys, args.File, "/", workingDir, &finalFormat)
+	output, err := bkl.Required(fsys, args.File, "/", workingDir, &args.Format, &args.File)
 	if err != nil {
 		return nil, fmt.Errorf("required operation failed: %v", err)
 	}
@@ -1102,10 +1066,35 @@ func (s *Server) requiredHandler(ctx context.Context, args requiredArgs) (*requi
 
 	return &requiredResponse{
 		File:       args.File,
-		Format:     finalFormat,
 		Output:     string(output),
 		Operation:  "required",
 		OutputPath: args.OutputPath,
+	}, nil
+}
+
+func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compareResponse, error) {
+	workingDir := ""
+	if args.FileSystem != nil {
+		workingDir = "/"
+	}
+
+	fsys, err := getFileSystem(args.FileSystem)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := bkl.Compare(fsys, args.File1, args.File2, "/", workingDir, args.Environment, &args.Format, args.SortPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return &compareResponse{
+		File1:       result.File1,
+		File2:       result.File2,
+		Diff:        result.Diff,
+		Operation:   "compare",
+		Environment: result.Environment,
+		SortPath:    result.SortPath,
 	}, nil
 }
 
@@ -1241,7 +1230,7 @@ You can look up other documentation and tests as needed:
 mcp__bkl-mcp__query keywords="..."
 
 Hints:
-* Try to convert ALL lists to maps with names plus $encode: values[:name[:value]].
+* Try to convert ALL lists to maps with names plus $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.
 
 Return the converted bkl file contents in the results field of:
 
@@ -1253,6 +1242,11 @@ Return the converted bkl file contents in the results field of:
 		)
 
 		task.Data["original_file"] = originalContent
+	}
+
+	originalFileMap := make(map[string]string)
+	for i, file := range result.Files {
+		originalFileMap[prepFiles[i]] = file
 	}
 
 	task := p.InsertTaskBefore(
@@ -1287,7 +1281,7 @@ I'll figure out which files are in the base layer and which are in the derived l
 DO NOT create directories or files -- just use the tools to determine the file structure and tell me.
 `,
 		func(p *taskcp.Project, t *taskcp.Task) error {
-			return s.convertToBklOnPlan(p, t)
+			return s.convertToBklOnPlan(p, t, originalFileMap)
 		},
 	)
 
@@ -1372,7 +1366,203 @@ If you need to modify the conversion, provide the corrected bkl file contents in
 	return s.writeConvertedFile(targetPath, preppedContent)
 }
 
-func (s *Server) convertToBklOnPlan(p *taskcp.Project, t *taskcp.Task) error {
+type planResult struct {
+	Files map[string]string `json:"files"`
+}
+
+func (s *Server) convertToBklOnPlan(p *taskcp.Project, t *taskcp.Task, originalFileMap map[string]string) error {
+	result := planResult{}
+
+	if err := json.Unmarshal([]byte(t.Result), &result); err != nil {
+		return fmt.Errorf("failed to parse file plan: %w", err)
+	}
+
+	if len(result.Files) == 0 {
+		return fmt.Errorf("no file mappings provided")
+	}
+
+	type fileInfo struct {
+		prepFile   string
+		targetFile string
+		parent     string
+	}
+
+	files := make(map[string]*fileInfo)
+	for prepFile, targetFile := range result.Files {
+		files[targetFile] = &fileInfo{
+			prepFile:   prepFile,
+			targetFile: targetFile,
+		}
+	}
+	for targetFile, info := range files {
+		base := strings.TrimSuffix(targetFile, ".yaml")
+		parts := strings.Split(base, ".")
+
+		if len(parts) > 1 {
+			parentBase := strings.Join(parts[:len(parts)-1], ".")
+			parentFile := parentBase + ".yaml"
+			if _, exists := files[parentFile]; exists {
+				info.parent = parentFile
+			} else {
+				// Check if this parent should exist by looking for other files that would share it
+				info.parent = parentFile
+				// Add the implicit parent to files map if it doesn't exist
+				if _, exists := files[parentFile]; !exists {
+					files[parentFile] = &fileInfo{
+						targetFile: parentFile,
+					}
+				}
+			}
+		}
+	}
+
+	processed := make(map[string]bool)
+	format := "yaml"
+
+	var processFile func(targetFile string) error
+	processFile = func(targetFile string) error {
+		if processed[targetFile] {
+			return nil
+		}
+
+		info := files[targetFile]
+		if info == nil {
+			return fmt.Errorf("file info not found for %s", targetFile)
+		}
+
+		if info.parent != "" {
+			if err := processFile(info.parent); err != nil {
+				return err
+			}
+		}
+
+		fsys := os.DirFS("/")
+
+		if info.parent == "" {
+			var sourcesForBase []string
+
+			// If this file has a prepFile, use it directly
+			if info.prepFile != "" {
+				for prep, target := range result.Files {
+					if target == targetFile {
+						sourcesForBase = append(sourcesForBase, prep)
+					}
+				}
+			} else {
+				// This is an implicit parent - find prep files of its children
+				for _, childInfo := range files {
+					if childInfo.parent == targetFile && childInfo.prepFile != "" {
+						sourcesForBase = append(sourcesForBase, childInfo.prepFile)
+					}
+				}
+			}
+
+			if len(sourcesForBase) > 1 {
+				output, err := bkl.Intersect(fsys, sourcesForBase, "/", "", "kind", &format)
+				if err != nil {
+					return fmt.Errorf("failed to intersect files %v for base %s: %w", sourcesForBase, targetFile, err)
+				}
+
+				if err := s.writeConvertedFile(targetFile, string(output)); err != nil {
+					return fmt.Errorf("failed to write base layer %s: %w", targetFile, err)
+				}
+			} else {
+				content, err := os.ReadFile(info.prepFile)
+				if err != nil {
+					return fmt.Errorf("failed to read source file %s: %w", info.prepFile, err)
+				}
+
+				if err := s.writeConvertedFile(targetFile, string(content)); err != nil {
+					return fmt.Errorf("failed to write file %s: %w", targetFile, err)
+				}
+			}
+		} else {
+			output, err := bkl.Diff(fsys, info.parent, info.prepFile, "/", "", "kind", &format)
+			if err != nil {
+				return fmt.Errorf("failed to diff %s -> %s: %w", info.parent, info.prepFile, err)
+			}
+
+			if err := s.writeConvertedFile(targetFile, string(output)); err != nil {
+				return fmt.Errorf("failed to write derived layer %s: %w", targetFile, err)
+			}
+		}
+
+		processed[targetFile] = true
+		return nil
+	}
+
+	for targetFile := range files {
+		if err := processFile(targetFile); err != nil {
+			return err
+		}
+	}
+
+	verificationTaskIDs := []string{}
+
+	for prepFile, targetFile := range result.Files {
+		originalFile := originalFileMap[prepFile]
+		if originalFile == "" {
+			continue
+		}
+
+		fsys := os.DirFS("/")
+		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+		if err != nil {
+			return fmt.Errorf("failed to compare %s: %w", originalFile, err)
+		}
+
+		if compareResult.Diff != "" {
+			task := p.InsertTaskBefore(
+				"",
+				fmt.Sprintf("Verify %s", filepath.Base(originalFile)),
+				fmt.Sprintf(`Review the bkl conversion for %s.
+
+The diff between evaluating the original file and the bkl layered files is in data["diff"].
+
+If satisfied with the conversion, respond with an empty string in the result field of:
+{SUCCESS_PROMPT}
+
+If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
+				func(p *taskcp.Project, t *taskcp.Task) error {
+					return s.verifyConversion(p, t, originalFile, targetFile)
+				},
+			)
+
+			originalContent, err := os.ReadFile(originalFile)
+			if err != nil {
+				return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
+			}
+			targetContent, err := os.ReadFile(targetFile)
+			if err != nil {
+				return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
+			}
+
+			task.Data["original_content"] = string(originalContent)
+			task.Data["target_content"] = string(targetContent)
+			task.Data["diff"] = compareResult.Diff
+
+			verificationTaskIDs = append(verificationTaskIDs, task.ID)
+		}
+	}
+
+	summaryTask := p.InsertTaskBefore(
+		"",
+		"Summarize conversion results",
+		`All file conversions have been completed. Please provide a summary for the user.
+
+The task summary is in data["summary"].
+
+Call {SUCCESS_PROMPT} with your summary in the result field.`,
+		func(p *taskcp.Project, t *taskcp.Task) error {
+			fmt.Printf("\n🎉 Conversion complete!\n\n%s\n", t.Result)
+			return nil
+		},
+	)
+
+	summaryTask.Data["summary"] = p.Summary().String()
+
+	_ = summaryTask
+
 	return nil
 }
 
@@ -1384,6 +1574,48 @@ func (s *Server) writeConvertedFile(targetPath string, content string) error {
 
 	if err := os.WriteFile(targetPath, []byte(content), 0o644); err != nil {
 		return fmt.Errorf("failed to write file %s: %w", targetPath, err)
+	}
+
+	return nil
+}
+
+func (s *Server) verifyConversion(p *taskcp.Project, t *taskcp.Task, originalFile, targetFile string) error {
+	if t.Result == "" {
+		return nil
+	}
+
+	if err := s.writeConvertedFile(targetFile, t.Result); err != nil {
+		return fmt.Errorf("failed to write updated file %s: %w", targetFile, err)
+	}
+
+	fsys := os.DirFS("/")
+	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "/", nil, nil, "")
+	if err != nil {
+		return fmt.Errorf("failed to re-compare: %w", err)
+	}
+
+	if compareResult.Diff != "" {
+		originalContent, err := os.ReadFile(originalFile)
+		if err != nil {
+			return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
+		}
+
+		retryTask := p.InsertTaskBefore(
+			t.NextTaskID,
+			fmt.Sprintf("Re-verify %s", filepath.Base(targetFile)),
+			fmt.Sprintf(`The bkl file still produces different output. 
+
+The diff is in data["diff"].
+
+Review and provide the updated bkl file content for %s in the result field of {SUCCESS_PROMPT}, or respond with an empty string if this is acceptable.`, targetFile),
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.verifyConversion(p, t, originalFile, targetFile)
+			},
+		)
+
+		retryTask.Data["original_content"] = string(originalContent)
+		retryTask.Data["target_content"] = t.Result
+		retryTask.Data["diff"] = compareResult.Diff
 	}
 
 	return nil
@@ -1405,33 +1637,4 @@ func findCommonPrefix(files []string) string {
 	}
 
 	return strings.Join(commonParts, string(filepath.Separator))
-}
-
-func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compareResponse, error) {
-	workingDir := ""
-	if args.FileSystem != nil {
-		workingDir = "/"
-	}
-
-	fsys, err := getFileSystem(args.FileSystem)
-	if err != nil {
-		return nil, err
-	}
-
-	finalFormat := determineFormatWithPaths(args.Format, "", []string{args.File1, args.File2})
-
-	result, err := bkl.Compare(fsys, args.File1, args.File2, "/", workingDir, args.Environment, &finalFormat, args.SortPath)
-	if err != nil {
-		return nil, err
-	}
-
-	return &compareResponse{
-		File1:       result.File1,
-		File2:       result.File2,
-		Format:      result.Format,
-		Diff:        result.Diff,
-		Operation:   "compare",
-		Environment: result.Environment,
-		SortPath:    result.SortPath,
-	}, nil
 }

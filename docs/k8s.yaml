@@ -150,20 +150,20 @@
                 - name: ANALYTICS_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: web-secrets
                       key: analytics-key
+                      name: web-secrets
                 - name: API_URL
-                  value: "https://api.example.com"
+                  value: https://api.example.com
           - languages: [[0, "yaml"]]
             code: |
               env:
                 ANALYTICS_KEY:
                   valueFrom:
                     secretKeyRef:
-                      name: web-secrets
                       key: analytics-key
+                      name: web-secrets
                 API_URL:
-                  value: "https://api.example.com"
+                  value: https://api.example.com
                 $encode: values:name
             highlights: ["$encode: values:name"]
     - content: |
