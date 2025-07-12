@@ -38,7 +38,7 @@
   items:
     - content: |
         <p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
-
+    - content: |
         <p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers. Use keys that make sense for the values, but remember that they must be valid YAML.</p>
     - example:
         operation: convert
@@ -356,16 +356,8 @@
           $ bkl prep/prod/namespace.yaml --output=bkl/namespace.yaml
           $ bkld --selector=kind bkl/namespace.yaml prep/staging/namespace.yaml --output=bkl/namespace.staging.yaml
           $ bkld --selector=kind bkl/namespace.yaml prep/dev/namespace.yaml --output=bkl/namespace.staging.dev.yaml
-    - content: |
-        <p>Validate the combined bkl file layers against the original configs.</p>
-    - code:
-        languages: [[0, "shell"]]
-        code: |
-          $ bklc --sort=kind --color original/prod/namespace.yaml bkl/namespace.yaml
-          $ bklc --sort=kind --color original/staging/namespace.yaml bkl/namespace.staging.yaml
-          $ bklc --sort=kind --color original/dev/namespace.yaml bkl/namespace.staging.dev.yaml
 - id: base
-  title: Base layer
+  title: base
   items:
     - content: |
         <p>Use <highlight>bkli</highlight> to create a minimal base layer for the services.</p>
@@ -384,14 +376,6 @@
           $ bkld --selector=kind bkl/base.yaml prep/prod/api-service.yaml --output=bkl/base.api-service.yaml
           $ bkld --selector=kind bkl/base.api-service.yaml prep/staging/api-service.yaml --output=bkl/base.api-service.staging.yaml
           $ bkld --selector=kind bkl/base.api-service.staging.yaml prep/dev/api-service.yaml --output=bkl/base.api-service.staging.dev.yaml
-    - content: |
-        <p>Validate the combined bkl file layers against the original configs.</p>
-    - code:
-        languages: [[0, "shell"]]
-        code: |
-          $ bklc --sort=kind --color original/prod/api-service.yaml bkl/base.api-service.yaml
-          $ bklc --sort=kind --color original/staging/api-service.yaml bkl/base.api-service.staging.yaml
-          $ bklc --sort=kind --color original/dev/api-service.yaml bkl/base.api-service.staging.dev.yaml
 - id: web-service
   title: web-service
   items:
@@ -403,11 +387,51 @@
           $ bkld --selector=kind bkl/base.yaml prep/prod/web-service.yaml --output=bkl/base.web-service.yaml
           $ bkld --selector=kind bkl/base.web-service.yaml prep/staging/web-service.yaml --output=bkl/base.web-service.staging.yaml
           $ bkld --selector=kind bkl/base.web-service.staging.yaml prep/dev/web-service.yaml --output=bkl/base.web-service.staging.dev.yaml
+- id: convert-validate
+  title: Validate
+  items:
     - content: |
         <p>Validate the combined bkl file layers against the original configs.</p>
     - code:
         languages: [[0, "shell"]]
         code: |
+          $ bklc --sort=kind --color original/prod/namespace.yaml bkl/namespace.yaml
+          $ bklc --sort=kind --color original/staging/namespace.yaml bkl/namespace.staging.yaml
+          $ bklc --sort=kind --color original/dev/namespace.yaml bkl/namespace.staging.dev.yaml
+
+          $ bklc --sort=kind --color original/prod/api-service.yaml bkl/base.api-service.yaml
+          $ bklc --sort=kind --color original/staging/api-service.yaml bkl/base.api-service.staging.yaml
+          $ bklc --sort=kind --color original/dev/api-service.yaml bkl/base.api-service.staging.dev.yaml
+
           $ bklc --sort=kind --color original/prod/web-service.yaml bkl/base.web-service.yaml
           $ bklc --sort=kind --color original/staging/web-service.yaml bkl/base.web-service.staging.yaml
           $ bklc --sort=kind --color original/dev/web-service.yaml bkl/base.web-service.staging.dev.yaml
+- id: polish
+  title: Polish
+  items:
+    - content: |
+        <p>Apply additional simplifications to the bkl configs.</p>
+    - content: |
+        <p>Merge together common overrides into a single document. When merging things like labels, you may find cases where the values weren't consistently applied before to all objects, but could be.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              $match:
+                kind: Service
+              metadata:
+                labels:
+                  environment: prod
+              ---
+              $match:
+                kind: Deployment
+              metadata:
+                labels:
+                  environment: prod
+          - languages: [[0, "yaml"]]
+            code: |
+              $match: {}
+              metadata:
+                labels:
+                  environment: prod

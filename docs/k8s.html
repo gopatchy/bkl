@@ -807,11 +807,15 @@ hunk-header {
 
 	<li><a href="#namespace">namespace</a></li>
 
-	<li><a href="#base">Base layer</a></li>
+	<li><a href="#base">base</a></li>
 
 	<li><a href="#api-service">api-service</a></li>
 
 	<li><a href="#web-service">web-service</a></li>
+
+	<li><a href="#convert-validate">Validate</a></li>
+
+	<li><a href="#polish">Polish</a></li>
 
 </ol>
 </div>
@@ -891,8 +895,11 @@ original/
 
 
 <p><p>Transform patterns in the prep configs using bkl features to make them easier to work with.</p>
+</p>
 
-<p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers. Use keys that make sense for the values, but remember that they must be valid YAML.</p>
+
+
+<p><p>Convert lists of items to maps with names plus <highlight>$encode: values</highlight>. This allows them to be easily referenced by upper layers. Use keys that make sense for the values, but remember that they must be valid YAML.</p>
 </p>
 
 
@@ -1648,30 +1655,10 @@ base.yaml
 
 
 
-<p><p>Validate the combined bkl file layers against the original configs.</p>
-</p>
-
-
-
-
-<div class="example-container">
-
-<div class="code-wrapper">
-
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/namespace.yaml</argument> <argument>bkl/namespace.yaml</argument>
-<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/namespace.yaml</argument> <argument>bkl/namespace.staging.yaml</argument>
-<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/namespace.yaml</argument> <argument>bkl/namespace.staging.dev.yaml</argument></bkl-code>
-</div>
-
-</div>
-
-
-
-
 </section>
 
 <section id="base">
-<h2><a name="base">Base layer</a></h2>
+<h2><a name="base">base</a></h2>
 
 
 
@@ -1720,26 +1707,6 @@ base.yaml
 
 
 
-<p><p>Validate the combined bkl file layers against the original configs.</p>
-</p>
-
-
-
-
-<div class="example-container">
-
-<div class="code-wrapper">
-
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/api-service.yaml</argument> <argument>bkl/base.api-service.yaml</argument>
-<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/api-service.yaml</argument> <argument>bkl/base.api-service.staging.yaml</argument>
-<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/api-service.yaml</argument> <argument>bkl/base.api-service.staging.dev.yaml</argument></bkl-code>
-</div>
-
-</div>
-
-
-
-
 </section>
 
 <section id="web-service">
@@ -1767,6 +1734,13 @@ base.yaml
 
 
 
+</section>
+
+<section id="convert-validate">
+<h2><a name="convert-validate">Validate</a></h2>
+
+
+
 <p><p>Validate the combined bkl file layers against the original configs.</p>
 </p>
 
@@ -1777,12 +1751,92 @@ base.yaml
 
 <div class="code-wrapper">
 
-<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/web-service.yaml</argument> <argument>bkl/base.web-service.yaml</argument>
+<bkl-code class="code-unlabeled"><prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/namespace.yaml</argument> <argument>bkl/namespace.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/namespace.yaml</argument> <argument>bkl/namespace.staging.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/namespace.yaml</argument> <argument>bkl/namespace.staging.dev.yaml</argument>
+
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/api-service.yaml</argument> <argument>bkl/base.api-service.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/api-service.yaml</argument> <argument>bkl/base.api-service.staging.yaml</argument>
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/api-service.yaml</argument> <argument>bkl/base.api-service.staging.dev.yaml</argument>
+
+<prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/prod/web-service.yaml</argument> <argument>bkl/base.web-service.yaml</argument>
 <prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/staging/web-service.yaml</argument> <argument>bkl/base.web-service.staging.yaml</argument>
 <prompt>$ </prompt><command>bklc</command> <flag>--sort=kind</flag> <flag>--color</flag> <argument>original/dev/web-service.yaml</argument> <argument>bkl/base.web-service.staging.dev.yaml</argument></bkl-code>
 </div>
 
 </div>
+
+
+
+
+</section>
+
+<section id="polish">
+<h2><a name="polish">Polish</a></h2>
+
+
+
+<p><p>Apply additional simplifications to the bkl configs.</p>
+</p>
+
+
+
+<p><p>Merge together common overrides into a single document. When merging things like labels, you may find cases where the values weren't consistently applied before to all objects, but could be.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>$match</key>:
+  <key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>environment</key>: <string>prod</string>
+<string>---</string>
+<key>$match</key>:
+  <key>kind</key>: <string>Deployment</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>environment</key>: <string>prod</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>$match</key>: <string>{}</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>environment</key>: <string>prod</string></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
 
 
 
