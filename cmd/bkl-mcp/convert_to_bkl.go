@@ -177,7 +177,7 @@ func (s *Server) convertToBklOnPrepFile(p *taskcp.Project, targetPath string, t 
 		fixTask := p.InsertTaskBefore(
 			t.NextTaskID,
 			"Fix the prepped file",
-			`The comparison failed. Please fi	x the prepped file.
+			`The comparison failed. Please fix the prepped file.
 
 The original file content is in data["original_file"].
 The prepped file content that failed is in data["prepped_file"].
@@ -231,198 +231,30 @@ type planResult struct {
 	Files map[string]string `json:"files"`
 }
 
+type fileInfo struct {
+	prepFile   string
+	targetFile string
+	parent     string
+}
+
 func (s *Server) convertToBklOnPlan(p *taskcp.Project, t *taskcp.Task, originalFileMap map[string]string) error {
-	result := planResult{}
-
-	if err := json.Unmarshal([]byte(t.Result), &result); err != nil {
-		return fmt.Errorf("failed to parse file plan: %w", err)
+	result, err := s.parseFilePlan(t.Result)
+	if err != nil {
+		return err
 	}
 
-	if len(result.Files) == 0 {
-		return fmt.Errorf("no file mappings provided")
+	files := s.buildFileInfoMap(result.Files)
+	s.determineFileParents(files)
+
+	if err := s.processFiles(files, result.Files); err != nil {
+		return err
 	}
 
-	type fileInfo struct {
-		prepFile   string
-		targetFile string
-		parent     string
+	if err := s.createVerificationTasks(p, result.Files, originalFileMap); err != nil {
+		return err
 	}
 
-	files := make(map[string]*fileInfo)
-	for prepFile, targetFile := range result.Files {
-		files[targetFile] = &fileInfo{
-			prepFile:   prepFile,
-			targetFile: targetFile,
-		}
-	}
-	for targetFile, info := range files {
-		base := strings.TrimSuffix(targetFile, ".yaml")
-		parts := strings.Split(base, ".")
-
-		if len(parts) > 1 {
-			parentBase := strings.Join(parts[:len(parts)-1], ".")
-			parentFile := parentBase + ".yaml"
-			if _, exists := files[parentFile]; exists {
-				info.parent = parentFile
-			} else {
-				// Check if this parent should exist by looking for other files that would share it
-				info.parent = parentFile
-				// Add the implicit parent to files map if it doesn't exist
-				if _, exists := files[parentFile]; !exists {
-					files[parentFile] = &fileInfo{
-						targetFile: parentFile,
-					}
-				}
-			}
-		}
-	}
-
-	processed := make(map[string]bool)
-	format := "yaml"
-
-	var processFile func(targetFile string) error
-	processFile = func(targetFile string) error {
-		if processed[targetFile] {
-			return nil
-		}
-
-		info := files[targetFile]
-		if info == nil {
-			return fmt.Errorf("file info not found for %s", targetFile)
-		}
-
-		if info.parent != "" {
-			if err := processFile(info.parent); err != nil {
-				return err
-			}
-		}
-
-		fsys := os.DirFS("/")
-
-		if info.parent == "" {
-			var sourcesForBase []string
-
-			// If this file has a prepFile, use it directly
-			if info.prepFile != "" {
-				for prep, target := range result.Files {
-					if target == targetFile {
-						sourcesForBase = append(sourcesForBase, prep)
-					}
-				}
-			} else {
-				// This is an implicit parent - find prep files of its children
-				for _, childInfo := range files {
-					if childInfo.parent == targetFile && childInfo.prepFile != "" {
-						sourcesForBase = append(sourcesForBase, childInfo.prepFile)
-					}
-				}
-			}
-
-			if len(sourcesForBase) > 1 {
-				output, err := bkl.Intersect(fsys, sourcesForBase, "/", "", "kind", &format)
-				if err != nil {
-					return fmt.Errorf("failed to intersect files %v for base %s: %w", sourcesForBase, targetFile, err)
-				}
-
-				if err := s.writeConvertedFile(targetFile, string(output)); err != nil {
-					return fmt.Errorf("failed to write base layer %s: %w", targetFile, err)
-				}
-			} else {
-				content, err := os.ReadFile(info.prepFile)
-				if err != nil {
-					return fmt.Errorf("failed to read source file %s: %w", info.prepFile, err)
-				}
-
-				if err := s.writeConvertedFile(targetFile, string(content)); err != nil {
-					return fmt.Errorf("failed to write file %s: %w", targetFile, err)
-				}
-			}
-		} else {
-			output, err := bkl.Diff(fsys, info.parent, info.prepFile, "/", "", "kind", &format)
-			if err != nil {
-				return fmt.Errorf("failed to diff %s -> %s: %w", info.parent, info.prepFile, err)
-			}
-
-			if err := s.writeConvertedFile(targetFile, string(output)); err != nil {
-				return fmt.Errorf("failed to write derived layer %s: %w", targetFile, err)
-			}
-		}
-
-		processed[targetFile] = true
-		return nil
-	}
-
-	for targetFile := range files {
-		if err := processFile(targetFile); err != nil {
-			return err
-		}
-	}
-
-	verificationTaskIDs := []string{}
-
-	for prepFile, targetFile := range result.Files {
-		originalFile := originalFileMap[prepFile]
-		if originalFile == "" {
-			continue
-		}
-
-		fsys := os.DirFS("/")
-		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
-		if err != nil {
-			return fmt.Errorf("failed to compare %s: %w", originalFile, err)
-		}
-
-		if compareResult.Diff != "" {
-			task := p.InsertTaskBefore(
-				"",
-				fmt.Sprintf("Verify %s", filepath.Base(originalFile)),
-				fmt.Sprintf(`Review the bkl conversion for %s.
-
-The diff between evaluating the original file and the bkl layered files is in data["diff"].
-
-If satisfied with the conversion, respond with an empty string in the result field of:
-{SUCCESS_PROMPT}
-
-If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
-				func(p *taskcp.Project, t *taskcp.Task) error {
-					return s.verifyConversion(p, t, originalFile, targetFile)
-				},
-			)
-
-			originalContent, err := os.ReadFile(originalFile)
-			if err != nil {
-				return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
-			}
-			targetContent, err := os.ReadFile(targetFile)
-			if err != nil {
-				return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
-			}
-
-			task.Data["original_content"] = string(originalContent)
-			task.Data["target_content"] = string(targetContent)
-			task.Data["diff"] = compareResult.Diff
-
-			verificationTaskIDs = append(verificationTaskIDs, task.ID)
-		}
-	}
-
-	summaryTask := p.InsertTaskBefore(
-		"",
-		"Summarize conversion results",
-		`All file conversions have been completed. Please provide a summary for the user.
-
-The task summary is in data["summary"].
-
-Call {SUCCESS_PROMPT} with your summary in the result field.`,
-		func(p *taskcp.Project, t *taskcp.Task) error {
-			fmt.Printf("\n🎉 Conversion complete!\n\n%s\n", t.Result)
-			return nil
-		},
-	)
-
-	summaryTask.Data["summary"] = p.Summary().String()
-
-	_ = summaryTask
+	s.createSummaryTask(p)
 
 	return nil
 }
@@ -498,4 +330,214 @@ func findCommonPrefix(files []string) string {
 	}
 
 	return strings.Join(commonParts, string(filepath.Separator))
+}
+
+func (s *Server) parseFilePlan(result string) (planResult, error) {
+	plan := planResult{}
+
+	if err := json.Unmarshal([]byte(result), &plan); err != nil {
+		return plan, fmt.Errorf("failed to parse file plan: %w", err)
+	}
+
+	if len(plan.Files) == 0 {
+		return plan, fmt.Errorf("no file mappings provided")
+	}
+
+	return plan, nil
+}
+
+func (s *Server) buildFileInfoMap(fileMap map[string]string) map[string]*fileInfo {
+	files := make(map[string]*fileInfo)
+	for prepFile, targetFile := range fileMap {
+		files[targetFile] = &fileInfo{
+			prepFile:   prepFile,
+			targetFile: targetFile,
+		}
+	}
+	return files
+}
+
+func (s *Server) determineFileParents(files map[string]*fileInfo) {
+	for targetFile, info := range files {
+		base := strings.TrimSuffix(targetFile, ".yaml")
+		parts := strings.Split(base, ".")
+
+		if len(parts) > 1 {
+			parentBase := strings.Join(parts[:len(parts)-1], ".")
+			parentFile := parentBase + ".yaml"
+			info.parent = parentFile
+
+			if _, exists := files[parentFile]; !exists {
+				files[parentFile] = &fileInfo{
+					targetFile: parentFile,
+				}
+			}
+		}
+	}
+}
+
+func (s *Server) processFiles(files map[string]*fileInfo, fileMap map[string]string) error {
+	processed := make(map[string]bool)
+	format := "yaml"
+
+	var processFile func(targetFile string) error
+	processFile = func(targetFile string) error {
+		if processed[targetFile] {
+			return nil
+		}
+
+		info := files[targetFile]
+		if info == nil {
+			return fmt.Errorf("file info not found for %s", targetFile)
+		}
+
+		if info.parent != "" {
+			if err := processFile(info.parent); err != nil {
+				return err
+			}
+		}
+
+		if info.parent == "" {
+			if err := s.processBaseLayer(info, files, fileMap, format); err != nil {
+				return err
+			}
+		} else {
+			if err := s.processDerivedLayer(info, format); err != nil {
+				return err
+			}
+		}
+
+		processed[targetFile] = true
+		return nil
+	}
+
+	for targetFile := range files {
+		if err := processFile(targetFile); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) processBaseLayer(info *fileInfo, files map[string]*fileInfo, fileMap map[string]string, format string) error {
+	fsys := os.DirFS("/")
+	var sourcesForBase []string
+
+	if info.prepFile != "" {
+		for prep, target := range fileMap {
+			if target == info.targetFile {
+				sourcesForBase = append(sourcesForBase, prep)
+			}
+		}
+	} else {
+		for _, childInfo := range files {
+			if childInfo.parent == info.targetFile && childInfo.prepFile != "" {
+				sourcesForBase = append(sourcesForBase, childInfo.prepFile)
+			}
+		}
+	}
+
+	if len(sourcesForBase) > 1 {
+		output, err := bkl.Intersect(fsys, sourcesForBase, "/", "", "kind", &format)
+		if err != nil {
+			return fmt.Errorf("failed to intersect files %v for base %s: %w", sourcesForBase, info.targetFile, err)
+		}
+
+		if err := s.writeConvertedFile(info.targetFile, string(output)); err != nil {
+			return fmt.Errorf("failed to write base layer %s: %w", info.targetFile, err)
+		}
+	} else if len(sourcesForBase) == 1 {
+		content, err := os.ReadFile(info.prepFile)
+		if err != nil {
+			return fmt.Errorf("failed to read source file %s: %w", info.prepFile, err)
+		}
+
+		if err := s.writeConvertedFile(info.targetFile, string(content)); err != nil {
+			return fmt.Errorf("failed to write file %s: %w", info.targetFile, err)
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) processDerivedLayer(info *fileInfo, format string) error {
+	fsys := os.DirFS("/")
+	output, err := bkl.Diff(fsys, info.parent, info.prepFile, "/", "", "kind", &format)
+	if err != nil {
+		return fmt.Errorf("failed to diff %s -> %s: %w", info.parent, info.prepFile, err)
+	}
+
+	if err := s.writeConvertedFile(info.targetFile, string(output)); err != nil {
+		return fmt.Errorf("failed to write derived layer %s: %w", info.targetFile, err)
+	}
+
+	return nil
+}
+
+func (s *Server) createVerificationTasks(p *taskcp.Project, fileMap map[string]string, originalFileMap map[string]string) error {
+	for prepFile, targetFile := range fileMap {
+		originalFile := originalFileMap[prepFile]
+		if originalFile == "" {
+			continue
+		}
+
+		fsys := os.DirFS("/")
+		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+		if err != nil {
+			return fmt.Errorf("failed to compare %s: %w", originalFile, err)
+		}
+
+		if compareResult.Diff == "" {
+			continue
+		}
+
+		task := p.InsertTaskBefore(
+			"",
+			fmt.Sprintf("Verify %s", filepath.Base(originalFile)),
+			fmt.Sprintf(`Review the bkl conversion for %s.
+
+The diff between evaluating the original file and the bkl layered files is in data["diff"].
+
+If satisfied with the conversion, respond with an empty string in the result field of:
+{SUCCESS_PROMPT}
+
+If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.verifyConversion(p, t, originalFile, targetFile)
+			},
+		)
+
+		originalContent, err := os.ReadFile(originalFile)
+		if err != nil {
+			return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
+		}
+		targetContent, err := os.ReadFile(targetFile)
+		if err != nil {
+			return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
+		}
+
+		task.Data["original_content"] = string(originalContent)
+		task.Data["target_content"] = string(targetContent)
+		task.Data["diff"] = compareResult.Diff
+	}
+
+	return nil
+}
+
+func (s *Server) createSummaryTask(p *taskcp.Project) {
+	summaryTask := p.InsertTaskBefore(
+		"",
+		"Summarize conversion results",
+		`All file conversions have been completed. Please provide a summary for the user.
+
+The task summary is in data["summary"].
+
+Call {SUCCESS_PROMPT} with your summary in the result field.`,
+		func(p *taskcp.Project, t *taskcp.Task) error {
+			return nil
+		},
+	)
+
+	summaryTask.Data["summary"] = p.Summary().String()
 }
