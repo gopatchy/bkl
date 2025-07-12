@@ -62,7 +62,7 @@
                 $encode: values
             highlights: ["http:", "https:", "$encode: values"]
     - content: |
-        <p>When the list items need to contain the key (e.g. <highlight>ports: { name: http }</highlight>), we can use <highlight>$encode: values:name</highlight> to reduce duplication.</p>
+        <p>When the list items need to contain the key (e.g. <highlight>ports: { name: http }</highlight>), we can use <highlight>$encode: values:KEY</highlight> to reduce duplication.</p>
     - example:
         operation: convert
         layers:
@@ -121,7 +121,7 @@
               $encode: values:resource.name
             highlights: ["$encode: values:resource.name"]
     - content: |
-        <p>Convert environment variable lists to maps for easier overriding and use <highlight>$encode: values:name:value</highlight> to transform them back.</p>
+        <p>Convert environment variable lists to maps for easier overriding and use <highlight>$encode: values:KEY:VALUE</highlight> to transform them back.</p>
     - example:
         operation: convert
         layers:
@@ -140,7 +140,7 @@
                 $encode: values:name:value
             highlights: ["$encode: values:name:value"]
     - content: |
-        <p>Lists with <highlight>valueFrom</highlight> use <highlight>$encode: values:name</highlight> instead.</p>
+        <p>Lists with <highlight>valueFrom</highlight> use <highlight>$encode: values:KEY</highlight> instead.</p>
     - example:
         operation: convert
         layers:
