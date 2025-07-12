@@ -418,23 +418,66 @@
         layers:
           - languages: [[0, "yaml"]]
             code: |
-              $match:
-                kind: Service
+              kind: Service
               metadata:
                 labels:
                   environment: prod
               ---
-              $match:
-                kind: Deployment
+              kind: Deployment
               metadata:
                 labels:
                   environment: prod
           - languages: [[0, "yaml"]]
             code: |
+              kind: Service
+              ---
+              kind: Deployment
+              ---
               $match: {}
               metadata:
                 labels:
                   environment: prod
+    - content: |
+        <p>If overrides must only apply to a subset of objects, use <highlight>$matches</highlight> to select them.</p>
+    - example:
+        operation: convert
+        layers:
+          - languages: [[0, "yaml"]]
+            code: |
+              kind: Ingress
+              metadata:
+                labels:
+                  app: frontend
+              ---
+              kind: Service
+              metadata:
+                labels:
+                  app: frontend
+              ---
+              kind: Secret
+              metadata:
+                labels:
+                  app: backend
+          - languages: [[0, "yaml"]]
+            code: |
+              kind: Ingress
+              ---
+              kind: Service
+              ---
+              kind: Secret
+              ---
+              $matches:
+                - kind: Ingress
+                - kind: Service
+              metadata:
+                labels:
+                  app: frontend
+              ---
+              $matches:
+                - kind: Secret
+              metadata:
+                labels:
+                  app: backend
 - id: polish-validate
   title: Validate
   items:

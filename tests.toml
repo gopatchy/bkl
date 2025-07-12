@@ -1101,6 +1101,165 @@ $match:
 d: 4
 '''
 
+[matchesBasic]
+description = "Test $matches directive with multiple patterns"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+c: 3
+d: 4
+---
+b: 2
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$matches:
+  - b: 2
+  - a: 1
+c: 3
+d: 4
+'''
+
+[matchesSinglePattern]
+description = "Test $matches with single pattern matching multiple docs"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+b: 2
+d: 4
+---
+a: 1
+c: 3
+d: 4
+'''
+files."a.yaml" = '''
+a: 1
+b: 2
+---
+a: 1
+c: 3
+'''
+files."a.b.yaml" = '''
+$matches:
+  - a: 1
+d: 4
+'''
+
+[matchesNoMatch]
+description = "Test $matches error when pattern matches nothing"
+eval = ["a.b.yaml"]
+format = "yaml"
+errors = ["no document/entry matched $match"]
+files."a.yaml" = '''
+a: 1
+---
+b: 2
+'''
+files."a.b.yaml" = '''
+$matches:
+  - c: 3
+d: 4
+'''
+
+[matchesListInList]
+description = "Test $matches in list context"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+items:
+  - a: 1
+    d: 4
+  - b: 2
+    d: 4
+  - c: 3
+'''
+files."a.yaml" = '''
+items:
+  - a: 1
+  - b: 2
+  - c: 3
+'''
+files."a.b.yaml" = '''
+items:
+  - $matches:
+      - a: 1
+      - b: 2
+    d: 4
+'''
+
+[matchesWithReplace]
+description = "Test $matches with $replace"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+a: 1
+x: replaced
+---
+b: 2
+x: replaced
+'''
+files."a.yaml" = '''
+a: 1
+x: old
+---
+b: 2
+x: old
+'''
+files."a.b.yaml" = '''
+$matches:
+  - x: old
+x: replaced
+'''
+
+[matchesPartialMap]
+description = "Test $matches with partial map matching"
+eval = ["a.b.yaml"]
+format = "yaml"
+expected = '''
+a:
+  b: 1
+  c: 2
+e: new
+---
+d:
+  b: 1
+  c: 3
+e: new
+'''
+files."a.yaml" = '''
+a:
+  b: 1
+  c: 2
+---
+d:
+  b: 1
+  c: 3
+'''
+files."a.b.yaml" = '''
+$matches:
+  - a: {}
+  - d: {}
+e: new
+'''
+
+[matchesInvalidType]
+description = "Test $matches error with non-list value"
+eval = ["a.yaml"]
+format = "yaml"
+errors = ["$matches must be a list"]
+files."a.yaml" = '''
+$matches: "not a list"
+a: 1
+'''
+
 ###############################################################################
 # List Operations
 ###############################################################################

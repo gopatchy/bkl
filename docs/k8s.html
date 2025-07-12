@@ -1802,14 +1802,12 @@ base.yaml
 
 <div class="code-container">
 
-<bkl-code class="code-unlabeled"><key>$match</key>:
-  <key>kind</key>: <string>Service</string>
+<bkl-code class="code-unlabeled"><key>kind</key>: <string>Service</string>
 <key>metadata</key>:
   <key>labels</key>:
     <key>environment</key>: <string>prod</string>
 <string>---</string>
-<key>$match</key>:
-  <key>kind</key>: <string>Deployment</string>
+<key>kind</key>: <string>Deployment</string>
 <key>metadata</key>:
   <key>labels</key>:
     <key>environment</key>: <string>prod</string></bkl-code>
@@ -1826,10 +1824,91 @@ base.yaml
 
 <div class="code-container">
 
-<bkl-code class="code-unlabeled"><key>$match</key>: <string>{}</string>
+<bkl-code class="code-unlabeled"><key>kind</key>: <string>Service</string>
+<string>---</string>
+<key>kind</key>: <string>Deployment</string>
+<string>---</string>
+<key>$match</key>: <string>{}</string>
 <key>metadata</key>:
   <key>labels</key>:
     <key>environment</key>: <string>prod</string></bkl-code>
+</div>
+
+
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+<p><p>If overrides must only apply to a subset of objects, use <highlight>$matches</highlight> to select them.</p>
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="example-container">
+<div class="grid-container grid-3-col">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>kind</key>: <string>Ingress</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>app</key>: <string>frontend</string>
+<string>---</string>
+<key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>app</key>: <string>frontend</string>
+<string>---</string>
+<key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>app</key>: <string>backend</string></bkl-code>
+</div>
+
+
+<div class="operator-symbol">→</div>
+
+<div class="code-container" style="display: contents;">
+
+
+
+
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>kind</key>: <string>Ingress</string>
+<string>---</string>
+<key>kind</key>: <string>Service</string>
+<string>---</string>
+<key>kind</key>: <string>Secret</string>
+<string>---</string>
+<key>$matches</key>:
+  - <key>kind</key>: <string>Ingress</string>
+  - <key>kind</key>: <string>Service</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>app</key>: <string>frontend</string>
+<string>---</string>
+<key>$matches</key>:
+  - <key>kind</key>: <string>Secret</string>
+<key>metadata</key>:
+  <key>labels</key>:
+    <key>app</key>: <string>backend</string></bkl-code>
 </div>
 
 

@@ -16,11 +16,16 @@ import (
 	"github.com/gopatchy/bkl/pkg/log"
 )
 
-// Document applies the supplied document to the current
-// internal document state using bkl's merge semantics.
-// It returns the updated document slice.
 func Document(docs []*document.Document, patch *document.Document) ([]*document.Document, error) {
-	matched, updatedDocs, err := patchMatch(docs, patch)
+	matched, updatedDocs, err := patchMatches(docs, patch)
+	if err != nil {
+		return nil, err
+	}
+	if matched {
+		return updatedDocs, nil
+	}
+
+	matched, updatedDocs, err = patchMatch(docs, patch)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +43,6 @@ func Document(docs []*document.Document, patch *document.Document) ([]*document.
 	}
 
 	if !matched {
-		// Avoid modifying input: callers may reuse the same slice across multiple operations
 		newDocs := make([]*document.Document, len(docs), len(docs)+1)
 		copy(newDocs, docs)
 		newDocs = append(newDocs, patch)
@@ -62,9 +66,6 @@ func findParents(docs []*document.Document, patch *document.Document) []*documen
 	return ret
 }
 
-// patchMatch attempts to apply the supplied patch to one or more
-// documents specified by $match. It returns matched status, updated docs, and error.
-// (false, docs, nil) means no $match directive. Zero matches is an error.
 func patchMatch(docs []*document.Document, patch *document.Document) (bool, []*document.Document, error) {
 	found, m := patch.PopMapValue("$match")
 	if !found {
@@ -72,7 +73,6 @@ func patchMatch(docs []*document.Document, patch *document.Document) (bool, []*d
 	}
 
 	if m == nil {
-		// Explicit append - create a new slice
 		doc := document.New(fmt.Sprintf("%s|matchnull", patch.ID))
 		newDocs := make([]*document.Document, len(docs), len(docs)+1)
 		copy(newDocs, docs)
@@ -96,10 +96,43 @@ func patchMatch(docs []*document.Document, patch *document.Document) (bool, []*d
 	return true, docs, nil
 }
 
+func patchMatches(docs []*document.Document, patch *document.Document) (bool, []*document.Document, error) {
+	found, matches := patch.PopMapValue("$matches")
+	if !found {
+		return false, docs, nil
+	}
+
+	matchesList, ok := matches.([]any)
+	if !ok {
+		return true, nil, fmt.Errorf("$matches must be a list, got %T", matches)
+	}
+
+	matchedDocs := make(map[string]*document.Document)
+
+	for i, matchPattern := range matchesList {
+		matched := findMatches(docs, patch, matchPattern)
+		if len(matched) == 0 {
+			return true, nil, fmt.Errorf("$matches[%d] %#v: %w", i, matchPattern, errors.ErrNoMatchFound)
+		}
+
+		for _, doc := range matched {
+			matchedDocs[doc.ID] = doc
+		}
+	}
+
+	for _, doc := range matchedDocs {
+		err := process.MergeDocs(doc, patch)
+		if err != nil {
+			return true, nil, err
+		}
+	}
+
+	return true, docs, nil
+}
+
 func findMatches(docs []*document.Document, doc *document.Document, pat any) []*document.Document {
 	ret := []*document.Document{}
 
-	// Try parents, then all docs
 	parents := findParents(docs, doc)
 	for _, ds := range [][]*document.Document{parents, docs} {
 		for _, d := range ds {
@@ -116,8 +149,6 @@ func findMatches(docs []*document.Document, doc *document.Document, pat any) []*
 	return nil
 }
 
-// Files merges multiple files and returns the result in the specified format.
-// If format is empty, it defaults to "json-pretty".
 func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, sortPath string) ([]byte, error) {
 	var docs []*document.Document
 	var deferredDocs []*document.Document
@@ -180,12 +211,10 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, s
 		return nil, err
 	}
 
-	// Finalize outputs (e.g., unescape $$)
 	for i, out := range outputs {
 		outputs[i] = output.FinalizeOutput(out)
 	}
 
-	// Sort outputs by path if requested
 	if err := sortOutputsByPath(outputs, sortPath); err != nil {
 		return nil, err
 	}
@@ -193,8 +222,6 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, s
 	return ft.MarshalStream(outputs)
 }
 
-// FileObj applies an already-parsed file object into the document state.
-// It returns the updated document slice.
 func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, error) {
 	log.Debugf("[%s] merging", f)
 
@@ -211,7 +238,6 @@ func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, err
 	return docs, nil
 }
 
-// sortOutputsByPath sorts the outputs slice by the value at the specified path
 func sortOutputsByPath(outputs []any, sortPath string) error {
 	var sortErr error
 	sort.SliceStable(outputs, func(i, j int) bool {
@@ -232,5 +258,3 @@ func sortOutputsByPath(outputs []any, sortPath string) error {
 	})
 	return sortErr
 }
-
-// getPathString retrieves a value from a nested structure and converts it to string

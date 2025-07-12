@@ -153,6 +153,23 @@ func mergeListList(dst []any, src []any) ([]any, error) {
 			continue
 		}
 
+		found, matches, vMap := utils.PopMapValue(vMap, "$matches")
+		if found {
+			matchesList, ok := matches.([]any)
+			if !ok {
+				return nil, fmt.Errorf("$matches must be a list, got %T", matches)
+			}
+
+			for i, matchPattern := range matchesList {
+				dst, err = mergeListMatch(dst, matchPattern, vMap)
+				if err != nil {
+					return nil, fmt.Errorf("$matches[%d]: %w", i, err)
+				}
+			}
+
+			continue
+		}
+
 		dst = append(dst, v)
 	}
 
