@@ -92,6 +92,7 @@ mcp__bkl-mcp__query keywords="..."
 
 Hints:
 * Try to convert ALL lists to maps with names plus $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.
+* Don't add comments
 
 Return the converted bkl file contents in the results field of:
 
@@ -251,6 +252,14 @@ func (s *Server) convertToBklOnPlan(p *taskcp.Project, t *taskcp.Task, originalF
 	}
 
 	if err := s.createVerificationTasks(p, result.Files, originalFileMap); err != nil {
+		return err
+	}
+
+	if err := s.createPolishTasks(p, result.Files); err != nil {
+		return err
+	}
+
+	if err := s.createSecondVerificationTasks(p, result.Files, originalFileMap); err != nil {
 		return err
 	}
 
@@ -540,4 +549,103 @@ Call {SUCCESS_PROMPT} with your summary in the result field.`,
 	)
 
 	summaryTask.Data["summary"] = p.Summary().String()
+}
+
+func (s *Server) createPolishTasks(p *taskcp.Project, fileMap map[string]string) error {
+	for _, targetFile := range fileMap {
+		task := p.InsertTaskBefore(
+			"",
+			fmt.Sprintf("Polish %s", filepath.Base(targetFile)),
+			fmt.Sprintf(`Apply polish steps to improve the bkl file %s.
+
+Read the polish documentation:
+
+mcp__bkl-mcp__get type="documentation" id="polish" source="k8s"
+
+The current file content is in data["file_content"].
+
+If no polish is needed, respond with an empty string in the result field of:
+{SUCCESS_PROMPT}
+
+Otherwise, provide the polished bkl file content in the result field.
+
+Hints:
+* Don't add comments
+`, targetFile),
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.polishBklFile(p, t, targetFile)
+			},
+		)
+
+		content, err := os.ReadFile(targetFile)
+		if err != nil {
+			return fmt.Errorf("failed to read file %s for polish: %w", targetFile, err)
+		}
+
+		task.Data["file_content"] = string(content)
+	}
+
+	return nil
+}
+
+func (s *Server) polishBklFile(p *taskcp.Project, t *taskcp.Task, targetFile string) error {
+	if t.Result == "" {
+		return nil
+	}
+
+	if err := s.writeConvertedFile(targetFile, t.Result); err != nil {
+		return fmt.Errorf("failed to write polished file %s: %w", targetFile, err)
+	}
+
+	return nil
+}
+
+func (s *Server) createSecondVerificationTasks(p *taskcp.Project, fileMap map[string]string, originalFileMap map[string]string) error {
+	for prepFile, targetFile := range fileMap {
+		originalFile := originalFileMap[prepFile]
+		if originalFile == "" {
+			continue
+		}
+
+		fsys := os.DirFS("/")
+		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+		if err != nil {
+			return fmt.Errorf("failed to compare %s after polish: %w", originalFile, err)
+		}
+
+		if compareResult.Diff == "" {
+			continue
+		}
+
+		task := p.InsertTaskBefore(
+			"",
+			fmt.Sprintf("Re-verify %s after polish", filepath.Base(originalFile)),
+			fmt.Sprintf(`Review the bkl conversion for %s after polish has been applied.
+
+The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
+
+If satisfied with the conversion, respond with an empty string in the result field of:
+{SUCCESS_PROMPT}
+
+If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
+			func(p *taskcp.Project, t *taskcp.Task) error {
+				return s.verifyConversion(p, t, originalFile, targetFile)
+			},
+		)
+
+		originalContent, err := os.ReadFile(originalFile)
+		if err != nil {
+			return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
+		}
+		targetContent, err := os.ReadFile(targetFile)
+		if err != nil {
+			return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
+		}
+
+		task.Data["original_content"] = string(originalContent)
+		task.Data["target_content"] = string(targetContent)
+		task.Data["diff"] = compareResult.Diff
+	}
+
+	return nil
 }
