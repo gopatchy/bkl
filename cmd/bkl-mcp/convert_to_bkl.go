@@ -16,10 +16,9 @@ import (
 func (s *Server) convertToBklHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
 	p := s.taskService.AddProject()
 
-	task := p.InsertTaskBefore(
-		"",
-		"Find configuration files",
-		`Find all the configuration files you need to convert. Then call:
+	p.AddNextTask().
+		WithTitle("Find configuration files").
+		WithInstructions(`Find all the configuration files you need to convert. Then call:
 
 {SUCCESS_PROMPT}
 
@@ -31,11 +30,15 @@ where result contains a JSON encoding in the following format:
 		"path/to/file2.yaml"
 	]
 }
-`,
-		func(p *taskcp.Project, task *taskcp.Task) error {
-			return s.convertToBklOnFiles(p, task)
-		},
-	)
+`).
+		Then(func(t *taskcp.Task) error {
+			return s.convertToBklOnFiles(p, t)
+		})
+
+	t, err := p.PopNextTask()
+	if err != nil {
+		return nil, err
+	}
 
 	return &promptResponse{
 		Prompt: `# Converting Kubernetes configuration files to bkl format
@@ -44,7 +47,7 @@ I'll walk you through this process step by step. Follow EXACTLY these steps -- d
 
 First execute:
 
-` + task.String(),
+` + t.String(),
 	}, nil
 }
 
@@ -77,10 +80,9 @@ func (s *Server) convertToBklOnFiles(p *taskcp.Project, t *taskcp.Task) error {
 		}
 
 		originalContent := string(content)
-		task := p.InsertTaskBefore(
-			"",
-			"Convert to bkl",
-			`Convert the content in data["original_file"] to bkl patterns.
+		p.AddLastTask().
+			WithTitle("Convert to bkl").
+			WithInstructions(`Convert the content in data["original_file"] to bkl patterns.
 
 You can read the pattern documentation with:
 
@@ -97,13 +99,12 @@ Hints:
 Return the converted bkl file contents in the results field of:
 
 {SUCCESS_PROMPT}
-`,
-			func(p *taskcp.Project, t *taskcp.Task) error {
+`).
+			WithData("original_file", originalContent).
+			Then(func(t *taskcp.Task) error {
 				return s.convertToBklOnPrepFile(p, prepFile, t)
-			},
-		)
+			})
 
-		task.Data["original_file"] = originalContent
 	}
 
 	originalFileMap := make(map[string]string)
@@ -111,10 +112,9 @@ Return the converted bkl file contents in the results field of:
 		originalFileMap[prepFiles[i]] = file
 	}
 
-	task := p.InsertTaskBefore(
-		"",
-		"Determine bkl file structure",
-		`Read the documentation for file structure:
+	p.AddLastTask().
+		WithTitle("Determine bkl file structure").
+		WithInstructions(`Read the documentation for file structure:
 
 mcp__bkl-mcp__get type="documentation" id="plan" source="k8s"
 
@@ -141,13 +141,11 @@ where the result is a JSON encoding in the following format:
 I'll figure out which files are in the base layer and which are in the derived layers.
 
 DO NOT create directories or files -- just use the tools to determine the file structure and tell me.
-`,
-		func(p *taskcp.Project, t *taskcp.Task) error {
+`).
+		WithData("prep_files", prepFiles).
+		Then(func(t *taskcp.Task) error {
 			return s.convertToBklOnPlan(p, t, originalFileMap)
-		},
-	)
-
-	task.Data["prep_files"] = prepFiles
+		})
 
 	return nil
 }
@@ -175,10 +173,9 @@ func (s *Server) convertToBklOnPrepFile(p *taskcp.Project, targetPath string, t 
 
 	compareResult, err := bkl.Compare(fsys, "original.yaml", "prepped.yaml", "/", "/", nil, nil, "")
 	if err != nil {
-		fixTask := p.InsertTaskBefore(
-			t.NextTaskID,
-			"Fix the prepped file",
-			`The comparison failed. Please fix the prepped file.
+		p.AddNextTask().
+			WithTitle("Fix the prepped file").
+			WithInstructions(`The comparison failed. Please fix the prepped file.
 
 The original file content is in data["original_file"].
 The prepped file content that failed is in data["prepped_file"].
@@ -186,24 +183,21 @@ The error is in data["error"].
 
 Return the corrected bkl file contents in the result field of:
 
-{SUCCESS_PROMPT}`,
-			func(p *taskcp.Project, t *taskcp.Task) error {
+{SUCCESS_PROMPT}`).
+			WithData("original_file", originalContent).
+			WithData("prepped_file", preppedContent).
+			WithData("error", err.Error()).
+			Then(func(t *taskcp.Task) error {
 				return s.convertToBklOnPrepFile(p, targetPath, t)
-			},
-		)
-
-		fixTask.Data["original_file"] = originalContent
-		fixTask.Data["prepped_file"] = preppedContent
-		fixTask.Data["error"] = err.Error()
+			})
 
 		return nil
 	}
 
 	if compareResult.Diff != "" && t.Result != "" {
-		verifyTask := p.InsertTaskBefore(
-			t.NextTaskID,
-			"Verify the conversion",
-			`The conversion resulted in different output. Please verify the changes are correct.
+		p.AddNextTask().
+			WithTitle("Verify the conversion").
+			WithInstructions(`The conversion resulted in different output. Please verify the changes are correct.
 
 The original file content is in data["original_file"].
 The prepped file content is in data["prepped_file"].
@@ -215,15 +209,13 @@ If the changes are correct, respond with an empty string in the result field of:
 If you need to modify the conversion, provide the corrected bkl file contents in the result field.
 
 Hints:
-* Changes in values after $encode conversion are usually bugs (other than list ordering). Don't convert back to a list -- figure out how to use $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.`,
-			func(p *taskcp.Project, t *taskcp.Task) error {
+* Changes in values after $encode conversion are usually bugs (other than list ordering). Don't convert back to a list -- figure out how to use $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.`).
+			WithData("original_file", originalContent).
+			WithData("prepped_file", preppedContent).
+			WithData("diff", compareResult.Diff).
+			Then(func(t *taskcp.Task) error {
 				return s.convertToBklOnPrepFile(p, targetPath, t)
-			},
-		)
-
-		verifyTask.Data["original_file"] = originalContent
-		verifyTask.Data["prepped_file"] = preppedContent
-		verifyTask.Data["diff"] = compareResult.Diff
+			})
 
 		return nil
 	}
@@ -301,22 +293,25 @@ func (s *Server) verifyConversion(p *taskcp.Project, t *taskcp.Task, originalFil
 			return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
 		}
 
-		retryTask := p.InsertTaskBefore(
-			t.NextTaskID,
-			fmt.Sprintf("Re-verify %s", filepath.Base(targetFile)),
-			fmt.Sprintf(`The bkl file still produces different output. 
+		p.AddNextTask().
+			WithTitle(fmt.Sprintf("Re-verify %s", filepath.Base(targetFile))).
+			WithInstructions(`The bkl file still produces different output. 
 
 The diff is in data["diff"].
 
-Review and provide the updated bkl file content for %s in the result field of {SUCCESS_PROMPT}, or respond with an empty string if this is acceptable.`, targetFile),
-			func(p *taskcp.Project, t *taskcp.Task) error {
-				return s.verifyConversion(p, t, originalFile, targetFile)
-			},
-		)
+Review and provide the updated bkl file content for %s in the result field of:
 
-		retryTask.Data["original_content"] = string(originalContent)
-		retryTask.Data["target_content"] = t.Result
-		retryTask.Data["diff"] = compareResult.Diff
+{SUCCESS_PROMPT}
+
+or respond with an empty string if this is acceptable.`).
+			WithData("original_content", string(originalContent)).
+			WithData("target_content", t.Result).
+			WithData("diff", compareResult.Diff).
+			Then(func(t *taskcp.Task) error {
+				return s.verifyConversion(p, t, originalFile, targetFile)
+			})
+
+		return nil
 	}
 
 	return nil
@@ -500,22 +495,6 @@ func (s *Server) createVerificationTasks(p *taskcp.Project, fileMap map[string]s
 			continue
 		}
 
-		task := p.InsertTaskBefore(
-			"",
-			fmt.Sprintf("Verify %s", filepath.Base(originalFile)),
-			fmt.Sprintf(`Review the bkl conversion for %s.
-
-The diff between evaluating the original file and the bkl layered files is in data["diff"].
-
-If satisfied with the conversion, respond with an empty string in the result field of:
-{SUCCESS_PROMPT}
-
-If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
-			func(p *taskcp.Project, t *taskcp.Task) error {
-				return s.verifyConversion(p, t, originalFile, targetFile)
-			},
-		)
-
 		originalContent, err := os.ReadFile(originalFile)
 		if err != nil {
 			return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
@@ -525,37 +504,58 @@ If you want to modify the conversion, provide the updated bkl file content for %
 			return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
 		}
 
-		task.Data["original_content"] = string(originalContent)
-		task.Data["target_content"] = string(targetContent)
-		task.Data["diff"] = compareResult.Diff
+		p.AddLastTask().
+			WithTitle("Verify bkl converion").
+			WithInstructions(`Review the bkl conversion for %s.
+
+The diff between evaluating the original file and the bkl layered files is in data["diff"].
+
+If satisfied with the conversion, respond with an empty string in the result field of:
+
+{SUCCESS_PROMPT}
+
+If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`).
+			WithData("original_content", string(originalContent)).
+			WithData("target_content", string(targetContent)).
+			WithData("diff", compareResult.Diff).
+			Then(func(t *taskcp.Task) error {
+				return s.verifyConversion(p, t, originalFile, targetFile)
+			})
+
+		return nil
 	}
 
 	return nil
 }
 
 func (s *Server) createSummaryTask(p *taskcp.Project) {
-	summaryTask := p.InsertTaskBefore(
-		"",
-		"Summarize conversion results",
-		`All file conversions have been completed. Please provide a summary for the user.
+	p.AddLastTask().
+		WithTitle("Summarize conversion results").
+		WithInstructions(`All file conversions have been completed. Please provide a summary for the user.
 
 The task summary is in data["summary"].
 
-Call {SUCCESS_PROMPT} with your summary in the result field.`,
-		func(p *taskcp.Project, t *taskcp.Task) error {
-			return nil
-		},
-	)
+Call:
 
-	summaryTask.Data["summary"] = p.Summary().String()
+{SUCCESS_PROMPT}
+
+with your summary in the result field.`).
+		WithData("summary", p.Summary().String()).
+		Then(func(t *taskcp.Task) error {
+			return nil
+		})
 }
 
 func (s *Server) createPolishTasks(p *taskcp.Project, fileMap map[string]string, originalFileMap map[string]string) error {
 	for _, targetFile := range fileMap {
-		task := p.InsertTaskBefore(
-			"",
-			fmt.Sprintf("Polish %s", filepath.Base(targetFile)),
-			fmt.Sprintf(`Apply polish steps to improve the bkl file %s.
+		content, err := os.ReadFile(targetFile)
+		if err != nil {
+			return fmt.Errorf("failed to read file %s for polish: %w", targetFile, err)
+		}
+
+		p.AddLastTask().
+			WithTitle(fmt.Sprintf("Polish %s", filepath.Base(targetFile))).
+			WithInstructions(`Apply polish steps to improve the bkl file %s.
 
 Read the polish documentation:
 
@@ -570,18 +570,12 @@ Otherwise, provide the polished bkl file content in the result field.
 
 Hints:
 * Don't add comments
-`, targetFile),
-			func(p *taskcp.Project, t *taskcp.Task) error {
+`).
+			WithData("file_content", string(content)).
+			Then(func(t *taskcp.Task) error {
 				return s.polishBklFile(p, t, targetFile, fileMap, originalFileMap)
-			},
-		)
+			})
 
-		content, err := os.ReadFile(targetFile)
-		if err != nil {
-			return fmt.Errorf("failed to read file %s for polish: %w", targetFile, err)
-		}
-
-		task.Data["file_content"] = string(content)
 	}
 
 	return nil
@@ -596,10 +590,10 @@ func (s *Server) polishBklFile(p *taskcp.Project, t *taskcp.Task, targetFile str
 		return fmt.Errorf("failed to write polished file %s: %w", targetFile, err)
 	}
 
-	return s.createSecondVerificationTask(p, t, targetFile, fileMap, originalFileMap)
+	return s.createSecondVerificationTask(p, targetFile, fileMap, originalFileMap)
 }
 
-func (s *Server) createSecondVerificationTask(p *taskcp.Project, currentTask *taskcp.Task, targetFile string, fileMap map[string]string, originalFileMap map[string]string) error {
+func (s *Server) createSecondVerificationTask(p *taskcp.Project, targetFile string, fileMap map[string]string, originalFileMap map[string]string) error {
 	var originalFile string
 
 	for prep, target := range fileMap {
@@ -617,19 +611,6 @@ func (s *Server) createSecondVerificationTask(p *taskcp.Project, currentTask *ta
 	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
 	if err != nil {
 		compareErr := err
-		task := p.InsertTaskBefore(
-			currentTask.NextTaskID,
-			fmt.Sprintf("Fix comparison error for %s", filepath.Base(originalFile)),
-			fmt.Sprintf(`The comparison between the original file and bkl conversion failed with error: %s
-
-Please review the files and provide a corrected bkl file content for %s that can be properly compared with %s.
-
-Provide the updated bkl file content in the result field of:
-{SUCCESS_PROMPT}`, compareErr.Error(), targetFile, originalFile),
-			func(p *taskcp.Project, t *taskcp.Task) error {
-				return s.verifyConversion(p, t, originalFile, targetFile)
-			},
-		)
 
 		originalContent, err := os.ReadFile(originalFile)
 		if err != nil {
@@ -640,9 +621,19 @@ Provide the updated bkl file content in the result field of:
 			return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
 		}
 
-		task.Data["original_content"] = string(originalContent)
-		task.Data["target_content"] = string(targetContent)
-		task.Data["error"] = compareErr.Error()
+		p.AddNextTask().
+			WithTitle("Fix comparison error").
+			WithInstructions(`The comparison between the original file and bkl conversion failed.
+
+Provide the updated bkl file content in the result field of:
+
+{SUCCESS_PROMPT}`).
+			WithData("error", compareErr.Error()).
+			WithData("target_content", string(targetContent)).
+			WithData("original_content", string(originalContent)).
+			Then(func(t *taskcp.Task) error {
+				return s.verifyConversion(p, t, originalFile, targetFile)
+			})
 
 		return nil
 	}
@@ -650,22 +641,6 @@ Provide the updated bkl file content in the result field of:
 	if compareResult.Diff == "" {
 		return nil
 	}
-
-	task := p.InsertTaskBefore(
-		currentTask.NextTaskID,
-		fmt.Sprintf("Re-verify %s after polish", filepath.Base(originalFile)),
-		fmt.Sprintf(`Review the bkl conversion for %s after polish has been applied.
-
-The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
-
-If satisfied with the polish changes, respond with an empty string in the result field of:
-{SUCCESS_PROMPT}
-
-If you want to modify the polish changes, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
-		func(p *taskcp.Project, t *taskcp.Task) error {
-			return s.verifyConversion(p, t, originalFile, targetFile)
-		},
-	)
 
 	originalContent, err := os.ReadFile(originalFile)
 	if err != nil {
@@ -676,9 +651,23 @@ If you want to modify the polish changes, provide the updated bkl file content f
 		return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
 	}
 
-	task.Data["original_content"] = string(originalContent)
-	task.Data["target_content"] = string(targetContent)
-	task.Data["diff"] = compareResult.Diff
+	p.AddNextTask().
+		WithTitle("Re-verify after polish").
+		WithInstructions(`Review the bkl conversion after polish has been applied.
+
+The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
+
+If satisfied with the polish changes, respond with an empty string in the result field of:
+
+{SUCCESS_PROMPT}
+
+If you want to modify the polish changes, provide the updated bkl file content for %s in the result field.`).
+		WithData("original_content", string(originalContent)).
+		WithData("target_content", string(targetContent)).
+		WithData("diff", compareResult.Diff).
+		Then(func(t *taskcp.Task) error {
+			return s.verifyConversion(p, t, originalFile, targetFile)
+		})
 
 	return nil
 }
