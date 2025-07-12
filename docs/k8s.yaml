@@ -391,7 +391,7 @@
   title: Validate
   items:
     - content: |
-        <p>Validate the combined bkl file layers against the original configs.</p>
+        <p>Validate the bkl file layers against the original configs.</p>
     - code:
         languages: [[0, "shell"]]
         code: |
@@ -435,3 +435,22 @@
               metadata:
                 labels:
                   environment: prod
+- id: polish-validate
+  title: Validate
+  items:
+    - content: |
+        <p>Validate the polished bkl file layers against the original configs.</p>
+    - code:
+        languages: [[0, "shell"]]
+        code: |
+          $ bklc --sort=kind --color original/prod/namespace.yaml bkl/namespace.yaml
+          $ bklc --sort=kind --color original/staging/namespace.yaml bkl/namespace.staging.yaml
+          $ bklc --sort=kind --color original/dev/namespace.yaml bkl/namespace.staging.dev.yaml
+
+          $ bklc --sort=kind --color original/prod/api-service.yaml bkl/base.api-service.yaml
+          $ bklc --sort=kind --color original/staging/api-service.yaml bkl/base.api-service.staging.yaml
+          $ bklc --sort=kind --color original/dev/api-service.yaml bkl/base.api-service.staging.dev.yaml
+
+          $ bklc --sort=kind --color original/prod/web-service.yaml bkl/base.web-service.yaml
+          $ bklc --sort=kind --color original/staging/web-service.yaml bkl/base.web-service.staging.yaml
+          $ bklc --sort=kind --color original/dev/web-service.yaml bkl/base.web-service.staging.dev.yaml
