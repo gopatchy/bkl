@@ -212,7 +212,10 @@ The diff is in data["diff"].
 If the changes are correct, respond with an empty string in the result field of:
 {SUCCESS_PROMPT}
 
-If you need to modify the conversion, provide the corrected bkl file contents in the result field.`,
+If you need to modify the conversion, provide the corrected bkl file contents in the result field.
+
+Hints:
+* Changes in values after $encode conversion are usually bugs (other than list ordering). Don't convert back to a list -- figure out how to use $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.`,
 			func(p *taskcp.Project, t *taskcp.Task) error {
 				return s.convertToBklOnPrepFile(p, targetPath, t)
 			},
@@ -255,11 +258,7 @@ func (s *Server) convertToBklOnPlan(p *taskcp.Project, t *taskcp.Task, originalF
 		return err
 	}
 
-	if err := s.createPolishTasks(p, result.Files); err != nil {
-		return err
-	}
-
-	if err := s.createSecondVerificationTasks(p, result.Files, originalFileMap); err != nil {
+	if err := s.createPolishTasks(p, result.Files, originalFileMap); err != nil {
 		return err
 	}
 
@@ -291,7 +290,7 @@ func (s *Server) verifyConversion(p *taskcp.Project, t *taskcp.Task, originalFil
 	}
 
 	fsys := os.DirFS("/")
-	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "/", nil, nil, "")
+	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
 	if err != nil {
 		return fmt.Errorf("failed to re-compare: %w", err)
 	}
@@ -551,7 +550,7 @@ Call {SUCCESS_PROMPT} with your summary in the result field.`,
 	summaryTask.Data["summary"] = p.Summary().String()
 }
 
-func (s *Server) createPolishTasks(p *taskcp.Project, fileMap map[string]string) error {
+func (s *Server) createPolishTasks(p *taskcp.Project, fileMap map[string]string, originalFileMap map[string]string) error {
 	for _, targetFile := range fileMap {
 		task := p.InsertTaskBefore(
 			"",
@@ -573,7 +572,7 @@ Hints:
 * Don't add comments
 `, targetFile),
 			func(p *taskcp.Project, t *taskcp.Task) error {
-				return s.polishBklFile(p, t, targetFile)
+				return s.polishBklFile(p, t, targetFile, fileMap, originalFileMap)
 			},
 		)
 
@@ -588,7 +587,7 @@ Hints:
 	return nil
 }
 
-func (s *Server) polishBklFile(p *taskcp.Project, t *taskcp.Task, targetFile string) error {
+func (s *Server) polishBklFile(p *taskcp.Project, t *taskcp.Task, targetFile string, fileMap map[string]string, originalFileMap map[string]string) error {
 	if t.Result == "" {
 		return nil
 	}
@@ -597,37 +596,36 @@ func (s *Server) polishBklFile(p *taskcp.Project, t *taskcp.Task, targetFile str
 		return fmt.Errorf("failed to write polished file %s: %w", targetFile, err)
 	}
 
-	return nil
+	return s.createSecondVerificationTask(p, t, targetFile, fileMap, originalFileMap)
 }
 
-func (s *Server) createSecondVerificationTasks(p *taskcp.Project, fileMap map[string]string, originalFileMap map[string]string) error {
-	for prepFile, targetFile := range fileMap {
-		originalFile := originalFileMap[prepFile]
-		if originalFile == "" {
-			continue
-		}
+func (s *Server) createSecondVerificationTask(p *taskcp.Project, currentTask *taskcp.Task, targetFile string, fileMap map[string]string, originalFileMap map[string]string) error {
+	var originalFile string
 
-		fsys := os.DirFS("/")
-		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
-		if err != nil {
-			return fmt.Errorf("failed to compare %s after polish: %w", originalFile, err)
+	for prep, target := range fileMap {
+		if target == targetFile {
+			originalFile = originalFileMap[prep]
+			break
 		}
+	}
 
-		if compareResult.Diff == "" {
-			continue
-		}
+	if originalFile == "" {
+		return nil
+	}
 
+	fsys := os.DirFS("/")
+	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+	if err != nil {
+		compareErr := err
 		task := p.InsertTaskBefore(
-			"",
-			fmt.Sprintf("Re-verify %s after polish", filepath.Base(originalFile)),
-			fmt.Sprintf(`Review the bkl conversion for %s after polish has been applied.
+			currentTask.NextTaskID,
+			fmt.Sprintf("Fix comparison error for %s", filepath.Base(originalFile)),
+			fmt.Sprintf(`The comparison between the original file and bkl conversion failed with error: %s
 
-The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
+Please review the files and provide a corrected bkl file content for %s that can be properly compared with %s.
 
-If satisfied with the conversion, respond with an empty string in the result field of:
-{SUCCESS_PROMPT}
-
-If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
+Provide the updated bkl file content in the result field of:
+{SUCCESS_PROMPT}`, compareErr.Error(), targetFile, originalFile),
 			func(p *taskcp.Project, t *taskcp.Task) error {
 				return s.verifyConversion(p, t, originalFile, targetFile)
 			},
@@ -644,8 +642,43 @@ If you want to modify the conversion, provide the updated bkl file content for %
 
 		task.Data["original_content"] = string(originalContent)
 		task.Data["target_content"] = string(targetContent)
-		task.Data["diff"] = compareResult.Diff
+		task.Data["error"] = compareErr.Error()
+
+		return nil
 	}
+
+	if compareResult.Diff == "" {
+		return nil
+	}
+
+	task := p.InsertTaskBefore(
+		currentTask.NextTaskID,
+		fmt.Sprintf("Re-verify %s after polish", filepath.Base(originalFile)),
+		fmt.Sprintf(`Review the bkl conversion for %s after polish has been applied.
+
+The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
+
+If satisfied with the polish changes, respond with an empty string in the result field of:
+{SUCCESS_PROMPT}
+
+If you want to modify the polish changes, provide the updated bkl file content for %s in the result field.`, originalFile, targetFile),
+		func(p *taskcp.Project, t *taskcp.Task) error {
+			return s.verifyConversion(p, t, originalFile, targetFile)
+		},
+	)
+
+	originalContent, err := os.ReadFile(originalFile)
+	if err != nil {
+		return fmt.Errorf("failed to read original file %s: %w", originalFile, err)
+	}
+	targetContent, err := os.ReadFile(targetFile)
+	if err != nil {
+		return fmt.Errorf("failed to read target file %s: %w", targetFile, err)
+	}
+
+	task.Data["original_content"] = string(originalContent)
+	task.Data["target_content"] = string(targetContent)
+	task.Data["diff"] = compareResult.Diff
 
 	return nil
 }
