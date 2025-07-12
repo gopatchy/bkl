@@ -6,20 +6,6 @@ import (
 	"testing/fstest"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func createTestFS(fileSystem map[string]string) (fs.FS, error) {
 	fsys := fstest.MapFS{}
 	for filename, content := range fileSystem {
