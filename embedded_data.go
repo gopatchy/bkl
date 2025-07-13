@@ -21,55 +21,55 @@ var k8sData []byte
 var fixitData []byte
 
 type TestCase struct {
-	Description string            `toml:"description"`
-	Eval        []string          `toml:"eval"`
-	Format      string            `toml:"format"`
-	Expected    string            `toml:"expected,omitempty"`
-	Files       map[string]string `toml:"files"`
-	Errors      []string          `toml:"errors,omitempty"`
-	RootPath    string            `toml:"rootPath,omitempty"`
-	Env         map[string]string `toml:"env,omitempty"`
-	Diff        bool              `toml:"diff,omitempty"`
-	Intersect   bool              `toml:"intersect,omitempty"`
-	Required    bool              `toml:"required,omitempty"`
-	Compare     bool              `toml:"compare,omitempty"`
-	Benchmark   bool              `toml:"benchmark,omitempty"`
-	Selector    string            `toml:"selector,omitempty"`
-	SortPath    string            `toml:"sortPath,omitempty"`
+	Description string            `toml:"description" json:"description"`
+	Eval        []string          `toml:"eval" json:"eval"`
+	Format      string            `toml:"format" json:"format"`
+	Expected    string            `toml:"expected,omitempty" json:"expected,omitempty"`
+	Files       map[string]string `toml:"files" json:"files"`
+	Errors      []string          `toml:"errors,omitempty" json:"errors,omitempty"`
+	RootPath    string            `toml:"rootPath,omitempty" json:"rootPath,omitempty"`
+	Env         map[string]string `toml:"env,omitempty" json:"env,omitempty"`
+	Diff        bool              `toml:"diff,omitempty" json:"diff,omitempty"`
+	Intersect   bool              `toml:"intersect,omitempty" json:"intersect,omitempty"`
+	Required    bool              `toml:"required,omitempty" json:"required,omitempty"`
+	Compare     bool              `toml:"compare,omitempty" json:"compare,omitempty"`
+	Benchmark   bool              `toml:"benchmark,omitempty" json:"benchmark,omitempty"`
+	Selector    string            `toml:"selector,omitempty" json:"selector,omitempty"`
+	SortPath    string            `toml:"sortPath,omitempty" json:"sortPath,omitempty"`
 }
 
 type DocSection struct {
-	ID     string    `yaml:"id"`
-	Title  string    `yaml:"title"`
-	Items  []DocItem `yaml:"items"`
-	Source string    `yaml:"-"`
+	ID     string    `yaml:"id" json:"id"`
+	Title  string    `yaml:"title" json:"title"`
+	Items  []DocItem `yaml:"items" json:"items"`
+	Source string    `yaml:"-" json:"-"`
 }
 
 type DocItem struct {
-	Content    string         `yaml:"content,omitempty"`
-	Example    *DocExample    `yaml:"example,omitempty"`
-	Code       *DocLayer      `yaml:"code,omitempty"`
-	SideBySide *DocSideBySide `yaml:"side_by_side,omitempty"`
+	Content    string         `yaml:"content,omitempty" json:"content,omitempty"`
+	Example    *DocExample    `yaml:"example,omitempty" json:"example,omitempty"`
+	Code       *DocLayer      `yaml:"code,omitempty" json:"code,omitempty"`
+	SideBySide *DocSideBySide `yaml:"side_by_side,omitempty" json:"side_by_side,omitempty"`
 }
 
 type DocSideBySide struct {
-	Left  DocLayer `yaml:"left"`
-	Right DocLayer `yaml:"right"`
+	Left  DocLayer `yaml:"left" json:"left"`
+	Right DocLayer `yaml:"right" json:"right"`
 }
 
 type DocExample struct {
-	Operation string     `yaml:"operation,omitempty"`
-	Layers    []DocLayer `yaml:"layers,omitempty"`
-	Result    DocLayer   `yaml:"result,omitempty"`
+	Operation string     `yaml:"operation,omitempty" json:"operation,omitempty"`
+	Layers    []DocLayer `yaml:"layers,omitempty" json:"layers,omitempty"`
+	Result    DocLayer   `yaml:"result,omitempty" json:"result,omitempty"`
 }
 
 type DocLayer struct {
-	Label      string   `yaml:"label,omitempty"`
-	Code       string   `yaml:"code"`
-	Highlights []string `yaml:"highlights,omitempty"`
-	Languages  [][]any  `yaml:"languages,omitempty"`
-	Expandable bool     `yaml:"expandable,omitempty"`
-	Collapsed  bool     `yaml:"collapsed,omitempty"`
+	Label      string   `yaml:"label,omitempty" json:"label,omitempty"`
+	Code       string   `yaml:"code" json:"code"`
+	Highlights []string `yaml:"highlights,omitempty" json:"highlights,omitempty"`
+	Languages  [][]any  `yaml:"languages,omitempty" json:"languages,omitempty"`
+	Expandable bool     `yaml:"expandable,omitempty" json:"expandable,omitempty"`
+	Collapsed  bool     `yaml:"collapsed,omitempty" json:"collapsed,omitempty"`
 }
 
 func GetTests() (map[string]*TestCase, error) {

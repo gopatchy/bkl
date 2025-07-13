@@ -797,6 +797,8 @@ hunk-header {
 
 	<li><a href="#env-keys-values">env keys and values</a></li>
 
+	<li><a href="#encode-nesting-level">$encode nesting level</a></li>
+
 </ol>
 </div>
 </nav>
@@ -830,7 +832,10 @@ hunk-header {
 </div>
 
 </div>
-<div style="text-align: center; margin: 5px 0; font-size: 30px; color: var(--neutral5);">↓</div>
+<div class="grid-container grid-2-col">
+<div style="text-align: center; font-size: 30px; color: var(--red5);">↓</div>
+<div style="text-align: center; font-size: 30px; color: var(--green5);">↓</div>
+</div>
 <div class="grid-container grid-2-col">
 <div class="code-container fixit-bad">
 
@@ -893,7 +898,10 @@ hunk-header {
 </div>
 
 </div>
-<div style="text-align: center; margin: 5px 0; font-size: 30px; color: var(--neutral5);">↓</div>
+<div class="grid-container grid-2-col">
+<div style="text-align: center; font-size: 30px; color: var(--red5);">↓</div>
+<div style="text-align: center; font-size: 30px; color: var(--green5);">↓</div>
+</div>
 <div class="grid-container grid-2-col">
 <div class="code-container fixit-bad">
 
@@ -914,6 +922,68 @@ hunk-header {
   <key>DB_HOST</key>: <string>postgres</string>
   <key>DB_PORT</key>: <string>"5432"</string>
   <highlight><key>$encode</key>: <string>values:name:value</string></highlight></bkl-code>
+</div>
+
+</div>
+</div>
+
+</div>
+
+
+
+
+
+
+</section>
+
+<section id="encode-nesting-level">
+<h2><a name="encode-nesting-level">$encode nesting level</a></h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="example-container fixit-3-layer">
+
+<div class="code-container">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>imagePullSecrets</key>:
+  - <key>name</key>: <string>regcred</string></bkl-code>
+</div>
+
+</div>
+<div class="grid-container grid-2-col">
+<div style="text-align: center; font-size: 30px; color: var(--red5);">↓</div>
+<div style="text-align: center; font-size: 30px; color: var(--green5);">↓</div>
+</div>
+<div class="grid-container grid-2-col">
+<div class="code-container fixit-bad">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>imagePullSecrets</key>:
+  <key>regcred</key>:
+    <key>$encode</key>: <string>values:name</string></bkl-code>
+</div>
+
+</div>
+<div class="code-container fixit-good">
+
+<div class="code-container">
+
+<bkl-code class="code-unlabeled"><key>imagePullSecrets</key>:
+  <key>regcred</key>: <string>{}</string>
+  <key>$encode</key>: <string>values:name</string></bkl-code>
 </div>
 
 </div>

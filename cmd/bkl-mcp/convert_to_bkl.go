@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing/fstest"
@@ -12,6 +13,133 @@ import (
 	"github.com/gopatchy/bkl"
 	"github.com/gopatchy/taskcp"
 )
+
+func (s *Server) convertHelmToPlain(files []string) ([]string, error) {
+	chartDir := ""
+	hasChart := false
+	var valuesFiles []string
+
+	for _, file := range files {
+		base := filepath.Base(file)
+		if base == "Chart.yaml" {
+			hasChart = true
+			chartDir = filepath.Dir(file)
+		} else if strings.HasPrefix(base, "values") && (strings.HasSuffix(base, ".yaml") || strings.HasSuffix(base, ".yml")) {
+			valuesFiles = append(valuesFiles, file)
+			if base == "values.yaml" || base == "values.yml" {
+				hasChart = true
+			}
+		}
+	}
+
+	if !hasChart {
+		return nil, nil
+	}
+
+	if chartDir == "" && len(files) > 0 {
+		chartDir = filepath.Dir(files[0])
+	}
+
+	if err := os.MkdirAll("plain", 0o755); err != nil {
+		return nil, fmt.Errorf("failed to create plain directory: %w", err)
+	}
+
+	var plainFiles []string
+
+	if len(valuesFiles) == 0 {
+		cmd := exec.Command("helm", "template", "release", chartDir, "--output-dir", "plain")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("helm template failed: %w\nOutput: %s", err, output)
+		}
+	} else {
+		for _, valuesFile := range valuesFiles {
+			base := filepath.Base(valuesFile)
+			env := "base"
+
+			if base != "values.yaml" && base != "values.yml" {
+				nameWithoutExt := strings.TrimSuffix(strings.TrimSuffix(base, ".yaml"), ".yml")
+				if e, found := strings.CutPrefix(nameWithoutExt, "values."); found {
+					env = e
+				} else if e, found := strings.CutPrefix(nameWithoutExt, "values-"); found {
+					env = e
+				}
+				if env == "" {
+					env = "base"
+				}
+			}
+
+			outputDir := filepath.Join("plain", env)
+			if err := os.MkdirAll(outputDir, 0o755); err != nil {
+				return nil, fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
+			}
+
+			cmd := exec.Command("helm", "template", "release", chartDir, "-f", valuesFile, "--output-dir", outputDir)
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				return nil, fmt.Errorf("helm template failed for %s: %w\nOutput: %s", valuesFile, err, output)
+			}
+		}
+	}
+
+	err := filepath.Walk("plain", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && (strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".yml")) {
+			plainFiles = append(plainFiles, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to walk plain directory: %w", err)
+	}
+
+	return plainFiles, nil
+}
+
+func (s *Server) convertKustomizeToPlain(files []string) ([]string, error) {
+	kustomizeDir := ""
+	hasKustomization := false
+	for _, file := range files {
+		base := filepath.Base(file)
+		if base == "kustomization.yaml" || base == "kustomization.yml" {
+			hasKustomization = true
+			kustomizeDir = filepath.Dir(file)
+			break
+		}
+	}
+
+	if !hasKustomization {
+		return nil, nil
+	}
+
+	if kustomizeDir == "" && len(files) > 0 {
+		kustomizeDir = filepath.Dir(files[0])
+	}
+
+	if err := os.MkdirAll("plain", 0o755); err != nil {
+		return nil, fmt.Errorf("failed to create plain directory: %w", err)
+	}
+
+	outputFile := "plain/kustomize-output.yaml"
+
+	cmd := exec.Command("kubectl", "kustomize", kustomizeDir)
+	output, err := cmd.Output()
+	if err != nil {
+		cmd = exec.Command("kustomize", "build", kustomizeDir)
+		output, err = cmd.Output()
+		if err != nil {
+			return nil, fmt.Errorf("kustomize build failed: %w", err)
+		}
+	}
+
+	if err := os.WriteFile(outputFile, output, 0o644); err != nil {
+		return nil, fmt.Errorf("failed to write kustomize output: %w", err)
+	}
+
+	return []string{outputFile}, nil
+}
 
 func (s *Server) convertToBklHandler(ctx context.Context, args struct{}) (*promptResponse, error) {
 	p := s.taskService.AddProject()
@@ -66,6 +194,23 @@ func (s *Server) convertToBklOnFiles(p *taskcp.Project, t *taskcp.Task) error {
 		return fmt.Errorf("no files provided")
 	}
 
+	helmFiles, err := s.convertHelmToPlain(result.Files)
+	if err != nil {
+		return fmt.Errorf("failed to convert Helm to plain YAML: %w", err)
+	}
+	if helmFiles != nil {
+		result.Files = helmFiles
+	} else {
+
+		kustomizeFiles, err := s.convertKustomizeToPlain(result.Files)
+		if err != nil {
+			return fmt.Errorf("failed to convert Kustomize to plain YAML: %w", err)
+		}
+		if kustomizeFiles != nil {
+			result.Files = kustomizeFiles
+		}
+	}
+
 	commonPrefix := findCommonPrefix(result.Files)
 
 	prepFiles := []string{}
@@ -95,6 +240,7 @@ mcp__bkl-mcp__query keywords="..."
 Hints:
 * Try to convert ALL lists to maps with names plus $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.
 * Don't add comments
+* If you run into a problem, try querying keywords="fixit" for previous solutions
 
 Return the converted bkl file contents in the results field of:
 
@@ -141,6 +287,9 @@ where the result is a JSON encoding in the following format:
 I'll figure out which files are in the base layer and which are in the derived layers.
 
 DO NOT create directories or files -- just use the tools to determine the file structure and tell me.
+
+Hints:
+* selector="kind" is critical to tell intersect how to match documents
 `).
 		WithData("prep_files", prepFiles).
 		Then(func(t *taskcp.Task) error {

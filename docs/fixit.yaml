@@ -46,3 +46,23 @@
                 $encode: values:name:value
             languages: [[0, "yaml"]]
             highlights: ["$encode: values:name:value"]
+- id: encode-nesting-level
+  title: $encode nesting level
+  items:
+    - example:
+        operation: fixit
+        layers:
+          - code: |
+              imagePullSecrets:
+                - name: regcred
+            languages: [[0, "yaml"]]
+          - code: |
+              imagePullSecrets:
+                regcred:
+                  $encode: values:name
+            languages: [[0, "yaml"]]
+          - code: |
+              imagePullSecrets:
+                regcred: {}
+                $encode: values:name
+            languages: [[0, "yaml"]]

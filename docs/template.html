@@ -101,7 +101,10 @@
 <div class="code-container">
 {{template "codeBlock" dict "Label" (index .Layers 0).Label "Code" (index .Layers 0 | formatLayer) "HasLabels" $hasLabels}}
 </div>
-<div style="text-align: center; margin: 5px 0; font-size: 30px; color: var(--neutral5);">↓</div>
+<div class="grid-container grid-2-col">
+<div style="text-align: center; font-size: 30px; color: var(--red5);">↓</div>
+<div style="text-align: center; font-size: 30px; color: var(--green5);">↓</div>
+</div>
 <div class="grid-container grid-2-col">
 <div class="code-container fixit-bad">
 {{template "codeBlock" dict "Label" (index .Layers 1).Label "Code" (index .Layers 1 | formatLayer) "HasLabels" $hasLabels}}
