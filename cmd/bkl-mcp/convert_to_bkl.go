@@ -47,11 +47,16 @@ func (s *Server) convertHelmToPlain(files []string) ([]string, error) {
 	var plainFiles []string
 
 	if len(valuesFiles) == 0 {
-		cmd := exec.Command("helm", "template", "release", chartDir, "--output-dir", "plain")
-		output, err := cmd.CombinedOutput()
+		cmd := exec.Command("helm", "template", "release", chartDir)
+		output, err := cmd.Output()
 		if err != nil {
-			return nil, fmt.Errorf("helm template failed: %w\nOutput: %s", err, output)
+			return nil, fmt.Errorf("helm template failed: %w", err)
 		}
+		outputFile := filepath.Join("plain", "base.yaml")
+		if err := os.WriteFile(outputFile, output, 0o644); err != nil {
+			return nil, fmt.Errorf("failed to write output file: %w", err)
+		}
+		plainFiles = append(plainFiles, outputFile)
 	} else {
 		for _, valuesFile := range valuesFiles {
 			base := filepath.Base(valuesFile)
@@ -69,30 +74,17 @@ func (s *Server) convertHelmToPlain(files []string) ([]string, error) {
 				}
 			}
 
-			outputDir := filepath.Join("plain", env)
-			if err := os.MkdirAll(outputDir, 0o755); err != nil {
-				return nil, fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
-			}
-
-			cmd := exec.Command("helm", "template", "release", chartDir, "-f", valuesFile, "--output-dir", outputDir)
-			output, err := cmd.CombinedOutput()
+			cmd := exec.Command("helm", "template", "release", chartDir, "-f", valuesFile)
+			output, err := cmd.Output()
 			if err != nil {
-				return nil, fmt.Errorf("helm template failed for %s: %w\nOutput: %s", valuesFile, err, output)
+				return nil, fmt.Errorf("helm template failed for %s: %w", valuesFile, err)
 			}
+			outputFile := filepath.Join("plain", env+".yaml")
+			if err := os.WriteFile(outputFile, output, 0o644); err != nil {
+				return nil, fmt.Errorf("failed to write output file: %w", err)
+			}
+			plainFiles = append(plainFiles, outputFile)
 		}
-	}
-
-	err := filepath.Walk("plain", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() && (strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".yml")) {
-			plainFiles = append(plainFiles, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to walk plain directory: %w", err)
 	}
 
 	return plainFiles, nil
