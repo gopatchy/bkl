@@ -201,121 +201,121 @@
     - content: |
         By default, child documents apply to all parent documents. Use <highlight>$match</highlight> to target specific documents.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-              ---
-              b: 2
-            languages: [[0, "yaml"]]
-          - code: |
-              c: 3
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            c: 3
-            ---
-            b: 2
-            c: 3
-          languages: [[0, "yaml"]]
-          highlights: ["c: 3", "c: 3"]
-    - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-              ---
-              b: 2
-            languages: [[0, "yaml"]]
-          - code: |
-              $match:
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                ---
                 b: 2
+              languages: [[0, "yaml"]]
+            - code: |
+                c: 3
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: 1
               c: 3
-            highlights: ["$match:", "b: 2"]
+              ---
+              b: 2
+              c: 3
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            ---
-            b: 2
-            c: 3
-          highlights: ["c: 3"]
-          languages: [[0, "yaml"]]
+            highlights: ["c: 3", "c: 3"]
+    - example:
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                ---
+                b: 2
+              languages: [[0, "yaml"]]
+            - code: |
+                $match:
+                  b: 2
+                c: 3
+              highlights: ["$match:", "b: 2"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: 1
+              ---
+              b: 2
+              c: 3
+            highlights: ["c: 3"]
+            languages: [[0, "yaml"]]
     - content: |
         The supplied pattern can match multiple documents and the updates will be applied to all of them. <highlight>$match: {}</highlight> matches any documents with a map as their root element, regardless of parent.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                ---
+                b: 2
+                ---
+                a: 1
+              languages: [[0, "yaml"]]
+            - code: |
+                $match:
+                  a: 1
+                c: 3
+              highlights: ["$match:", "a: 1"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
+              c: 3
               ---
               b: 2
               ---
               a: 1
-            languages: [[0, "yaml"]]
-          - code: |
-              $match:
-                a: 1
               c: 3
-            highlights: ["$match:", "a: 1"]
+            highlights: ["c: 3", "c: 3"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            c: 3
-            ---
-            b: 2
-            ---
-            a: 1
-            c: 3
-          highlights: ["c: 3", "c: 3"]
-          languages: [[0, "yaml"]]
     - content: |
         <highlight>$invert: true</highlight> inside a <highlight>$match</highlight> block inverts the match, causing it to apply to any documents that do not contain the match criteria.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                ---
+                b: 2
+              languages: [[0, "yaml"]]
+            - code: |
+                $match:
+                  a: 1
+                  $invert: true
+                c: 3
+              highlights: ["$match:", "$invert: true"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               ---
               b: 2
-            languages: [[0, "yaml"]]
-          - code: |
-              $match:
-                a: 1
-                $invert: true
               c: 3
-            highlights: ["$match:", "$invert: true"]
+            highlights: ["c: 3"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            ---
-            b: 2
-            c: 3
-          highlights: ["c: 3"]
-          languages: [[0, "yaml"]]
     - content: |
         <highlight>$match: null</highlight> forces the updates to apply to a new document.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+              languages: [[0, "yaml"]]
+            - code: |
+                $match: null
+                b: 2
+              highlights: ["$match: null"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
-            languages: [[0, "yaml"]]
-          - code: |
-              $match: null
+              ---
               b: 2
-            highlights: ["$match: null"]
+            highlights: ["b: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            ---
-            b: 2
-          highlights: ["b: 2"]
-          languages: [[0, "yaml"]]
 
 - id: maps
   title: Maps
@@ -323,51 +323,51 @@
     - content: |
         Maps are merged by default. Use <highlight>$replace: true</highlight> to replace the entire map or <highlight>$delete</highlight> to remove specific keys.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+              languages: [[0, "yaml"]]
+            - code: |
+                b: 2
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
-            languages: [[0, "yaml"]]
-          - code: |
               b: 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-            languages: [[0, "yaml"]]
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+              languages: [[0, "yaml"]]
+            - code: |
+                b: 2
+                $replace: true
+              highlights: ["$replace: true"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               b: 2
-              $replace: true
-            highlights: ["$replace: true"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            b: 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: 2
+              languages: [[0, "yaml"]]
+            - code: |
+                c: 3
+                b: $delete
+              highlights: ["b: $delete"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
-              b: 2
-            languages: [[0, "yaml"]]
-          - code: |
               c: 3
-              b: $delete
-            highlights: ["b: $delete"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            c: 3
-          languages: [[0, "yaml"]]
     - content: |
         bkl returns an error if you use <highlight>$delete</highlight>, <highlight>$replace: true</highlight>, or a <highlight>key: value</highlight> pair when they don't override a value from a lower layer. This helps keep upper layers minimal.
 
@@ -377,91 +377,91 @@
     - content: |
         Lists are merged by default. Use <highlight>$replace: true</highlight> to replace the entire list or <highlight>$delete</highlight> to remove specific entries.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                - 1
+              languages: [[0, "yaml"]]
+            - code: |
+                - 2
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               - 1
-            languages: [[0, "yaml"]]
-          - code: |
               - 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - 1
-            - 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              - 1
-            languages: [[0, "yaml"]]
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                - 1
+              languages: [[0, "yaml"]]
+            - code: |
+                - 2
+                - $replace: true
+              highlights: ["$replace: true"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               - 2
-              - $replace: true
-            highlights: ["$replace: true"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                - x: 1
+                - x: 2
+              languages: [[0, "yaml"]]
+            - code: |
+                - x: 3
+                - $delete:
+                    x: 2
+              highlights: ["$delete:", "x: 2"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               - x: 1
-              - x: 2
-            languages: [[0, "yaml"]]
-          - code: |
               - x: 3
-              - $delete:
-                  x: 2
-            highlights: ["$delete:", "x: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - x: 1
-            - x: 3
-          languages: [[0, "yaml"]]
     - content: |
         bkl returns an error if you use <highlight>$replace: true</highlight> or <highlight>$delete</highlight> when they don't override a value from a lower layer. This helps keep upper layers minimal.
     - content: |
         To update a specific list item, use <highlight>$match</highlight>. For scalar values in lists, use <highlight>$value</highlight> to replace the entire item.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                - a: 1
+                - b: 2
+              languages: [[0, "yaml"]]
+            - code: |
+                - $match:
+                    b: 2
+                  b: 10
+              highlights: ["$match:", "b: 2"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               - a: 1
-              - b: 2
+              - b: 10
             languages: [[0, "yaml"]]
-          - code: |
-              - $match:
-                  b: 2
-                b: 10
-            highlights: ["$match:", "b: 2"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            - a: 1
-            - b: 10
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                - 1
+                - 2
+              languages: [[0, "yaml"]]
+            - code: |
+                - $match: 2
+                  $value: 10
+              highlights: ["$match: 2", "$value: 10"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               - 1
-              - 2
+              - 10
             languages: [[0, "yaml"]]
-          - code: |
-              - $match: 2
-                $value: 10
-            highlights: ["$match: 2", "$value: 10"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            - 1
-            - 10
-          languages: [[0, "yaml"]]
 
 - id: interp
   title: $""
@@ -469,23 +469,23 @@
     - content: |
         Use <highlight>$""</highlight> to interpolate format strings with <a href="#merge"><highlight>$merge</highlight></a>-style references.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  c: foo
+                d: $"{b.c} bar {a} 2"
+              highlights: ["$\"{b.c} bar {a} 2\""]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b:
                 c: foo
-              d: $"{b.c} bar {a} 2"
-            highlights: ["$\"{b.c} bar {a} 2\""]
+              d: foo bar 1 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b:
-              c: foo
-            d: foo bar 1 2
-          languages: [[0, "yaml"]]
-          highlights: ["foo bar 1 2"]
+            highlights: ["foo bar 1 2"]
 
 - id: decode
   title: $decode
@@ -493,19 +493,19 @@
     - content: |
         <highlight>$decode</highlight> transforms a string into a tree by parsing standard formats.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              $value: |
-                {"a":1}
-              $decode: json
-            highlights: ["{\"a\":1}", "$decode: json"]
+        evaluate:
+          inputs:
+            - code: |
+                $value: |
+                  {"a":1}
+                $decode: json
+              highlights: ["{\"a\":1}", "$decode: json"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: 1
+            highlights: ["a: 1"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-          highlights: ["a: 1"]
-          languages: [[0, "yaml"]]
 
 - id: env
   title: $env
@@ -513,31 +513,31 @@
     - content: |
         Use <highlight>$env:</highlight> to substitute environment variables. This is supported in keys and values.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              # export FOO=test
-              "$env:FOO": 1
-            highlights: ["\"$env:FOO\""]
+        evaluate:
+          inputs:
+            - code: |
+                # export FOO=test
+                "$env:FOO": 1
+              highlights: ["\"$env:FOO\""]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              test: 1
+            highlights: ["test"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            test: 1
-          highlights: ["test"]
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              # export FOO=test
-              a: $env:FOO
-            highlights: ["$env:FOO"]
+        evaluate:
+          inputs:
+            - code: |
+                # export FOO=test
+                a: $env:FOO
+              highlights: ["$env:FOO"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: test
+            highlights: ["test"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: test
-          highlights: ["test"]
-          languages: [[0, "yaml"]]
     - content: |
         Note that all <highlight>$env:</highlight> substitutions result in string values even if the substituted value is <highlight>true</highlight>, <highlight>false</highlight>, <highlight>null</highlight>, or all digits.
 
@@ -547,208 +547,208 @@
     - content: |
         <highlight>$encode</highlight> transforms the subtree into the specified format.
     - example:
-        operation: evaluate
-        layers:
-          - label: base64
+        evaluate:
+          inputs:
+            - label: base64
+              code: |
+                $value: a
+                $encode: base64
+              highlights: ["$encode: base64"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
-              $value: a
-              $encode: base64
-            highlights: ["$encode: base64"]
+              YQ==
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            YQ==
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - label: flags
+        evaluate:
+          inputs:
+            - label: flags
+              code: |
+                a: 1
+                b: 2
+                $encode: flags
+                # [tolist:=, prefix:--]
+              highlights: ["$encode: flags"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
-              a: 1
-              b: 2
-              $encode: flags
-              # [tolist:=, prefix:--]
-            highlights: ["$encode: flags"]
+              - --a=1
+              - --b=2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - --a=1
-            - --b=2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - label: flatten
-            code: |
-              - - a
-                - b
-              - - c
-                - 4
-              - e
-              - $encode: flatten
-            highlights: ["$encode: flatten"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            - a
-            - b
-            - c
-            - 4
-            - e
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: join
-            code: |
-              $value: [a, b]
-              $encode: join:/
-            highlights: ["$encode: join:/"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a/b
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: json
-            code: |
-              a: 1
-              b: 2
-              $encode: json
-            highlights: ["$encode: json"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            |
-              {"a":1,"b":2}
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: json (list)
-            code: |
-              - a: 1
-              - b: 2
-              - $encode: json
-            highlights: ["$encode: json"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            |
-              [{"a":1},{"b":2}]
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: prefix
+        evaluate:
+          inputs:
+            - label: flatten
+              code: |
+                - - a
+                  - b
+                - - c
+                  - 4
+                - e
+                - $encode: flatten
+              highlights: ["$encode: flatten"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
               - a
+              - b
+              - c
+              - 4
+              - e
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: join
+              code: |
+                $value: [a, b]
+                $encode: join:/
+              highlights: ["$encode: join:/"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a/b
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: json
+              code: |
+                a: 1
+                b: 2
+                $encode: json
+              highlights: ["$encode: json"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              |
+                {"a":1,"b":2}
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: json (list)
+              code: |
+                - a: 1
+                - b: 2
+                - $encode: json
+              highlights: ["$encode: json"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              |
+                [{"a":1},{"b":2}]
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: prefix
+              code: |
+                - a
+                - 2
+                - $encode: prefix:X
+              highlights: ["$encode: prefix:X"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              - Xa
+              - X2
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: sha256
+              code: |
+                $value: hello world
+                $encode: sha256
+              highlights: ["$encode: sha256"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: tolist
+              code: |
+                a: 1
+                b: 2
+                $encode: tolist:=
+              highlights: ["$encode: tolist:="]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              - a=1
+              - b=2
+            languages: [[0, "yaml"]]
+    - example:
+        evaluate:
+          inputs:
+            - label: values
+              code: |
+                a: 1
+                b: 2
+                c: 3
+                $encode: values
+              highlights: ["$encode: values"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              - 1
               - 2
-              - $encode: prefix:X
-            highlights: ["$encode: prefix:X"]
+              - 3
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - Xa
-            - X2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - label: sha256
+        evaluate:
+          inputs:
+            - label: values:KEY
+              code: |
+                a:
+                  b: 1
+                c:
+                  d: 2
+                $encode: values:name
+              highlights: ["$encode: values:name"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
-              $value: hello world
-              $encode: sha256
-            highlights: ["$encode: sha256"]
+              - b: 1
+                name: a
+              - d: 2
+                name: c
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - label: tolist
+        evaluate:
+          inputs:
+            - label: values:KEY:VALUE
+              code: |
+                a: 1
+                b: 2
+                $encode: values:name:value
+              highlights: ["$encode: values:name:value"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
-              a: 1
-              b: 2
-              $encode: tolist:=
-            highlights: ["$encode: tolist:="]
+              - name: a
+                value: 1
+              - name: b
+                value: 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - a=1
-            - b=2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - label: values
+        evaluate:
+          inputs:
+            - label: Stacking
+              code: |
+                a: 1
+                b: 2
+                $encode: [tolist:=, "join:,"]
+              highlights: ["$encode: [tolist:=, \"join:,\"]"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
-              a: 1
-              b: 2
-              c: 3
-              $encode: values
-            highlights: ["$encode: values"]
+              a=1,b=2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - 1
-            - 2
-            - 3
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: values:KEY
-            code: |
-              a:
-                b: 1
-              c:
-                d: 2
-              $encode: values:name
-            highlights: ["$encode: values:name"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            - b: 1
-              name: a
-            - d: 2
-              name: c
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: values:KEY:VALUE
-            code: |
-              a: 1
-              b: 2
-              $encode: values:name:value
-            highlights: ["$encode: values:name:value"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            - name: a
-              value: 1
-            - name: b
-              value: 2
-          languages: [[0, "yaml"]]
-    - example:
-        operation: evaluate
-        layers:
-          - label: Stacking
-            code: |
-              a: 1
-              b: 2
-              $encode: [tolist:=, "join:,"]
-            highlights: ["$encode: [tolist:=, \"join:,\"]"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a=1,b=2
-          languages: [[0, "yaml"]]
 
 - id: required
   title: $required
@@ -756,75 +756,75 @@
     - content: |
         Use <highlight>$required</highlight> in lower layers to force upper layers to replace the value.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-              b: $required
-            highlights: ["b: $required"]
-            languages: [[0, "yaml"]]
-          - code: |
-              c: 3
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            Error
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: $required
+              highlights: ["b: $required"]
+              languages: [[0, "yaml"]]
+            - code: |
+                c: 3
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              Error
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: $required
+              highlights: ["b: $required"]
+              languages: [[0, "yaml"]]
+            - code: |
+                b: 2
+                c: 3
+              highlights: ["b: 2"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
-              b: $required
-            highlights: ["b: $required"]
-            languages: [[0, "yaml"]]
-          - code: |
               b: 2
               c: 3
-            highlights: ["b: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-            c: 3
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-              b:
-                - $required
-            highlights: ["b:", "- $required"]
-            languages: [[0, "yaml"]]
-          - code: |
-              c: 3
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            Error
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  - $required
+              highlights: ["b:", "- $required"]
+              languages: [[0, "yaml"]]
+            - code: |
+                c: 3
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              Error
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  - $required
+              highlights: ["b:", "- $required"]
+              languages: [[0, "yaml"]]
+            - code: |
+                b:
+                  - 2
+                c: 3
+              highlights: ["b:", "- 2"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
-              b:
-                - $required
-            highlights: ["b:", "- $required"]
-            languages: [[0, "yaml"]]
-          - code: |
               b:
                 - 2
               c: 3
-            highlights: ["b:", "- 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b:
-              - 2
-            c: 3
-          languages: [[0, "yaml"]]
 
 - id: merge
   title: $merge
@@ -832,166 +832,166 @@
     - content: |
         Use <highlight>$merge</highlight> to merge the contents one subtree or scalar value into another.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    a: 1
+                zig:
+                  b: 2
+                  $merge: foo.bar
+              highlights: ["$merge: foo.bar"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               foo:
                 bar:
                   a: 1
               zig:
-                b: 2
-                $merge: foo.bar
-            highlights: ["$merge: foo.bar"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            foo:
-              bar:
                 a: 1
-            zig:
-              a: 1
-              b: 2
-          highlights: ["a: 1"]
-          languages: [[0, "yaml"]]
+                b: 2
+            highlights: ["a: 1"]
+            languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    - a: 1
+                zig:
+                  - b: 2
+                  - $merge: foo.bar
+              highlights: ["$merge: foo.bar"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               foo:
                 bar:
                   - a: 1
               zig:
                 - b: 2
-                - $merge: foo.bar
-            highlights: ["$merge: foo.bar"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            foo:
-              bar:
                 - a: 1
-            zig:
-              - b: 2
-              - a: 1
-          highlights: ["a: 1"]
-          languages: [[0, "yaml"]]
+            highlights: ["a: 1"]
+            languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    a: 1
+                zig:
+                  b: 2
+                  c: $merge:foo.bar.a
+              highlights: ["$merge:foo.bar.a"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               foo:
                 bar:
                   a: 1
               zig:
                 b: 2
-                c: $merge:foo.bar.a
-            highlights: ["$merge:foo.bar.a"]
+                c: 1
+            highlights: ["1"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            foo:
-              bar:
-                a: 1
-            zig:
-              b: 2
-              c: 1
-          highlights: ["1"]
-          languages: [[0, "yaml"]]
     - content: |
         You can also merge across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: 2
+                ---
+                c: 3
+                $merge:
+                  $match:
+                    a: 1
+              highlights: ["$merge:", "$match:", "a: 1"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b: 2
               ---
+              a: 1
+              b: 2
               c: 3
-              $merge:
-                $match:
-                  a: 1
-            highlights: ["$merge:", "$match:", "a: 1"]
+            highlights: ["a: 1", "b: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-            ---
-            a: 1
-            b: 2
-            c: 3
-          highlights: ["a: 1", "b: 2"]
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  c: 3
+                ---
+                d: 4
+                $merge:
+                  $match:
+                    a: 1
+                  $path: b
+              highlights: ["$merge:", "$match:", "a: 1", "$path: b"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b:
                 c: 3
               ---
-              d: 4
-              $merge:
-                $match:
-                  a: 1
-                $path: b
-            highlights: ["$merge:", "$match:", "a: 1", "$path: b"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b:
               c: 3
-            ---
-            c: 3
-            d: 4
-          highlights: ["c: 3"]
-          languages: [[0, "yaml"]]
+              d: 4
+            highlights: ["c: 3"]
+            languages: [[0, "yaml"]]
     - content: |
         <highlight>$merge</highlight> supports a shorthand syntax: <highlight>$merge: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: 2
+                ---
+                c: 3
+                $merge: [{a: 1}]
+              highlights: ["$merge: [{a: 1}]"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b: 2
               ---
+              a: 1
+              b: 2
               c: 3
-              $merge: [{a: 1}]
-            highlights: ["$merge: [{a: 1}]"]
+            highlights: ["a: 1", "b: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-            ---
-            a: 1
-            b: 2
-            c: 3
-          highlights: ["a: 1", "b: 2"]
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  c: 3
+                ---
+                d: 4
+                $merge: [{a: 1}, b]
+              highlights: ["$merge: [{a: 1}, b]"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b:
                 c: 3
               ---
-              d: 4
-              $merge: [{a: 1}, b]
-            highlights: ["$merge: [{a: 1}, b]"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b:
               c: 3
-            ---
-            c: 3
-            d: 4
-          highlights: ["c: 3"]
-          languages: [[0, "yaml"]]
+              d: 4
+            highlights: ["c: 3"]
+            languages: [[0, "yaml"]]
 
 - id: replace
   title: $replace
@@ -999,161 +999,161 @@
     - content: |
         Use <highlight>$replace</highlight> to merge the contents of one subtree or scalar value with another.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    a: 1
+                zig:
+                  b: 2
+                  $replace: foo.bar
+              highlights: ["$replace: foo.bar"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               foo:
                 bar:
                   a: 1
               zig:
-                b: 2
-                $replace: foo.bar
-            highlights: ["$replace: foo.bar"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            foo:
-              bar:
                 a: 1
-            zig:
-              a: 1
-          highlights: ["a: 1"]
-          languages: [[0, "yaml"]]
+            highlights: ["a: 1"]
+            languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    - a: 1
+                zig:
+                  - b: 2
+                  - $replace: foo.bar
+              highlights: ["$replace: foo.bar"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               foo:
                 bar:
                   - a: 1
               zig:
-                - b: 2
-                - $replace: foo.bar
-            highlights: ["$replace: foo.bar"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            foo:
-              bar:
                 - a: 1
-            zig:
-              - a: 1
-          highlights: ["a: 1"]
-          languages: [[0, "yaml"]]
+            highlights: ["a: 1"]
+            languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    a: 1
+                zig:
+                  b: 2
+                  c: $replace:foo.bar.a
+              highlights: ["$replace:foo.bar.a"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               foo:
                 bar:
                   a: 1
               zig:
                 b: 2
-                c: $replace:foo.bar.a
-            highlights: ["$replace:foo.bar.a"]
+                c: 1
+            highlights: ["1"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            foo:
-              bar:
-                a: 1
-            zig:
-              b: 2
-              c: 1
-          highlights: ["1"]
-          languages: [[0, "yaml"]]
     - content: |
         Note that <highlight>$merge</highlight> and <highlight>$replace</highlight> are equivalent for scalar values.
     - content: |
         You can also replace across documents using <highlight>$match</highlight> and optionally <highlight>$path</highlight>:
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: 2
+                ---
+                c: 3
+                $replace:
+                  $match:
+                    a: 1
+              highlights: ["$replace:", "$match:", "a: 1"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b: 2
               ---
-              c: 3
-              $replace:
-                $match:
-                  a: 1
-            highlights: ["$replace:", "$match:", "a: 1"]
+              a: 1
+              b: 2
+            highlights: ["a: 1", "b: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-            ---
-            a: 1
-            b: 2
-          highlights: ["a: 1", "b: 2"]
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  c: 3
+                ---
+                d: 4
+                $replace:
+                  $match:
+                    a: 1
+                  $path: b
+              highlights: ["$replace:", "$match:", "a: 1", "$path: b"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b:
                 c: 3
               ---
-              d: 4
-              $replace:
-                $match:
-                  a: 1
-                $path: b
-            highlights: ["$replace:", "$match:", "a: 1", "$path: b"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b:
               c: 3
-            ---
-            c: 3
-          languages: [[0, "yaml"]]
+            languages: [[0, "yaml"]]
     - content: |
         <highlight>$replace</highlight> supports a shorthand syntax: <highlight>$replace: [{pattern}, path]</highlight> is equivalent to using <highlight>$match</highlight> and <highlight>$path</highlight>.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b: 2
+                ---
+                c: 3
+                $replace: [{a: 1}]
+              highlights: ["$replace: [{a: 1}]"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b: 2
               ---
-              c: 3
-              $replace: [{a: 1}]
-            highlights: ["$replace: [{a: 1}]"]
+              a: 1
+              b: 2
+            highlights: ["a: 1", "b: 2"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-            ---
-            a: 1
-            b: 2
-          highlights: ["a: 1", "b: 2"]
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                b:
+                  c: 3
+                ---
+                d: 4
+                $replace: [{a: 1}, b]
+              highlights: ["$replace: [{a: 1}, b]"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
               b:
                 c: 3
               ---
-              d: 4
-              $replace: [{a: 1}, b]
-            highlights: ["$replace: [{a: 1}, b]"]
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b:
               c: 3
-            ---
-            c: 3
-          highlights: ["c: 3"]
-          languages: [[0, "yaml"]]
+            highlights: ["c: 3"]
+            languages: [[0, "yaml"]]
 
 - id: output
   title: $output
@@ -1161,87 +1161,87 @@
     - content: |
         Use <highlight>$output: true</highlight> to select a subtree for output instead of the document root.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              foo:
-                bar:
-                  $output: true
-                  a: 1
-                  b: 2
-            highlights: ["$output: true"]
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    $output: true
+                    a: 1
+                    b: 2
+              highlights: ["$output: true"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: 1
+              b: 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-            b: 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              foo:
-                bar:
-                  - $output: true
-                  - a: 1
-                  - b: 2
-            highlights: ["$output: true"]
+        evaluate:
+          inputs:
+            - code: |
+                foo:
+                  bar:
+                    - $output: true
+                    - a: 1
+                    - b: 2
+              highlights: ["$output: true"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              - a: 1
+              - b: 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - a: 1
-            - b: 2
-          languages: [[0, "yaml"]]
     - content: |
         Multiple instances of <highlight>$output: true</highlight> in a document will generate multiple output documents (delimited with <highlight>---</highlight>).
     - content: |
         Use <highlight>$output: false</highlight> to omit a subtree or entire document from the output.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a:
-                b: 1
-                $output: false
+        evaluate:
+          inputs:
+            - code: |
+                a:
+                  b: 1
+                  $output: false
+                c:
+                  d: 2
+              highlights: ["$output: false"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               c:
                 d: 2
-            highlights: ["$output: false"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            c:
-              d: 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a:
-                - b: 1
-                - $output: false
+        evaluate:
+          inputs:
+            - code: |
+                a:
+                  - b: 1
+                  - $output: false
+                c:
+                  - d: 2
+              highlights: ["$output: false"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               c:
                 - d: 2
-            highlights: ["$output: false"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            c:
-              - d: 2
-          languages: [[0, "yaml"]]
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: 1
-              $output: false
-              ---
+        evaluate:
+          inputs:
+            - code: |
+                a: 1
+                $output: false
+                ---
+                b: 2
+              highlights: ["$output: false"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               b: 2
-            highlights: ["$output: false"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            b: 2
-          languages: [[0, "yaml"]]
     - content: |
         Combine <highlight>$output</highlight> with <highlight>$merge</highlight> to create reusable template sections.
 
@@ -1251,128 +1251,128 @@
     - content: |
         <highlight>$repeat:</highlight> at the top level of a document causes the document to be duplicated the given number of times. Within the document, <highlight>$repeat</highlight> can be used to reference the zero-based repeat index.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a: foo
+                b: $repeat
+                $repeat: 2
+              highlights: ["$repeat: 2", "b: $repeat"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: foo
-              b: $repeat
-              $repeat: 2
-            highlights: ["$repeat: 2", "b: $repeat"]
+              b: 0
+              ---
+              a: foo
+              b: 1
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: foo
-            b: 0
-            ---
-            a: foo
-            b: 1
-          languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> can also contain a map of named repeat iterators to repeat count. The result is the cartesian product (all combinations) of repeat values.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              $repeat:
-                a: 2
-                b: 3
-              $value: $"{$repeat:a},{$repeat:b}"
-            highlights: ["$repeat:", "a: 2", "b: 3", "$repeat:a", "$repeat:b"]
+        evaluate:
+          inputs:
+            - code: |
+                $repeat:
+                  a: 2
+                  b: 3
+                $value: $"{$repeat:a},{$repeat:b}"
+              highlights: ["$repeat:", "a: 2", "b: 3", "$repeat:a", "$repeat:b"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              0,0
+              ---
+              0,1
+              ---
+              0,2
+              ---
+              1,0
+              ---
+              1,1
+              ---
+              1,2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            0,0
-            ---
-            0,1
-            ---
-            0,2
-            ---
-            1,0
-            ---
-            1,1
-            ---
-            1,2
-          languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> can contain a list of values to iterate over:
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              $repeat: [foo, bar, baz]
-              a: $repeat
-            highlights: ["$repeat: [foo, bar, baz]", "a: $repeat"]
+        evaluate:
+          inputs:
+            - code: |
+                $repeat: [foo, bar, baz]
+                a: $repeat
+              highlights: ["$repeat: [foo, bar, baz]", "a: $repeat"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: foo
+              ---
+              a: bar
+              ---
+              a: baz
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: foo
-            ---
-            a: bar
-            ---
-            a: baz
-          languages: [[0, "yaml"]]
     - content: |
         <highlight>$repeat:</highlight> supports range parameters for numeric sequences:
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              $repeat:
-                $first: 10
-                $count: 3
-              a: $repeat
-            highlights: ["$repeat:", "$first: 10", "$count: 3", "a: $repeat"]
+        evaluate:
+          inputs:
+            - code: |
+                $repeat:
+                  $first: 10
+                  $count: 3
+                a: $repeat
+              highlights: ["$repeat:", "$first: 10", "$count: 3", "a: $repeat"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: 10
+              ---
+              a: 11
+              ---
+              a: 12
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 10
-            ---
-            a: 11
-            ---
-            a: 12
-          languages: [[0, "yaml"]]
     - content: |
         Range parameters require exactly 2 of <highlight>$first</highlight>, <highlight>$last</highlight>, and <highlight>$count</highlight>. Optional <highlight>$step</highlight> defaults to 1.
     - content: |
         <highlight>$repeat:</highlight> also works at the object level within maps and lists:
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a:
+                  $"b{$repeat}":
+                    c: $repeat
+                    $repeat: 3
+              highlights: ["$repeat: 3", "c: $repeat"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a:
-                $"b{$repeat}":
-                  c: $repeat
-                  $repeat: 3
-            highlights: ["$repeat: 3", "c: $repeat"]
+                b0:
+                  c: 0
+                b1:
+                  c: 1
+                b2:
+                  c: 2
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a:
-              b0:
-                c: 0
-              b1:
-                c: 1
-              b2:
-                c: 2
-          languages: [[0, "yaml"]]
     - content: |
         Object-level repeat in lists:
     - example:
-        operation: evaluate
-        layers:
-          - code: |
+        evaluate:
+          inputs:
+            - code: |
+                a:
+                  - b: $repeat
+                    $repeat: [foo, bar, baz]
+              highlights: ["$repeat: [foo, bar, baz]", "b: $repeat"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a:
-                - b: $repeat
-                  $repeat: [foo, bar, baz]
-            highlights: ["$repeat: [foo, bar, baz]", "b: $repeat"]
+                - b: foo
+                - b: bar
+                - b: baz
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a:
-              - b: foo
-              - b: bar
-              - b: baz
-          languages: [[0, "yaml"]]
 
 - id: defer
   title: $defer
@@ -1382,33 +1382,33 @@
     - content: |
         This allows operations on the final output after transformations like <highlight>$repeat</highlight> have been applied.
     - example:
-        operation: evaluate
-        layers:
-          - label: a.yaml
+        evaluate:
+          inputs:
+            - label: a.yaml
+              code: |
+                $repeat: 2
+                a: $repeat
+              languages: [[0, "yaml"]]
+            - label: a.b.yaml
+              code: |
+                $repeat: 3
+                ---
+                $defer: true
+                $match:
+                  a: 2
+                b: special
+              highlights: ["$defer: true"]
+              languages: [[0, "yaml"]]
+          result:
             code: |
-              $repeat: 2
-              a: $repeat
-            languages: [[0, "yaml"]]
-          - label: a.b.yaml
-            code: |
-              $repeat: 3
+              a: 0
               ---
-              $defer: true
-              $match:
-                a: 2
+              a: 1
+              ---
+              a: 2
               b: special
-            highlights: ["$defer: true"]
+            highlights: ["b: special"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 0
-            ---
-            a: 1
-            ---
-            a: 2
-            b: special
-          highlights: ["b: special"]
-          languages: [[0, "yaml"]]
 
 - id: escape
   title: $$
@@ -1416,17 +1416,17 @@
     - content: |
         <highlight>$$</highlight> translates to a literal <highlight>$</highlight> in cases where it would otherwise trigger special handling.
     - example:
-        operation: evaluate
-        layers:
-          - code: |
-              a: $$env:foo
-            highlights: ["$$env:foo"]
+        evaluate:
+          inputs:
+            - code: |
+                a: $$env:foo
+              highlights: ["$$env:foo"]
+              languages: [[0, "yaml"]]
+          result:
+            code: |
+              a: $env:foo
+            highlights: ["$env:foo"]
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: $env:foo
-          highlights: ["$env:foo"]
-          languages: [[0, "yaml"]]
 
 - id: toml
   title: TOML
@@ -1491,61 +1491,64 @@
     - content: |
         Use <highlight>--selector</highlight> to limit processing to documents matching a specific path.
     - example:
-        operation: diff
-        layers:
-          - code: |
+        diff:
+          base:
+            code: |
               a: 1
               b: $required
               c: 3
             languages: [[0, "yaml"]]
-          - code: |
+          target:
+            code: |
               a: 1
               b: 2
               d: 4
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            $match: {}
-            b: 2
-            c: $delete
-            d: 4
-          languages: [[0, "yaml"]]
+          result:
+            code: |
+              $match: {}
+              b: 2
+              c: $delete
+              d: 4
+            languages: [[0, "yaml"]]
     - example:
-        operation: diff
-        layers:
-          - code: |
+        diff:
+          base:
+            code: |
               - a: 1
               - b: 2
             languages: [[0, "yaml"]]
-          - code: |
+          target:
+            code: |
               - a: 1
               - c: 3
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - $match: {}
-            - c: 3
-            - $delete:
-                b: 2
-          languages: [[0, "yaml"]]
+          result:
+            code: |
+              - $match: {}
+              - c: 3
+              - $delete:
+                  b: 2
+            languages: [[0, "yaml"]]
     - example:
-        operation: diff
-        layers:
-          - code: |
+        diff:
+          base:
+            code: |
               - 1
               - 2
             languages: [[0, "yaml"]]
-          - code: |
+          target:
+            code: |
               - 1
               - 3
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            - $match: {}
-            - 1
-            - 3
-            - $replace: true
-          languages: [[0, "yaml"]]
+          result:
+            code: |
+              - $match: {}
+              - 1
+              - 3
+              - $replace: true
+            languages: [[0, "yaml"]]
 
 - id: bkli
   title: bkli
@@ -1561,39 +1564,39 @@
     - content: |
         Use <highlight>--selector</highlight> to limit processing to documents matching a specific path.
     - example:
-        operation: intersect
-        layers:
-          - code: |
+        intersect:
+          inputs:
+            - code: |
+                a: 1
+                b: 2
+                c: 3
+              languages: [[0, "yaml"]]
+            - code: |
+                a: 1
+                b: 10
+                d: 4
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               a: 1
-              b: 2
-              c: 3
             languages: [[0, "yaml"]]
-          - code: |
-              a: 1
-              b: 10
-              d: 4
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            a: 1
-          languages: [[0, "yaml"]]
     - example:
-        operation: intersect
-        layers:
-          - code: |
+        intersect:
+          inputs:
+            - code: |
+                - a: 1
+                - b: 2
+                - c: 3
+              languages: [[0, "yaml"]]
+            - code: |
+                - a: 1
+                - b: 10
+                - d: 4
+              languages: [[0, "yaml"]]
+          result:
+            code: |
               - a: 1
-              - b: 2
-              - c: 3
             languages: [[0, "yaml"]]
-          - code: |
-              - a: 1
-              - b: 10
-              - d: 4
-            languages: [[0, "yaml"]]
-        result:
-          code: |
-            - a: 1
-          languages: [[0, "yaml"]]
 
 - id: bklr
   title: bklr
@@ -1615,30 +1618,31 @@
     - content: |
         <highlight>bklc</highlight> (c for "compare") compares two bkl files and shows colorized text differences between their evaluated outputs. Use <highlight>--color</highlight> to enable colored output. Use <highlight>--sort</highlight> to order documents by a specific path before comparison.
     - example:
-        operation: compare
-        layers:
-          - code: |
+        compare:
+          left:
+            code: |
               a: 1
               b: 2
               c: 3
             languages: [[0, "yaml"]]
-          - code: |
+          right:
+            code: |
               a: 1
               b: 4
               c: 3
               d: 5
             languages: [[0, "yaml"]]
-        result:
-          code: |
-            --- file1
-            +++ file2
-            @@ -1,3 +1,4 @@
-             a: 1
-            -b: 2
-            +b: 4
-             c: 3
-            +d: 5
-          languages: [[0, "diff"]]
+          result:
+            code: |
+              --- file1
+              +++ file2
+              @@ -1,3 +1,4 @@
+               a: 1
+              -b: 2
+              +b: 4
+               c: 3
+              +d: 5
+            languages: [[0, "diff"]]
 
 - id: kubectl-bkl
   title: kubectl bkl

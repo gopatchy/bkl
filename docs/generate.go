@@ -85,3 +85,7 @@ func dict(values ...any) map[string]any {
 	}
 	return m
 }
+
+func slice(values ...any) []any {
+	return values
+}

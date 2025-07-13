@@ -125,17 +125,59 @@ func scoreDocItem(item bkl.DocItem, keywords []string) int {
 func scoreExample(example *bkl.DocExample, keywords []string) int {
 	score := 0
 
-	for _, layer := range example.Layers {
-		codeMatches := countKeywordMatches(strings.ToLower(layer.Code), keywords)
-		labelMatches := countKeywordMatches(strings.ToLower(layer.Label), keywords)
-		if codeMatches > 0 || labelMatches > 0 {
-			score += (codeMatches + labelMatches) * 5
-			break
+	switch {
+	case example.Evaluate != nil:
+		for _, input := range example.Evaluate.Inputs {
+			codeMatches := countKeywordMatches(strings.ToLower(input.Code), keywords)
+			labelMatches := countKeywordMatches(strings.ToLower(input.Label), keywords)
+			if codeMatches > 0 || labelMatches > 0 {
+				score += (codeMatches + labelMatches) * 5
+				break
+			}
 		}
-	}
+		resultMatches := countKeywordMatches(strings.ToLower(example.Evaluate.Result.Code), keywords)
+		score += resultMatches * 5
 
-	resultMatches := countKeywordMatches(strings.ToLower(example.Result.Code), keywords)
-	score += resultMatches * 5
+	case example.Diff != nil:
+		baseMatches := countKeywordMatches(strings.ToLower(example.Diff.Base.Code), keywords)
+		targetMatches := countKeywordMatches(strings.ToLower(example.Diff.Target.Code), keywords)
+		score += (baseMatches + targetMatches) * 5
+		resultMatches := countKeywordMatches(strings.ToLower(example.Diff.Result.Code), keywords)
+		score += resultMatches * 5
+
+	case example.Intersect != nil:
+		for _, input := range example.Intersect.Inputs {
+			codeMatches := countKeywordMatches(strings.ToLower(input.Code), keywords)
+			labelMatches := countKeywordMatches(strings.ToLower(input.Label), keywords)
+			if codeMatches > 0 || labelMatches > 0 {
+				score += (codeMatches + labelMatches) * 5
+				break
+			}
+		}
+		resultMatches := countKeywordMatches(strings.ToLower(example.Intersect.Result.Code), keywords)
+		score += resultMatches * 5
+
+	case example.Convert != nil:
+		fromMatches := countKeywordMatches(strings.ToLower(example.Convert.From.Code), keywords)
+		toMatches := countKeywordMatches(strings.ToLower(example.Convert.To.Code), keywords)
+		score += (fromMatches + toMatches) * 5
+
+	case example.Fixit != nil:
+		if example.Fixit.Original.Code != "" {
+			origMatches := countKeywordMatches(strings.ToLower(example.Fixit.Original.Code), keywords)
+			score += origMatches * 5
+		}
+		badMatches := countKeywordMatches(strings.ToLower(example.Fixit.Bad.Code), keywords)
+		goodMatches := countKeywordMatches(strings.ToLower(example.Fixit.Good.Code), keywords)
+		score += (badMatches + goodMatches) * 5
+
+	case example.Compare != nil:
+		leftMatches := countKeywordMatches(strings.ToLower(example.Compare.Left.Code), keywords)
+		rightMatches := countKeywordMatches(strings.ToLower(example.Compare.Right.Code), keywords)
+		score += (leftMatches + rightMatches) * 5
+		resultMatches := countKeywordMatches(strings.ToLower(example.Compare.Result.Code), keywords)
+		score += resultMatches * 5
+	}
 
 	return score
 }

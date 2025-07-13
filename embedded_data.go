@@ -1,6 +1,7 @@
 package bkl
 
 import (
+	"bytes"
 	_ "embed"
 	"fmt"
 
@@ -58,9 +59,45 @@ type DocSideBySide struct {
 }
 
 type DocExample struct {
-	Operation string     `yaml:"operation,omitempty" json:"operation,omitempty"`
-	Layers    []DocLayer `yaml:"layers,omitempty" json:"layers,omitempty"`
-	Result    DocLayer   `yaml:"result,omitempty" json:"result,omitempty"`
+	Evaluate  *DocEvaluate  `yaml:"evaluate,omitempty" json:"evaluate,omitempty"`
+	Diff      *DocDiff      `yaml:"diff,omitempty" json:"diff,omitempty"`
+	Intersect *DocIntersect `yaml:"intersect,omitempty" json:"intersect,omitempty"`
+	Convert   *DocConvert   `yaml:"convert,omitempty" json:"convert,omitempty"`
+	Fixit     *DocFixit     `yaml:"fixit,omitempty" json:"fixit,omitempty"`
+	Compare   *DocCompare   `yaml:"compare,omitempty" json:"compare,omitempty"`
+}
+
+type DocEvaluate struct {
+	Inputs []DocLayer `yaml:"inputs" json:"inputs"`
+	Result DocLayer   `yaml:"result" json:"result"`
+}
+
+type DocDiff struct {
+	Base   DocLayer `yaml:"base" json:"base"`
+	Target DocLayer `yaml:"target" json:"target"`
+	Result DocLayer `yaml:"result" json:"result"`
+}
+
+type DocIntersect struct {
+	Inputs []DocLayer `yaml:"inputs" json:"inputs"`
+	Result DocLayer   `yaml:"result" json:"result"`
+}
+
+type DocConvert struct {
+	From DocLayer `yaml:"from" json:"from"`
+	To   DocLayer `yaml:"to" json:"to"`
+}
+
+type DocFixit struct {
+	Original DocLayer `yaml:"original,omitempty" json:"original,omitempty"`
+	Bad      DocLayer `yaml:"bad" json:"bad"`
+	Good     DocLayer `yaml:"good" json:"good"`
+}
+
+type DocCompare struct {
+	Left   DocLayer `yaml:"left" json:"left"`
+	Right  DocLayer `yaml:"right" json:"right"`
+	Result DocLayer `yaml:"result" json:"result"`
 }
 
 type DocLayer struct {
@@ -74,7 +111,9 @@ type DocLayer struct {
 
 func GetTests() (map[string]*TestCase, error) {
 	var tests map[string]*TestCase
-	if err := toml.Unmarshal(testsData, &tests); err != nil {
+	decoder := toml.NewDecoder(bytes.NewReader(testsData))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&tests); err != nil {
 		return nil, err
 	}
 	return tests, nil
@@ -91,7 +130,9 @@ func GetDocSections() ([]DocSection, error) {
 
 	for name, data := range files {
 		var sections []DocSection
-		if err := yaml.Unmarshal(data, &sections); err != nil {
+		decoder := yaml.NewDecoder(bytes.NewReader(data))
+		decoder.KnownFields(true)
+		if err := decoder.Decode(&sections); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal %s.yaml: %w", name, err)
 		}
 		for i := range sections {

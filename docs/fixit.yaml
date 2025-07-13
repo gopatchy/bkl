@@ -2,19 +2,21 @@
   title: Unnamed ports
   items:
     - example:
-        operation: fixit
-        layers:
-          - code: |
+        fixit:
+          original:
+            code: |
               ports:
                 - containerPort: 8080
             languages: [[0, "yaml"]]
-          - code: |
+          bad:
+            code: |
               ports:
                 api:
                   containerPort: 8080
                 $encode: values:containerPort
             languages: [[0, "yaml"]]
-          - code: |
+          good:
+            code: |
               ports:
                 api: 8080
                 $encode: values::containerPort
@@ -24,22 +26,24 @@
   title: env keys and values
   items:
     - example:
-        operation: fixit
-        layers:
-          - code: |
+        fixit:
+          original:
+            code: |
               env:
                 - name: DB_HOST
                   value: postgres
                 - name: DB_PORT
                   value: "5432"
             languages: [[0, "yaml"]]
-          - code: |
+          bad:
+            code: |
               env:
                 DB_HOST: postgres
                 DB_PORT: "5432"
                 $encode: values:name
             languages: [[0, "yaml"]]
-          - code: |
+          good:
+            code: |
               env:
                 DB_HOST: postgres
                 DB_PORT: "5432"
@@ -50,18 +54,20 @@
   title: $encode nesting level
   items:
     - example:
-        operation: fixit
-        layers:
-          - code: |
+        fixit:
+          original:
+            code: |
               imagePullSecrets:
                 - name: regcred
             languages: [[0, "yaml"]]
-          - code: |
+          bad:
+            code: |
               imagePullSecrets:
                 regcred:
                   $encode: values:name
             languages: [[0, "yaml"]]
-          - code: |
+          good:
+            code: |
               imagePullSecrets:
                 regcred: {}
                 $encode: values:name

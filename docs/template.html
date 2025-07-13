@@ -47,21 +47,6 @@
 </div>
 {{end}}
 
-{{define "exampleOperatorSymbol"}}
-{{if eq .Operation "evaluate"}}
-  {{template "operatorSymbol" dict "Symbol" "+" "HasLabels" .HasLabels}}
-{{else if eq .Operation "diff"}}
-  {{template "operatorSymbol" dict "Symbol" "?" "HasLabels" .HasLabels}}
-{{else if eq .Operation "intersect"}}
-  {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" .HasLabels}}
-{{else if eq .Operation "convert"}}
-  {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
-{{else if eq .Operation "fixit"}}
-  {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" .HasLabels}}
-{{else if eq .Operation "compare"}}
-  {{template "operatorSymbol" dict "Symbol" "↔" "HasLabels" .HasLabels}}
-{{end}}
-{{end}}
 
 {{define "exampleResultBlock"}}
 <div class="code-container">
@@ -77,29 +62,24 @@
 {{end}}
 
 {{define "exampleConvert"}}
-{{$hasLabels := .HasLabels}}
+{{$hasLabels := or .From.Label .To.Label}}
 <div class="example-container">
 <div class="grid-container grid-3-col">
-{{template "codeBlock" dict "Label" (index .Layers 0).Label "Code" (index .Layers 0 | formatLayer) "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .From.Label "Code" (.From | formatLayer) "HasLabels" $hasLabels}}
 {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" $hasLabels}}
-<div class="code-container" style="display: contents;">
-{{range $layerIndex, $layer := .Layers}}
-{{if eq $layerIndex 1}}
-{{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
-{{end}}
-{{end}}
-</div>
+{{template "codeBlock" dict "Label" .To.Label "Code" (.To | formatLayer) "HasLabels" $hasLabels}}
 </div>
 </div>
 {{end}}
 
 {{define "exampleFixit"}}
-{{$hasLabels := .HasLabels}}
-{{$numLayers := len .Layers}}
-<div class="example-container {{if eq $numLayers 3}}fixit-3-layer{{end}}">
-{{if eq $numLayers 3}}
+{{$hasOriginal := .Original.Code}}
+{{$hasLabels := or .Bad.Label .Good.Label}}
+{{if $hasOriginal}}{{$hasLabels = or $hasLabels .Original.Label}}{{end}}
+<div class="example-container {{if $hasOriginal}}fixit-3-layer{{end}}">
+{{if $hasOriginal}}
 <div class="code-container">
-{{template "codeBlock" dict "Label" (index .Layers 0).Label "Code" (index .Layers 0 | formatLayer) "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .Original.Label "Code" (.Original | formatLayer) "HasLabels" $hasLabels}}
 </div>
 <div class="grid-container grid-2-col">
 <div style="text-align: center; font-size: 30px; color: var(--red5);">↓</div>
@@ -107,34 +87,30 @@
 </div>
 <div class="grid-container grid-2-col">
 <div class="code-container fixit-bad">
-{{template "codeBlock" dict "Label" (index .Layers 1).Label "Code" (index .Layers 1 | formatLayer) "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .Bad.Label "Code" (.Bad | formatLayer) "HasLabels" $hasLabels}}
 </div>
 <div class="code-container fixit-good">
-{{template "codeBlock" dict "Label" (index .Layers 2).Label "Code" (index .Layers 2 | formatLayer) "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .Good.Label "Code" (.Good | formatLayer) "HasLabels" $hasLabels}}
 </div>
 </div>
 {{else}}
 <div class="grid-container grid-3-col">
 <div class="code-container fixit-bad">
-{{template "codeBlock" dict "Label" (index .Layers 0).Label "Code" (index .Layers 0 | formatLayer) "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .Bad.Label "Code" (.Bad | formatLayer) "HasLabels" $hasLabels}}
 </div>
 {{template "operatorSymbol" dict "Symbol" "→" "HasLabels" $hasLabels}}
 <div class="code-container fixit-good">
-{{range $layerIndex, $layer := .Layers}}
-{{if eq $layerIndex 1}}
-{{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
-{{end}}
-{{end}}
+{{template "codeBlock" dict "Label" .Good.Label "Code" (.Good | formatLayer) "HasLabels" $hasLabels}}
 </div>
 </div>
 {{end}}
 </div>
 {{end}}
 
-{{define "exampleDefault"}}
-{{$hasLabels := .HasLabels}}
-{{$operation := .Operation}}
-{{$numLayers := len .Layers}}
+{{define "exampleEvaluate"}}
+{{$hasLabels := .Result.Label}}
+{{range $layer := .Inputs}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
+{{$numLayers := len .Inputs}}
 {{$numChildren := 0}}
 {{if eq $numLayers 1}}
   {{$numChildren = 3}}
@@ -145,15 +121,62 @@
 {{end}}
 <div class="example-container">
 <div class="grid-container {{if eq $numChildren 3}}grid-3-col{{else if eq $numChildren 5}}grid-5-col{{end}}">
-{{range $layerIndex, $layer := .Layers}}
+{{range $layerIndex, $layer := .Inputs}}
 {{if eq $layerIndex 1}}
-  {{template "exampleOperatorSymbol" dict "Operation" $operation "HasLabels" $hasLabels}}
+  {{template "operatorSymbol" dict "Symbol" "+" "HasLabels" $hasLabels}}
 {{end}}
 {{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
 {{end}}
-{{if and (eq (len .Layers) 1) (ne $operation "evaluate")}}
-  {{template "exampleOperatorSymbol" dict "Operation" $operation "HasLabels" $hasLabels}}
+{{template "operatorSymbol" dict "Symbol" "=" "HasLabels" $hasLabels}}
+{{template "exampleResultBlock" dict "Result" .Result "HasLabels" $hasLabels}}
+</div>
+</div>
 {{end}}
+
+{{define "exampleDiff"}}
+{{$hasLabels := or .Base.Label .Target.Label .Result.Label}}
+<div class="example-container">
+<div class="grid-container grid-5-col">
+{{template "codeBlock" dict "Label" .Base.Label "Code" (.Base | formatLayer) "HasLabels" $hasLabels}}
+{{template "operatorSymbol" dict "Symbol" "?" "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .Target.Label "Code" (.Target | formatLayer) "HasLabels" $hasLabels}}
+{{template "operatorSymbol" dict "Symbol" "=" "HasLabels" $hasLabels}}
+{{template "exampleResultBlock" dict "Result" .Result "HasLabels" $hasLabels}}
+</div>
+</div>
+{{end}}
+
+{{define "exampleIntersect"}}
+{{$hasLabels := .Result.Label}}
+{{range $layer := .Inputs}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
+{{$numLayers := len .Inputs}}
+{{$numChildren := 0}}
+{{if eq $numLayers 2}}
+  {{$numChildren = 5}}
+{{else}}
+  {{$numChildren = 3}}
+{{end}}
+<div class="example-container">
+<div class="grid-container {{if eq $numChildren 3}}grid-3-col{{else if eq $numChildren 5}}grid-5-col{{end}}">
+{{range $layerIndex, $layer := .Inputs}}
+{{if eq $layerIndex 1}}
+  {{template "operatorSymbol" dict "Symbol" "∩" "HasLabels" $hasLabels}}
+{{end}}
+{{template "codeBlock" dict "Label" $layer.Label "Code" ($layer | formatLayer) "HasLabels" $hasLabels}}
+{{end}}
+{{template "operatorSymbol" dict "Symbol" "=" "HasLabels" $hasLabels}}
+{{template "exampleResultBlock" dict "Result" .Result "HasLabels" $hasLabels}}
+</div>
+</div>
+{{end}}
+
+{{define "exampleCompare"}}
+{{$hasLabels := or .Left.Label .Right.Label .Result.Label}}
+<div class="example-container">
+<div class="grid-container grid-5-col">
+{{template "codeBlock" dict "Label" .Left.Label "Code" (.Left | formatLayer) "HasLabels" $hasLabels}}
+{{template "operatorSymbol" dict "Symbol" "↔" "HasLabels" $hasLabels}}
+{{template "codeBlock" dict "Label" .Right.Label "Code" (.Right | formatLayer) "HasLabels" $hasLabels}}
 {{template "operatorSymbol" dict "Symbol" "=" "HasLabels" $hasLabels}}
 {{template "exampleResultBlock" dict "Result" .Result "HasLabels" $hasLabels}}
 </div>
@@ -162,16 +185,18 @@
 
 {{define "exampleLayout"}}
 {{$example := .}}
-{{$hasLabels := false}}
-{{range $layer := $example.Layers}}{{if $layer.Label}}{{$hasLabels = true}}{{end}}{{end}}
-{{if $example.Result.Label}}{{$hasLabels = true}}{{end}}
-{{$context := dict "Layers" $example.Layers "Operation" $example.Operation "Result" $example.Result "HasLabels" $hasLabels}}
-{{if eq $example.Operation "convert"}}
-{{template "exampleConvert" $context}}
-{{else if eq $example.Operation "fixit"}}
-{{template "exampleFixit" $context}}
-{{else}}
-{{template "exampleDefault" $context}}
+{{if $example.Evaluate}}
+{{template "exampleEvaluate" $example.Evaluate}}
+{{else if $example.Diff}}
+{{template "exampleDiff" $example.Diff}}
+{{else if $example.Intersect}}
+{{template "exampleIntersect" $example.Intersect}}
+{{else if $example.Convert}}
+{{template "exampleConvert" $example.Convert}}
+{{else if $example.Fixit}}
+{{template "exampleFixit" $example.Fixit}}
+{{else if $example.Compare}}
+{{template "exampleCompare" $example.Compare}}
 {{end}}
 {{end}}
 

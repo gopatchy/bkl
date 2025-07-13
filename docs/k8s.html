@@ -18,6 +18,11 @@
 
 
 
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -911,10 +916,6 @@ original/
 
 
 
-
-
-
-
 <div class="example-container">
 <div class="grid-container grid-3-col">
 
@@ -930,11 +931,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -948,9 +944,6 @@ original/
   <highlight><key>$encode</key>: <string>values</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -961,10 +954,6 @@ original/
 
 <p><p>When the list items need to contain the key (e.g. <highlight>ports: { name: http }</highlight>), we can use <highlight>$encode: values:KEY</highlight> to reduce duplication.</p>
 </p>
-
-
-
-
 
 
 
@@ -990,11 +979,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1008,15 +992,8 @@ original/
   <highlight><key>$encode</key>: <string>values:name</string></highlight></bkl-code>
 </div>
 
-
-
 </div>
 </div>
-</div>
-
-
-
-
 
 
 
@@ -1050,11 +1027,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1073,9 +1045,6 @@ original/
 <highlight><key>$encode</key>: <string>values:resource.name</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1086,10 +1055,6 @@ original/
 
 <p><p>Convert environment variable lists to maps for easier overriding and use <highlight>$encode: values:KEY:VALUE</highlight> to transform them back.</p>
 </p>
-
-
-
-
 
 
 
@@ -1113,11 +1078,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1127,9 +1087,6 @@ original/
   <highlight><key>$encode</key>: <string>values:name:value</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1140,10 +1097,6 @@ original/
 
 <p><p>Lists with <highlight>valueFrom</highlight> use <highlight>$encode: values:KEY</highlight> instead.</p>
 </p>
-
-
-
-
 
 
 
@@ -1170,11 +1123,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1189,9 +1137,6 @@ original/
   <highlight><key>$encode</key>: <string>values:name</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1202,10 +1147,6 @@ original/
 
 <p><p>Use keys that make sense for the values. Remember that unusual characters are permitted in keys, but sometimes must be quoted.</p>
 </p>
-
-
-
-
 
 
 
@@ -1240,11 +1181,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1267,9 +1203,6 @@ original/
   <highlight><key>$encode</key>: <string>values:path</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1280,10 +1213,6 @@ original/
 
 <p><p>Convert argument lists to maps with names plus <highlight>$encode: flags</highlight>. If there are non-flag initial arguments, move them from <highlight>args</highlight> to <highlight>command</highlight>. Values are converted to strings automatically, so you don't need to quote them.</p>
 </p>
-
-
-
-
 
 
 
@@ -1310,11 +1239,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1330,9 +1254,6 @@ original/
   <highlight><key>$encode</key>: <string>flags</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1343,10 +1264,6 @@ original/
 
 <p><p>Convert embedded JSON/YAML strings to structures with <highlight>$encode: json-pretty</highlight> or <highlight>$encode: yaml</highlight>.</p>
 </p>
-
-
-
-
 
 
 
@@ -1375,11 +1292,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1393,15 +1305,8 @@ original/
   <highlight><key>$encode</key>: <string>json-pretty</string></highlight></bkl-code>
 </div>
 
-
-
 </div>
 </div>
-</div>
-
-
-
-
 
 
 
@@ -1427,11 +1332,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1442,9 +1342,6 @@ original/
   <highlight><key>$encode</key>: <string>yaml</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1455,10 +1352,6 @@ original/
 
 <p><p>For Java-style properties files, use <highlight>$encode: properties</highlight>.</p>
 </p>
-
-
-
-
 
 
 
@@ -1483,11 +1376,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1500,9 +1388,6 @@ original/
   <highlight><key>$encode</key>: <string>properties</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1513,10 +1398,6 @@ original/
 
 <p><p>Convert embedded base64 strings to <highlight>$encode: base64</highlight>.</p>
 </p>
-
-
-
-
 
 
 
@@ -1536,11 +1417,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1549,9 +1425,6 @@ original/
   <highlight><key>$encode</key>: <string>base64</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1562,10 +1435,6 @@ original/
 
 <p><p>Remove duplication between string fields with <highlight>$""</highlight>.</p>
 </p>
-
-
-
-
 
 
 
@@ -1587,11 +1456,6 @@ original/
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1600,9 +1464,6 @@ original/
 <key>namespace</key>: <highlight><string>$"api-{labels.environment}"</string></highlight></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1871,10 +1732,6 @@ base.yaml
 
 
 
-
-
-
-
 <div class="example-container">
 <div class="grid-container grid-3-col">
 
@@ -1894,11 +1751,6 @@ base.yaml
 
 <div class="operator-symbol">→</div>
 
-<div class="code-container" style="display: contents;">
-
-
-
-
 
 <div class="code-container">
 
@@ -1912,9 +1764,6 @@ base.yaml
     <key>environment</key>: <string>prod</string></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 
@@ -1925,10 +1774,6 @@ base.yaml
 
 <p><p>If overrides must only apply to a subset of objects, use <highlight>$matches</highlight> to select them.</p>
 </p>
-
-
-
-
 
 
 
@@ -1960,11 +1805,6 @@ base.yaml
 
 
 <div class="operator-symbol">→</div>
-
-<div class="code-container" style="display: contents;">
-
-
-
 
 
 <div class="code-container">
@@ -1989,9 +1829,6 @@ base.yaml
     <key>app</key>: <string>backend</string></bkl-code>
 </div>
 
-
-
-</div>
 </div>
 </div>
 

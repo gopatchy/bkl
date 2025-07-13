@@ -119,14 +119,69 @@ func convertDocSectionCodeBlocks(section *bkl.DocSection) bool {
 		item := &section.Items[i]
 
 		if item.Example != nil {
-			for j := range item.Example.Layers {
-				if convertCodeBlockToJSON(&item.Example.Layers[j]) {
+			switch {
+			case item.Example.Evaluate != nil:
+				for j := range item.Example.Evaluate.Inputs {
+					if convertCodeBlockToJSON(&item.Example.Evaluate.Inputs[j]) {
+						converted = true
+					}
+				}
+				if convertCodeBlockToJSON(&item.Example.Evaluate.Result) {
 					converted = true
 				}
-			}
 
-			if convertCodeBlockToJSON(&item.Example.Result) {
-				converted = true
+			case item.Example.Diff != nil:
+				if convertCodeBlockToJSON(&item.Example.Diff.Base) {
+					converted = true
+				}
+				if convertCodeBlockToJSON(&item.Example.Diff.Target) {
+					converted = true
+				}
+				if convertCodeBlockToJSON(&item.Example.Diff.Result) {
+					converted = true
+				}
+
+			case item.Example.Intersect != nil:
+				for j := range item.Example.Intersect.Inputs {
+					if convertCodeBlockToJSON(&item.Example.Intersect.Inputs[j]) {
+						converted = true
+					}
+				}
+				if convertCodeBlockToJSON(&item.Example.Intersect.Result) {
+					converted = true
+				}
+
+			case item.Example.Convert != nil:
+				if convertCodeBlockToJSON(&item.Example.Convert.From) {
+					converted = true
+				}
+				if convertCodeBlockToJSON(&item.Example.Convert.To) {
+					converted = true
+				}
+
+			case item.Example.Fixit != nil:
+				if item.Example.Fixit.Original.Code != "" {
+					if convertCodeBlockToJSON(&item.Example.Fixit.Original) {
+						converted = true
+					}
+				}
+				if convertCodeBlockToJSON(&item.Example.Fixit.Bad) {
+					converted = true
+				}
+				if convertCodeBlockToJSON(&item.Example.Fixit.Good) {
+					converted = true
+				}
+
+			case item.Example.Compare != nil:
+				if convertCodeBlockToJSON(&item.Example.Compare.Left) {
+					converted = true
+				}
+				if convertCodeBlockToJSON(&item.Example.Compare.Right) {
+					converted = true
+				}
+				if convertCodeBlockToJSON(&item.Example.Compare.Result) {
+					converted = true
+				}
 			}
 		}
 
