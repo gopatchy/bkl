@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gopatchy/bkl"
 )
@@ -11,7 +12,7 @@ import (
 type diffArgs struct {
 	BaseFile   string            `json:"baseFile"`
 	TargetFile string            `json:"targetFile"`
-	Selector   string            `json:"selector,omitempty"`
+	Selectors  string            `json:"selectors,omitempty"`
 	Format     string            `json:"format,omitempty"`
 	FileSystem map[string]string `json:"fileSystem,omitempty"`
 	OutputPath string            `json:"outputPath,omitempty"`
@@ -36,7 +37,12 @@ func (s *Server) diffHandler(ctx context.Context, args diffArgs) (*diffResponse,
 		return nil, err
 	}
 
-	output, err := bkl.Diff(fsys, args.BaseFile, args.TargetFile, "/", workingDir, args.Selector, &args.Format, &args.BaseFile, &args.TargetFile)
+	var selectors []string
+	if args.Selectors != "" {
+		selectors = strings.Split(args.Selectors, ",")
+	}
+
+	output, err := bkl.Diff(fsys, args.BaseFile, args.TargetFile, "/", workingDir, selectors, &args.Format, &args.BaseFile, &args.TargetFile)
 	if err != nil {
 		return nil, fmt.Errorf("diff operation failed: %v", err)
 	}

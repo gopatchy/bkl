@@ -33,7 +33,7 @@ func WrapOrDie(cmd string) {
 	for i, arg := range args {
 		// Try to evaluate the file - Evaluate handles FileMatch internally
 		fsys := os.DirFS("/")
-		output, err := bkl.Evaluate(fsys, []string{arg}, "/", "", nil, nil, "", &arg)
+		output, err := bkl.Evaluate(fsys, []string{arg}, "/", "", nil, nil, nil, &arg)
 		if err != nil {
 			continue
 		}

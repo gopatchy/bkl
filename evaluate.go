@@ -69,7 +69,7 @@ import (
 // Evaluate processes the specified files and returns the formatted output.
 // If format is nil, it infers the format from the paths parameter (output path first, then input files).
 // If env is nil, it uses the current OS environment.
-func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, sortPath string, paths ...*string) ([]byte, error) {
+func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env map[string]string, format *string, sort []string, paths ...*string) ([]byte, error) {
 	if env == nil {
 		env = getOSEnv()
 	}
@@ -99,7 +99,7 @@ func Evaluate(fx fs.FS, files []string, rootPath string, workingDir string, env 
 		return nil, err
 	}
 
-	return merge.Files(fx, realFiles, ft, env, sortPath)
+	return merge.Files(fx, realFiles, ft, env, sort)
 }
 
 func EvaluateTree(fx fs.FS, directory string, pattern string, env map[string]string, format *string) ([]TreeResult, error) {
@@ -133,7 +133,7 @@ func EvaluateTree(fx fs.FS, directory string, pattern string, env map[string]str
 			}
 		}
 
-		output, err := Evaluate(fx, []string{fullPath}, "/", "/", env, format, "", &fullPath)
+		output, err := Evaluate(fx, []string{fullPath}, "/", "/", env, format, nil, &fullPath)
 		results = append(results, TreeResult{
 			Path:   fullPath,
 			Error:  err,

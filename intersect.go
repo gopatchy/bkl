@@ -12,7 +12,7 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, selector string, format *string, formatPaths ...*string) ([]byte, error) {
+func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, selectors []string, format *string, formatPaths ...*string) ([]byte, error) {
 	preparedPaths, err := utils.PreparePathsForParser(paths, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -49,9 +49,9 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 
 		if i == 0 {
 			for _, doc := range docs {
-				keyStr, err := evaluateSelector(doc, selector)
+				keyStr, err := evaluateSelectors(doc, selectors)
 				if err != nil {
-					return nil, fmt.Errorf("evaluating selector on document in %s: %w", path, err)
+					return nil, fmt.Errorf("evaluating selectors on document in %s: %w", path, err)
 				}
 				if _, exists := tracking[keyStr]; exists {
 					return nil, fmt.Errorf("selector %q matches multiple documents in %s", keyStr, path)
@@ -62,9 +62,9 @@ func Intersect(fx fs.FS, paths []string, rootPath string, workingDir string, sel
 		} else {
 			seen := map[string]bool{}
 			for _, doc := range docs {
-				keyStr, err := evaluateSelector(doc, selector)
+				keyStr, err := evaluateSelectors(doc, selectors)
 				if err != nil {
-					return nil, fmt.Errorf("evaluating selector on document in %s: %w", path, err)
+					return nil, fmt.Errorf("evaluating selectors on document in %s: %w", path, err)
 				}
 				if seen[keyStr] {
 					return nil, fmt.Errorf("selector %q matches multiple documents in %s", keyStr, path)

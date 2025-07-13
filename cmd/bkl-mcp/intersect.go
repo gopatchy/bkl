@@ -11,7 +11,7 @@ import (
 
 type intersectArgs struct {
 	Files      string            `json:"files"`
-	Selector   string            `json:"selector,omitempty"`
+	Selectors  string            `json:"selectors,omitempty"`
 	Format     string            `json:"format,omitempty"`
 	FileSystem map[string]string `json:"fileSystem,omitempty"`
 	OutputPath string            `json:"outputPath,omitempty"`
@@ -25,15 +25,10 @@ type intersectResponse struct {
 }
 
 func (s *Server) intersectHandler(ctx context.Context, args intersectArgs) (*intersectResponse, error) {
-	fileFields := strings.Split(args.Files, ",")
-	files := []string{}
+	files := strings.Split(args.Files, ",")
 	paths := []*string{}
-	for _, f := range fileFields {
-		trimmed := strings.TrimSpace(f)
-		if trimmed != "" {
-			files = append(files, trimmed)
-			paths = append(paths, &trimmed)
-		}
+	for _, f := range files {
+		paths = append(paths, &f)
 	}
 
 	if len(files) < 2 {
@@ -49,7 +44,12 @@ func (s *Server) intersectHandler(ctx context.Context, args intersectArgs) (*int
 		return nil, err
 	}
 
-	output, err := bkl.Intersect(fsys, files, "/", workingDir, args.Selector, &args.Format, paths...)
+	var selectors []string
+	if args.Selectors != "" {
+		selectors = strings.Split(args.Selectors, ",")
+	}
+
+	output, err := bkl.Intersect(fsys, files, "/", workingDir, selectors, &args.Format, paths...)
 	if err != nil {
 		return nil, fmt.Errorf("intersect operation failed: %v", err)
 	}

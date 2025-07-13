@@ -18,7 +18,7 @@ type evaluateArgs struct {
 	Environment   map[string]string `json:"environment,omitempty"`
 	FileSystem    map[string]string `json:"fileSystem,omitempty"`
 	OutputPath    string            `json:"outputPath,omitempty"`
-	SortPath      string            `json:"sortPath,omitempty"`
+	Sort          string            `json:"sort,omitempty"`
 }
 
 type evaluateResponse struct {
@@ -106,14 +106,7 @@ func (s *Server) evaluateHandler(ctx context.Context, args evaluateArgs) (*evalu
 		}, nil
 	}
 
-	fileFields := strings.Split(args.Files, ",")
-	files := []string{}
-	for _, f := range fileFields {
-		trimmed := strings.TrimSpace(f)
-		if trimmed != "" {
-			files = append(files, trimmed)
-		}
-	}
+	files := strings.Split(args.Files, ",")
 
 	if len(files) == 0 {
 		return nil, fmt.Errorf("no files provided")
@@ -124,7 +117,12 @@ func (s *Server) evaluateHandler(ctx context.Context, args evaluateArgs) (*evalu
 		paths = append(paths, &file)
 	}
 
-	output, err := bkl.Evaluate(fsys, files, "/", workingDir, args.Environment, &args.Format, args.SortPath, paths...)
+	var sortPaths []string
+	if args.Sort != "" {
+		sortPaths = strings.Split(args.Sort, ",")
+	}
+
+	output, err := bkl.Evaluate(fsys, files, "/", workingDir, args.Environment, &args.Format, sortPaths, paths...)
 	if err != nil {
 		return nil, fmt.Errorf("evaluation failed: %v", err)
 	}

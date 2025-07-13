@@ -32,7 +32,7 @@ func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 		}
 	}
 
-	rootPath := testCase.RootPath
+	rootPath := testCase.Root
 	if rootPath == "" {
 		rootPath = "/"
 	}
@@ -85,14 +85,14 @@ func runTestCase(testCase *bkl.TestCase) ([]byte, error) {
 			return nil, fmt.Errorf("Compare tests require exactly 2 eval files, got %d", len(testCase.Eval))
 		}
 
-		result, err := bkl.Compare(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath, testCase.Env, &testCase.Format, testCase.SortPath)
+		result, err := bkl.Compare(testFS, testCase.Eval[0], testCase.Eval[1], rootPath, rootPath, testCase.Env, &testCase.Format, testCase.Sort)
 		if err != nil {
 			return nil, err
 		}
 		output = []byte(result.Diff)
 
 	default:
-		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, rootPath, testCase.Env, &testCase.Format, testCase.SortPath, &testCase.Eval[0])
+		output, err = bkl.Evaluate(testFS, testCase.Eval, rootPath, rootPath, testCase.Env, &testCase.Format, testCase.Sort, &testCase.Eval[0])
 	}
 
 	return output, err
@@ -267,16 +267,20 @@ func executeCLICommand(t *testing.T, cmdPath string, args []string, testCase *bk
 		args = append(args, "--format", testCase.Format)
 	}
 
-	if testCase.Selector != "" && (testCase.Diff || testCase.Intersect) {
-		args = append(args, "--selector", testCase.Selector)
+	if len(testCase.Selector) > 0 && (testCase.Diff || testCase.Intersect) {
+		for _, selector := range testCase.Selector {
+			args = append(args, "--selector", selector)
+		}
 	}
 
-	if testCase.SortPath != "" {
-		args = append(args, "--sort", testCase.SortPath)
+	if len(testCase.Sort) > 0 {
+		for _, sortPath := range testCase.Sort {
+			args = append(args, "--sort", sortPath)
+		}
 	}
 
-	if testCase.RootPath != "" {
-		args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.RootPath)}, args...)
+	if testCase.Root != "" {
+		args = append([]string{"--root-path", filepath.Join(tmpDir, testCase.Root)}, args...)
 	}
 
 	cmdArgs := append([]string{"run", cmdPath}, args...)

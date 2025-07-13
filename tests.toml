@@ -3380,7 +3380,7 @@ c: 3
 description = "Test root path restriction with current directory"
 eval = ["a.yaml"]
 format = "yaml"
-rootPath = "."
+root = "."
 expected = '''
 a: 1
 b: 1
@@ -3394,7 +3394,7 @@ b: $merge:a
 description = "Test root path with root directory (no restriction)"
 eval = ["a.yaml"]
 format = "yaml"
-rootPath = "/"
+root = "/"
 expected = '''
 a: 1
 b: 1
@@ -3409,7 +3409,7 @@ b: $merge:a
 description = "Test root path with subdirectory"
 eval = ["sub/a.yaml"]
 format = "yaml"
-rootPath = "sub"
+root = "sub"
 expected = '''
 a: 1
 b: 1
@@ -3423,7 +3423,7 @@ b: $merge:a
 description = "Test root path restriction prevents access outside root"
 eval = ["a.yaml"]
 format = "yaml"
-rootPath = "sub"
+root = "sub"
 errors = ["outside root path", "no such file or directory"]
 files."a.yaml" = '''
 a: 1
@@ -5442,7 +5442,7 @@ description = "Test diff with selector matching documents by name"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
-selector = "name"
+selector = ["name"]
 expected = '''
 $match:
   name: doc1
@@ -5476,7 +5476,7 @@ description = "Test intersect with selector matching documents by id"
 eval = ["a.yaml", "b.yaml", "c.yaml"]
 format = "yaml"
 intersect = true
-selector = "id"
+selector = ["id"]
 expected = '''
 a: 1
 id: 1
@@ -5519,7 +5519,7 @@ description = "Test diff with selector using nested path"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
-selector = "metadata.name"
+selector = ["metadata.name"]
 expected = '''
 $match:
   metadata:
@@ -5566,7 +5566,7 @@ description = "Test diff with selector where destination has unmatched documents
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
-selector = "id"
+selector = ["id"]
 expected = '''
 $match:
   id: 1
@@ -5604,7 +5604,7 @@ description = "Test diff with empty selector on single documents"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 diff = true
-selector = ""
+selector = []
 expected = '''
 $match: {}
 b: 2
@@ -5623,7 +5623,7 @@ description = "Test intersect with empty selector on single documents"
 eval = ["a.yaml", "b.yaml"]
 format = "yaml"
 intersect = true
-selector = ""
+selector = []
 expected = '''
 a: 1
 '''
@@ -5840,7 +5840,7 @@ y: 2
 description = "Test sorting output documents by path"
 eval = ["a.yaml"]
 format = "yaml"
-sortPath = "name"
+sort = ["name"]
 expected = '''
 name: alpha
 value: 2
@@ -5868,7 +5868,7 @@ value: 3
 description = "Test sorting output documents by nested path"
 eval = ["a.yaml"]
 format = "yaml"
-sortPath = "metadata.name"
+sort = ["metadata.name"]
 expected = '''
 metadata:
   name: doc1
@@ -5923,4 +5923,235 @@ b: 2
 "b.yaml" = '''
 a: 1
 b: 3
+'''
+
+###############################################################################
+# Multiple Sort Paths
+###############################################################################
+
+[evaluateMultipleSortPaths]
+description = "Test sorting with multiple sort paths"
+eval = ["a.yaml"]
+format = "yaml"
+sort = ["category", "name"]
+expected = '''
+category: a
+name: beta
+value: 2
+---
+category: a
+name: delta
+value: 4
+---
+category: b
+name: alpha
+value: 1
+---
+category: b
+name: gamma
+value: 3
+'''
+[evaluateMultipleSortPaths.files]
+"a.yaml" = '''
+---
+category: b
+name: gamma
+value: 3
+---
+category: a
+name: delta
+value: 4
+---
+category: b
+name: alpha
+value: 1
+---
+category: a
+name: beta
+value: 2
+'''
+
+[evaluateMultipleSortPathsWithMissing]
+description = "Test sorting with multiple sort paths where some paths are missing"
+eval = ["a.yaml"]
+format = "yaml"
+sort = ["category", "subcategory", "name"]
+expected = '''
+category: a
+name: beta
+value: 2
+---
+category: a
+name: delta
+subcategory: x
+value: 4
+---
+category: b
+name: gamma
+value: 3
+---
+category: b
+name: alpha
+subcategory: "y"
+value: 1
+'''
+[evaluateMultipleSortPathsWithMissing.files]
+"a.yaml" = '''
+---
+category: b
+name: gamma
+value: 3
+---
+category: a
+subcategory: x
+name: delta
+value: 4
+---
+category: b
+subcategory: y
+name: alpha
+value: 1
+---
+category: a
+name: beta
+value: 2
+'''
+
+###############################################################################
+# Multiple Selectors
+###############################################################################
+
+[diffMultipleSelectors]
+description = "Test diff with multiple selectors"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+selector = ["kind", "metadata.name"]
+expected = '''
+$match:
+  kind: Service
+  metadata:
+    name: api
+metadata:
+  labels:
+    version: v2
+---
+$match:
+  kind: Service
+  metadata:
+    name: web
+$output: false
+'''
+[diffMultipleSelectors.files]
+"a.yaml" = '''
+---
+kind: Service
+metadata:
+  name: api
+  labels:
+    version: v1
+---
+kind: Service
+metadata:
+  name: web
+  labels:
+    version: v1
+'''
+"b.yaml" = '''
+kind: Service
+metadata:
+  name: api
+  labels:
+    version: v2
+'''
+
+[intersectMultipleSelectors]
+description = "Test intersect with multiple selectors"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+intersect = true
+selector = ["kind", "metadata.name"]
+expected = '''
+kind: Service
+metadata:
+  labels:
+    app: myapp
+  name: api
+'''
+[intersectMultipleSelectors.files]
+"a.yaml" = '''
+---
+kind: Service
+metadata:
+  name: api
+  labels:
+    app: myapp
+    version: v1
+---
+kind: Service
+metadata:
+  name: web
+  labels:
+    app: webapp
+'''
+"b.yaml" = '''
+---
+kind: Service
+metadata:
+  name: api
+  labels:
+    app: myapp
+    env: prod
+---
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 3
+'''
+
+[diffMultipleSelectorsWithMissing]
+description = "Test diff with multiple selectors where some paths are missing"
+eval = ["a.yaml", "b.yaml"]
+format = "yaml"
+diff = true
+selector = ["kind", "metadata.name", "metadata.namespace"]
+expected = '''
+$match:
+  kind: Service
+  metadata:
+    name: api
+metadata:
+  labels:
+    version: v2
+---
+$match:
+  kind: Service
+  metadata:
+    name: web
+    namespace: prod
+$output: false
+'''
+[diffMultipleSelectorsWithMissing.files]
+"a.yaml" = '''
+---
+kind: Service
+metadata:
+  name: api
+  labels:
+    version: v1
+---
+kind: Service
+metadata:
+  name: web
+  namespace: prod
+  labels:
+    version: v1
+'''
+"b.yaml" = '''
+kind: Service
+metadata:
+  name: api
+  labels:
+    version: v2
 '''

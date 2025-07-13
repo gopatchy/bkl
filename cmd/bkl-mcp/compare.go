@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	"github.com/gopatchy/bkl"
 )
@@ -12,7 +13,7 @@ type compareArgs struct {
 	Format      string            `json:"format,omitempty"`
 	FileSystem  map[string]string `json:"fileSystem,omitempty"`
 	Environment map[string]string `json:"environment,omitempty"`
-	SortPath    string            `json:"sortPath,omitempty"`
+	Sort        string            `json:"sort,omitempty"`
 }
 
 type compareResponse struct {
@@ -21,7 +22,7 @@ type compareResponse struct {
 	Diff        string            `json:"diff"`
 	Operation   string            `json:"operation"`
 	Environment map[string]string `json:"environment,omitempty"`
-	SortPath    string            `json:"sortPath,omitempty"`
+	Sort        string            `json:"sort,omitempty"`
 }
 
 func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compareResponse, error) {
@@ -35,7 +36,12 @@ func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compare
 		return nil, err
 	}
 
-	result, err := bkl.Compare(fsys, args.File1, args.File2, "/", workingDir, args.Environment, &args.Format, args.SortPath)
+	var sortPaths []string
+	if args.Sort != "" {
+		sortPaths = strings.Split(args.Sort, ",")
+	}
+
+	result, err := bkl.Compare(fsys, args.File1, args.File2, "/", workingDir, args.Environment, &args.Format, sortPaths)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +52,6 @@ func (s *Server) compareHandler(ctx context.Context, args compareArgs) (*compare
 		Diff:        result.Diff,
 		Operation:   "compare",
 		Environment: result.Environment,
-		SortPath:    result.SortPath,
+		Sort:        strings.Join(result.Sort, ","),
 	}, nil
 }

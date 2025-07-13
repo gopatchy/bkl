@@ -149,7 +149,7 @@ func findMatches(docs []*document.Document, doc *document.Document, pat any) []*
 	return nil
 }
 
-func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, sortPath string) ([]byte, error) {
+func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, sort []string) ([]byte, error) {
 	var docs []*document.Document
 	var deferredDocs []*document.Document
 	fileSystem := fsys.New(fx)
@@ -215,7 +215,7 @@ func Files(fx fs.FS, files []string, ft *format.Format, env map[string]string, s
 		outputs[i] = output.FinalizeOutput(out)
 	}
 
-	if err := sortOutputsByPath(outputs, sortPath); err != nil {
+	if err := sortOutputsByPath(outputs, sort); err != nil {
 		return nil, err
 	}
 
@@ -238,23 +238,28 @@ func FileObj(docs []*document.Document, f *file.File) ([]*document.Document, err
 	return docs, nil
 }
 
-func sortOutputsByPath(outputs []any, sortPath string) error {
-	var sortErr error
+func sortOutputsByPath(outputs []any, sortPaths []string) error {
+	if len(sortPaths) == 0 {
+		return nil
+	}
+
 	sort.SliceStable(outputs, func(i, j int) bool {
-		if sortErr != nil {
-			return false
+		for _, sortPath := range sortPaths {
+			valI, errI := pathutil.GetString(outputs[i], sortPath)
+			if errI != nil {
+				valI = ""
+			}
+
+			valJ, errJ := pathutil.GetString(outputs[j], sortPath)
+			if errJ != nil {
+				valJ = ""
+			}
+
+			if valI != valJ {
+				return valI < valJ
+			}
 		}
-		valI, errI := pathutil.GetString(outputs[i], sortPath)
-		if errI != nil {
-			sortErr = fmt.Errorf("failed to get sort key at path %q from document %d: %w", sortPath, i, errI)
-			return false
-		}
-		valJ, errJ := pathutil.GetString(outputs[j], sortPath)
-		if errJ != nil {
-			sortErr = fmt.Errorf("failed to get sort key at path %q from document %d: %w", sortPath, j, errJ)
-			return false
-		}
-		return valI < valJ
+		return false
 	})
-	return sortErr
+	return nil
 }

@@ -15,16 +15,16 @@ type CompareResult struct {
 	Format      string
 	Diff        string
 	Environment map[string]string
-	SortPath    string
+	Sort        []string
 }
 
-func Compare(fsys fs.FS, file1, file2 string, rootPath, workingDir string, env map[string]string, format *string, sortPath string) (*CompareResult, error) {
-	output1, err := Evaluate(fsys, []string{file1}, rootPath, workingDir, env, format, sortPath, &file1)
+func Compare(fsys fs.FS, file1, file2 string, rootPath, workingDir string, env map[string]string, format *string, sort []string) (*CompareResult, error) {
+	output1, err := Evaluate(fsys, []string{file1}, rootPath, workingDir, env, format, sort, &file1)
 	if err != nil {
 		return nil, fmt.Errorf("failed to evaluate %s: %w", file1, err)
 	}
 
-	output2, err := Evaluate(fsys, []string{file2}, rootPath, workingDir, env, format, sortPath, &file2)
+	output2, err := Evaluate(fsys, []string{file2}, rootPath, workingDir, env, format, sort, &file2)
 	if err != nil {
 		return nil, fmt.Errorf("failed to evaluate %s: %w", file2, err)
 	}
@@ -43,7 +43,7 @@ func Compare(fsys fs.FS, file1, file2 string, rootPath, workingDir string, env m
 		Format:      finalFormat,
 		Diff:        unified,
 		Environment: env,
-		SortPath:    sortPath,
+		Sort:        sort,
 	}
 
 	return result, nil

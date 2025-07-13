@@ -6,6 +6,7 @@ import (
 	"maps"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/gopatchy/bkl/internal/document"
 	"github.com/gopatchy/bkl/internal/file"
@@ -15,7 +16,7 @@ import (
 	"github.com/gopatchy/bkl/internal/utils"
 )
 
-func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string, selector string, format *string, paths ...*string) ([]byte, error) {
+func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string, selectors []string, format *string, paths ...*string) ([]byte, error) {
 	preparedPaths, err := utils.PreparePathsForParser([]string{srcPath, dstPath}, rootPath, workingDir)
 	if err != nil {
 		return nil, err
@@ -67,9 +68,9 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	srcMap := make(map[string]*document.Document)
 	var srcKeys []string
 	for _, doc := range srcDocs {
-		keyStr, err := evaluateSelector(doc, selector)
+		keyStr, err := evaluateSelectors(doc, selectors)
 		if err != nil {
-			return nil, fmt.Errorf("evaluating selector on source document: %w", err)
+			return nil, fmt.Errorf("evaluating selectors on source document: %w", err)
 		}
 		if _, exists := srcMap[keyStr]; exists {
 			return nil, fmt.Errorf("selector %q matches multiple source documents", keyStr)
@@ -81,9 +82,9 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	dstMap := make(map[string]*document.Document)
 	var dstKeys []string
 	for _, doc := range dstDocs {
-		keyStr, err := evaluateSelector(doc, selector)
+		keyStr, err := evaluateSelectors(doc, selectors)
 		if err != nil {
-			return nil, fmt.Errorf("evaluating selector on destination document: %w", err)
+			return nil, fmt.Errorf("evaluating selectors on destination document: %w", err)
 		}
 		if _, exists := dstMap[keyStr]; exists {
 			return nil, fmt.Errorf("selector %q matches multiple destination documents", keyStr)
@@ -109,12 +110,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 				return nil, err
 			}
 
-			matchValue := map[string]any{}
-			if selector != "" {
-				parts := pathutil.SplitPath(selector)
-				val, _ := pathutil.Get(srcDoc.Data, parts)
-				pathutil.Set(matchValue, parts, val)
-			}
+			matchValue := buildMatchValue(srcDoc.Data, selectors)
 			result = addMatchDirective(result, matchValue)
 			results = append(results, result)
 		}
@@ -123,13 +119,7 @@ func Diff(fx fs.FS, srcPath, dstPath string, rootPath string, workingDir string,
 	for _, keyStr := range srcKeys {
 		srcDoc := srcMap[keyStr]
 		if _, found := dstMap[keyStr]; !found {
-			matchValue := map[string]any{}
-			if selector != "" {
-				parts := pathutil.SplitPath(selector)
-				val, _ := pathutil.Get(srcDoc.Data, parts)
-				pathutil.Set(matchValue, parts, val)
-			}
-
+			matchValue := buildMatchValue(srcDoc.Data, selectors)
 			result := map[string]any{
 				"$match":  matchValue,
 				"$output": false,
@@ -261,16 +251,36 @@ outer2:
 	return ret, nil
 }
 
-func evaluateSelector(doc *document.Document, selector string) (string, error) {
-	if selector == "" {
+func evaluateSelectors(doc *document.Document, selectors []string) (string, error) {
+	if len(selectors) == 0 {
 		return "", nil
 	}
-	parts := pathutil.SplitPath(selector)
-	val, err := pathutil.Get(doc.Data, parts)
-	if err != nil {
-		return "", err
+
+	var keyParts []string
+	for _, selector := range selectors {
+		parts := pathutil.SplitPath(selector)
+		val, err := pathutil.Get(doc.Data, parts)
+		if err != nil {
+			keyParts = append(keyParts, "")
+		} else {
+			keyParts = append(keyParts, fmt.Sprint(val))
+		}
 	}
-	return fmt.Sprint(val), nil
+	return strings.Join(keyParts, "|"), nil
+}
+
+func buildMatchValue(data any, selectors []string) map[string]any {
+	matchValue := map[string]any{}
+	for _, selector := range selectors {
+		if selector != "" {
+			parts := pathutil.SplitPath(selector)
+			val, err := pathutil.Get(data, parts)
+			if err == nil {
+				pathutil.Set(matchValue, parts, val)
+			}
+		}
+	}
+	return matchValue
 }
 
 func addMatchDirective(result any, matchValue map[string]any) any {

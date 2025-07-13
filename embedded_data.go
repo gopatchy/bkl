@@ -28,15 +28,15 @@ type TestCase struct {
 	Expected    string            `toml:"expected,omitempty" json:"expected,omitempty"`
 	Files       map[string]string `toml:"files" json:"files"`
 	Errors      []string          `toml:"errors,omitempty" json:"errors,omitempty"`
-	RootPath    string            `toml:"rootPath,omitempty" json:"rootPath,omitempty"`
+	Root        string            `toml:"root,omitempty" json:"root,omitempty"`
 	Env         map[string]string `toml:"env,omitempty" json:"env,omitempty"`
 	Diff        bool              `toml:"diff,omitempty" json:"diff,omitempty"`
 	Intersect   bool              `toml:"intersect,omitempty" json:"intersect,omitempty"`
 	Required    bool              `toml:"required,omitempty" json:"required,omitempty"`
 	Compare     bool              `toml:"compare,omitempty" json:"compare,omitempty"`
 	Benchmark   bool              `toml:"benchmark,omitempty" json:"benchmark,omitempty"`
-	Selector    string            `toml:"selector,omitempty" json:"selector,omitempty"`
-	SortPath    string            `toml:"sortPath,omitempty" json:"sortPath,omitempty"`
+	Selector    []string          `toml:"selector,omitempty" json:"selector,omitempty"`
+	Sort        []string          `toml:"sort,omitempty" json:"sort,omitempty"`
 }
 
 type DocSection struct {

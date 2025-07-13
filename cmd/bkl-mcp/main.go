@@ -129,8 +129,8 @@ func main() {
 		mcp.WithString("outputPath",
 			mcp.Description("Optional path to write the output to (in addition to returning it)"),
 		),
-		mcp.WithString("sortPath",
-			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
+		mcp.WithString("sort",
+			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority'), comma-separated for multiple"),
 		),
 	)
 	mcpServer.AddTool(evaluateTool, wrapHandler(srv.evaluateHandler))
@@ -145,8 +145,8 @@ func main() {
 			mcp.Required(),
 			mcp.Description("Target file path"),
 		),
-		mcp.WithString("selector",
-			mcp.Description("Selector expression to match documents (e.g. 'metadata.name')"),
+		mcp.WithString("selectors",
+			mcp.Description("Selector expressions to match documents (e.g. 'metadata.name,metadata.type'), comma-separated for multiple"),
 		),
 		formatParam,
 		fileSystemParam,
@@ -162,8 +162,8 @@ func main() {
 			mcp.Required(),
 			mcp.Description("Comma-separated list of files to intersect (requires at least 2 files)"),
 		),
-		mcp.WithString("selector",
-			mcp.Description("Selector expression to match documents (e.g. 'metadata.name')"),
+		mcp.WithString("selectors",
+			mcp.Description("Selector expressions to match documents (e.g. 'metadata.name,metadata.type'), comma-separated for multiple"),
 		),
 		formatParam,
 		fileSystemParam,
@@ -217,8 +217,8 @@ func main() {
 		mcp.WithObject("environment",
 			mcp.Description("Environment variables as key-value pairs"),
 		),
-		mcp.WithString("sortPath",
-			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority')"),
+		mcp.WithString("sort",
+			mcp.Description("Sort output documents by path (e.g. 'name' or 'metadata.priority'), comma-separated for multiple"),
 		),
 	)
 	mcpServer.AddTool(compareTool, wrapHandler(srv.compareHandler))

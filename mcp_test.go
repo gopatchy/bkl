@@ -100,7 +100,7 @@ func TestMCP(t *testing.T) {
 			continue
 		}
 
-		if testCase.RootPath != "" {
+		if testCase.Root != "" {
 			continue
 		}
 
@@ -172,8 +172,8 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 			"format":     format,
 			"fileSystem": fileSystem,
 		}
-		if testCase.Selector != "" {
-			args["selector"] = testCase.Selector
+		if len(testCase.Selector) > 0 {
+			args["selectors"] = strings.Join(testCase.Selector, ",")
 		}
 		result, err = client.CallTool(ctx, "intersect", args)
 
@@ -188,8 +188,8 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 			"format":     format,
 			"fileSystem": fileSystem,
 		}
-		if testCase.Selector != "" {
-			args["selector"] = testCase.Selector
+		if len(testCase.Selector) > 0 {
+			args["selectors"] = strings.Join(testCase.Selector, ",")
 		}
 		result, err = client.CallTool(ctx, "diff", args)
 
@@ -207,8 +207,8 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 		if len(testCase.Env) > 0 {
 			args["environment"] = testCase.Env
 		}
-		if testCase.SortPath != "" {
-			args["sortPath"] = testCase.SortPath
+		if len(testCase.Sort) > 0 {
+			args["sort"] = strings.Join(testCase.Sort, ",")
 		}
 		result, err = client.CallTool(ctx, "compare", args)
 
@@ -223,8 +223,8 @@ func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.Te
 			args["environment"] = testCase.Env
 		}
 
-		if testCase.SortPath != "" {
-			args["sortPath"] = testCase.SortPath
+		if len(testCase.Sort) > 0 {
+			args["sort"] = strings.Join(testCase.Sort, ",")
 		}
 
 		result, err = client.CallTool(ctx, "evaluate", args)

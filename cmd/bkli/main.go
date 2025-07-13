@@ -13,7 +13,7 @@ import (
 type options struct {
 	OutputPath   *flags.Filename `short:"o" long:"output" description:"output file path"`
 	OutputFormat *string         `short:"f" long:"format" description:"output format" choice:"json" choice:"json-pretty" choice:"jsonl" choice:"toml" choice:"yaml"`
-	Selector     string          `short:"s" long:"selector" description:"selector expression to match documents (e.g. 'metadata.name')"`
+	Selectors    []string        `short:"s" long:"selector" description:"selector expression to match documents (e.g. 'metadata.name'), can be specified multiple times"`
 	Version      bool            `short:"v" long:"version" description:"print version and exit"`
 
 	Positional struct {
@@ -50,7 +50,7 @@ See https://bkl.gopatchy.io/#bkli for detailed documentation.`
 	}
 
 	fsys := os.DirFS("/")
-	enc, err := bkl.Intersect(fsys, paths, "/", "", opts.Selector, opts.OutputFormat, (*string)(opts.OutputPath), &paths[0])
+	enc, err := bkl.Intersect(fsys, paths, "/", "", opts.Selectors, opts.OutputFormat, (*string)(opts.OutputPath), &paths[0])
 	if err != nil {
 		fatal(err)
 	}

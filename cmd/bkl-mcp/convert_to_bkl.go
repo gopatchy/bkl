@@ -312,7 +312,7 @@ func (s *Server) convertToBklOnPrepFile(p *taskcp.Project, targetPath string, t 
 		"prepped.yaml":  &fstest.MapFile{Data: []byte(preppedContent)},
 	}
 
-	compareResult, err := bkl.Compare(fsys, "original.yaml", "prepped.yaml", "/", "/", nil, nil, "")
+	compareResult, err := bkl.Compare(fsys, "original.yaml", "prepped.yaml", "/", "/", nil, nil, nil)
 	if err != nil {
 		p.AddNextTask().
 			WithTitle("Fix the prepped file").
@@ -423,7 +423,7 @@ func (s *Server) verifyConversion(p *taskcp.Project, t *taskcp.Task, originalFil
 	}
 
 	fsys := os.DirFS("/")
-	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, nil)
 	if err != nil {
 		return fmt.Errorf("failed to re-compare: %w", err)
 	}
@@ -583,7 +583,7 @@ func (s *Server) processBaseLayer(info *fileInfo, files map[string]*fileInfo, fi
 	}
 
 	if len(sourcesForBase) > 1 {
-		output, err := bkl.Intersect(fsys, sourcesForBase, "/", "", "kind", &format)
+		output, err := bkl.Intersect(fsys, sourcesForBase, "/", "", []string{"kind"}, &format)
 		if err != nil {
 			return fmt.Errorf("failed to intersect files %v for base %s: %w", sourcesForBase, info.targetFile, err)
 		}
@@ -607,7 +607,7 @@ func (s *Server) processBaseLayer(info *fileInfo, files map[string]*fileInfo, fi
 
 func (s *Server) processDerivedLayer(info *fileInfo, format string) error {
 	fsys := os.DirFS("/")
-	output, err := bkl.Diff(fsys, info.parent, info.prepFile, "/", "", "kind", &format)
+	output, err := bkl.Diff(fsys, info.parent, info.prepFile, "/", "", []string{"kind"}, &format)
 	if err != nil {
 		return fmt.Errorf("failed to diff %s -> %s: %w", info.parent, info.prepFile, err)
 	}
@@ -627,7 +627,7 @@ func (s *Server) createVerificationTasks(p *taskcp.Project, fileMap map[string]s
 		}
 
 		fsys := os.DirFS("/")
-		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+		compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("failed to compare %s: %w", originalFile, err)
 		}
@@ -749,7 +749,7 @@ func (s *Server) createSecondVerificationTask(p *taskcp.Project, targetFile stri
 	}
 
 	fsys := os.DirFS("/")
-	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, "")
+	compareResult, err := bkl.Compare(fsys, originalFile, targetFile, "/", "", nil, nil, nil)
 	if err != nil {
 		compareErr := err
 

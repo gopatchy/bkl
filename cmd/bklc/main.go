@@ -10,9 +10,9 @@ import (
 )
 
 type options struct {
-	Format   *string `short:"f" long:"format" description:"output format" choice:"json" choice:"jsonl" choice:"toml" choice:"yaml"`
-	SortPath string  `short:"s" long:"sort" description:"sort output documents by path (e.g. 'metadata.name')"`
-	Color    bool    `short:"c" long:"color" description:"colorize diff output"`
+	Format *string  `short:"f" long:"format" description:"output format" choice:"json" choice:"jsonl" choice:"toml" choice:"yaml"`
+	Sort   []string `short:"s" long:"sort" description:"sort output documents by path (e.g. 'metadata.name'), can be specified multiple times"`
+	Color  bool     `short:"c" long:"color" description:"colorize diff output"`
 
 	Positional struct {
 		File1 flags.Filename `positional-arg-name:"file1" required:"yes" description:"first file to compare"`
@@ -44,7 +44,7 @@ Examples:
 
 	fsys := os.DirFS("/")
 
-	result, err := bkl.Compare(fsys, file1, file2, "/", "", nil, opts.Format, opts.SortPath)
+	result, err := bkl.Compare(fsys, file1, file2, "/", "", nil, opts.Format, opts.Sort)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
