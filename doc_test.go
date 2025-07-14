@@ -250,16 +250,16 @@ func runDocumentationTest(t *testing.T, testCase *bkl.DocExample, example *bkl.D
 	case testCase.Evaluate != nil:
 		output, err = runEvaluateTestForDoc(testCase)
 	case testCase.Required != nil:
-		runRequiredTest(t, testCase)
+		runRequiredTest(t, testCase.Required)
 		return
 	case testCase.Intersect != nil:
-		runIntersectTest(t, testCase)
+		runIntersectTest(t, testCase.Intersect)
 		return
 	case testCase.Diff != nil:
-		runDiffTest(t, testCase)
+		runDiffTest(t, testCase.Diff)
 		return
 	case testCase.Compare != nil:
-		runCompareTest(t, testCase)
+		runCompareTest(t, testCase.Compare)
 		return
 	default:
 		t.Errorf("Test case has no operation defined")
