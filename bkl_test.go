@@ -716,11 +716,6 @@ func TestDocumentationExamples(t *testing.T) {
 
 			testCase.Description = fmt.Sprintf("Doc example from %s", section.Title)
 
-			if section.ID == "bklr" && testCase.Evaluate != nil {
-				testCase.Required = testCase.Evaluate
-				testCase.Evaluate = nil
-			}
-
 			var actualFormat *string
 			switch {
 			case testCase.Required != nil:

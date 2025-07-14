@@ -45,7 +45,7 @@ type DocExample struct {
 	Evaluate    *DocEvaluate  `yaml:"evaluate,omitempty" json:"evaluate,omitempty" toml:"evaluate,omitempty"`
 	Diff        *DocDiff      `yaml:"diff,omitempty" json:"diff,omitempty" toml:"diff,omitempty"`
 	Intersect   *DocIntersect `yaml:"intersect,omitempty" json:"intersect,omitempty" toml:"intersect,omitempty"`
-	Required    *DocEvaluate  `yaml:"required,omitempty" json:"required,omitempty" toml:"required,omitempty"` // Required uses same structure as Evaluate
+	Required    *DocRequired  `yaml:"required,omitempty" json:"required,omitempty" toml:"required,omitempty"`
 	Convert     *DocConvert   `yaml:"convert,omitempty" json:"convert,omitempty" toml:"convert,omitempty"`
 	Fixit       *DocFixit     `yaml:"fixit,omitempty" json:"fixit,omitempty" toml:"fixit,omitempty"`
 	Compare     *DocCompare   `yaml:"compare,omitempty" json:"compare,omitempty" toml:"compare,omitempty"`
@@ -74,6 +74,14 @@ type DocIntersect struct {
 	Result   DocLayer    `yaml:"result" json:"result" toml:"result"`
 	Selector []string    `yaml:"selector,omitempty" json:"selector,omitempty" toml:"selector,omitempty"`
 	Errors   []string    `yaml:"errors,omitempty" json:"errors,omitempty" toml:"errors,omitempty"`
+}
+
+type DocRequired struct {
+	Inputs []*DocLayer       `yaml:"inputs" json:"inputs" toml:"inputs"`
+	Result DocLayer          `yaml:"result" json:"result" toml:"result"`
+	Env    map[string]string `yaml:"env,omitempty" json:"env,omitempty" toml:"env,omitempty"`
+	Errors []string          `yaml:"errors,omitempty" json:"errors,omitempty" toml:"errors,omitempty"`
+	Root   string            `yaml:"root,omitempty" json:"root,omitempty" toml:"root,omitempty"`
 }
 
 type DocConvert struct {
