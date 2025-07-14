@@ -21,32 +21,6 @@ func TestMCP(t *testing.T) {
 		t.Fatalf("Failed to get tests: %v", err)
 	}
 
-	filterTests := map[string]bool{}
-	if *testFilter != "" {
-		for _, name := range strings.Split(*testFilter, ",") {
-			name = strings.TrimSpace(name)
-			if name != "" {
-				if _, ok := tests[name]; !ok {
-					t.Fatalf("Test %q not found", name)
-				}
-				filterTests[name] = true
-			}
-		}
-	}
-
-	excludeTests := map[string]bool{}
-	if *testExclude != "" {
-		for _, name := range strings.Split(*testExclude, ",") {
-			name = strings.TrimSpace(name)
-			if name != "" {
-				if _, ok := tests[name]; !ok {
-					t.Fatalf("Test %q not found", name)
-				}
-				excludeTests[name] = true
-			}
-		}
-	}
-
 	cmd := exec.Command("go", "run", "./cmd/bkl-mcp/")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -88,14 +62,6 @@ func TestMCP(t *testing.T) {
 		t.Fatalf("Failed to initialize MCP client: %v", err)
 	}
 	for testName, testCase := range tests {
-		if len(filterTests) > 0 && !filterTests[testName] {
-			continue
-		}
-
-		if excludeTests[testName] {
-			continue
-		}
-
 		if testCase.Benchmark {
 			continue
 		}

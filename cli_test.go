@@ -12,30 +12,8 @@ import (
 	"github.com/gopatchy/bkl"
 )
 
-func setupCLITestFiles(t *testing.T, testCase *bkl.TestCase) string {
+func setupCLITestFiles(t *testing.T, files map[string]string) string {
 	tmpDir := t.TempDir()
-
-	files := make(map[string]string)
-	switch {
-	case testCase.Required != nil:
-		for _, input := range testCase.Required.Inputs {
-			files[input.Filename] = input.Code
-		}
-	case testCase.Intersect != nil:
-		for _, input := range testCase.Intersect.Inputs {
-			files[input.Filename] = input.Code
-		}
-	case testCase.Diff != nil:
-		files[testCase.Diff.Base.Filename] = testCase.Diff.Base.Code
-		files[testCase.Diff.Target.Filename] = testCase.Diff.Target.Code
-	case testCase.Compare != nil:
-		files[testCase.Compare.Left.Filename] = testCase.Compare.Left.Code
-		files[testCase.Compare.Right.Filename] = testCase.Compare.Right.Code
-	case testCase.Evaluate != nil:
-		for _, input := range testCase.Evaluate.Inputs {
-			files[input.Filename] = input.Code
-		}
-	}
 
 	for filename, content := range files {
 		fullPath := filepath.Join(tmpDir, filename)
@@ -53,6 +31,36 @@ func setupCLITestFiles(t *testing.T, testCase *bkl.TestCase) string {
 	}
 
 	return tmpDir
+}
+
+func addFormatArg(args []string, languages [][]any) []string {
+	if len(languages) > 0 && len(languages[0]) > 1 {
+		if format, ok := languages[0][1].(string); ok {
+			return append(args, "--format", format)
+		}
+	}
+	return args
+}
+
+func addRootPathArg(args []string, tmpDir, rootPath string) []string {
+	if rootPath != "" {
+		return append(args, "--root-path", filepath.Join(tmpDir, rootPath))
+	}
+	return args
+}
+
+func addSelectorArgs(args []string, selectors []string) []string {
+	for _, sel := range selectors {
+		args = append(args, "--selector", sel)
+	}
+	return args
+}
+
+func addSortArgs(args []string, sortPaths []string) []string {
+	for _, sortPath := range sortPaths {
+		args = append(args, "--sort", sortPath)
+	}
+	return args
 }
 
 func executeCLICommand(t *testing.T, cmdPath string, args []string, env map[string]string, expectedErrors []string) []byte {
@@ -95,19 +103,19 @@ func executeCLICommand(t *testing.T, cmdPath string, args []string, env map[stri
 	return output
 }
 
-func checkCLIOutput(t *testing.T, output []byte, expected string, trimDiffHeaders bool) {
+func checkCLIOutput(t *testing.T, output []byte, expected string, removeInitialLines int) {
 	expectedBytes := bytes.TrimSpace([]byte(expected))
 	outputBytes := bytes.TrimSpace(output)
 
-	if trimDiffHeaders {
+	if removeInitialLines > 0 {
 		outputLines := bytes.Split(outputBytes, []byte("\n"))
 		expectedLines := bytes.Split(expectedBytes, []byte("\n"))
 
-		if len(outputLines) > 2 {
-			outputBytes = bytes.Join(outputLines[2:], []byte("\n"))
+		if len(outputLines) > removeInitialLines {
+			outputBytes = bytes.Join(outputLines[removeInitialLines:], []byte("\n"))
 		}
-		if len(expectedLines) > 2 {
-			expectedBytes = bytes.Join(expectedLines[2:], []byte("\n"))
+		if len(expectedLines) > removeInitialLines {
+			expectedBytes = bytes.Join(expectedLines[removeInitialLines:], []byte("\n"))
 		}
 	}
 
@@ -119,17 +127,12 @@ func checkCLIOutput(t *testing.T, output []byte, expected string, trimDiffHeader
 func TestCLI(t *testing.T) {
 	t.Parallel()
 
-	tests, filterTests, excludeTests := getFilteredTests(t)
+	tests, err := bkl.GetTests()
+	if err != nil {
+		t.Fatalf("Failed to get tests: %v", err)
+	}
 
 	for testName, testCase := range tests {
-		if len(filterTests) > 0 && !filterTests[testName] {
-			continue
-		}
-
-		if excludeTests[testName] {
-			continue
-		}
-
 		if testCase.Benchmark {
 			continue
 		}
@@ -153,79 +156,66 @@ func TestCLI(t *testing.T) {
 }
 
 func runTestCLIEvaluate(t *testing.T, testCase *bkl.TestCase) {
-	tmpDir := setupCLITestFiles(t, testCase)
+	files := map[string]string{}
+	for _, input := range testCase.Evaluate.Inputs {
+		files[input.Filename] = input.Code
+	}
+
+	tmpDir := setupCLITestFiles(t, files)
 
 	var args []string
-	if testCase.Evaluate != nil {
-		if testCase.Evaluate.Root != "" {
-			args = append(args, "--root-path", filepath.Join(tmpDir, testCase.Evaluate.Root))
-		}
+	args = addRootPathArg(args, tmpDir, testCase.Evaluate.Root)
 
-		if len(testCase.Evaluate.Inputs) > 0 {
-			lastInput := testCase.Evaluate.Inputs[len(testCase.Evaluate.Inputs)-1]
-			args = append(args, filepath.Join(tmpDir, lastInput.Filename))
-		}
-
-		format := getFormat(testCase.Evaluate.Result.Languages)
-		if format != nil {
-			args = append(args, "--format", *format)
-		}
-
-		for _, sortPath := range testCase.Evaluate.Sort {
-			args = append(args, "--sort", sortPath)
-		}
+	if len(testCase.Evaluate.Inputs) > 0 {
+		lastInput := testCase.Evaluate.Inputs[len(testCase.Evaluate.Inputs)-1]
+		args = append(args, filepath.Join(tmpDir, lastInput.Filename))
 	}
+
+	args = addFormatArg(args, testCase.Evaluate.Result.Languages)
+	args = addSortArgs(args, testCase.Evaluate.Sort)
 
 	output := executeCLICommand(t, "./cmd/bkl", args, testCase.Evaluate.Env, testCase.Evaluate.Errors)
 	if output != nil {
-		var expected string
-		if testCase.Evaluate != nil {
-			expected = testCase.Evaluate.Result.Code
-		}
-		checkCLIOutput(t, output, expected, false)
+		checkCLIOutput(t, output, testCase.Evaluate.Result.Code, 0)
 	}
 }
 
 func runTestCLIRequired(t *testing.T, testCase *bkl.TestCase) {
-	tmpDir := setupCLITestFiles(t, testCase)
-
-	if testCase.Required == nil {
-		t.Fatalf("Expected Required operation")
-	}
-
 	if len(testCase.Required.Inputs) != 1 {
 		t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Required.Inputs))
 	}
 
-	var args []string
-
-	if testCase.Required.Root != "" {
-		args = append(args, "--root-path", filepath.Join(tmpDir, testCase.Required.Root))
+	files := map[string]string{}
+	for _, input := range testCase.Required.Inputs {
+		files[input.Filename] = input.Code
 	}
+
+	tmpDir := setupCLITestFiles(t, files)
+
+	var args []string
+	args = addRootPathArg(args, tmpDir, testCase.Required.Root)
 
 	args = append(args, filepath.Join(tmpDir, testCase.Required.Inputs[0].Filename))
 
-	format := getFormat(testCase.Required.Result.Languages)
-	if format != nil {
-		args = append(args, "--format", *format)
-	}
+	args = addFormatArg(args, testCase.Required.Result.Languages)
 
 	output := executeCLICommand(t, "./cmd/bklr", args, testCase.Required.Env, testCase.Required.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Required.Result.Code, false)
+		checkCLIOutput(t, output, testCase.Required.Result.Code, 0)
 	}
 }
 
 func runTestCLIIntersect(t *testing.T, testCase *bkl.TestCase) {
-	tmpDir := setupCLITestFiles(t, testCase)
-
-	if testCase.Intersect == nil {
-		t.Fatalf("Expected Intersect operation")
-	}
-
 	if len(testCase.Intersect.Inputs) < 2 {
 		t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Intersect.Inputs))
 	}
+
+	files := map[string]string{}
+	for _, input := range testCase.Intersect.Inputs {
+		files[input.Filename] = input.Code
+	}
+
+	tmpDir := setupCLITestFiles(t, files)
 
 	var args []string
 
@@ -233,71 +223,55 @@ func runTestCLIIntersect(t *testing.T, testCase *bkl.TestCase) {
 		args = append(args, filepath.Join(tmpDir, input.Filename))
 	}
 
-	format := getFormat(testCase.Intersect.Result.Languages)
-	if format != nil {
-		args = append(args, "--format", *format)
-	}
-
-	for _, sel := range testCase.Intersect.Selector {
-		args = append(args, "--selector", sel)
-	}
+	args = addFormatArg(args, testCase.Intersect.Result.Languages)
+	args = addSelectorArgs(args, testCase.Intersect.Selector)
 
 	output := executeCLICommand(t, "./cmd/bkli", args, nil, testCase.Intersect.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Intersect.Result.Code, false)
+		checkCLIOutput(t, output, testCase.Intersect.Result.Code, 0)
 	}
 }
 
 func runTestCLIDiff(t *testing.T, testCase *bkl.TestCase) {
-	tmpDir := setupCLITestFiles(t, testCase)
-
-	if testCase.Diff == nil {
-		t.Fatalf("Expected Diff operation")
+	files := map[string]string{
+		testCase.Diff.Base.Filename:   testCase.Diff.Base.Code,
+		testCase.Diff.Target.Filename: testCase.Diff.Target.Code,
 	}
+
+	tmpDir := setupCLITestFiles(t, files)
 
 	var args []string
 
 	args = append(args, filepath.Join(tmpDir, testCase.Diff.Base.Filename))
 	args = append(args, filepath.Join(tmpDir, testCase.Diff.Target.Filename))
 
-	format := getFormat(testCase.Diff.Result.Languages)
-	if format != nil {
-		args = append(args, "--format", *format)
-	}
-
-	for _, sel := range testCase.Diff.Selector {
-		args = append(args, "--selector", sel)
-	}
+	args = addFormatArg(args, testCase.Diff.Result.Languages)
+	args = addSelectorArgs(args, testCase.Diff.Selector)
 
 	output := executeCLICommand(t, "./cmd/bkld", args, nil, testCase.Diff.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Diff.Result.Code, false)
+		checkCLIOutput(t, output, testCase.Diff.Result.Code, 0)
 	}
 }
 
 func runTestCLICompare(t *testing.T, testCase *bkl.TestCase) {
-	tmpDir := setupCLITestFiles(t, testCase)
-
-	if testCase.Compare == nil {
-		t.Fatalf("Expected Compare operation")
+	files := map[string]string{
+		testCase.Compare.Left.Filename:  testCase.Compare.Left.Code,
+		testCase.Compare.Right.Filename: testCase.Compare.Right.Code,
 	}
+
+	tmpDir := setupCLITestFiles(t, files)
 
 	var args []string
 
 	args = append(args, filepath.Join(tmpDir, testCase.Compare.Left.Filename))
 	args = append(args, filepath.Join(tmpDir, testCase.Compare.Right.Filename))
 
-	format := getFormat(testCase.Compare.Result.Languages)
-	if format != nil {
-		args = append(args, "--format", *format)
-	}
-
-	for _, sortPath := range testCase.Compare.Sort {
-		args = append(args, "--sort", sortPath)
-	}
+	args = addFormatArg(args, testCase.Compare.Result.Languages)
+	args = addSortArgs(args, testCase.Compare.Sort)
 
 	output := executeCLICommand(t, "./cmd/bklc", args, testCase.Compare.Env, nil)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Compare.Result.Code, true) // true to trim diff headers
+		checkCLIOutput(t, output, testCase.Compare.Result.Code, 2)
 	}
 }

@@ -2,7 +2,6 @@ package bkl_test
 
 import (
 	"bytes"
-	"flag"
 	"fmt"
 	"io/fs"
 	"regexp"
@@ -14,11 +13,7 @@ import (
 	"github.com/gopatchy/bkl"
 )
 
-var (
-	testFilter  = flag.String("test.filter", "", "Run only specified tests from tests.toml (comma-separated list)")
-	testExclude = flag.String("test.exclude", "", "Exclude specified tests from tests.toml (comma-separated list)")
-	exportRegex = regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
-)
+var exportRegex = regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
 
 func runEvaluateTest(testCase *bkl.TestCase) ([]byte, error) {
 	fsys := fstest.MapFS{}
@@ -313,41 +308,7 @@ func TestBKL(t *testing.T) {
 		t.Fatalf("Failed to get tests: %v", err)
 	}
 
-	filterTests := map[string]bool{}
-	if *testFilter != "" {
-		for _, name := range strings.Split(*testFilter, ",") {
-			name = strings.TrimSpace(name)
-			if name != "" {
-				if _, ok := tests[name]; !ok {
-					t.Fatalf("Test %q not found", name)
-				}
-				filterTests[name] = true
-			}
-		}
-	}
-
-	excludeTests := map[string]bool{}
-	if *testExclude != "" {
-		for _, name := range strings.Split(*testExclude, ",") {
-			name = strings.TrimSpace(name)
-			if name != "" {
-				if _, ok := tests[name]; !ok {
-					t.Fatalf("Test %q not found", name)
-				}
-				excludeTests[name] = true
-			}
-		}
-	}
-
 	for testName, testCase := range tests {
-		if len(filterTests) > 0 && !filterTests[testName] {
-			continue
-		}
-
-		if excludeTests[testName] {
-			continue
-		}
-
 		if testCase.Benchmark {
 			continue
 		}
@@ -439,41 +400,6 @@ func BenchmarkBKL(b *testing.B) {
 			})
 		}
 	}
-}
-
-func getFilteredTests(t *testing.T) (map[string]*bkl.TestCase, map[string]bool, map[string]bool) {
-	tests, err := bkl.GetTests()
-	if err != nil {
-		t.Fatalf("Failed to get tests: %v", err)
-	}
-
-	filterTests := map[string]bool{}
-	if *testFilter != "" {
-		for _, name := range strings.Split(*testFilter, ",") {
-			name = strings.TrimSpace(name)
-			if name != "" {
-				if _, ok := tests[name]; !ok {
-					t.Fatalf("Test %q not found", name)
-				}
-				filterTests[name] = true
-			}
-		}
-	}
-
-	excludeTests := map[string]bool{}
-	if *testExclude != "" {
-		for _, name := range strings.Split(*testExclude, ",") {
-			name = strings.TrimSpace(name)
-			if name != "" {
-				if _, ok := tests[name]; !ok {
-					t.Fatalf("Test %q not found", name)
-				}
-				excludeTests[name] = true
-			}
-		}
-	}
-
-	return tests, filterTests, excludeTests
 }
 
 func extractEnvVars(code string) map[string]string {
