@@ -73,7 +73,7 @@ func TestMCP(t *testing.T) {
 		}
 
 		t.Run(testName, func(t *testing.T) {
-			output, err := runTestCaseViaMCP(ctx, client, testCase, testName, t)
+			output, err := runDocExampleViaMCP(ctx, client, testCase, testName, t)
 
 			// Get expected errors from operation-specific structure
 			var expectedErrors []string
@@ -134,7 +134,7 @@ func TestMCP(t *testing.T) {
 	}
 }
 
-func runTestCaseViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.TestCase, testName string, t *testing.T) ([]byte, error) {
+func runDocExampleViaMCP(ctx context.Context, client *mcp.Client, testCase *bkl.DocExample, testName string, t *testing.T) ([]byte, error) {
 	// Build filesystem from operation-specific structure
 	fileSystem := make(map[string]any)
 	var format *string

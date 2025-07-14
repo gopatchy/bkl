@@ -21,16 +21,6 @@ var k8sData []byte
 //go:embed docs/fixit.yaml
 var fixitData []byte
 
-type TestCase struct {
-	Description string        `toml:"description" json:"description"`
-	Evaluate    *DocEvaluate  `toml:"evaluate,omitempty" json:"evaluate,omitempty"`
-	Diff        *DocDiff      `toml:"diff,omitempty" json:"diff,omitempty"`
-	Intersect   *DocIntersect `toml:"intersect,omitempty" json:"intersect,omitempty"`
-	Required    *DocEvaluate  `toml:"required,omitempty" json:"required,omitempty"` // Required uses same structure as Evaluate
-	Compare     *DocCompare   `toml:"compare,omitempty" json:"compare,omitempty"`
-	Benchmark   bool          `toml:"benchmark,omitempty" json:"benchmark,omitempty"`
-}
-
 type DocSection struct {
 	ID     string    `yaml:"id" json:"id"`
 	Title  string    `yaml:"title" json:"title"`
@@ -51,12 +41,15 @@ type DocSideBySide struct {
 }
 
 type DocExample struct {
-	Evaluate  *DocEvaluate  `yaml:"evaluate,omitempty" json:"evaluate,omitempty"`
-	Diff      *DocDiff      `yaml:"diff,omitempty" json:"diff,omitempty"`
-	Intersect *DocIntersect `yaml:"intersect,omitempty" json:"intersect,omitempty"`
-	Convert   *DocConvert   `yaml:"convert,omitempty" json:"convert,omitempty"`
-	Fixit     *DocFixit     `yaml:"fixit,omitempty" json:"fixit,omitempty"`
-	Compare   *DocCompare   `yaml:"compare,omitempty" json:"compare,omitempty"`
+	Description string        `toml:"description" json:"description" yaml:"description,omitempty"`
+	Evaluate    *DocEvaluate  `yaml:"evaluate,omitempty" json:"evaluate,omitempty" toml:"evaluate,omitempty"`
+	Diff        *DocDiff      `yaml:"diff,omitempty" json:"diff,omitempty" toml:"diff,omitempty"`
+	Intersect   *DocIntersect `yaml:"intersect,omitempty" json:"intersect,omitempty" toml:"intersect,omitempty"`
+	Required    *DocEvaluate  `yaml:"required,omitempty" json:"required,omitempty" toml:"required,omitempty"` // Required uses same structure as Evaluate
+	Convert     *DocConvert   `yaml:"convert,omitempty" json:"convert,omitempty" toml:"convert,omitempty"`
+	Fixit       *DocFixit     `yaml:"fixit,omitempty" json:"fixit,omitempty" toml:"fixit,omitempty"`
+	Compare     *DocCompare   `yaml:"compare,omitempty" json:"compare,omitempty" toml:"compare,omitempty"`
+	Benchmark   bool          `toml:"benchmark,omitempty" json:"benchmark,omitempty" yaml:"benchmark,omitempty"`
 }
 
 type DocEvaluate struct {
@@ -113,8 +106,8 @@ type DocLayer struct {
 	Collapsed  bool     `yaml:"collapsed,omitempty" json:"collapsed,omitempty" toml:"collapsed,omitempty"`
 }
 
-func GetTests() (map[string]*TestCase, error) {
-	var tests map[string]*TestCase
+func GetTests() (map[string]*DocExample, error) {
+	var tests map[string]*DocExample
 	decoder := toml.NewDecoder(bytes.NewReader(testsData))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&tests); err != nil {

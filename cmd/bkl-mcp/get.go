@@ -18,7 +18,7 @@ type getArgs struct {
 
 type getResponse struct {
 	Documentation    *bkl.DocSection `json:"documentation,omitempty"`
-	Test             *bkl.TestCase   `json:"test,omitempty"`
+	Test             *bkl.DocExample `json:"test,omitempty"`
 	FormatsConverted bool            `json:"formatsConverted,omitempty"`
 }
 
@@ -62,7 +62,7 @@ func (s *Server) getHandler(ctx context.Context, args getArgs) (*getResponse, er
 		testCopy := *test
 
 		if convertToJSON {
-			response.FormatsConverted = convertTestCaseCodeBlocks(&testCopy)
+			response.FormatsConverted = convertDocExampleCodeBlocks(&testCopy)
 		}
 
 		response.Test = &testCopy
@@ -204,7 +204,7 @@ func convertDocSectionCodeBlocks(section *bkl.DocSection) bool {
 	return converted
 }
 
-func convertTestCaseCodeBlocks(test *bkl.TestCase) bool {
+func convertDocExampleCodeBlocks(test *bkl.DocExample) bool {
 	converted := false
 
 	// Convert inputs based on operation type

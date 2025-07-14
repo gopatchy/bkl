@@ -155,7 +155,7 @@ func TestCLI(t *testing.T) {
 	}
 }
 
-func runTestCLIEvaluate(t *testing.T, testCase *bkl.TestCase) {
+func runTestCLIEvaluate(t *testing.T, testCase *bkl.DocExample) {
 	files := map[string]string{}
 	for _, input := range testCase.Evaluate.Inputs {
 		files[input.Filename] = input.Code
@@ -180,7 +180,7 @@ func runTestCLIEvaluate(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestCLIRequired(t *testing.T, testCase *bkl.TestCase) {
+func runTestCLIRequired(t *testing.T, testCase *bkl.DocExample) {
 	if len(testCase.Required.Inputs) != 1 {
 		t.Fatalf("Required tests require exactly 1 eval file, got %d", len(testCase.Required.Inputs))
 	}
@@ -205,7 +205,7 @@ func runTestCLIRequired(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestCLIIntersect(t *testing.T, testCase *bkl.TestCase) {
+func runTestCLIIntersect(t *testing.T, testCase *bkl.DocExample) {
 	if len(testCase.Intersect.Inputs) < 2 {
 		t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(testCase.Intersect.Inputs))
 	}
@@ -232,7 +232,7 @@ func runTestCLIIntersect(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestCLIDiff(t *testing.T, testCase *bkl.TestCase) {
+func runTestCLIDiff(t *testing.T, testCase *bkl.DocExample) {
 	files := map[string]string{
 		testCase.Diff.Base.Filename:   testCase.Diff.Base.Code,
 		testCase.Diff.Target.Filename: testCase.Diff.Target.Code,
@@ -254,7 +254,7 @@ func runTestCLIDiff(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestCLICompare(t *testing.T, testCase *bkl.TestCase) {
+func runTestCLICompare(t *testing.T, testCase *bkl.DocExample) {
 	files := map[string]string{
 		testCase.Compare.Left.Filename:  testCase.Compare.Left.Code,
 		testCase.Compare.Right.Filename: testCase.Compare.Right.Code,

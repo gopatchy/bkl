@@ -15,7 +15,7 @@ import (
 
 var exportRegex = regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
 
-func runEvaluateTest(testCase *bkl.TestCase) ([]byte, error) {
+func runEvaluateTest(testCase *bkl.DocExample) ([]byte, error) {
 	fsys := fstest.MapFS{}
 	rootPath := testCase.Evaluate.Root
 	if rootPath == "" {
@@ -53,7 +53,7 @@ func runEvaluateTest(testCase *bkl.TestCase) ([]byte, error) {
 	return bkl.Evaluate(testFS, evalFiles, rootPath, rootPath, testCase.Evaluate.Env, format, testCase.Evaluate.Sort, firstFile)
 }
 
-func runRequiredTest(testCase *bkl.TestCase) ([]byte, error) {
+func runRequiredTest(testCase *bkl.DocExample) ([]byte, error) {
 	fsys := fstest.MapFS{}
 	rootPath := testCase.Required.Root
 	if rootPath == "" {
@@ -89,7 +89,7 @@ func runRequiredTest(testCase *bkl.TestCase) ([]byte, error) {
 	return bkl.Required(testFS, evalFiles[0], rootPath, rootPath, format, firstFile)
 }
 
-func runIntersectTest(testCase *bkl.TestCase) ([]byte, error) {
+func runIntersectTest(testCase *bkl.DocExample) ([]byte, error) {
 	fsys := fstest.MapFS{}
 	rootPath := "/"
 
@@ -114,7 +114,7 @@ func runIntersectTest(testCase *bkl.TestCase) ([]byte, error) {
 	return bkl.Intersect(fsys, evalFiles, rootPath, rootPath, testCase.Intersect.Selector, format, firstFile)
 }
 
-func runDiffTest(testCase *bkl.TestCase) ([]byte, error) {
+func runDiffTest(testCase *bkl.DocExample) ([]byte, error) {
 	fsys := fstest.MapFS{}
 	rootPath := "/"
 
@@ -131,7 +131,7 @@ func runDiffTest(testCase *bkl.TestCase) ([]byte, error) {
 	return bkl.Diff(fsys, testCase.Diff.Base.Filename, testCase.Diff.Target.Filename, rootPath, rootPath, testCase.Diff.Selector, format, firstFile)
 }
 
-func runCompareTest(testCase *bkl.TestCase) ([]byte, error) {
+func runCompareTest(testCase *bkl.DocExample) ([]byte, error) {
 	fsys := fstest.MapFS{}
 	rootPath := "/"
 
@@ -160,7 +160,7 @@ func getFormat(languages [][]any) *string {
 	return nil
 }
 
-func runTestBKLEvaluate(t *testing.T, testCase *bkl.TestCase) {
+func runTestBKLEvaluate(t *testing.T, testCase *bkl.DocExample) {
 	output, err := runEvaluateTest(testCase)
 
 	if len(testCase.Evaluate.Errors) > 0 {
@@ -192,7 +192,7 @@ func runTestBKLEvaluate(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestBKLRequired(t *testing.T, testCase *bkl.TestCase) {
+func runTestBKLRequired(t *testing.T, testCase *bkl.DocExample) {
 	output, err := runRequiredTest(testCase)
 
 	if len(testCase.Required.Errors) > 0 {
@@ -224,7 +224,7 @@ func runTestBKLRequired(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestBKLIntersect(t *testing.T, testCase *bkl.TestCase) {
+func runTestBKLIntersect(t *testing.T, testCase *bkl.DocExample) {
 	output, err := runIntersectTest(testCase)
 
 	if len(testCase.Intersect.Errors) > 0 {
@@ -256,7 +256,7 @@ func runTestBKLIntersect(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestBKLDiff(t *testing.T, testCase *bkl.TestCase) {
+func runTestBKLDiff(t *testing.T, testCase *bkl.DocExample) {
 	output, err := runDiffTest(testCase)
 
 	if len(testCase.Diff.Errors) > 0 {
@@ -288,7 +288,7 @@ func runTestBKLDiff(t *testing.T, testCase *bkl.TestCase) {
 	}
 }
 
-func runTestBKLCompare(t *testing.T, testCase *bkl.TestCase) {
+func runTestBKLCompare(t *testing.T, testCase *bkl.DocExample) {
 	output, err := runCompareTest(testCase)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -439,9 +439,9 @@ func validateLanguagePointers(layers []*bkl.DocLayer, acceptableLanguages []stri
 	return true
 }
 
-func processEvaluateExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+func prepareEvaluateExample(example *bkl.DocExample, acceptableLanguages []string) bool {
 	if !validateLanguagePointers(example.Evaluate.Inputs, acceptableLanguages) {
-		return nil, false
+		return false
 	}
 
 	inputs := make([]*bkl.DocLayer, 0, len(example.Evaluate.Inputs))
@@ -467,24 +467,21 @@ func processEvaluateExample(example *bkl.DocExample, acceptableLanguages []strin
 	}
 
 	if len(example.Evaluate.Result.Languages) != 1 {
-		return nil, false
+		return false
 	}
 
-	testCase := &bkl.TestCase{
-		Description: "Doc example",
-		Evaluate: &bkl.DocEvaluate{
-			Inputs: inputs,
-			Result: example.Evaluate.Result,
-			Env:    env,
-		},
+	example.Evaluate = &bkl.DocEvaluate{
+		Inputs: inputs,
+		Result: example.Evaluate.Result,
+		Env:    env,
 	}
 
-	return testCase, true
+	return true
 }
 
-func processConvertExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+func prepareConvertExample(example *bkl.DocExample, acceptableLanguages []string) bool {
 	if !validateLanguage([]bkl.DocLayer{example.Convert.To}, acceptableLanguages) {
-		return nil, false
+		return false
 	}
 
 	lang := example.Convert.To.Languages[0][1].(string)
@@ -496,58 +493,56 @@ func processConvertExample(example *bkl.DocExample, acceptableLanguages []string
 	}
 
 	if len(example.Convert.From.Languages) != 1 {
-		return nil, false
+		return false
 	}
 
-	testCase := &bkl.TestCase{
-		Description: "Doc example",
-		Evaluate: &bkl.DocEvaluate{
-			Inputs: []*bkl.DocLayer{{
-				Filename:  filename,
-				Code:      example.Convert.To.Code,
-				Languages: example.Convert.To.Languages,
-			}},
-			Result: example.Convert.From,
-			Env:    env,
-		},
+	// Convert to Evaluate for testing
+	example.Evaluate = &bkl.DocEvaluate{
+		Inputs: []*bkl.DocLayer{{
+			Filename:  filename,
+			Code:      example.Convert.To.Code,
+			Languages: example.Convert.To.Languages,
+		}},
+		Result: example.Convert.From,
+		Env:    env,
 	}
+	example.Convert = nil
 
-	return testCase, true
+	return true
 }
 
-func processFixitExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+func prepareFixitExample(example *bkl.DocExample, acceptableLanguages []string) bool {
 	goodLayer := example.Fixit.Good
 
 	if len(goodLayer.Languages) != 1 {
-		return nil, false
+		return false
 	}
 
 	lang := goodLayer.Languages[0][1].(string)
 	if !slices.Contains(acceptableLanguages, lang) {
-		return nil, false
+		return false
 	}
 
 	filename := "good." + lang
 
-	testCase := &bkl.TestCase{
-		Description: "Doc example",
-		Evaluate: &bkl.DocEvaluate{
-			Inputs: []*bkl.DocLayer{{
-				Filename:  filename,
-				Code:      goodLayer.Code,
-				Languages: goodLayer.Languages,
-			}},
-			Result: goodLayer,
-			Env:    extractEnvVars(goodLayer.Code),
-		},
+	// Convert to Evaluate for testing
+	example.Evaluate = &bkl.DocEvaluate{
+		Inputs: []*bkl.DocLayer{{
+			Filename:  filename,
+			Code:      goodLayer.Code,
+			Languages: goodLayer.Languages,
+		}},
+		Result: goodLayer,
+		Env:    extractEnvVars(goodLayer.Code),
 	}
+	// Keep Fixit for special handling in runDocumentationTest
 
-	return testCase, true
+	return true
 }
 
-func processDiffExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+func prepareDiffExample(example *bkl.DocExample, acceptableLanguages []string) bool {
 	if !validateLanguage([]bkl.DocLayer{example.Diff.Base, example.Diff.Target}, acceptableLanguages) {
-		return nil, false
+		return false
 	}
 
 	baseLang := example.Diff.Base.Languages[0][1].(string)
@@ -560,24 +555,21 @@ func processDiffExample(example *bkl.DocExample, acceptableLanguages []string) (
 	target.Filename = "file1." + targetLang
 
 	if len(example.Diff.Result.Languages) != 1 {
-		return nil, false
+		return false
 	}
 
-	testCase := &bkl.TestCase{
-		Description: "Doc example",
-		Diff: &bkl.DocDiff{
-			Base:   base,
-			Target: target,
-			Result: example.Diff.Result,
-		},
+	example.Diff = &bkl.DocDiff{
+		Base:   base,
+		Target: target,
+		Result: example.Diff.Result,
 	}
 
-	return testCase, true
+	return true
 }
 
-func processIntersectExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
+func prepareIntersectExample(example *bkl.DocExample, acceptableLanguages []string) bool {
 	if !validateLanguagePointers(example.Intersect.Inputs, acceptableLanguages) {
-		return nil, false
+		return false
 	}
 
 	inputs := make([]*bkl.DocLayer, len(example.Intersect.Inputs))
@@ -593,30 +585,18 @@ func processIntersectExample(example *bkl.DocExample, acceptableLanguages []stri
 	}
 
 	if len(example.Intersect.Result.Languages) != 1 {
-		return nil, false
+		return false
 	}
 
-	testCase := &bkl.TestCase{
-		Description: "Doc example",
-		Intersect: &bkl.DocIntersect{
-			Inputs: inputs,
-			Result: example.Intersect.Result,
-		},
+	example.Intersect = &bkl.DocIntersect{
+		Inputs: inputs,
+		Result: example.Intersect.Result,
 	}
 
-	return testCase, true
+	return true
 }
 
-func processRequiredExample(example *bkl.DocExample, acceptableLanguages []string) (*bkl.TestCase, bool) {
-	testCase, ok := processEvaluateExample(example, acceptableLanguages)
-	if ok && testCase.Evaluate != nil {
-		testCase.Required = testCase.Evaluate
-		testCase.Evaluate = nil
-	}
-	return testCase, ok
-}
-
-func runDocumentationTest(t *testing.T, testCase *bkl.TestCase, example *bkl.DocExample) {
+func runDocumentationTest(t *testing.T, testCase *bkl.DocExample, example *bkl.DocExample) {
 	var output []byte
 	var err error
 
@@ -704,22 +684,28 @@ func TestDocumentationExamples(t *testing.T) {
 			example := item.Example
 			testName := fmt.Sprintf("%s_item%d", section.ID, itemIdx)
 
-			var testCase *bkl.TestCase
-			var ok bool
-
-			switch {
-			case example.Evaluate != nil:
-				testCase, ok = processEvaluateExample(example, acceptableLanguages)
-			case example.Convert != nil:
-				testCase, ok = processConvertExample(example, acceptableLanguages)
-			case example.Fixit != nil:
-				testCase, ok = processFixitExample(example, acceptableLanguages)
-			case example.Diff != nil:
-				testCase, ok = processDiffExample(example, acceptableLanguages)
-			case example.Intersect != nil:
-				testCase, ok = processIntersectExample(example, acceptableLanguages)
-			case example.Compare != nil:
+			// Skip Compare examples for now
+			if example.Compare != nil {
 				continue
+			}
+
+			// Prepare the example for testing
+			testCase := &bkl.DocExample{}
+			*testCase = *example // Copy the example
+
+			// Process based on which operation is present
+			ok := false
+			switch {
+			case testCase.Evaluate != nil:
+				ok = prepareEvaluateExample(testCase, acceptableLanguages)
+			case testCase.Convert != nil:
+				ok = prepareConvertExample(testCase, acceptableLanguages)
+			case testCase.Fixit != nil:
+				ok = prepareFixitExample(testCase, acceptableLanguages)
+			case testCase.Diff != nil:
+				ok = prepareDiffExample(testCase, acceptableLanguages)
+			case testCase.Intersect != nil:
+				ok = prepareIntersectExample(testCase, acceptableLanguages)
 			default:
 				continue
 			}

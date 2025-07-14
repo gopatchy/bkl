@@ -14,7 +14,7 @@ import (
 )
 
 type Server struct {
-	tests       map[string]*bkl.TestCase
+	tests       map[string]*bkl.DocExample
 	sections    []bkl.DocSection
 	taskService *taskcp.Service
 }

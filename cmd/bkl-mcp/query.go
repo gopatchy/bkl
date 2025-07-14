@@ -205,7 +205,7 @@ func (s *Server) searchTests(keywords []string) []queryResult {
 	return results
 }
 
-func (s *Server) scoreTest(name string, test *bkl.TestCase, keywords []string) int {
+func (s *Server) scoreTest(name string, test *bkl.DocExample, keywords []string) int {
 	score := 0
 
 	nameLower := strings.ToLower(name)
