@@ -215,7 +215,36 @@ func (s *Server) scoreTest(name string, test *bkl.TestCase, keywords []string) i
 	score += countKeywordMatches(descLower, keywords) * 15
 
 	bestFileScore := 0
-	for _, content := range test.Files {
+
+	// Search through all code content based on operation type
+	var contents []string
+	switch {
+	case test.Evaluate != nil:
+		for _, input := range test.Evaluate.Inputs {
+			contents = append(contents, input.Code)
+		}
+		contents = append(contents, test.Evaluate.Result.Code)
+
+	case test.Required != nil:
+		for _, input := range test.Required.Inputs {
+			contents = append(contents, input.Code)
+		}
+		contents = append(contents, test.Required.Result.Code)
+
+	case test.Diff != nil:
+		contents = append(contents, test.Diff.Base.Code, test.Diff.Target.Code, test.Diff.Result.Code)
+
+	case test.Intersect != nil:
+		for _, input := range test.Intersect.Inputs {
+			contents = append(contents, input.Code)
+		}
+		contents = append(contents, test.Intersect.Result.Code)
+
+	case test.Compare != nil:
+		contents = append(contents, test.Compare.Left.Code, test.Compare.Right.Code, test.Compare.Result.Code)
+	}
+
+	for _, content := range contents {
 		contentLower := strings.ToLower(content)
 		fileMatches := countKeywordMatches(contentLower, keywords)
 		if fileMatches > bestFileScore {

@@ -122,7 +122,7 @@ func convertDocSectionCodeBlocks(section *bkl.DocSection) bool {
 			switch {
 			case item.Example.Evaluate != nil:
 				for j := range item.Example.Evaluate.Inputs {
-					if convertCodeBlockToJSON(&item.Example.Evaluate.Inputs[j]) {
+					if convertCodeBlockToJSON(item.Example.Evaluate.Inputs[j]) {
 						converted = true
 					}
 				}
@@ -143,7 +143,7 @@ func convertDocSectionCodeBlocks(section *bkl.DocSection) bool {
 
 			case item.Example.Intersect != nil:
 				for j := range item.Example.Intersect.Inputs {
-					if convertCodeBlockToJSON(&item.Example.Intersect.Inputs[j]) {
+					if convertCodeBlockToJSON(item.Example.Intersect.Inputs[j]) {
 						converted = true
 					}
 				}
@@ -207,15 +207,59 @@ func convertDocSectionCodeBlocks(section *bkl.DocSection) bool {
 func convertTestCaseCodeBlocks(test *bkl.TestCase) bool {
 	converted := false
 
-	for filename, content := range test.Files {
-		ext := strings.TrimPrefix(filename[strings.LastIndex(filename, "."):], ".")
+	// Convert inputs based on operation type
+	switch {
+	case test.Evaluate != nil:
+		converted = convertDocLayerCodeBlocks(test.Evaluate.Inputs...) || converted
+		converted = convertDocLayerCodeBlocks(&test.Evaluate.Result) || converted
+
+	case test.Required != nil:
+		converted = convertDocLayerCodeBlocks(test.Required.Inputs...) || converted
+		converted = convertDocLayerCodeBlocks(&test.Required.Result) || converted
+
+	case test.Diff != nil:
+		converted = convertDocLayerCodeBlocks(&test.Diff.Base, &test.Diff.Target) || converted
+		converted = convertDocLayerCodeBlocks(&test.Diff.Result) || converted
+
+	case test.Intersect != nil:
+		converted = convertDocLayerCodeBlocks(test.Intersect.Inputs...) || converted
+		converted = convertDocLayerCodeBlocks(&test.Intersect.Result) || converted
+
+	case test.Compare != nil:
+		converted = convertDocLayerCodeBlocks(&test.Compare.Left, &test.Compare.Right) || converted
+		converted = convertDocLayerCodeBlocks(&test.Compare.Result) || converted
+	}
+
+	return converted
+}
+
+func convertDocLayerCodeBlocks(layers ...*bkl.DocLayer) bool {
+	converted := false
+
+	for _, layer := range layers {
+		if layer == nil {
+			continue
+		}
+
+		// Determine format from filename or languages
+		var ext string
+		if layer.Filename != "" {
+			if idx := strings.LastIndex(layer.Filename, "."); idx != -1 {
+				ext = layer.Filename[idx+1:]
+			}
+		} else if len(layer.Languages) > 0 && len(layer.Languages[0]) > 1 {
+			if format, ok := layer.Languages[0][1].(string); ok {
+				ext = format
+			}
+		}
+
 		if ext == "yaml" || ext == "toml" {
 			formatHandler, err := format.Get(ext)
 			if err != nil {
 				continue
 			}
 
-			docs, err := formatHandler.UnmarshalStream([]byte(content))
+			docs, err := formatHandler.UnmarshalStream([]byte(layer.Code))
 			if err != nil {
 				continue
 			}
@@ -230,26 +274,13 @@ func convertTestCaseCodeBlocks(test *bkl.TestCase) bool {
 				continue
 			}
 
-			test.Files[filename] = string(jsonBytes)
-			converted = true
-		}
-	}
-
-	if test.Format == "yaml" || test.Format == "toml" {
-		formatHandler, err := format.Get(test.Format)
-		if err == nil {
-			docs, err := formatHandler.UnmarshalStream([]byte(test.Expected))
-			if err == nil {
-				jsonHandler, err := format.Get("json-pretty")
-				if err == nil {
-					jsonBytes, err := jsonHandler.MarshalStream(docs)
-					if err == nil {
-						test.Expected = string(jsonBytes)
-						test.Format = "json"
-						converted = true
-					}
-				}
+			layer.Code = string(jsonBytes)
+			layer.Content = string(jsonBytes)
+			// Update languages to reflect JSON format
+			if len(layer.Languages) > 0 && len(layer.Languages[0]) > 1 {
+				layer.Languages[0][1] = "json"
 			}
+			converted = true
 		}
 	}
 

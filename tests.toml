@@ -4,14 +4,18 @@
 
 [listDeleteExtra]
 description = "Test error when $delete has extra keys"
-eval = ["a.b.yaml"]
-format = "yaml"
-errors = ["extra keys"]
-files."a.yaml" = '''
+evaluate.errors = ["extra keys"]
+
+[[listDeleteExtra.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - x: 1
 - x: 2
 '''
-files."a.b.yaml" = '''
+
+[[listDeleteExtra.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - x: 3
 - $delete:
     x: 2
@@ -20,36 +24,44 @@ files."a.b.yaml" = '''
 
 [mapDelete]
 description = "Test map deletion with $delete directive"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 c: 3
 '''
-files."a.yaml" = '''
+
+[[mapDelete.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[mapDelete.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: $delete
 c: 3
 '''
 
 [mapDeleteNested]
 description = "Test nested map deletion with $delete directive"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   a: 1
   c: 3
 '''
-files."a.yaml" = '''
+
+[[mapDeleteNested.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
   a: 1
   b: 2
 '''
-files."a.b.yaml" = '''
+
+[[mapDeleteNested.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 x:
   b: $delete
   c: 3
@@ -57,16 +69,23 @@ x:
 
 [listDelete]
 description = "Test list deletion with $delete directive"
-eval = ["a.b.yaml"]
-format = "json"
-expected = '''
+
+[listDelete.evaluate.result]
+code = '''
 [{"x":1},{"x":3}]
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[listDelete.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - x: 1
 - x: 2
 '''
-files."a.b.yaml" = '''
+
+[[listDelete.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - x: 3
 - $delete:
     x: 2
@@ -74,19 +93,26 @@ files."a.b.yaml" = '''
 
 [listDeletePartialList]
 description = "Test partial list deletion with nested structures"
-eval = ["a.b.yaml"]
-format = "json"
-expected = '''
+
+[listDeletePartialList.evaluate.result]
+code = '''
 [{"x":[{"a":1}]},{"x":[{"d":4}]}]
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[listDeletePartialList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - x:
   - a: 1
 - x:
   - b: 2
   - c: 3
 '''
-files."a.b.yaml" = '''
+
+[[listDeletePartialList.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - x:
   - d: 4
 - $delete:
@@ -96,18 +122,22 @@ files."a.b.yaml" = '''
 
 [listDeletePartialMap]
 description = "Test list deletion with partial map matching"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - x: 1
 - x: 3
 '''
-files."a.yaml" = '''
+
+[[listDeletePartialMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - x: 1
 - x: 2
   z: 5
 '''
-files."a.b.yaml" = '''
+
+[[listDeletePartialMap.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - x: 3
 - $delete:
     x: 2
@@ -115,18 +145,22 @@ files."a.b.yaml" = '''
 
 [mergeDeleteExisting]
 description = "Test $delete directive behavior in merge"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 c: 3
 '''
-files."a.yaml" = '''
+
+[[mergeDeleteExisting.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $delete
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[mergeDeleteExisting.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 a: 1
 c: 3
 '''
@@ -137,13 +171,17 @@ c: 3
 
 [listReplaceExtra]
 description = "Test error when $replace has extra keys"
-eval = ["a.b.yaml"]
-format = "yaml"
-errors = ["bool as reference: invalid type"]
-files."a.yaml" = '''
+evaluate.errors = ["bool as reference: invalid type"]
+
+[[listReplaceExtra.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 '''
-files."a.b.yaml" = '''
+
+[[listReplaceExtra.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 2
 - $replace: true
   a: 1
@@ -151,10 +189,11 @@ files."a.b.yaml" = '''
 
 [replaceCrossDocShortDot]
 description = "Test error with invalid replace path reference"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["reference not found"]
-files."a.yaml" = '''
+evaluate.errors = ["reference not found"]
+
+[[replaceCrossDocShortDot.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b:
@@ -167,27 +206,38 @@ $replace: [{a: 1}, b.c]
 
 [mapReplace]
 description = "Test map replacement with $replace directive"
-eval = ["a.b.yaml"]
-format = "json"
-expected = '''
+
+[mapReplace.evaluate.result]
+code = '''
 {"b":2}
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[mapReplace.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mapReplace.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: 2
 $replace: true
 '''
 
 [replaceMap]
 description = "Test map replacement with $replace directive (path reference)"
-eval = ["a.yaml"]
-format = "json"
-expected = '''
+
+[replaceMap.evaluate.result]
+code = '''
 {"foo":{"bar":{"a":1}},"zig":{"a":1}}
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[replaceMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     a: 1
@@ -198,31 +248,39 @@ zig:
 
 [listReplace]
 description = "Test list replacement with $replace directive"
-eval = ["a.b.yaml"]
-format = "json"
-expected = '''
+
+[listReplace.evaluate.result]
+code = '''
 [2]
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[listReplace.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 '''
-files."a.b.yaml" = '''
+
+[[listReplace.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 2
 - $replace
 '''
 
 [replaceCrossDoc]
 description = "Test cross-document replacement with $replace"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 ---
 a: 1
 b: 2
 '''
-files."a.yaml" = '''
+
+[[replaceCrossDoc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 ---
@@ -234,12 +292,13 @@ $replace:
 
 [replaceCrossDocPath]
 description = "Test cross-document replacement with path extraction"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c: 3
 '''
-files."a.yaml" = '''
+
+[[replaceCrossDocPath.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b:
@@ -254,12 +313,13 @@ $replace:
 
 [replaceCrossDocString]
 description = "Test cross-document replacement with string output"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo
 '''
-files."a.yaml" = '''
+
+[[replaceCrossDocString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: foo
 $output: false
@@ -273,15 +333,16 @@ $replace:
 
 [replaceString]
 description = "Test string replacement using $replace directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo: bar
 zig:
   b: 2
   zag: bar
 '''
-files."a.yaml" = '''
+
+[[replaceString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo: bar
 zig:
   b: 2
@@ -290,31 +351,36 @@ zig:
 
 [listReplaceTrue]
 description = "Test list replacement with $replace: true"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 2
 '''
-files."a.yaml" = '''
+
+[[listReplaceTrue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 '''
-files."a.b.yaml" = '''
+
+[[listReplaceTrue.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 2
 - $replace: true
 '''
 
 [replaceList]
 description = "Test $replace directive replacing list contents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo:
   bar:
     - a: 1
 zig:
   - a: 1
 '''
-files."a.yaml" = '''
+
+[[replaceList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     - a: 1
@@ -329,20 +395,22 @@ zig:
 
 [mergeLoop]
 description = "Test circular merge reference error"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["circular reference"]
-files."a.yaml" = '''
+evaluate.errors = ["circular reference"]
+
+[[mergeLoop.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $merge:b
 b: $merge:a
 '''
 
 [mergeCrossDocShortDot]
 description = "Test error with invalid merge path reference"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["reference not found"]
-files."a.yaml" = '''
+evaluate.errors = ["reference not found"]
+
+[[mergeCrossDocShortDot.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b:
@@ -355,48 +423,64 @@ $merge: [{a: 1}, b.c]
 
 [mergeDeleteMissingKey]
 description = "Test error when deleting non-existent key"
-eval = ["a.b.yaml"]
-format = "yaml"
-errors = ["useless override"]
-files."a.yaml" = '''
+evaluate.errors = ["useless override"]
+
+[[mergeDeleteMissingKey.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mergeDeleteMissingKey.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: $delete
 '''
 
 [mergeMapDeleteUseless]
 description = "Test error for useless delete operation"
-eval = ["a.b.yaml"]
-format = "yaml"
-errors = ["useless override"]
-files."a.yaml" = '''
+evaluate.errors = ["useless override"]
+
+[[mergeMapDeleteUseless.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mergeMapDeleteUseless.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: $delete
 '''
 
 [mergeMapUseless]
 description = "Test error for redundant merge"
-eval = ["a.b.yaml"]
-format = "yaml"
-errors = ["useless override"]
-files."a.yaml" = '''
+evaluate.errors = ["useless override"]
+
+[[mergeMapUseless.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mergeMapUseless.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 a: 1
 '''
 
 [mergeMap]
 description = "Test map merging with $merge directive"
-eval = ["a.yaml"]
-format = "json"
-expected = '''
+
+[mergeMap.evaluate.result]
+code = '''
 {"foo":{"bar":{"a":1}},"zig":{"a":1,"b":2}}
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[mergeMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     a: 1
@@ -407,9 +491,7 @@ zig:
 
 [mergeCrossDocShortList]
 description = "Test cross-document merging with lists"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 2
 - 3
 ---
@@ -417,7 +499,10 @@ expected = '''
 - 2
 - 3
 '''
-files."a.yaml" = '''
+
+[[mergeCrossDocShortList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 2
 - 3
 ---
@@ -427,13 +512,14 @@ files."a.yaml" = '''
 
 [mergeCrossDocShortScalar]
 description = "Test cross-document merging with scalar values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c: 3
 d: 4
 '''
-files."a.yaml" = '''
+
+[[mergeCrossDocShortScalar.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b: 3
@@ -445,13 +531,14 @@ d: 4
 
 [mergePathDot]
 description = "Test merging with dot notation in path"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 d: 4
 e: 3
 '''
-files."a.yaml" = '''
+
+[[mergePathDot.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b:
@@ -467,13 +554,14 @@ $merge:
 
 [mergeScalarAsKey]
 description = "Test merging using scalar value as key reference"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo: bar
 zig: bar
 '''
-files."a.yaml" = '''
+
+[[mergeScalarAsKey.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo: bar
 zig:
   $merge: foo
@@ -481,16 +569,17 @@ zig:
 
 [mergeStringDot]
 description = "Test merging values when key contains dot"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo:
   c.d: bar
 zig:
   b: 2
   zag: bar
 '''
-files."a.yaml" = '''
+
+[[mergeStringDot.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   c.d: bar
 zig:
@@ -500,15 +589,16 @@ zig:
 
 [mergeValueReference]
 description = "Test using $merge within $value directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   b:
     c: 1
   d: "1"
 '''
-files."a.yaml" = '''
+
+[[mergeValueReference.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   b:
     c: 1
@@ -519,98 +609,122 @@ a:
 
 [mergeChainLayers]
 description = "Test chained merge operations across layers"
-eval = ["a.b.c.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 c: 3
 '''
-files."a.yaml" = '''
+
+[[mergeChainLayers.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mergeChainLayers.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: 2
 '''
-files."a.b.c.yaml" = '''
+
+[[mergeChainLayers.evaluate.inputs]]
+filename = "a.b.c.yaml"
+code = '''
 c: 3
 '''
 
 [mergeListNil]
 description = "Test merging list with null value"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 1
 - 2
 '''
-files."a.yaml" = '''
+
+[[mergeListNil.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ~
 '''
-files."a.b.yaml" = '''
+
+[[mergeListNil.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 1
 - 2
 '''
 
 [mergeListString]
 description = "Test merging string into list"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 hello
 '''
-files."a.yaml" = '''
+
+[[mergeListString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 - 2
 '''
-files."a.b.yaml" = '''
+
+[[mergeListString.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 hello
 '''
 
 [mergeListWithNull]
 description = "Test merging list containing null values"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 1
 - null
 - 3
 - 4
 '''
-files."a.yaml" = '''
+
+[[mergeListWithNull.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 - null
 - 3
 '''
-files."a.b.yaml" = '''
+
+[[mergeListWithNull.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 4
 '''
 
 [mergeMapNil]
 description = "Test null value overriding map value"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: null
 '''
-files."a.yaml" = '''
+
+[[mergeMapNil.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mergeMapNil.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 a: null
 '''
 
 [mergeChain]
 description = "Test chained $merge operations"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 1
 c: 4
 d: 4
 '''
-files."a.yaml" = '''
+
+[[mergeChain.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: $merge:a
 c: $merge:d
@@ -619,9 +733,7 @@ d: 4
 
 [mergeCrossDoc]
 description = "Test $merge across YAML documents with $match"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 ---
@@ -629,7 +741,10 @@ a: 1
 b: 2
 c: 3
 '''
-files."a.yaml" = '''
+
+[[mergeCrossDoc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 ---
@@ -641,9 +756,7 @@ $merge:
 
 [mergeCrossDocList]
 description = "Test merging lists across documents with matching"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 2
 - 3
 ---
@@ -651,7 +764,10 @@ expected = '''
 - 2
 - 3
 '''
-files."a.yaml" = '''
+
+[[mergeCrossDocList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 2
 - 3
 ---
@@ -663,13 +779,14 @@ files."a.yaml" = '''
 
 [mergeCrossDocPath]
 description = "Test merging with path selection across documents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c: 3
 d: 4
 '''
-files."a.yaml" = '''
+
+[[mergeCrossDocPath.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b:
@@ -684,13 +801,14 @@ $merge:
 
 [mergeCrossDocShort]
 description = "Test short syntax for merge across documents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c: 3
 d: 4
 '''
-files."a.yaml" = '''
+
+[[mergeCrossDocShort.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a: 1
 b:
@@ -702,9 +820,7 @@ $merge: [{a: 1}, b]
 
 [mergeList]
 description = "Test $merge with list values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo:
   bar:
     - a: 1
@@ -712,7 +828,10 @@ zig:
   - b: 2
   - a: 1
 '''
-files."a.yaml" = '''
+
+[[mergeList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     - a: 1
@@ -723,9 +842,7 @@ zig:
 
 [mergeListMulti]
 description = "Test multiple merges within a list"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo:
   bar:
     - a: 1
@@ -736,7 +853,10 @@ zig:
   - c: 3
   - a: 1
 '''
-files."a.yaml" = '''
+
+[[mergeListMulti.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     - a: 1
@@ -750,15 +870,16 @@ zig:
 
 [mergeNum]
 description = "Test merging numeric values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo: 1
 zig:
   b: 2
   zag: 1
 '''
-files."a.yaml" = '''
+
+[[mergeNum.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo: 1
 zig:
   b: 2
@@ -767,15 +888,16 @@ zig:
 
 [mergeString]
 description = "Test $merge with string values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo: bar
 zig:
   b: 2
   zag: bar
 '''
-files."a.yaml" = '''
+
+[[mergeString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo: bar
 zig:
   b: 2
@@ -784,37 +906,45 @@ zig:
 
 [mapMerge]
 description = "Test simple map merging"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 '''
-files."a.yaml" = '''
+
+[[mapMerge.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mapMerge.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: 2
 '''
 
 [mergeMapWithNil]
 description = "Test merging null value into map"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   a: 1
   b: 2
 "y": null
 z: null
 '''
-files."a.yaml" = '''
+
+[[mergeMapWithNil.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
   a: 1
   b: 2
 y: null
 '''
-files."a.b.yaml" = '''
+
+[[mergeMapWithNil.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 z:
   $merge: y
   c: 3
@@ -822,22 +952,26 @@ z:
 
 [mergeMapWithScalar]
 description = "Test merging scalar value into map"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   a: 1
   b: 2
 "y": 10
 z: 10
 '''
-files."a.yaml" = '''
+
+[[mergeMapWithScalar.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
   a: 1
   b: 2
 y: 10
 '''
-files."a.b.yaml" = '''
+
+[[mergeMapWithScalar.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 z:
   $merge: y
   c: 3
@@ -845,37 +979,45 @@ z:
 
 [mergeRace]
 description = "Test merge with required fields resolution order"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 1
 c:
   a: 1
 '''
-files."a.yaml" = '''
+
+[[mergeRace.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $required
 b: $merge:a
 c:
   a: 1
 '''
-files."a.b.yaml" = '''
+
+[[mergeRace.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $merge: c
 '''
 
 [mergeStringIntoMapError]
 description = "Test merging string value replaces map entirely"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: string
 '''
-files."a.yaml" = '''
+
+[[mergeStringIntoMapError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   b: 1
   c: 2
 '''
-files."a.b.yaml" = '''
+
+[[mergeStringIntoMapError.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 a: "string"
 '''
 
@@ -885,10 +1027,11 @@ a: "string"
 
 [matchMulti]
 description = "Test error with multiple matches in $replace"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["multiple documents $match"]
-files."a.yaml" = '''
+evaluate.errors = ["multiple documents $match"]
+
+[[matchMulti.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $output: false
@@ -905,18 +1048,25 @@ $replace:
 
 [matchMap]
 description = "Test $match directive for selective document processing"
-eval = ["a.b.yaml"]
-format = "json"
-expected = '''
+
+[matchMap.evaluate.result]
+code = '''
 {"a":1,"d":4}
 {"b":2,"c":3}
 '''
-files."a.yaml" = '''
+languages = [[0, "jsonl"]]
+
+[[matchMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[matchMap.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match:
   b: 2
 c: 3
@@ -928,13 +1078,14 @@ d: 4
 
 [matchEmptyMap]
 description = "Test $match directive with empty map"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: {}
 b: 2
 '''
-files."a.yaml" = '''
+
+[[matchEmptyMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: {}
 ---
 $match:
@@ -944,20 +1095,24 @@ b: 2
 
 [matchInvert]
 description = "Test $match with $invert directive"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 c: 3
 ---
 b: 2
 '''
-files."a.yaml" = '''
+
+[[matchInvert.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[matchInvert.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match:
   b: 2
   $invert: true
@@ -966,20 +1121,24 @@ c: 3
 
 [matchListValue]
 description = "Test $match in list with $value replacement"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   - b: 1
     d: 4
   - c: 2
 '''
-files."a.yaml" = '''
+
+[[matchListValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   - b: 1
   - c: 2
 '''
-files."a.b.yaml" = '''
+
+[[matchListValue.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 a:
   - $match:
       b: 1
@@ -989,9 +1148,7 @@ a:
 
 [matchMultiDoc]
 description = "Test $match applying to multiple documents"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 d: 4
@@ -1000,14 +1157,20 @@ a: 1
 c: 3
 d: 4
 '''
-files."a.yaml" = '''
+
+[[matchMultiDoc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 ---
 a: 1
 c: 3
 '''
-files."a.b.yaml" = '''
+
+[[matchMultiDoc.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match:
   a: 1
 d: 4
@@ -1015,20 +1178,24 @@ d: 4
 
 [matchPartial]
 description = "Test $match with partial map matching"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   b: 1
   c: 2
   d: 3
 '''
-files."a.yaml" = '''
+
+[[matchPartial.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
   b: 1
   c: 2
 '''
-files."a.b.yaml" = '''
+
+[[matchPartial.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match:
   x: {}
 x:
@@ -1037,89 +1204,75 @@ x:
 
 [streamAdd]
 description = "Test adding new document to stream"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 ---
 c: 3
 '''
-files."a.yaml" = '''
+
+[[streamAdd.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[streamAdd.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match: null
 c: 3
 '''
 
 [streamMatchNull]
 description = "Test stream with null matching"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 ---
 b: 2
 ---
 c: 3
 '''
-files."a.yaml" = '''
+
+[[streamMatchNull.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[streamMatchNull.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match: null
 c: 3
 '''
 
-[matchArgs]
-description = "Test $match directive across multiple evaluated files"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-expected = '''
+[matchesBasic]
+description = "Test $matches directive with multiple patterns"
+evaluate.result.code = '''
 a: 1
+c: 3
 d: 4
 ---
 b: 2
 c: 3
-'''
-files."a.yaml" = '''
-a: 1
----
-b: 2
-'''
-files."b.yaml" = '''
-$match:
-  b: 2
-c: 3
----
-$match:
-  a: 1
 d: 4
 '''
 
-[matchesBasic]
-description = "Test $matches directive with multiple patterns"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
-a: 1
-c: 3
-d: 4
----
-b: 2
-c: 3
-d: 4
-'''
-files."a.yaml" = '''
+[[matchesBasic.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[matchesBasic.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $matches:
   - b: 2
   - a: 1
@@ -1129,9 +1282,7 @@ d: 4
 
 [matchesSinglePattern]
 description = "Test $matches with single pattern matching multiple docs"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 d: 4
@@ -1140,14 +1291,20 @@ a: 1
 c: 3
 d: 4
 '''
-files."a.yaml" = '''
+
+[[matchesSinglePattern.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 ---
 a: 1
 c: 3
 '''
-files."a.b.yaml" = '''
+
+[[matchesSinglePattern.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $matches:
   - a: 1
 d: 4
@@ -1155,15 +1312,19 @@ d: 4
 
 [matchesNoMatch]
 description = "Test $matches error when pattern matches nothing"
-eval = ["a.b.yaml"]
-format = "yaml"
-errors = ["no document/entry matched $match"]
-files."a.yaml" = '''
+evaluate.errors = ["no document/entry matched $match"]
+
+[[matchesNoMatch.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[matchesNoMatch.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $matches:
   - c: 3
 d: 4
@@ -1171,9 +1332,7 @@ d: 4
 
 [matchesListInList]
 description = "Test $matches in list context"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 items:
   - a: 1
     d: 4
@@ -1181,13 +1340,19 @@ items:
     d: 4
   - c: 3
 '''
-files."a.yaml" = '''
+
+[[matchesListInList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 items:
   - a: 1
   - b: 2
   - c: 3
 '''
-files."a.b.yaml" = '''
+
+[[matchesListInList.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 items:
   - $matches:
       - a: 1
@@ -1197,23 +1362,27 @@ items:
 
 [matchesWithReplace]
 description = "Test $matches with $replace"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 x: replaced
 ---
 b: 2
 x: replaced
 '''
-files."a.yaml" = '''
+
+[[matchesWithReplace.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 x: old
 ---
 b: 2
 x: old
 '''
-files."a.b.yaml" = '''
+
+[[matchesWithReplace.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $matches:
   - x: old
 x: replaced
@@ -1221,9 +1390,7 @@ x: replaced
 
 [matchesPartialMap]
 description = "Test $matches with partial map matching"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   b: 1
   c: 2
@@ -1234,7 +1401,10 @@ d:
   c: 3
 e: new
 '''
-files."a.yaml" = '''
+
+[[matchesPartialMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   b: 1
   c: 2
@@ -1243,7 +1413,10 @@ d:
   b: 1
   c: 3
 '''
-files."a.b.yaml" = '''
+
+[[matchesPartialMap.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $matches:
   - a: {}
   - d: {}
@@ -1252,10 +1425,11 @@ e: new
 
 [matchesInvalidType]
 description = "Test $matches error with non-list value"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["$matches must be a list"]
-files."a.yaml" = '''
+evaluate.errors = ["$matches must be a list"]
+
+[[matchesInvalidType.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $matches: "not a list"
 a: 1
 '''
@@ -1266,31 +1440,42 @@ a: 1
 
 [listMerge]
 description = "Test default list merge behavior (concatenation)"
-eval = ["a.b.yaml"]
-format = "json"
-expected = '''
+
+[listMerge.evaluate.result]
+code = '''
 [1,2]
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[listMerge.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 '''
-files."a.b.yaml" = '''
+
+[[listMerge.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 2
 '''
 
 [listMatch]
 description = "Test list matching and modification"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a: 1
 - b: 10
 '''
-files."a.yaml" = '''
+
+[[listMatch.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 - b: 2
 '''
-files."a.b.yaml" = '''
+
+[[listMatch.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - $match:
     b: 2
   b: 10
@@ -1298,26 +1483,28 @@ files."a.b.yaml" = '''
 
 [listMatchValue]
 description = "Test list matching with value replacement"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 1
 - 10
 '''
-files."a.yaml" = '''
+
+[[listMatchValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 - 2
 '''
-files."a.b.yaml" = '''
+
+[[listMatchValue.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - $match: 2
   $value: 10
 '''
 
 [listWithNull]
 description = "Test preservation of null values in lists"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   - a
   - null
@@ -1325,25 +1512,32 @@ x:
   - null
   - e
 '''
-files."a.yaml" = '''
+
+[[listWithNull.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x: [a, null, c, null, e]
 '''
 
 [listMatchValueMulti]
 description = "Test list matching and replacement with multiple matches"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 1
 - 10
 - 10
 '''
-files."a.yaml" = '''
+
+[[listMatchValueMulti.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 1
 - 2
 - 2
 '''
-files."a.b.yaml" = '''
+
+[[listMatchValueMulti.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - $match: 2
   $value: 10
 '''
@@ -1354,24 +1548,26 @@ files."a.b.yaml" = '''
 
 [encodeFlagsRequired]
 description = "Test error when required field is missing in flags encoding"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["required field not set"]
-files."a.yaml" = '''
+evaluate.errors = ["required field not set"]
+
+[[encodeFlagsRequired.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $required
 $encode: flags
 '''
 
 [encodeTolist]
 description = "Test tolist encoding with custom separator"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a=1
 - b=2
 - c
 '''
-files."a.yaml" = '''
+
+[[encodeTolist.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 c: ""
@@ -1380,13 +1576,14 @@ $encode: tolist:=
 
 [encodeValues]
 description = "Test values encoding extracts map values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 1
 - 2
 '''
-files."a.yaml" = '''
+
+[[encodeValues.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $encode: values
@@ -1394,15 +1591,16 @@ $encode: values
 
 [encodeValuesWithName]
 description = "Test values encoding with name parameter"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - k2: v2
   name: k1
 - k4: v4
   name: k3
 '''
-files."a.yaml" = '''
+
+[[encodeValuesWithName.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 k1:
   k2: v2
 k3:
@@ -1412,10 +1610,11 @@ $encode: values:name
 
 [encodeValuesWithNameScalar]
 description = "Test values encoding with name parameter for scalar values"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["invalid type"]
-files."a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[encodeValuesWithNameScalar.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $encode: values:name
@@ -1423,9 +1622,7 @@ $encode: values:name
 
 [encodeValuesNestedPath]
 description = "Test values encoding sets key at nested path"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - foo:
     bar: item1
   other: 1
@@ -1433,7 +1630,10 @@ expected = '''
     bar: item2
   other: 2
 '''
-files."a.yaml" = '''
+
+[[encodeValuesNestedPath.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 item1:
   foo:
     bar: 1
@@ -1447,16 +1647,17 @@ $encode: values:foo.bar
 
 [encodeValuesNestedPathMissing]
 description = "Test values encoding sets key at nested path creating intermediate maps"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - foo:
     bar: item1
 - foo:
     bar: item2
   other: 2
 '''
-files."a.yaml" = '''
+
+[[encodeValuesNestedPathMissing.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 item1:
   foo:
     bar: 1
@@ -1467,9 +1668,7 @@ $encode: values:foo.bar
 
 [encodeValuesDeepNestedPath]
 description = "Test values encoding sets key at deep nested path"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a:
     b:
       c:
@@ -1479,7 +1678,10 @@ expected = '''
       c:
         d: item2
 '''
-files."a.yaml" = '''
+
+[[encodeValuesDeepNestedPath.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 item1:
   a:
     b:
@@ -1495,13 +1697,14 @@ $encode: values:a.b.c.d
 
 [encodePrefix]
 description = "Test prefix encoding adds prefix to list items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - Xa
 - X2
 '''
-files."a.yaml" = '''
+
+[[encodePrefix.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - a
 - 2
 - $encode: prefix:X
@@ -1509,12 +1712,13 @@ files."a.yaml" = '''
 
 [encodeBase64Number]
 description = "Test base64 encoding of numeric values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: NDI=
 '''
-files."a.yaml" = '''
+
+[[encodeBase64Number.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: 42 
   $encode: base64
@@ -1522,13 +1726,14 @@ a:
 
 [encodeList]
 description = "Test JSON encoding of list values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: |
   [{"b":2},{"c":3}]
 '''
-files."a.yaml" = '''
+
+[[encodeList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   - b: 2
   - c: 3
@@ -1537,13 +1742,14 @@ a:
 
 [encodeMap]
 description = "Test JSON encoding of map values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: |
   {"b":2,"c":3}
 '''
-files."a.yaml" = '''
+
+[[encodeMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   b: 2
   c: 3
@@ -1552,13 +1758,14 @@ a:
 
 [encodeJsonList]
 description = "Test JSON encoding of list as multiline string"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 |
   [{"a":1},{"b":2}]
 '''
-files."a.yaml" = '''
+
+[[encodeJsonList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 - b: 2
 - $encode: json
@@ -1566,14 +1773,15 @@ files."a.yaml" = '''
 
 [encodeFlags]
 description = "Test flags encoding converts map to command-line flags"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - --a=1
 - --b=2
 - --c
 '''
-files."a.yaml" = '''
+
+[[encodeFlags.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 c: ""
@@ -1582,9 +1790,7 @@ $encode: flags
 
 [encodeFlagsFlatten]
 description = "Test flags encoding with flatten for mixed list content"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a
 - b
 - --c=3
@@ -1593,7 +1799,10 @@ expected = '''
 - f
 - g
 '''
-files."a.yaml" = '''
+
+[[encodeFlagsFlatten.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - - a
   - b
 - c: 3
@@ -1607,35 +1816,40 @@ files."a.yaml" = '''
 
 [encodeFlagsFlattenLayer]
 description = "Test flags and flatten encoding across file inheritance layers"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a
 - --b=2
 - --c=3
 '''
-files."a.yaml" = '''
+
+[[encodeFlagsFlattenLayer.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - - a
 - b: 2
   $encode: flags
 - $encode: flatten
 '''
-files."a.b.yaml" = '''
+
+[[encodeFlagsFlattenLayer.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - $match: {}
   c: 3
 '''
 
 [encodeFlagsSublist]
 description = "Test flags encoding with list values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - --a=1
 - --b=2
 - --b=c
 - --b
 '''
-files."a.yaml" = '''
+
+[[encodeFlagsSublist.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b:
 - 2
@@ -1646,12 +1860,13 @@ $encode: flags
 
 [encodeMulti]
 description = "Test multiple encoding directives (tolist and join)"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a=1,b=2
 '''
-files."a.yaml" = '''
+
+[[encodeMulti.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $encode: [tolist:=, "join:,"]
@@ -1659,12 +1874,13 @@ $encode: [tolist:=, "join:,"]
 
 [encodeSha256Number]
 description = "Test SHA256 encoding of numeric values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049
 '''
-files."a.yaml" = '''
+
+[[encodeSha256Number.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: 42
   $encode: sha256
@@ -1672,14 +1888,15 @@ a:
 
 [encodeTolistLists]
 description = "Test tolist encoding with list of maps"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a=1
 - a=2
 - b=3
 '''
-files."a.yaml" = '''
+
+[[encodeTolistLists.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 - a: 2
   b: 3
@@ -1688,13 +1905,14 @@ files."a.yaml" = '''
 
 [encodeValue]
 description = "Test JSON encoding of simple value"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: |
   "b"
 '''
-files."a.yaml" = '''
+
+[[encodeValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: b
   $encode: json
@@ -1702,14 +1920,15 @@ a:
 
 [encodeValuesPrefix]
 description = "Test values encoding with prefix field"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - foo
 - 1
 - 2
 '''
-files."a.yaml" = '''
+
+[[encodeValuesPrefix.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 _prefix: foo
@@ -1718,15 +1937,16 @@ $encode: values
 
 [encodeValuesNameValue]
 description = "Test values encoding with name:value format"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - name: a
   value: 1
 - name: b
   value: 2
 '''
-files."a.yaml" = '''
+
+[[encodeValuesNameValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $encode: values:name:value
@@ -1734,9 +1954,7 @@ $encode: values:name:value
 
 [encodeValuesNameValueNested]
 description = "Test values encoding with nested paths for name:value format"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - metadata:
     name: a
   spec:
@@ -1746,7 +1964,10 @@ expected = '''
   spec:
     value: 2
 '''
-files."a.yaml" = '''
+
+[[encodeValuesNameValueNested.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $encode: values:metadata.name:spec.value
@@ -1754,13 +1975,14 @@ $encode: values:metadata.name:spec.value
 
 [encodeValuesOnlyValue]
 description = "Encode values with only value key using double colon"
-eval = ["test.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - containerPort: 8080
 - containerPort: 8081
 '''
-files."test.yaml" = '''
+
+[[encodeValuesOnlyValue.evaluate.inputs]]
+filename = "test.yaml"
+code = '''
 api: 8080
 web: 8081
 $encode: values::containerPort
@@ -1768,25 +1990,27 @@ $encode: values::containerPort
 
 [encodeBase64]
 description = "Test base64 encoding with $encode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 YQ==
 '''
-files."a.yaml" = '''
+
+[[encodeBase64.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $value: a
 $encode: base64
 '''
 
 [encodeJson]
 description = "Test JSON encoding with $encode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 |
   {"a":1,"b":2}
 '''
-files."a.yaml" = '''
+
+[[encodeJson.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 $encode: json
@@ -1794,16 +2018,17 @@ $encode: json
 
 [encodeProperties]
 description = "Test properties encoding with $encode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 |
   a=1
   b=2
   nested.x=hello
   nested.y=world
 '''
-files."a.yaml" = '''
+
+[[encodeProperties.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 nested:
@@ -1814,28 +2039,30 @@ $encode: properties
 
 [encodeSha256]
 description = "Test SHA-256 encoding with $encode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb
 '''
-files."a.yaml" = '''
+
+[[encodeSha256.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $value: a
 $encode: sha256
 '''
 
 [encodeFlatten]
 description = "Test flatten encoding with $encode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a
 - b
 - c
 - d
 - e
 '''
-files."a.yaml" = '''
+
+[[encodeFlatten.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - - a
   - b
 - - c
@@ -1846,12 +2073,13 @@ files."a.yaml" = '''
 
 [encodeJoin]
 description = "Test join encoding with $encode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a24b
 '''
-files."a.yaml" = '''
+
+[[encodeJoin.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $value: [a, 24, b]
 $encode: join
 '''
@@ -1862,14 +2090,15 @@ $encode: join
 
 [decodeValue]
 description = "Test decode JSON with $value and $decode directives"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   b: 1
   c: 2
 '''
-files."a.yaml" = '''
+
+[[decodeValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $decode: json
   $value: '{"b": 1, "c": 2}'
@@ -1877,13 +2106,14 @@ a:
 
 [decodeJson]
 description = "Test JSON decoding with $decode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   foo: bar
 '''
-files."a.yaml" = '''
+
+[[decodeJson.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: |
     {"foo":"bar"}
@@ -1892,9 +2122,7 @@ a:
 
 [decodeProperties]
 description = "Test properties decoding with $decode directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 config:
   app:
     name: myapp
@@ -1903,7 +2131,10 @@ config:
     host: localhost
     port: "5432"
 '''
-files."a.yaml" = '''
+
+[[decodeProperties.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 config:
   $value: |
     app.name=myapp
@@ -1919,16 +2150,17 @@ config:
 
 [interpSimple]
 description = "Test basic string interpolation"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: foo
 c:
   d: zig
 e: foo bar zig zag 1 2
 '''
-files."a.yaml" = '''
+
+[[interpSimple.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: foo
 c:
@@ -1938,27 +2170,29 @@ e: $"{b} bar {c.d} zag {a} 2"
 
 [interpKey]
 description = "Test interpolation in map keys"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: foo
 foo0: bar
 '''
-files."a.yaml" = '''
+
+[[interpKey.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: foo
 $"{a}0": bar
 '''
 
 [interpInterp]
 description = "Test chained interpolation"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: foo
 b: foo
 c: foo
 '''
-files."a.yaml" = '''
+
+[[interpInterp.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: foo
 b: $"{a}"
 c: $"{b}"
@@ -1966,14 +2200,15 @@ c: $"{b}"
 
 [interpRepeat]
 description = "Test string interpolation with $repeat directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: foo-0
 ---
 a: foo-1
 '''
-files."a.yaml" = '''
+
+[[interpRepeat.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $"foo-{$repeat}"
 $repeat: 2
 '''
@@ -1984,16 +2219,17 @@ $repeat: 2
 
 [repeatDocList]
 description = "Test $repeat directive with list documents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - b: 2
 - c: 0
 ---
 - b: 2
 - c: 1
 '''
-files."a.yaml" = '''
+
+[[repeatDocList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $repeat: 2
 - b: 2
 - c: $repeat
@@ -2001,9 +2237,7 @@ files."a.yaml" = '''
 
 [repeatDocMap]
 description = "Test $repeat directive with map documents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   b: 2
   c: 0
@@ -2012,7 +2246,10 @@ a:
   b: 2
   c: 1
 '''
-files."a.yaml" = '''
+
+[[repeatDocMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat: 2
 a:
   b: 2
@@ -2021,32 +2258,34 @@ a:
 
 [repeatListValues]
 description = "Test $repeat directive with list of values"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 fruit: apple
 ---
 fruit: banana
 ---
 fruit: cherry
 '''
-files."a.yaml" = '''
+
+[[repeatListValues.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat: ["apple", "banana", "cherry"]
 fruit: $repeat
 '''
 
 [repeatInsideList]
 description = "Test $repeat directive expanding items within a list"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   - b: 0
   - b: 1
   - b: 2
   - b: 3
 '''
-files."a.yaml" = '''
+
+[[repeatInsideList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   - $repeat: 4
     b: $repeat
@@ -2054,9 +2293,7 @@ a:
 
 [repeatInsideMap]
 description = "Test $repeat with dynamic key generation in maps"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   b0:
     c: 0
@@ -2067,7 +2304,10 @@ a:
   b3:
     c: 3
 '''
-files."a.yaml" = '''
+
+[[repeatInsideMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $"b{$repeat}":
     $repeat: 4
@@ -2076,9 +2316,7 @@ a:
 
 [repeatMap]
 description = "Test multi-dimensional repeat with string interpolation"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: x=0 y=0 xc=2 yc=3
 b: 2
 c: 3
@@ -2103,7 +2341,10 @@ a: x=1 y=2 xc=2 yc=3
 b: 2
 c: 3
 '''
-files."a.yaml" = '''
+
+[[repeatMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   x: 2
   y: 3
@@ -2114,16 +2355,17 @@ c: $merge:$repeat.y
 
 [repeatInsideMapValue]
 description = "Test $repeat with simple values in map"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a:
   b0: 2
   b1: 2
   b2: 2
   b3: 2
 '''
-files."a.yaml" = '''
+
+[[repeatInsideMapValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $"b{$repeat}":
     $repeat: 4
@@ -2132,15 +2374,16 @@ a:
 
 [repeatListInsideList]
 description = "Test $repeat with list creating multiple list items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 fruits:
   - name: apple
   - name: banana
   - name: cherry
 '''
-files."a.yaml" = '''
+
+[[repeatListInsideList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 fruits:
   - name: $repeat
     $repeat: ["apple", "banana", "cherry"]
@@ -2148,9 +2391,7 @@ fruits:
 
 [repeatListInsideMap]
 description = "Test $repeat with list creating multiple map entries"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 fruits:
   item-apple:
     name: apple
@@ -2159,7 +2400,10 @@ fruits:
   item-cherry:
     name: cherry
 '''
-files."a.yaml" = '''
+
+[[repeatListInsideMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 fruits:
   $"item-{$repeat}":
     name: $repeat
@@ -2168,9 +2412,7 @@ fruits:
 
 [repeatListMixedTypes]
 description = "Test $repeat with mixed data types creating documents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 type: Type is 42
 value: 42
 ---
@@ -2183,7 +2425,10 @@ value: true
 type: Type is 3.14
 value: 3.14
 '''
-files."a.yaml" = '''
+
+[[repeatListMixedTypes.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat: [42, "hello", true, 3.14]
 value: $repeat
 type: $"Type is {$repeat}"
@@ -2191,9 +2436,7 @@ type: $"Type is {$repeat}"
 
 [repeatMapInsideMap]
 description = "Test $repeat with map creating cartesian product"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 servers:
   server-dev-0:
     env: dev
@@ -2208,7 +2451,10 @@ servers:
     env: prod
     id: 1
 '''
-files."a.yaml" = '''
+
+[[repeatMapInsideMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 servers:
   $"server-{$repeat:env}-{$repeat:id}":
     env: $repeat:env
@@ -2218,9 +2464,7 @@ servers:
 
 [repeatRangeFirstLast]
 description = "Test $repeat with $first and $last range parameters"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 5
 ---
 a: 6
@@ -2233,7 +2477,10 @@ a: 9
 ---
 a: 10
 '''
-files."a.yaml" = '''
+
+[[repeatRangeFirstLast.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   $first: 5
   $last: 10
@@ -2242,9 +2489,7 @@ a: $repeat
 
 [repeatRangeInsideMap]
 description = "Test $repeat with range parameters inside map"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 ports:
   port-8080:
     number: 8080
@@ -2253,7 +2498,10 @@ ports:
   port-8082:
     number: 8082
 '''
-files."a.yaml" = '''
+
+[[repeatRangeInsideMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ports:
   $"port-{$repeat}":
     number: $repeat
@@ -2262,9 +2510,7 @@ ports:
 
 [repeatRangeNested]
 description = "Test nested $repeat with range parameters"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 result: a=0 b=10
 ---
 result: a=0 b=12
@@ -2277,7 +2523,10 @@ result: a=1 b=12
 ---
 result: a=1 b=14
 '''
-files."a.yaml" = '''
+
+[[repeatRangeNested.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   a: 2
   b:
@@ -2289,16 +2538,17 @@ result: $"a={$repeat:a} b={$repeat:b}"
 
 [repeatSubstValue]
 description = "Test $repeat with $merge directive"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 0
 b: 2
 ---
 a: 1
 b: 2
 '''
-files."a.yaml" = '''
+
+[[repeatSubstValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat: 2
 a: $repeat
 b: $merge:$repeat
@@ -2306,30 +2556,32 @@ b: $merge:$repeat
 
 [repeatMapLayer]
 description = "Test $repeat directive overriding in child layer"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: x=0
 ---
 a: x=1
 ---
 a: x=2
 '''
-files."a.yaml" = '''
+
+[[repeatMapLayer.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   x: 2
 a: $"x={$repeat:x}"
 '''
-files."a.b.yaml" = '''
+
+[[repeatMapLayer.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $repeat:
   x: 3
 '''
 
 [repeatOverride]
 description = "Test $repeat values propagating through inheritance"
-eval = ["a.b.c.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: x=0 y=0 z=0
 ---
 a: x=0 y=0 z=1
@@ -2354,26 +2606,33 @@ a: x=1 y=1 z=1
 ---
 a: x=1 y=1 z=2
 '''
-files."a.yaml" = '''
+
+[[repeatOverride.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   x: 2
   y: 2
   z: 2
 a: $"x={$repeat:x} y={$repeat:y} z={$repeat:z}"
 '''
-files."a.b.yaml" = '''
+
+[[repeatOverride.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $repeat:
   z: 3
 '''
-files."a.b.c.yaml" = '''
+
+[[repeatOverride.evaluate.inputs]]
+filename = "a.b.c.yaml"
+code = '''
 # No content - relies on inheritance
 '''
 
 [repeatUpperLayer]
 description = "Test $repeat in upper layer file"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: base
 b: x=0
 ---
@@ -2383,10 +2642,16 @@ b: x=1
 a: base
 b: x=2
 '''
-files."a.yaml" = '''
+
+[[repeatUpperLayer.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: base
 '''
-files."a.b.yaml" = '''
+
+[[repeatUpperLayer.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $repeat:
   x: 3
 b: $"x={$repeat:x}"
@@ -2395,11 +2660,11 @@ b: $"x={$repeat:x}"
 # Repeat range parameter error cases
 [repeatStepZero]
 description = "Test $repeat with $step=0 error"
-eval = ["a.yaml"]
-format = "yaml"
-expected = ""
-errors = ["$step cannot be 0"]
-files."a.yaml" = '''
+evaluate.errors = ["$step cannot be 0"]
+
+[[repeatStepZero.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   $first: 1
   $last: 5
@@ -2409,11 +2674,11 @@ x: $repeat
 
 [repeatCountNegative]
 description = "Test $repeat with negative $count error"
-eval = ["a.yaml"]
-format = "yaml"
-expected = ""
-errors = ["must be positive"]
-files."a.yaml" = '''
+evaluate.errors = ["must be positive"]
+
+[[repeatCountNegative.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   $first: 1
   $count: -1
@@ -2422,11 +2687,11 @@ x: $repeat
 
 [repeatAllThreeParams]
 description = "Test $repeat with all three params error"
-eval = ["a.yaml"]
-format = "yaml"
-expected = ""
-errors = ["cannot specify all of"]
-files."a.yaml" = '''
+evaluate.errors = ["cannot specify all of"]
+
+[[repeatAllThreeParams.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   $first: 1
   $last: 5
@@ -2436,11 +2701,11 @@ x: $repeat
 
 [repeatNotDivisible]
 description = "Test $repeat with non-divisible range error"
-eval = ["a.yaml"]
-format = "yaml"
-expected = ""
-errors = ["must be divisible by"]
-files."a.yaml" = '''
+evaluate.errors = ["must be divisible by"]
+
+[[repeatNotDivisible.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   $first: 1
   $last: 11
@@ -2450,11 +2715,11 @@ x: $repeat
 
 [repeatMissingParams]
 description = "Test $repeat with only one parameter error"
-eval = ["a.yaml"]
-format = "yaml"
-expected = ""
-errors = ["must specify exactly 2"]
-files."a.yaml" = '''
+evaluate.errors = ["must specify exactly 2"]
+
+[[repeatMissingParams.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   $first: 1
 x: $repeat
@@ -2462,19 +2727,23 @@ x: $repeat
 
 [repeatSubst]
 description = "Test $repeat with $match directive"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 c:
   d: foo-0
 '''
-files."a.yaml" = '''
+
+[[repeatSubst.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[repeatSubst.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $match:
   a: 1
 $repeat: 1
@@ -2488,15 +2757,16 @@ c:
 
 [outputMulti]
 description = "Test $output directive for selective output"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 ---
 c: 3
 '''
-files."a.yaml" = '''
+
+[[outputMulti.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     $output: true
@@ -2509,13 +2779,14 @@ foo:
 
 [outputFalse]
 description = "Test $output: false directive excludes content"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c:
   d: 1
 '''
-files."a.yaml" = '''
+
+[[outputFalse.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $output: false
   b: 1
@@ -2525,13 +2796,14 @@ c:
 
 [outputFalseList]
 description = "Test $output: false directive in list context"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c:
   - d: 1
 '''
-files."a.yaml" = '''
+
+[[outputFalseList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   - $output: false
   - b: 1
@@ -2541,14 +2813,15 @@ c:
 
 [outputFalseRoot]
 description = "Test $output: false directive at document root"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 ---
 c: 3
 '''
-files."a.yaml" = '''
+
+[[outputFalseRoot.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
@@ -2559,13 +2832,14 @@ c: 3
 
 [outputSingle]
 description = "Test $output: true directive for single section"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 '''
-files."a.yaml" = '''
+
+[[outputSingle.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     $output: true
@@ -2575,13 +2849,14 @@ foo:
 
 [outputList]
 description = "Test $output: true directive in list context"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - a: 1
 - b: 2
 '''
-files."a.yaml" = '''
+
+[[outputList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo:
   bar:
     - $output: true
@@ -2591,13 +2866,14 @@ foo:
 
 [outputMapInList]
 description = "Test $output: true directive for map within list"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c: 2
 d: 3
 '''
-files."a.yaml" = '''
+
+[[outputMapInList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   - b: 1
   - $output: true
@@ -2607,12 +2883,13 @@ a:
 
 [outputAfterReplace]
 description = "Test output control after replace operations"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 c: 2
 '''
-files."a.yaml" = '''
+
+[[outputAfterReplace.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   b: 2
   $output: false
@@ -2622,12 +2899,13 @@ c:
 
 [outputTrueWithinFalse]
 description = "Test nested output control (true within false)"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 b: 2
 '''
-files."a.yaml" = '''
+
+[[outputTrueWithinFalse.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $output: false
 a:
   b: 2
@@ -2640,17 +2918,21 @@ a:
 
 [parentCircular]
 description = "Test circular parent reference error"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["circular reference"]
-files."a.yaml" = '''
+evaluate.errors = ["circular reference"]
+
+[[parentCircular.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 # Test that circular parent references are handled gracefully
 # a.yaml → b.yaml → a.yaml (circular)
 
 $parent: b
 data: "from a.yaml"
 '''
-files."b.yaml" = '''
+
+[[parentCircular.evaluate.inputs]]
+filename = "b.yaml"
+code = '''
 # This creates a circular reference back to a.yaml
 # b.yaml → a.yaml → b.yaml (circular)
 $parent: a
@@ -2659,56 +2941,76 @@ data: "from b.yaml"
 
 [parentSet]
 description = "Test $parent directive for explicit parent file reference"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 '''
-files."a.b.yaml" = '''
+
+[[parentSet.evaluate.inputs]]
+filename = "c.yaml"
+code = '''
+b: 2
+'''
+
+[[parentSet.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $parent: c
 a: 1
-'''
-files."c.yaml" = '''
-b: 2
 '''
 
 [parentNull]
 description = "Test setting $parent to null to prevent inheritance"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[parentNull.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $parent: null
 a: 1
 '''
 
 [parentFalse]
 description = "Test $parent: false disables inheritance"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 '''
-files."a.b.yaml" = '''
+
+[[parentFalse.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $parent: false
 a: 1
 '''
 
 [parentMulti]
 description = "Test multiple documents with different parents"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 c: 3
 ---
 b: 2
 d: 4
 '''
-files."a.b.yaml" = '''
+
+[[parentMulti.evaluate.inputs]]
+filename = "c.yaml"
+code = '''
+c: 3
+'''
+
+[[parentMulti.evaluate.inputs]]
+filename = "d.yaml"
+code = '''
+$match: null
+d: 4
+'''
+
+[[parentMulti.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $parent: c
 $match:
   c: 3
@@ -2719,26 +3021,32 @@ $match:
   d: 4
 b: 2
 '''
-files."c.yaml" = '''
-c: 3
-'''
-files."d.yaml" = '''
-$match: null
-d: 4
-'''
 
 [parentMultiList]
 description = "Test parent directive with list of parents"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 c: 3
 ---
 b: 2
 d: 4
 '''
-files."a.b.yaml" = '''
+
+[[parentMultiList.evaluate.inputs]]
+filename = "c.yaml"
+code = '''
+c: 3
+'''
+
+[[parentMultiList.evaluate.inputs]]
+filename = "d.yaml"
+code = '''
+d: 4
+'''
+
+[[parentMultiList.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $parent:
   - c
   - d
@@ -2750,113 +3058,25 @@ $match:
   d: 4
 b: 2
 '''
-files."c.yaml" = '''
-c: 3
-'''
-files."d.yaml" = '''
-d: 4
-'''
 
 [parentFalseToml]
 description = "Test $parent: false in TOML format"
-eval = ["a.b.toml"]
-format = "toml"
-expected = '''
-a = 1
-'''
-files."a.toml" = '''
-a = 2
-b = 3
-'''
-files."a.b.toml" = '''
-"$parent" = false
+evaluate.result.code = '''
 a = 1
 '''
 
-[parentComplex]
-description = "Test complex parent patterns with wildcards"
-eval = ["all.yaml", "variant.yaml"]
-format = "yaml"
-expected = '''
-kind: Deployment
-metadata:
-  labels:
-    variant: a
-  name: user1
-spec:
-  replicas: 3
----
-kind: Service
-metadata:
-  labels:
-    variant: a
-  name: user1
----
-kind: Ingress
-metadata:
-  labels:
-    variant: a
-  name: user1
----
-kind: Deployment
-metadata:
-  labels:
-    variant: a
-  name: user2
-spec:
-  replicas: 3
----
-kind: Service
-metadata:
-  labels:
-    variant: a
-  name: user2
----
-kind: Ingress
-metadata:
-  labels:
-    variant: a
-  name: user2
+[[parentFalseToml.evaluate.inputs]]
+filename = "a.toml"
+code = '''
+a = 2
+b = 3
 '''
-files."all.yaml" = '''
-$parent: resources.*
-'''
-files."variant.yaml" = '''
-$match: {}
-metadata:
-  labels:
-    variant: a
----
-$match:
-  kind: Deployment
-spec:
-  replicas: 3
-'''
-files."deployment.yaml" = '''
-kind: Deployment
-metadata:
-  name: $required
-'''
-files."service.yaml" = '''
-kind: Service
-metadata:
-  name: $required
-'''
-files."ingress.yaml" = '''
-kind: Ingress
-metadata:
-  name: $required
-'''
-files."resources.yaml" = '''
-$parent: [deployment, service, ingress]
-'''
-files."resources.user1.yaml" = '''
-metadata:
-  name: user1
-'''
-files."resources.user2.yaml" = '''
-metadata:
-  name: user2
+
+[[parentFalseToml.evaluate.inputs]]
+filename = "a.b.toml"
+code = '''
+"$parent" = false
+a = 1
 '''
 
 ###############################################################################
@@ -2865,52 +3085,65 @@ metadata:
 
 [jsonInputStreamConcat]
 description = "Test handling of concatenated JSON objects without newlines"
-eval = ["a.json"]
-format = "yaml"
-expected = '''
+
+[jsonInputStreamConcat.evaluate.result]
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.json" = '''
+languages = [[0, "yaml"]]
+
+[[jsonInputStreamConcat.evaluate.inputs]]
+filename = "a.json"
+code = '''
 {"a": 1}{"b": 2}
 '''
 
 [jsonInputStreamNewline]
 description = "Test handling of JSON objects separated by newlines (JSON Lines)"
-eval = ["a.json"]
-format = "yaml"
-expected = '''
+
+[jsonInputStreamNewline.evaluate.result]
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.json" = '''
+languages = [[0, "yaml"]]
+
+[[jsonInputStreamNewline.evaluate.inputs]]
+filename = "a.json"
+code = '''
 {"a": 1}
 {"b": 2}
 '''
 
 [jsonLargeInt]
 description = "Test preservation of large integer values"
-eval = ["a.json"]
-format = "json"
-expected = '''
+evaluate.result.code = '''
 {"a":9223372036854775807,"b":2147483648}
 '''
-files."a.json" = '''
+
+[[jsonLargeInt.evaluate.inputs]]
+filename = "a.json"
+code = '''
 {"a": 9223372036854775807, "b": 2147483648}
 '''
 
 [tomlInputStream]
 description = "Test TOML input stream with standard delimiter"
-eval = ["a.toml"]
-format = "yaml"
-expected = '''
+
+[tomlInputStream.evaluate.result]
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.toml" = '''
+languages = [[0, "yaml"]]
+
+[[tomlInputStream.evaluate.inputs]]
+filename = "a.toml"
+code = '''
 a = 1
 ---
 b = 2
@@ -2918,14 +3151,18 @@ b = 2
 
 [tomlInputStreamHugo]
 description = "Test TOML input stream with Hugo-style delimiter"
-eval = ["a.toml"]
-format = "yaml"
-expected = '''
+
+[tomlInputStreamHugo.evaluate.result]
+code = '''
 a: 1
 ---
 b: 2
 '''
-files."a.toml" = '''
+languages = [[0, "yaml"]]
+
+[[tomlInputStreamHugo.evaluate.inputs]]
+filename = "a.toml"
+code = '''
 a = 1
 +++
 b = 2
@@ -2933,14 +3170,18 @@ b = 2
 
 [outputTomlStream]
 description = "Test YAML to TOML stream output conversion"
-eval = ["a.yaml"]
-format = "toml"
-expected = '''
+
+[outputTomlStream.evaluate.result]
+code = '''
 a = 1
 ---
 b = 2
 '''
-files."a.yaml" = '''
+languages = [[0, "toml"]]
+
+[[outputTomlStream.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 ---
 b: 2
@@ -2948,20 +3189,27 @@ b: 2
 
 [jsonInput]
 description = "Test JSON input format support"
-eval = ["a.b.json"]
-format = "json-pretty"
-expected = '''
+
+[jsonInput.evaluate.result]
+code = '''
 {
   "a": 1,
   "b": 2
 }
 '''
-files."a.json" = '''
+languages = [[0, "json-pretty"]]
+
+[[jsonInput.evaluate.inputs]]
+filename = "a.json"
+code = '''
 {
 	"a": 1
 }
 '''
-files."a.b.json" = '''
+
+[[jsonInput.evaluate.inputs]]
+filename = "a.b.json"
+code = '''
 {
 	"b": 2
 }
@@ -2969,9 +3217,7 @@ files."a.b.json" = '''
 
 [yamlTypes]
 description = "Test YAML type handling and preservation"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 bool: true
 float: 0.5
 int: 42
@@ -2979,7 +3225,10 @@ int: 42
 str: hello
 timestamp: "2022-02-05T10:30:00.1Z"
 '''
-files."a.yaml" = '''
+
+[[yamlTypes.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 null: null
 bool: true
 str: hello
@@ -2990,40 +3239,49 @@ timestamp: 2022-02-05T10:30:00.1Z
 
 [jsonFloat]
 description = "Test JSON float number handling"
-eval = ["a.json"]
-format = "json"
-expected = '''
+evaluate.result.code = '''
 {"a":3.14,"b":12300000000}
 '''
-files."a.json" = '''
+
+[[jsonFloat.evaluate.inputs]]
+filename = "a.json"
+code = '''
 {"a": 3.14, "b": 1.23e10}
 '''
 
 [jsonlInput]
 description = "Test JSONL input format"
-eval = ["a.jsonl"]
-format = "yaml"
-expected = '''
+
+[jsonlInput.evaluate.result]
+code = '''
 a: 1
 b: 2
 ---
 c: 3
 d: 4
 '''
-files."a.jsonl" = '''
+languages = [[0, "yaml"]]
+
+[[jsonlInput.evaluate.inputs]]
+filename = "a.jsonl"
+code = '''
 {"a":1,"b":2}
 {"c":3,"d":4}
 '''
 
 [jsonlOutput]
 description = "Test JSONL output format"
-eval = ["a.yaml"]
-format = "jsonl"
-expected = '''
+
+[jsonlOutput.evaluate.result]
+code = '''
 {"a":1,"b":2}
 {"c":3,"d":4}
 '''
-files."a.yaml" = '''
+languages = [[0, "jsonl"]]
+
+[[jsonlOutput.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 ---
@@ -3033,15 +3291,16 @@ d: 4
 
 [yamlEmptyDoc]
 description = "Test handling of empty YAML documents"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 foo: bar
 ---
 ---
 - 1
 '''
-files."a.yaml" = '''
+
+[[yamlEmptyDoc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 foo: bar
 ---
 ---
@@ -3050,68 +3309,82 @@ foo: bar
 
 [outputYaml]
 description = "Test YAML output with mixed formats"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 addr: 127.0.0.1
 name: myService
 port: 8081
 '''
-files."a.yaml" = '''
+
+[[outputYaml.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 name: myService
 addr: 127.0.0.1
 port: 8080
 '''
-files."a.b.yaml" = '''
+
+[[outputYaml.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 port: 8081
 '''
 
 [outputToml]
 description = "Test TOML output format"
-eval = ["a.b.toml"]
-format = "toml"
-expected = '''
+evaluate.result.code = '''
 addr = '127.0.0.1'
 name = 'myService'
 port = 8081
 '''
-files."a.yaml" = '''
+
+[[outputToml.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 name: myService
 addr: 127.0.0.1
 port: 8080
 '''
-files."a.b.toml" = '''
+
+[[outputToml.evaluate.inputs]]
+filename = "a.b.toml"
+code = '''
 port = 8081
 '''
 
 [outputJsonPretty]
 description = "Test JSON pretty output format"
-eval = ["a.b.toml"]
-format = "json-pretty"
-expected = '''
+
+[outputJsonPretty.evaluate.result]
+code = '''
 {
   "addr": "127.0.0.1",
   "name": "myService",
   "port": 8081
 }
 '''
-files."a.yaml" = '''
+languages = [[0, "json-pretty"]]
+
+[[outputJsonPretty.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 name: myService
 addr: 127.0.0.1
 port: 8080
 '''
-files."a.b.toml" = '''
+
+[[outputJsonPretty.evaluate.inputs]]
+filename = "a.b.toml"
+code = '''
 port = 8081
 '''
 
 [formatUnknown]
 description = "Test unknown format error"
-eval = ["a.xyz"]
-format = "xyz"
-expected = ""
-errors = ["unknown format", "Invalid value"]
-[formatUnknown.files]
-"a.xyz" = "x: 1"
+evaluate.errors = ["unknown format", "Invalid value"]
+
+[[formatUnknown.evaluate.inputs]]
+filename = "a.xyz"
+code = "x: 1"
 
 ###############################################################################
 # Special Characters and Escaping
@@ -3119,12 +3392,16 @@ errors = ["unknown format", "Invalid value"]
 
 [literalDollar]
 description = "Test literal dollar sign escaping ($$)"
-eval = ["a.yaml"]
-format = "json"
-expected = '''
+
+[literalDollar.evaluate.result]
+code = '''
 {"listKey":["$instance",{"nested":{"$key":"$value"}}],"mapKey":"$pod"}
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[literalDollar.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 listKey:
   - $$instance
   - nested:
@@ -3138,20 +3415,22 @@ mapKey: $$pod
 
 [requiredError]
 description = "Test error when required field is not set"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["required field not set"]
-files."a.yaml" = '''
+evaluate.errors = ["required field not set"]
+
+[[requiredError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: $required
 '''
 
 [yamlAnchorsRequiredError]
 description = "Test required field error with YAML anchors"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["required field not set"]
-files."a.yaml" = '''
+evaluate.errors = ["required field not set"]
+
+[[yamlAnchorsRequiredError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: &anchor
   $required
 b: *anchor
@@ -3159,15 +3438,19 @@ b: *anchor
 
 [requiredList]
 description = "Test $required field in list context"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - 1
 '''
-files."a.yaml" = '''
+
+[[requiredList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $required
 '''
-files."a.b.yaml" = '''
+
+[[requiredList.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - 1
 '''
 
@@ -3177,10 +3460,11 @@ files."a.b.yaml" = '''
 
 [valueExtra]
 description = "Test error when $value has extra keys"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["extra keys"]
-files."a.yaml" = '''
+evaluate.errors = ["extra keys"]
+
+[[valueExtra.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: "foo"
   b: 2
@@ -3188,10 +3472,11 @@ a:
 
 [interpMissing]
 description = "Test string interpolation with missing variable"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["missing_variable: variable not found"]
-files."a.yaml" = '''
+evaluate.errors = ["missing_variable: variable not found"]
+
+[[interpMissing.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 # Test for string interpolation with missing variable
 # This should trigger a variable not found error
 
@@ -3204,30 +3489,38 @@ result: $"Hello {missing_variable} world"
 
 [example1]
 description = "Example from documentation showing basic inheritance"
-eval = ["a.b.toml"]
-format = "json"
-expected = '''
+
+[example1.evaluate.result]
+code = '''
 {"addr":"127.0.0.1","name":"myService","port":8081}
 '''
-files."a.yaml" = '''
+languages = [[0, "json"]]
+
+[[example1.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 name: myService
 addr: 127.0.0.1
 port: 8080
 '''
-files."a.b.toml" = '''
+
+[[example1.evaluate.inputs]]
+filename = "a.b.toml"
+code = '''
 port = 8081
 '''
 
 [ordered]
 description = "Test preservation of key order in YAML"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 b: 2
 ---
 a: 1
 '''
-files."a.yaml" = '''
+
+[[ordered.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 b: 2
 ---
 a: 1
@@ -3235,68 +3528,46 @@ a: 1
 
 [validateNonDirective]
 description = "Test that variable-like strings are not treated as directives"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
-a: $FOO
-b: ${FOO}
-c: $(FOO)
-'''
-files."a.yaml" = '''
+evaluate.result.code = '''
 a: $FOO
 b: ${FOO}
 c: $(FOO)
 '''
 
-[args]
-description = "Test evaluating multiple files with inheritance"
-eval = ["a.b.yaml", "c.d.yaml"]
-format = "yaml"
-expected = '''
-a: 1
-c: 3
-d: 4
-'''
-files."a.yaml" = '''
-a: 1
-'''
-files."a.b.yaml" = '''
-b: 2
-'''
-files."c.yaml" = '''
-$match: {}
-b: 10
-c: 3
-'''
-files."c.d.yaml" = '''
-b: $delete
-d: 4
+[[validateNonDirective.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+a: $FOO
+b: ${FOO}
+c: $(FOO)
 '''
 
 [yamlAnchors]
 description = "Test YAML anchor and alias support"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 c: 1
 '''
-files."a.yaml" = '''
+
+[[yamlAnchors.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: &anchor
   1
 b: *anchor
 c: *anchor
 '''
-files."a.b.yaml" = '''
+
+[[yamlAnchors.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: 2
 '''
 
 [yamlMerge]
 description = "Test YAML merge key (<<) support"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - bar: 2
   foo: 1
   name: original
@@ -3305,7 +3576,10 @@ expected = '''
   isCopy: true
   name: copy
 '''
-files."a.yaml" = '''
+
+[[yamlMerge.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - &anchor
   bar: 2
   foo: 1
@@ -3313,7 +3587,10 @@ files."a.yaml" = '''
 - name: copy
   <<: *anchor
 '''
-files."a.b.yaml" = '''
+
+[[yamlMerge.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - $match:
     name: copy
   isCopy: true
@@ -3321,9 +3598,7 @@ files."a.b.yaml" = '''
 
 [yamlMergeMultiple]
 description = "Test YAML merge key with multiple sources"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 - bar: 2
   foo: 1
   name: original
@@ -3335,7 +3610,10 @@ expected = '''
   isCopy: true
   name: copy
 '''
-files."a.yaml" = '''
+
+[[yamlMergeMultiple.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - &anchor
   bar: 2
   foo: 1
@@ -3348,7 +3626,10 @@ files."a.yaml" = '''
     - *otherAnchor
     - *anchor
 '''
-files."a.b.yaml" = '''
+
+[[yamlMergeMultiple.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 - $match:
     name: copy
   isCopy: true
@@ -3356,18 +3637,22 @@ files."a.b.yaml" = '''
 
 [requiredSet]
 description = "Test $required field is set by child file"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 c: 3
 '''
-files."a.yaml" = '''
+
+[[requiredSet.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: $required
 '''
-files."a.b.yaml" = '''
+
+[[requiredSet.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 b: 2
 c: 3
 '''
@@ -3378,28 +3663,30 @@ c: 3
 
 [rootPathCur]
 description = "Test root path restriction with current directory"
-eval = ["a.yaml"]
-format = "yaml"
-root = "."
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 1
 '''
-files."a.yaml" = '''
+evaluate.root = "."
+
+[[rootPathCur.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: $merge:a
 '''
 
 [rootPathRoot]
 description = "Test root path with root directory (no restriction)"
-eval = ["a.yaml"]
-format = "yaml"
-root = "/"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 1
 '''
-files."a.yaml" = '''
+evaluate.root = "/"
+
+[[rootPathRoot.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: $merge:a
 '''
@@ -3407,25 +3694,27 @@ b: $merge:a
 
 [rootPathSub]
 description = "Test root path with subdirectory"
-eval = ["sub/a.yaml"]
-format = "yaml"
-root = "sub"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 1
 '''
-files."sub/a.yaml" = '''
+evaluate.root = "sub"
+
+[[rootPathSub.evaluate.inputs]]
+filename = "sub/a.yaml"
+code = '''
 a: 1
 b: $merge:a
 '''
 
 [rootPathBreak]
 description = "Test root path restriction prevents access outside root"
-eval = ["a.yaml"]
-format = "yaml"
-root = "sub"
-errors = ["outside root path", "no such file or directory"]
-files."a.yaml" = '''
+evaluate.errors = ["outside root path", "no such file or directory"]
+evaluate.root = "sub"
+
+[[rootPathBreak.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: $merge:a
 '''
@@ -3436,37 +3725,40 @@ b: $merge:a
 
 [envMapValue]
 description = "Test environment variable in map value"
-eval = ["a.yaml"]
-format = "yaml"
-env = { FOO = "test" }
-expected = '''
+evaluate.result.code = '''
 a: test
 '''
-files."a.yaml" = '''
+evaluate.env = { FOO = "test" }
+
+[[envMapValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $env:FOO
 '''
 
 [envMapKey]
 description = "Test environment variable in map key"
-eval = ["a.yaml"]
-format = "yaml"
-env = { FOO = "test" }
-expected = '''
+evaluate.result.code = '''
 test: 1
 '''
-files."a.yaml" = '''
+evaluate.env = { FOO = "test" }
+
+[[envMapKey.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $env:FOO: 1
 '''
 
 [encodeBase64Env]
 description = "Test base64 encoding with environment variable"
-eval = ["a.yaml"]
-format = "yaml"
-env = { FOO = "test" }
-expected = '''
+evaluate.result.code = '''
 a: dGVzdA==
 '''
-files."a.yaml" = '''
+evaluate.env = { FOO = "test" }
+
+[[encodeBase64Env.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: $env:FOO
   $encode: base64
@@ -3474,13 +3766,14 @@ a:
 
 [encodeJoinEnv]
 description = "Test join encoding with environment variable in array"
-eval = ["a.yaml"]
-format = "yaml"
-env = { FOO = "test" }
-expected = '''
+evaluate.result.code = '''
 a: a-test-b
 '''
-files."a.yaml" = '''
+evaluate.env = { FOO = "test" }
+
+[[encodeJoinEnv.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a:
   $value: [a-, $env:FOO, -b]
   $encode: join
@@ -3488,10 +3781,11 @@ a:
 
 [envMissing]
 description = "Test missing environment variable error"
-eval = ["a.yaml"]
-format = "yaml"
-errors = ["$env:FOO: variable not found"]
-files."a.yaml" = '''
+evaluate.errors = ["$env:FOO: variable not found"]
+
+[[envMissing.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $env:FOO
 '''
 ###############################################################################
@@ -3500,67 +3794,73 @@ a: $env:FOO
 
 [diffList]
 description = "Test diff of two lists"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 - $match: {}
 - c: 3
 - $delete:
     b: 2
 '''
-files."a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 - a: 1
 - b: 2
 '''
-files."b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 - a: 1
 - c: 3
 '''
 
 [diffListReplace]
 description = "Test diff of lists that requires $replace"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 - $match: {}
 - a: 1
 - c: 3
 - $replace: true
 '''
-files."a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 - a
 - b
 '''
-files."b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 - a: 1
 - c: 3
 '''
 
 [diffListSame]
 description = "Test diff of identical lists"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 $match: {}
 '''
-files."a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 - a: 1
 - b: 2
 '''
-files."b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 - a: 1
 - b: 2
 '''
 
 [diffMap]
 description = "Test diff of two maps"
-eval = ["a.yaml", "b.yaml"]
-format = "json-pretty"
-diff = true
-expected = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
+a: 1
+b: 2
+'''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
+a: 2
+c: 3
+'''
+
+[diffMap.diff.result]
+code = '''
 {
   "$match": {},
   "a": 2,
@@ -3568,48 +3868,39 @@ expected = '''
   "c": 3
 }
 '''
-files."a.yaml" = '''
-a: 1
-b: 2
-'''
-files."b.yaml" = '''
-a: 2
-c: 3
-'''
+languages = [[0, "json-pretty"]]
 
 [diffMapSame]
 description = "Test diff of identical maps"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 $match: {}
 '''
-files."a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 a: 1
 b: 2
 '''
-files."b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 a: 1
 b: 2
 '''
 
 [diffMerge]
 description = "Test diff with merge operation"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 $match: {}
 $merge: c.yaml
 c: 3
 d: 4
 '''
-files."a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 a: 1
 b: 2
 '''
-files."b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 a: 1
 b: 2
 c: 3
@@ -3619,18 +3910,17 @@ $merge: c.yaml
 
 [diffYamlJson]
 description = "Test diff between YAML and JSON files"
-eval = ["a.yaml", "b.json"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 $match: {}
 c: 3
 '''
-files."a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 a: 1
 b: 2
 '''
-files."b.json" = '''
+diff.target.filename = "b.json"
+diff.target.code = '''
 {
   "a": 1,
   "b": 2,
@@ -3638,53 +3928,26 @@ files."b.json" = '''
 }
 '''
 
-# Error handling tests for diff
-[diffMissingSourceFile]
-description = "Test diff with missing source file"
-eval = ["missing.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = ""
-errors = ["missing file"]
-[diffMissingSourceFile.files]
-"b.yaml" = "x: 1"
-
-[diffMissingDestFile]
-description = "Test diff with missing destination file"
-eval = ["a.yaml", "missing.yaml"]
-format = "yaml"
-diff = true
-expected = ""
-errors = ["missing file"]
-[diffMissingDestFile.files]
-"a.yaml" = "x: 1"
-
 [diffMultipleDocsSource]
 description = "Test diff with multiple documents in source file without selector"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = ""
-errors = ["selector"]
-[diffMultipleDocsSource.files]
-"a.yaml" = '''
+diff.errors = ["selector"]
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 ---
 x: 1
 ---
 y: 2
 '''
-"b.yaml" = "x: 1"
+diff.target.filename = "b.yaml"
+diff.target.code = "x: 1"
 
 [diffMultipleDocsDest]
 description = "Test diff with multiple documents in destination file without selector"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = ""
-errors = ["selector \"\" matches multiple"]
-[diffMultipleDocsDest.files]
-"a.yaml" = "x: 1"
-"b.yaml" = '''
+diff.errors = ["selector \"\" matches multiple"]
+diff.base.filename = "a.yaml"
+diff.base.code = "x: 1"
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 ---
 x: 1
 ---
@@ -3693,65 +3956,55 @@ y: 2
 
 [diffDifferentTypes]
 description = "Test diff with different types (string vs number)"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 $match: {}
 x: "1"
 '''
-[diffDifferentTypes.files]
-"a.yaml" = "x: 1"
-"b.yaml" = 'x: "1"'
+diff.base.filename = "a.yaml"
+diff.base.code = "x: 1"
+diff.target.filename = "b.yaml"
+diff.target.code = 'x: "1"'
 
 # Additional diff coverage tests
 [diffIdenticalValues]
 description = "Test diff with identical values returns nil"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = "$match: {}"
-[diffIdenticalValues.files]
-"a.yaml" = "x: 1"
-"b.yaml" = "x: 1"
+diff.result.code = "$match: {}"
+diff.base.filename = "a.yaml"
+diff.base.code = "x: 1"
+diff.target.filename = "b.yaml"
+diff.target.code = "x: 1"
 
 [diffPrimitiveValues]
 description = "Test diff with primitive values (not maps or lists)"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = "world"
-[diffPrimitiveValues.files]
-"a.yaml" = '"hello"'
-"b.yaml" = '"world"'
+diff.result.code = "world"
+diff.base.filename = "a.yaml"
+diff.base.code = '"hello"'
+diff.target.filename = "b.yaml"
+diff.target.code = '"world"'
 
 [diffListVsMap]
 description = "Test diff with list vs map (different types)"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 $match: {}
 x: 1
 '''
-[diffListVsMap.files]
-"a.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 - a: 1
 '''
-"b.yaml" = "x: 1"
+diff.target.filename = "b.yaml"
+diff.target.code = "x: 1"
 
 [diffMapVsList]
 description = "Test diff with map vs list (different types)"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-expected = '''
+diff.result.code = '''
 - $match: {}
 - a: 1
 '''
-[diffMapVsList.files]
-"a.yaml" = "x: 1"
-"b.yaml" = '''
+diff.base.filename = "a.yaml"
+diff.base.code = "x: 1"
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 - a: 1
 '''
 
@@ -3761,18 +4014,21 @@ expected = '''
 
 [intersectList]
 description = "Test intersect of two lists"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
+intersect.result.code = '''
 - a: 1
 '''
-files."a.yaml" = '''
+
+[[intersectList.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 - b: 2
 - c: 3
 '''
-files."b.yaml" = '''
+
+[[intersectList.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 - a: 1
 - b: 10
 - d: 4
@@ -3780,31 +4036,37 @@ files."b.yaml" = '''
 
 [intersectListRequired]
 description = "Test intersect of lists with no common elements"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-files."a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectListRequired.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 '''
-files."b.yaml" = '''
+
+[[intersectListRequired.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 - b: 2
 '''
 
 [intersectMap]
 description = "Test intersect of two maps"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
+intersect.result.code = '''
 a: 1
 '''
-files."a.yaml" = '''
+
+[[intersectMap.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 c: 3
 '''
-files."b.yaml" = '''
+
+[[intersectMap.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 a: 1
 b: 10
 d: 4
@@ -3812,90 +4074,91 @@ d: 4
 
 [intersectMapNull]
 description = "Test intersect of maps with null values"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
-a: null
-'''
-files."a.yaml" = '''
-a: null
-'''
-files."b.yaml" = '''
+intersect.result.code = '''
 a: null
 '''
 
-# Error handling tests for intersect
-[intersectMissingFile]
-description = "Test intersect with missing file"
-eval = ["a.yaml", "missing.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-errors = ["missing file"]
-[intersectMissingFile.files]
-"a.yaml" = "x: 1"
+[[intersectMapNull.intersect.inputs]]
+filename = "a.yaml"
+code = '''
+a: null
+'''
+
+[[intersectMapNull.intersect.inputs]]
+filename = "b.yaml"
+code = '''
+a: null
+'''
 
 [intersectMultipleDocs]
 description = "Test intersect with multiple documents in a file without selector"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-errors = ["selector"]
-[intersectMultipleDocs.files]
-"a.yaml" = '''
+intersect.errors = ["selector"]
+
+[[intersectMultipleDocs.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 x: 1
 ---
 y: 2
 '''
-"b.yaml" = "x: 1"
+
+[[intersectMultipleDocs.intersect.inputs]]
+filename = "b.yaml"
+code = "x: 1"
 
 [intersectDifferentTypes]
 description = "Test intersect with different types"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectDifferentTypes.files]
-"a.yaml" = "x: 1"
-"b.yaml" = '"string value"'
+intersect.result.code = ""
+
+[[intersectDifferentTypes.intersect.inputs]]
+filename = "a.yaml"
+code = "x: 1"
+
+[[intersectDifferentTypes.intersect.inputs]]
+filename = "b.yaml"
+code = '"string value"'
 
 # Additional intersect coverage tests
 [intersectListVsMap]
 description = "Test intersect with list vs map"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectListVsMap.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectListVsMap.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 '''
-"b.yaml" = "x: 1"
+
+[[intersectListVsMap.intersect.inputs]]
+filename = "b.yaml"
+code = "x: 1"
 
 [intersectPrimitiveVsList]
 description = "Test intersect with primitive vs list"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectPrimitiveVsList.files]
-"a.yaml" = '"hello"'
-"b.yaml" = '''
+intersect.result.code = ""
+
+[[intersectPrimitiveVsList.intersect.inputs]]
+filename = "a.yaml"
+code = '"hello"'
+
+[[intersectPrimitiveVsList.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 - a: 1
 '''
 
 [intersectPrimitiveVsMap]
 description = "Test intersect with primitive vs map"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectPrimitiveVsMap.files]
-"a.yaml" = '"hello"'
-"b.yaml" = "x: 1"
+intersect.result.code = ""
+
+[[intersectPrimitiveVsMap.intersect.inputs]]
+filename = "a.yaml"
+code = '"hello"'
+
+[[intersectPrimitiveVsMap.intersect.inputs]]
+filename = "b.yaml"
+code = "x: 1"
 
 ###############################################################################
 # Required Operations
@@ -3903,16 +4166,14 @@ expected = ""
 
 [requiredToolList]
 description = "Required tool filters list to show only $required items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = """
+required.result.code = """
 a:
   - $required
 """
-required = true
 
-[requiredToolList.files]
-"a.yaml" = """
+[[requiredToolList.required.inputs]]
+filename = "a.yaml"
+code = """
 a:
   - $required
 b:
@@ -3921,16 +4182,14 @@ b:
 
 [requiredToolMap]
 description = "Required tool filters map to show only $required items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = """
+required.result.code = """
 a:
   b: $required
 """
-required = true
 
-[requiredToolMap.files]
-"a.yaml" = """
+[[requiredToolMap.required.inputs]]
+filename = "a.yaml"
+code = """
 a:
   b: $required
   c: 3
@@ -3938,28 +4197,17 @@ a:
     e: 5
 """
 
-# Error handling tests for required
-[requiredMissingFile]
-description = "Test required with missing file"
-eval = ["missing.yaml"]
-format = "yaml"
-required = true
-expected = ""
-errors = ["missing file"]
-[requiredMissingFile.files]
-
 [requiredMultipleDocs]
 description = "Test required with multiple documents"
-eval = ["a.yaml"]
-format = "yaml"
-required = true
-expected = '''
+required.result.code = '''
 a: $required
 ---
 b: $required
 '''
-[requiredMultipleDocs.files]
-"a.yaml" = '''
+
+[[requiredMultipleDocs.required.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 a: $required
 ---
@@ -3969,21 +4217,19 @@ b: $required
 # Additional required coverage tests
 [requiredInString]
 description = "Test required string value is preserved"
-eval = ["a.yaml"]
-format = "yaml"
-required = true
-expected = "x: $required"
-[requiredInString.files]
-"a.yaml" = "x: $required"
+required.result.code = "x: $required"
+
+[[requiredInString.required.inputs]]
+filename = "a.yaml"
+code = "x: $required"
 
 [requiredNonRequiredString]
 description = "Test non-required string value is filtered out"
-eval = ["a.yaml"]
-format = "yaml"
-required = true
-expected = ""
-[requiredNonRequiredString.files]
-"a.yaml" = "x: not-required"
+required.result.code = ""
+
+[[requiredNonRequiredString.required.inputs]]
+filename = "a.yaml"
+code = "x: not-required"
 
 ###############################################################################
 # Error Handling - Additional Coverage
@@ -3992,29 +4238,29 @@ expected = ""
 # File loading errors
 [fileLoadInvalidFormat]
 description = "Test loading file with invalid format"
-eval = ["test.invalid"]
-expected = ""
-errors = ["unknown format"]
-[fileLoadInvalidFormat.files]
-"test.invalid" = "x: 1"
+evaluate.errors = ["unknown format"]
+
+[[fileLoadInvalidFormat.evaluate.inputs]]
+filename = "test.invalid"
+code = "x: 1"
 
 
 [unmarshalError]
 description = "Test unmarshal error with invalid YAML"
-eval = ["bad.yaml"]
-expected = ""
-errors = ["did not find expected node content"]
-[unmarshalError.files]
-"bad.yaml" = "{ invalid yaml: ["
+evaluate.errors = ["did not find expected node content"]
+
+[[unmarshalError.evaluate.inputs]]
+filename = "bad.yaml"
+code = "{ invalid yaml: ["
 
 # Merge errors
 [mergeListDeleteExtraKeys]
 description = "Test merge list delete with extra keys error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[mergeListDeleteExtraKeys.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid directive"]
+
+[[mergeListDeleteExtraKeys.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $delete:
     x: 1
   extra: key
@@ -4022,21 +4268,21 @@ errors = ["invalid directive"]
 
 [mergeListReplaceError]
 description = "Test merge list replace with invalid boolean"
-eval = ["a.yaml"]
-expected = ""
-errors = ["reference not found"]
-[mergeListReplaceError.files]
-"a.yaml" = '''
+evaluate.errors = ["reference not found"]
+
+[[mergeListReplaceError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $replace: "not a boolean"
 '''
 
 [mergeListMatchNotFound]
 description = "Test merge list match not found"
-eval = ["a.yaml"]
-expected = ""
-errors = ["not found"]
-[mergeListMatchNotFound.files]
-"a.yaml" = '''
+evaluate.errors = ["not found"]
+
+[[mergeListMatchNotFound.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 base:
   - a: 1
 updates:
@@ -4050,53 +4296,53 @@ result:
 # Decode errors
 [decodeInvalidType]
 description = "Test decode with invalid type"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[decodeInvalidType.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[decodeInvalidType.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: 123
 '''
 
 [decodeNotString]
 description = "Test decode on non-map type"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[decodeNotString.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[decodeNotString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $decode: base64
 '''
 
 [decodeMissingValue]
 description = "Test decode missing $value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["missing $value"]
-[decodeMissingValue.files]
-"a.yaml" = '''
+evaluate.errors = ["missing $value"]
+
+[[decodeMissingValue.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: base64
 other: field
 '''
 
 [decodeValueNotString]
 description = "Test decode with non-string $value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[decodeValueNotString.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[decodeValueNotString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: base64
 $value: 123
 '''
 
 [decodeExtraKeys]
 description = "Test decode with extra keys"
-eval = ["a.yaml"]
-expected = ""
-errors = ["extra keys"]
-[decodeExtraKeys.files]
-"a.yaml" = '''
+evaluate.errors = ["extra keys"]
+
+[[decodeExtraKeys.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: base64
 $value: SGVsbG8=
 extra: key
@@ -4104,33 +4350,33 @@ extra: key
 
 [decodeInvalidYAML]
 description = "Test decode with invalid YAML"
-eval = ["a.yaml"]
-expected = ""
-errors = ["yaml:"]
-[decodeInvalidYAML.files]
-"a.yaml" = '''
+evaluate.errors = ["yaml:"]
+
+[[decodeInvalidYAML.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: yaml
 $value: "{ invalid: yaml ["
 '''
 
 [decodeInvalidJSON]
 description = "Test decode with invalid JSON"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid character"]
-[decodeInvalidJSON.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid character"]
+
+[[decodeInvalidJSON.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: json
 $value: "{ invalid json"
 '''
 
 [decodeUnknownFormat]
 description = "Test decode with unknown format"
-eval = ["a.yaml"]
-expected = ""
-errors = ["unknown format"]
-[decodeUnknownFormat.files]
-"a.yaml" = '''
+evaluate.errors = ["unknown format"]
+
+[[decodeUnknownFormat.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: unknownformat
 $value: data
 '''
@@ -4138,22 +4384,23 @@ $value: data
 # Normalize errors
 [normalizeError]
 description = "Test normalize error with function value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[normalizeError.files]
-"a.yaml" = "func: $env"
+evaluate.errors = ["invalid directive"]
+
+[[normalizeError.evaluate.inputs]]
+filename = "a.yaml"
+code = "func: $env"
 
 # Encode coverage tests
 [encodeSHA256]
 description = "Test encode with sha256"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 data: foo
 hash: 2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae
 '''
-[encodeSHA256.files]
-"a.yaml" = '''
+
+[[encodeSHA256.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data: foo
 hash:
   $encode: sha256
@@ -4162,13 +4409,14 @@ hash:
 
 [encodeBase64Coverage]
 description = "Test encode with base64"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 data: Hello World
 encoded: SGVsbG8gV29ybGQ=
 '''
-[encodeBase64Coverage.files]
-"a.yaml" = '''
+
+[[encodeBase64Coverage.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data: Hello World
 encoded:
   $encode: base64
@@ -4177,8 +4425,7 @@ encoded:
 
 [encodeFlattenCoverage]
 description = "Test encode flatten"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 flattened:
   - a
   - b
@@ -4190,8 +4437,10 @@ nested:
   - - c
     - d
 '''
-[encodeFlattenCoverage.files]
-"a.yaml" = '''
+
+[[encodeFlattenCoverage.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 nested:
   - [a, b]
   - [c, d]
@@ -4204,8 +4453,7 @@ flattened:
 
 [encodeToListMap]
 description = "Test encode tolist with map"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 args:
   - name=foo
   - value=bar
@@ -4213,8 +4461,10 @@ config:
   name: foo
   value: bar
 '''
-[encodeToListMap.files]
-"a.yaml" = '''
+
+[[encodeToListMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 config:
   name: foo
   value: bar
@@ -4228,11 +4478,11 @@ args:
 # Deep clone error
 [deepCloneError]
 description = "Test deep clone with function causes error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[deepCloneError.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid directive"]
+
+[[deepCloneError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 base:
   func: $env
 copy:
@@ -4243,11 +4493,11 @@ copy:
 # Process2 tolist errors
 [toListInvalidDelimiter]
 description = "Test tolist with invalid delimiter argument"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid arguments"]
-[toListInvalidDelimiter.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid arguments"]
+
+[[toListInvalidDelimiter.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: tolist
 $value:
   a: 1
@@ -4255,11 +4505,11 @@ $value:
 
 [toListNonMap]
 description = "Test tolist with non-map value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[toListNonMap.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[toListNonMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: tolist:=
 $value: "not a map"
 '''
@@ -4267,33 +4517,33 @@ $value: "not a map"
 # Encode errors
 [encodeInvalidArguments]
 description = "Test encode with invalid arguments"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid arguments"]
-[encodeInvalidArguments.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid arguments"]
+
+[[encodeInvalidArguments.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: base64:extra
 $value: data
 '''
 
 [encodeFlattenNonList]
 description = "Test encode flatten with non-list"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[encodeFlattenNonList.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[encodeFlattenNonList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: flatten
 $value: "not a list"
 '''
 
 [encodeSHA256InvalidArgs]
 description = "Test encode sha256 with invalid arguments"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid arguments"]
-[encodeSHA256InvalidArgs.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid arguments"]
+
+[[encodeSHA256InvalidArgs.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: sha256:extra
 $value: data
 '''
@@ -4301,22 +4551,27 @@ $value: data
 # Parser logging coverage
 [parserDebugLog]
 description = "Test parser with debug logging enabled"
-eval = ["a.yaml"]
-expected = "x: 1"
-[parserDebugLog.files]
-"a.yaml" = "x: 1"
+evaluate.result.code = "x: 1"
+
+[[parserDebugLog.evaluate.inputs]]
+filename = "a.yaml"
+code = "x: 1"
 
 # File loading - parent from directive
 [parentFromDirectiveList]
 description = "Test parent from directive as list"
-eval = ["child.yaml"]
-expected = '''
+evaluate.result.code = '''
 base: value
 child: value
 '''
-[parentFromDirectiveList.files]
-"parent.yaml" = "base: value"
-"child.yaml" = '''
+
+[[parentFromDirectiveList.evaluate.inputs]]
+filename = "parent.yaml"
+code = "base: value"
+
+[[parentFromDirectiveList.evaluate.inputs]]
+filename = "child.yaml"
+code = '''
 $parent: [parent]
 child: value
 '''
@@ -4326,11 +4581,11 @@ child: value
 # Process2 decode errors
 [decodeMultipleDocs]
 description = "Test decode with multiple documents error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["decoding error"]
-[decodeMultipleDocs.files]
-"a.yaml" = '''
+evaluate.errors = ["decoding error"]
+
+[[decodeMultipleDocs.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $decode: yaml
 $value: |
   ---
@@ -4343,13 +4598,14 @@ $value: |
 # String interpolation edge cases
 [stringInterpEmptyVar]
 description = "Test string interpolation with empty variable"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 empty: ""
 result: 'Value: '
 '''
-[stringInterpEmptyVar.files]
-"a.yaml" = '''
+
+[[stringInterpEmptyVar.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 empty: ""
 result: '$"Value: {empty}"'
 '''
@@ -4362,14 +4618,15 @@ result: '$"Value: {empty}"'
 
 [getPathYAMLList]
 description = "Test get path from YAML-encoded list"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 data:
   nested:
     field: value
 '''
-[getPathYAMLList.files]
-"a.yaml" = '''
+
+[[getPathYAMLList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   nested:
     field: value
@@ -4377,59 +4634,46 @@ data:
 
 [getPathInvalidType]
 description = "Test get path with invalid type"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 result: 123
 '''
-[getPathInvalidType.files]
-"a.yaml" = '''
+
+[[getPathInvalidType.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 result: 123
 '''
 
 [getVarNotFound]
 description = "Test get variable not found"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[getVarNotFound.files]
-"a.yaml" = '''
-result: $nonexistent
-'''
+evaluate.errors = ["invalid directive"]
 
-[getCrossDocError]
-description = "Test get cross document error"
-eval = ["a.yaml", "b.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[getCrossDocError.files]
-"a.yaml" = '''
-result:
-  $get: [{id: missing}, field]
-'''
-"b.yaml" = '''
-id: other
-field: value
+[[getVarNotFound.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+result: $nonexistent
 '''
 
 [getPathFromStringError]
 description = "Test get path from string with YAML parse error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["yaml:"]
-[getPathFromStringError.files]
-"a.yaml" = '''
+evaluate.errors = ["yaml:"]
+
+[[getPathFromStringError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 result: $"[invalid: yaml: ["
 '''
 
 # Output operations
 [outputFilterMapFalse]
 description = "Test output filter on map with $output: false"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 visible: data
 '''
-[outputFilterMapFalse.files]
-"a.yaml" = '''
+
+[[outputFilterMapFalse.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 visible: data
 hidden:
   $output: false
@@ -4438,13 +4682,14 @@ hidden:
 
 [outputFilterListFalse]
 description = "Test output filter on list with $output: false"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 - visible
 - another
 '''
-[outputFilterListFalse.files]
-"a.yaml" = '''
+
+[[outputFilterListFalse.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - visible
 - $output: false
   hidden: value
@@ -4453,11 +4698,11 @@ expected = '''
 
 [outputFilterNestedError]
 description = "Test output filter with nested error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid"]
-[outputFilterNestedError.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid"]
+
+[[outputFilterNestedError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   field:
     $output: "not a boolean"
@@ -4465,11 +4710,11 @@ data:
 
 [findOutputsError]
 description = "Test find outputs with error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid"]
-[findOutputsError.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid"]
+
+[[findOutputsError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   - $output: "not a boolean"
 '''
@@ -4477,35 +4722,37 @@ data:
 # Normalize edge cases
 [normalizeMapKeyNonString]
 description = "Test normalize with non-string map key"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 "123": value
 '''
-[normalizeMapKeyNonString.files]
-"a.yaml" = '''
+
+[[normalizeMapKeyNonString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 123: value
 '''
 
 # Match operations
 [matchListNonList]
 description = "Test match list with non-list"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 data: not a list
 '''
-[matchListNonList.files]
-"a.yaml" = '''
+
+[[matchListNonList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data: not a list
 '''
 
 # JSON edge cases
 [jsonMarshalError]
 description = "Test JSON marshal with function type"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[jsonMarshalError.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid directive"]
+
+[[jsonMarshalError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 func: $env
 result:
   $encode: json
@@ -4515,23 +4762,24 @@ result:
 # YAML marshal edge cases
 [yamlMarshalMapIntKey]
 description = "Test YAML marshal with integer map key"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 "123": value
 '''
-[yamlMarshalMapIntKey.files]
-"a.yaml" = '''
+
+[[yamlMarshalMapIntKey.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 123: value
 '''
 
 # Process decode type errors
 [decodeNonMap]
 description = "Test decode on non-map"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[decodeNonMap.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[decodeNonMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - item
 - $decode: yaml
 '''
@@ -4542,8 +4790,7 @@ errors = ["invalid type"]
 # More coverage tests
 [getPathDeepNested]
 description = "Test get path with deep nesting"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 data:
   level1:
     level2:
@@ -4551,8 +4798,10 @@ data:
         value: found
 result: found
 '''
-[getPathDeepNested.files]
-"a.yaml" = '''
+
+[[getPathDeepNested.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   level1:
     level2:
@@ -4563,29 +4812,31 @@ result: found
 
 [normalizeListWithNonStringKey]
 description = "Test normalize list containing map with non-string key"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 - "123": value
 - normal: key
 '''
-[normalizeListWithNonStringKey.files]
-"a.yaml" = '''
+
+[[normalizeListWithNonStringKey.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - 123: value
 - normal: key
 '''
 
 [outputControlComplex]
 description = "Test complex output control"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 list:
   - item1
   - item3
 visible:
   data: shown
 '''
-[outputControlComplex.files]
-"a.yaml" = '''
+
+[[outputControlComplex.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 visible:
   data: shown
   hidden:
@@ -4600,50 +4851,51 @@ list:
 
 [toStringListMixed]
 description = "Test toStringList with mixed types"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[toStringListMixed.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid directive"]
+
+[[toStringListMixed.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   $get: [field1, {complex: object}, field2]
 '''
 
 [yamlUnmarshalStreamError]
 description = "Test YAML unmarshal stream with invalid input"
-eval = ["a.yaml"]
-expected = ""
-errors = ["yaml:"]
-[yamlUnmarshalStreamError.files]
-"a.yaml" = '''
+evaluate.errors = ["yaml:"]
+
+[[yamlUnmarshalStreamError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 {invalid yaml & here
 '''
 
 [jsonUnmarshalStreamEmpty]
 description = "Test JSON unmarshal with empty document"
-eval = ["a.json"]
-expected = ""
-[jsonUnmarshalStreamEmpty.files]
-"a.json" = ""
+evaluate.result.code = ""
+
+[[jsonUnmarshalStreamEmpty.evaluate.inputs]]
+filename = "a.json"
+code = ""
 
 [encodeUnknownCommand]
 description = "Test encode with unknown command"
-eval = ["a.yaml"]
-expected = ""
-errors = ["unknown format"]
-[encodeUnknownCommand.files]
-"a.yaml" = '''
+evaluate.errors = ["unknown format"]
+
+[[encodeUnknownCommand.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: unknowncommand
 $value: data
 '''
 
 [process2CircularRef]
 description = "Test process2 circular reference detection"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[process2CircularRef.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid directive"]
+
+[[process2CircularRef.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: $b
 b: $c
 c: $a
@@ -4653,14 +4905,15 @@ result: $a
 # Document and clone tests
 [documentCloneError]
 description = "Test document clone with marshal error"
-eval = ["a.yaml"]
-expected = '''
+evaluate.result.code = '''
 data:
   func: {}
 func: {}
 '''
-[documentCloneError.files]
-"a.yaml" = '''
+
+[[documentCloneError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   func: {}
 $merge: data
@@ -4669,32 +4922,32 @@ $merge: data
 # Process1 tests
 [process1MergeError]
 description = "Test process1 merge with error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["reference not found"]
-[process1MergeError.files]
-"a.yaml" = '''
+evaluate.errors = ["reference not found"]
+
+[[process1MergeError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $merge: nonexistent
 '''
 
 [process1ParentError]
 description = "Test process1 parent directive error"
-eval = ["a.yaml"]
-expected = ""
-errors = ["missing file"]
-[process1ParentError.files]
-"a.yaml" = '''
+evaluate.errors = ["missing file"]
+
+[[process1ParentError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $parent: [nonexistent]
 data: value
 '''
 
 [process1InvalidMerge]
 description = "Test process1 with invalid merge type"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[process1InvalidMerge.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[process1InvalidMerge.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $merge: 123
 '''
 
@@ -4702,40 +4955,44 @@ $merge: 123
 # GetFormat tests
 [getFormatError]
 description = "Test GetFormat with unknown format"
-eval = ["unknown.xyz"]
-expected = ""
-errors = ["unknown format"]
-[getFormatError.files]
-"unknown.xyz" = "data: value"
+evaluate.errors = ["unknown format"]
+
+[[getFormatError.evaluate.inputs]]
+filename = "unknown.xyz"
+code = "data: value"
 
 # Parent filename tests
 [parentFilenameTilde]
 description = "Test parent from filename with tilde"
-eval = ["service.base.yaml"]
-expected = '''
+evaluate.result.code = '''
 base: value
 service: value
 '''
-[parentFilenameTilde.files]
-"service.yaml" = "base: value"
-"service.base.yaml" = "service: value"
+
+[[parentFilenameTilde.evaluate.inputs]]
+filename = "service.yaml"
+code = "base: value"
+
+[[parentFilenameTilde.evaluate.inputs]]
+filename = "service.base.yaml"
+code = "service: value"
 
 [missingParentFile]
 description = "Test missing parent file from filename"
-eval = ["service.missing.base.yaml"]
-expected = ""
-errors = ["missing file"]
-[missingParentFile.files]
-"service.missing.base.yaml" = "content: value"
+evaluate.errors = ["missing file"]
+
+[[missingParentFile.evaluate.inputs]]
+filename = "service.missing.base.yaml"
+code = "content: value"
 
 # Process encode any tests
 [encodeAnyInvalidType]
 description = "Test encode any with invalid command type"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[encodeAnyInvalidType.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[encodeAnyInvalidType.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: {not: string}
 $value: data
 '''
@@ -4743,58 +5000,58 @@ $value: data
 # YAML parsing edge cases for coverage
 [yamlUnknownTag]
 description = "Test YAML with unknown scalar tag"
-eval = ["a.yaml"]
-expected = ""
-errors = ["unknown yaml short tag"]
-[yamlUnknownTag.files]
-"a.yaml" = '''
+evaluate.errors = ["unknown yaml short tag"]
+
+[[yamlUnknownTag.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 value: !!unknown "test"
 '''
 
 
 [process2DecodeNonMap]
 description = "Test decode on non-map value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["$decode: missing $value"]
-[process2DecodeNonMap.files]
-"a.yaml" = '''
+evaluate.errors = ["$decode: missing $value"]
+
+[[process2DecodeNonMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $decode: json
 '''
 
 [yamlFloat64]
 description = "Test YAML float64 large number handling"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 value: 1.7976931348623157e+308
 '''
-[yamlFloat64.files]
-"a.yaml" = '''
+
+[[yamlFloat64.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 value: 1.7976931348623157e+308
 '''
 
 [yamlInt32]
 description = "Test YAML int32 handling"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 value: 2147483647
 '''
-[yamlInt32.files]
-"a.yaml" = '''
+
+[[yamlInt32.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 value: 2147483647
 '''
 
 [toStringListNonString]
 description = "Test toStringList with non-string convertible value"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 helloworldmap[complex:object]
 '''
-[toStringListNonString.files]
-"a.yaml" = '''
+
+[[toStringListNonString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: join
 $value:
   - hello
@@ -4804,14 +5061,14 @@ $value:
 
 [popListStringEmpty]
 description = "Test popListString with empty list"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 empty: []
 items: []
 '''
-[popListStringEmpty.files]
-"a.yaml" = '''
+
+[[popListStringEmpty.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 items:
   $merge: empty
 empty: []
@@ -4819,27 +5076,27 @@ empty: []
 
 [popListMapValueEmpty]
 description = "Test popListMapValue with empty list"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 result: []
 '''
-[popListMapValueEmpty.files]
-"a.yaml" = '''
+
+[[popListMapValueEmpty.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 result: []
 '''
 
 [popListMapBoolValueNotFound]
 description = "Test popListMapBoolValue when value not found"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 list:
   - a: 1
   - b: 2
 '''
-[popListMapBoolValueNotFound.files]
-"a.yaml" = '''
+
+[[popListMapBoolValueNotFound.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 list:
 - a: 1
 - b: 2
@@ -4847,11 +5104,11 @@ list:
 
 [process2RepeatObjMapInvalid]
 description = "Test repeat object map with invalid context"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid directive"]
-[process2RepeatObjMapInvalid.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid directive"]
+
+[[process2RepeatObjMapInvalid.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 item:
   $repeat: 3
   value: "$repeat is not a map here"
@@ -4859,31 +5116,29 @@ item:
 
 [process2RepeatObjListInvalid]
 description = "Test repeat object list with invalid context"
-eval = ["a.yaml"]
-expected = ""
-errors = ["reference not found"]
-[process2RepeatObjListInvalid.files]
-"a.yaml" = '''
+evaluate.errors = ["reference not found"]
+
+[[process2RepeatObjListInvalid.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - $repeat: 2
   $merge: "invalid"
 '''
 
 [yamlMergeNonMap]
 description = "Test YAML merge with non-map value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["unknown type for merge target"]
-[yamlMergeNonMap.files]
-"a.yaml" = '''
+evaluate.errors = ["unknown type for merge target"]
+
+[[yamlMergeNonMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 <<: [1, 2, 3]
 value: test
 '''
 
 [yamlMergeList]
 description = "Test YAML merge with list of maps"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 base1:
   a: 1
   b: 2
@@ -4895,8 +5150,10 @@ result:
   b: 2
   c: 3
 '''
-[yamlMergeList.files]
-"a.yaml" = '''
+
+[[yamlMergeList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 base1: &base1
   a: 1
   b: 2
@@ -4909,87 +5166,60 @@ result:
 
 [process1StringMergeInvalid]
 description = "Test process1 string merge with invalid reference"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[process1StringMergeInvalid.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[process1StringMergeInvalid.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 value:
   $merge: 123
 '''
 
 [process1StringReplaceInvalid]
 description = "Test process1 string replace with invalid reference"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[process1StringReplaceInvalid.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[process1StringReplaceInvalid.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 value:
   $replace: 123
 '''
 
 [mergeListMatchInvalid]
 description = "Test merge list match with invalid match value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["match"]
-[mergeListMatchInvalid.files]
-"a.yaml" = '''
+evaluate.errors = ["match"]
+
+[[mergeListMatchInvalid.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 - a: 1
 - $match: "invalid string match"
   a: 2
 '''
 
-[diffFileMissing]
-description = "Test diff with missing source file"
-diff = true
-eval = ["missing.yaml", "b.yaml"]
-expected = ""
-errors = ["missing file"]
-[diffFileMissing.files]
-"b.yaml" = "value: 2"
-
-[intersectFileMissing]
-description = "Test intersect with missing file"
-intersect = true
-eval = ["missing.yaml", "b.yaml"]
-expected = ""
-errors = ["missing file"]
-[intersectFileMissing.files]
-"b.yaml" = "value: 2"
-
-[requiredFileMissing]
-description = "Test required with missing file"
-required = true
-eval = ["missing.yaml"]
-expected = ""
-errors = ["missing file"]
-[requiredFileMissing.files]
-# No files - testing missing file scenario
-
 [mergeFileNoDocuments]
 description = "Test merge file with no documents"
-eval = ["empty.yaml"]
-format = "yaml"
-expected = ""
-[mergeFileNoDocuments.files]
-"empty.yaml" = ""
+evaluate.result.code = ""
+
+[[mergeFileNoDocuments.evaluate.inputs]]
+filename = "empty.yaml"
+code = ""
 
 # More tests for additional coverage
 
 [toStringListError]
 description = "Test toStringList with nil in list"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 items:
   - a
   - null
   - c
 '''
-[toStringListError.files]
-"a.yaml" = '''
+
+[[toStringListError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 items:
 - a
 - null
@@ -4998,11 +5228,11 @@ items:
 
 [process2ToListListError]
 description = "Test toList on list with non-map"
-eval = ["a.yaml"]
-expected = ""
-errors = ["unknown format"]
-[process2ToListListError.files]
-"a.yaml" = '''
+evaluate.errors = ["unknown format"]
+
+[[process2ToListListError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: toList
 $value:
 - not a map
@@ -5010,11 +5240,11 @@ $value:
 
 [yamlMergeScalar]
 description = "Test YAML merge with scalar value"
-eval = ["a.yaml"]
-expected = ""
-errors = ["unknown type for merge target"]
-[yamlMergeScalar.files]
-"a.yaml" = '''
+evaluate.errors = ["unknown type for merge target"]
+
+[[yamlMergeScalar.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 base: &base 123
 result:
   <<: *base
@@ -5023,9 +5253,7 @@ result:
 
 [yamlAlias]
 description = "Test YAML alias handling"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 base:
   x: 1
   "y": 2
@@ -5033,8 +5261,10 @@ copy:
   x: 1
   "y": 2
 '''
-[yamlAlias.files]
-"a.yaml" = '''
+
+[[yamlAlias.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 base: &base
   x: 1
   y: 2
@@ -5043,51 +5273,51 @@ copy: *base
 
 [yamlTimestamp]
 description = "Test YAML timestamp handling"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 ts: "2021-01-01T00:00:00Z"
 '''
-[yamlTimestamp.files]
-"a.yaml" = '''
+
+[[yamlTimestamp.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ts: 2021-01-01T00:00:00Z
 '''
 
 
 [encodeAnyNonString]
 description = "Test encode any with non-string command"
-eval = ["a.yaml"]
-expected = ""
-errors = ["invalid type"]
-[encodeAnyNonString.files]
-"a.yaml" = '''
+evaluate.errors = ["invalid type"]
+
+[[encodeAnyNonString.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $encode: 123
 $value: data
 '''
 
 [mergeDocumentError]
 description = "Test merge document with nil document"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 value: test
 '''
-[mergeDocumentError.files]
-"a.yaml" = '''
+
+[[mergeDocumentError.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 value: test
 '''
 
 
 [deepCloneFunc]
 description = "Test deep clone with function value"
-eval = ["a.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 1
 b: 2
 '''
-[deepCloneFunc.files]
-"a.yaml" = '''
+
+[[deepCloneFunc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 '''
@@ -5095,10 +5325,7 @@ b: 2
 # Performance regression test
 [repeatPerformanceRegression]
 description = "Test that repeat performance is reasonable (not O(n²))"
-eval = ["a.yaml"]
-format = "yaml"
-# Just check first few items to verify correctness
-expected = '''
+evaluate.result.code = '''
 items:
   - id: item-0
     value: 0
@@ -5109,8 +5336,10 @@ items:
 # ... 497 more items
 '''
 benchmark = true  # Run as benchmark with 'go test -bench'
-[repeatPerformanceRegression.files]
-"a.yaml" = '''
+
+[[repeatPerformanceRegression.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 # This test reproduces a performance issue reported by users
 # With 500 items, evaluation should complete in under 100ms
 # but was taking 1+ seconds due to inefficient processing
@@ -5126,12 +5355,12 @@ items:
 
 [benchRepeat10]
 description = "Benchmark repeat with 10 items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = "items: []"  # Don't verify output in benchmarks
+evaluate.result.code = "items: []"  # Don't verify output in benchmarks
 benchmark = true
-[benchRepeat10.files]
-"a.yaml" = '''
+
+[[benchRepeat10.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 items:
 - $repeat: 10
   id: $"item-{$repeat}"
@@ -5140,12 +5369,12 @@ items:
 
 [benchRepeat100]
 description = "Benchmark repeat with 100 items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = "items: []"
+evaluate.result.code = "items: []"
 benchmark = true
-[benchRepeat100.files]
-"a.yaml" = '''
+
+[[benchRepeat100.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 items:
 - $repeat: 100
   id: $"item-{$repeat}"
@@ -5154,12 +5383,12 @@ items:
 
 [benchRepeat1000]
 description = "Benchmark repeat with 1000 items"
-eval = ["a.yaml"]
-format = "yaml"
-expected = "items: []"
+evaluate.result.code = "items: []"
 benchmark = true
-[benchRepeat1000.files]
-"a.yaml" = '''
+
+[[benchRepeat1000.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 items:
 - $repeat: 1000
   id: $"item-{$repeat}"
@@ -5168,12 +5397,12 @@ items:
 
 [benchRepeatNested]
 description = "Benchmark nested repeat (20x25=500 items)"
-eval = ["a.yaml"]
-format = "yaml"
-expected = "outer: []"
+evaluate.result.code = "outer: []"
 benchmark = true
-[benchRepeatNested.files]
-"a.yaml" = '''
+
+[[benchRepeatNested.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat:
   x: 20
   y: 25
@@ -5186,12 +5415,12 @@ outer:
 
 [benchRepeatDeepInterpolation]
 description = "Benchmark repeat with deep string interpolation"
-eval = ["a.yaml"]
-format = "yaml"
-expected = "data: {}"
+evaluate.result.code = "data: {}"
 benchmark = true
-[benchRepeatDeepInterpolation.files]
-"a.yaml" = '''
+
+[[benchRepeatDeepInterpolation.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 data:
   level1: "L1"
   level2: "L2"
@@ -5214,9 +5443,7 @@ items:
 
 [emptyIntermediateFile]
 description = "Empty intermediate file in the hierarchy"
-eval = ["a.b.c.e.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   - a
   - a.b.c
@@ -5229,29 +5456,45 @@ x:
   - a.b.c.d1
   - a.b.c.e
 '''
-[emptyIntermediateFile.files]
-"a.yaml" = '''
+
+[[emptyIntermediateFile.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
 - a
 '''
-"a.b.yaml" = '''
-'''
-"a.b.c.yaml" = '''
+
+[[emptyIntermediateFile.evaluate.inputs]]
+filename = "a.b.yaml"
+code = ''''''
+
+[[emptyIntermediateFile.evaluate.inputs]]
+filename = "a.b.c.yaml"
+code = '''
 $match: {}
 x:
 - a.b.c
 '''
-"a.b.c.d0.yaml" = '''
+
+[[emptyIntermediateFile.evaluate.inputs]]
+filename = "a.b.c.d0.yaml"
+code = '''
 $match: {}
 x:
 - a.b.c.d0
 '''
-"a.b.c.d1.yaml" = '''
+
+[[emptyIntermediateFile.evaluate.inputs]]
+filename = "a.b.c.d1.yaml"
+code = '''
 $match: {}
 x:
 - a.b.c.d1
 '''
-"a.b.c.e.yaml" = '''
+
+[[emptyIntermediateFile.evaluate.inputs]]
+filename = "a.b.c.e.yaml"
+code = '''
 $parent:
 - a.b.c.d*
 $match: {}
@@ -5261,37 +5504,43 @@ x:
 
 [nullChildDoc]
 description = "Null child document is also a no-op (same as empty)"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   - a
 '''
-[nullChildDoc.files]
-"a.yaml" = '''
+
+[[nullChildDoc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
 - a
 '''
-"a.b.yaml" = '''
+
+[[nullChildDoc.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 null
 '''
 
 
 [emptyChildDoc]
 description = "Empty child document merges as no-op"
-eval = ["a.b.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 x:
   - a
   - a.b
 '''
-[emptyChildDoc.files]
-"a.yaml" = '''
+
+[[emptyChildDoc.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 x:
 - a
 '''
-"a.b.yaml" = '''
+
+[[emptyChildDoc.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 x:
 - a.b
 ---
@@ -5304,9 +5553,7 @@ x:
 
 [deferWithRepeat]
 description = "Test $defer with $repeat - override repeat count then match specific item"
-eval = ["a.b.c.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 0
 ---
 a: 1
@@ -5314,14 +5561,23 @@ a: 1
 a: 2
 b: special
 '''
-files."a.yaml" = '''
+
+[[deferWithRepeat.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat: 2
 a: $repeat
 '''
-files."a.b.yaml" = '''
+
+[[deferWithRepeat.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $repeat: 3
 '''
-files."a.b.c.yaml" = '''
+
+[[deferWithRepeat.evaluate.inputs]]
+filename = "a.b.c.yaml"
+code = '''
 $defer: true
 $match:
   a: 2
@@ -5330,9 +5586,7 @@ b: special
 
 [deferWithRepeatSwapped]
 description = "Test $defer with $repeat - content swapped between files"
-eval = ["a.b.c.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: 0
 ---
 a: 1
@@ -5340,29 +5594,39 @@ a: 1
 a: 2
 b: special
 '''
-files."a.yaml" = '''
+
+[[deferWithRepeatSwapped.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 $repeat: 2
 a: $repeat
 '''
-files."a.b.yaml" = '''
+
+[[deferWithRepeatSwapped.evaluate.inputs]]
+filename = "a.b.yaml"
+code = '''
 $defer: true
 $match:
   a: 2
 b: special
 '''
-files."a.b.c.yaml" = '''
+
+[[deferWithRepeatSwapped.evaluate.inputs]]
+filename = "a.b.c.yaml"
+code = '''
 $repeat: 3
 '''
 
 [deferEscapeInteraction]
 description = "Test $$ escape interaction with $defer - $$ should be unescaped after defer processing"
-eval = ["test.yaml"]
-format = "yaml"
-expected = '''
+evaluate.result.code = '''
 a: $foo
 b: test
 '''
-files."test.yaml" = '''
+
+[[deferEscapeInteraction.evaluate.inputs]]
+filename = "test.yaml"
+code = '''
 a: $$foo
 ---
 $defer: true
@@ -5370,80 +5634,9 @@ $match: {}
 b: test
 '''
 
-###############################################################################
-# Match Expression Tests
-###############################################################################
-
-[matchExpressionFilter]
-description = "Test filename:match expression filters documents"
-eval = ["a.yaml:a: 1"]
-format = "yaml"
-expected = '''
-a: 1
-b: 2
-'''
-files."a.yaml" = '''
-a: 1
-b: 2
----
-a: 2
-b: 3
----
-a: 3
-b: 1
-'''
-
-[matchExpressionMultiple]
-description = "Test match expression with multiple matching documents"
-eval = ["a.yaml:b: 2"]
-format = "yaml"
-expected = '''
-a: 2
-b: 2
----
-a: 3
-b: 2
-'''
-files."a.yaml" = '''
-a: 1
-b: 1
----
-a: 2
-b: 2
----
-a: 3
-b: 2
-'''
-
-[matchExpressionNested]
-description = "Test match expression with nested values"
-eval = ["a.yaml:a: {b: 2}"]
-format = "yaml"
-expected = '''
-a:
-  b: 2
-  c: 3
-b: 1
-'''
-files."a.yaml" = '''
-a:
-  b: 2
-  c: 3
-b: 1
----
-a:
-  b: 1
-  c: 2
-b: 3
-'''
-
 [diffWithSelector]
 description = "Test diff with selector matching documents by name"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-selector = ["name"]
-expected = '''
+diff.result.code = '''
 $match:
   name: doc1
 b: 3
@@ -5452,8 +5645,9 @@ $match:
   name: doc2
 c: 4
 '''
-[diffWithSelector.files]
-"a.yaml" = '''
+diff.selector = ["name"]
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 ---
 name: doc1
 a: 1
@@ -5461,7 +5655,8 @@ a: 1
 name: doc2
 c: 3
 '''
-"b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 ---
 name: doc1
 a: 1
@@ -5473,19 +5668,18 @@ c: 4
 
 [intersectWithSelector]
 description = "Test intersect with selector matching documents by id"
-eval = ["a.yaml", "b.yaml", "c.yaml"]
-format = "yaml"
-intersect = true
-selector = ["id"]
-expected = '''
+intersect.result.code = '''
 a: 1
 id: 1
 ---
 b: 2
 id: 2
 '''
-[intersectWithSelector.files]
-"a.yaml" = '''
+intersect.selector = ["id"]
+
+[[intersectWithSelector.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 id: 1
 a: 1
@@ -5495,7 +5689,10 @@ id: 2
 b: 2
 c: 3
 '''
-"b.yaml" = '''
+
+[[intersectWithSelector.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 ---
 id: 1
 a: 1
@@ -5505,7 +5702,10 @@ id: 2
 b: 2
 d: 4
 '''
-"c.yaml" = '''
+
+[[intersectWithSelector.intersect.inputs]]
+filename = "c.yaml"
+code = '''
 ---
 id: 1
 a: 1
@@ -5516,11 +5716,7 @@ b: 2
 
 [diffWithSelectorNestedPath]
 description = "Test diff with selector using nested path"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-selector = ["metadata.name"]
-expected = '''
+diff.result.code = '''
 $match:
   metadata:
     name: service1
@@ -5533,8 +5729,9 @@ $match:
   metadata:
     name: service2
 '''
-[diffWithSelectorNestedPath.files]
-"a.yaml" = '''
+diff.selector = ["metadata.name"]
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 ---
 metadata:
   name: service1
@@ -5547,7 +5744,8 @@ metadata:
 spec:
   replicas: 1
 '''
-"b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 ---
 metadata:
   name: service1
@@ -5563,11 +5761,7 @@ spec:
 
 [diffWithSelectorNoMatch]
 description = "Test diff with selector where destination has unmatched documents"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-selector = ["id"]
-expected = '''
+diff.result.code = '''
 $match:
   id: 1
 ---
@@ -5578,8 +5772,9 @@ $match: null
 c: 3
 id: 3
 '''
-[diffWithSelectorNoMatch.files]
-"a.yaml" = '''
+diff.selector = ["id"]
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 ---
 id: 1
 a: 1
@@ -5587,7 +5782,8 @@ a: 1
 id: 2
 b: 2
 '''
-"b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 ---
 id: 1
 a: 1
@@ -5601,83 +5797,89 @@ c: 3
 
 [diffEmptySelector]
 description = "Test diff with empty selector on single documents"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-selector = []
-expected = '''
+diff.result.code = '''
 $match: {}
 b: 2
 '''
-[diffEmptySelector.files]
-"a.yaml" = '''
+diff.selector = []
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 a: 1
 '''
-"b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 a: 1
 b: 2
 '''
 
 [intersectEmptySelector]
 description = "Test intersect with empty selector on single documents"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-selector = []
-expected = '''
+intersect.result.code = '''
 a: 1
 '''
-[intersectEmptySelector.files]
-"a.yaml" = '''
+intersect.selector = []
+
+[[intersectEmptySelector.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 a: 1
 b: 2
 '''
-"b.yaml" = '''
+
+[[intersectEmptySelector.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 a: 1
 c: 3
 '''
 
 [intersectSkipRequiredDifferentTypes]
 description = "Test intersect with different types skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectSkipRequiredDifferentTypes.files]
-"a.yaml" = "x: 1"
-"b.yaml" = '"string value"'
+intersect.result.code = ""
+
+[[intersectSkipRequiredDifferentTypes.intersect.inputs]]
+filename = "a.yaml"
+code = "x: 1"
+
+[[intersectSkipRequiredDifferentTypes.intersect.inputs]]
+filename = "b.yaml"
+code = '"string value"'
 
 [intersectSkipRequiredMapMismatch]
 description = "Test intersect with map value mismatch skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
+intersect.result.code = '''
 x: 1
 '''
-[intersectSkipRequiredMapMismatch.files]
-"a.yaml" = '''
+
+[[intersectSkipRequiredMapMismatch.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: 1
 y: 2
 '''
-"b.yaml" = '''
+
+[[intersectSkipRequiredMapMismatch.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x: 1
 y: 3
 '''
 
 [intersectSkipRequiredListNoCommon]
 description = "Test intersect with no common list elements skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectSkipRequiredListNoCommon.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectSkipRequiredListNoCommon.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 items:
   - a
   - b
 '''
-"b.yaml" = '''
+
+[[intersectSkipRequiredListNoCommon.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 items:
   - c
   - d
@@ -5685,116 +5887,127 @@ items:
 
 [intersectSkipRequiredListVsMap]
 description = "Test intersect with list vs map skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"  
-intersect = true
-expected = ""
-[intersectSkipRequiredListVsMap.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectSkipRequiredListVsMap.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x:
   - 1
   - 2
 '''
-"b.yaml" = '''
+
+[[intersectSkipRequiredListVsMap.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x:
   a: 1
 '''
 
 [intersectEmptyObjects]
 description = "Test intersect with empty objects"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectEmptyObjects.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectEmptyObjects.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: {}
 y: 1
 '''
-"b.yaml" = '''
+
+[[intersectEmptyObjects.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x: {}
 y: 2
 '''
 
 [intersectNullValues]
 description = "Test intersect with null values"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
+intersect.result.code = '''
 x: null
 '''
-[intersectNullValues.files]
-"a.yaml" = '''
+
+[[intersectNullValues.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: null
 y: 1
 '''
-"b.yaml" = '''
+
+[[intersectNullValues.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x: null
 y: 2
 '''
 
 [intersectNullValuesSkipRequired]
 description = "Test intersect with null values skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
+intersect.result.code = '''
 x: null
 '''
-[intersectNullValuesSkipRequired.files]
-"a.yaml" = '''
+
+[[intersectNullValuesSkipRequired.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: null
 y: 1
 '''
-"b.yaml" = '''
+
+[[intersectNullValuesSkipRequired.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x: null
 y: 2
 '''
 
 [intersectEmptyVsNonEmpty]
 description = "Test intersect empty object vs non-empty"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectEmptyVsNonEmpty.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectEmptyVsNonEmpty.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: {}
 '''
-"b.yaml" = '''
+
+[[intersectEmptyVsNonEmpty.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x:
   a: 1
 '''
 
 [intersectEmptyVsNonEmptySkipRequired]
 description = "Test intersect empty object vs non-empty skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectEmptyVsNonEmptySkipRequired.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectEmptyVsNonEmptySkipRequired.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: {}
 '''
-"b.yaml" = '''
+
+[[intersectEmptyVsNonEmptySkipRequired.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 x:
   a: 1
 '''
 
 [intersectMixedEmptyNullValues]
 description = "Test intersect with mix of empty, null, and values"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = '''
+intersect.result.code = '''
 nested:
   x: 1
 null_val: null
 value: 1
 '''
-[intersectMixedEmptyNullValues.files]
-"a.yaml" = '''
+
+[[intersectMixedEmptyNullValues.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 empty: {}
 null_val: null
 value: 1
@@ -5802,7 +6015,10 @@ nested:
   x: 1
   y: {}
 '''
-"b.yaml" = '''
+
+[[intersectMixedEmptyNullValues.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 empty: {}
 null_val: null
 value: 1
@@ -5813,35 +6029,36 @@ nested:
 
 [intersectOnlyEmptyObjectsSkipRequired]
 description = "Test intersect with only empty objects skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectOnlyEmptyObjectsSkipRequired.files]
-"a.yaml" = '{}'
-"b.yaml" = '{}'
+intersect.result.code = ""
+
+[[intersectOnlyEmptyObjectsSkipRequired.intersect.inputs]]
+filename = "a.yaml"
+code = '{}'
+
+[[intersectOnlyEmptyObjectsSkipRequired.intersect.inputs]]
+filename = "b.yaml"
+code = '{}'
 
 [intersectEmptyRootSkipRequired]
 description = "Test intersect with no common fields skipping $required"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-expected = ""
-[intersectEmptyRootSkipRequired.files]
-"a.yaml" = '''
+intersect.result.code = ""
+
+[[intersectEmptyRootSkipRequired.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 x: 1
 '''
-"b.yaml" = '''
+
+[[intersectEmptyRootSkipRequired.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 y: 2
 '''
 
 
 [evaluateSortByPath]
 description = "Test sorting output documents by path"
-eval = ["a.yaml"]
-format = "yaml"
-sort = ["name"]
-expected = '''
+evaluate.result.code = '''
 name: alpha
 value: 2
 ---
@@ -5851,8 +6068,11 @@ value: 3
 name: zulu
 value: 1
 '''
-[evaluateSortByPath.files]
-"a.yaml" = '''
+evaluate.sort = ["name"]
+
+[[evaluateSortByPath.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 name: zulu
 value: 1
@@ -5866,10 +6086,7 @@ value: 3
 
 [evaluateSortByNestedPath]
 description = "Test sorting output documents by nested path"
-eval = ["a.yaml"]
-format = "yaml"
-sort = ["metadata.name"]
-expected = '''
+evaluate.result.code = '''
 metadata:
   name: doc1
   priority: 10
@@ -5882,8 +6099,11 @@ metadata:
   name: doc3
   priority: 2
 '''
-[evaluateSortByNestedPath.files]
-"a.yaml" = '''
+evaluate.sort = ["metadata.name"]
+
+[[evaluateSortByNestedPath.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 metadata:
   name: doc1
@@ -5904,10 +6124,7 @@ metadata:
 
 [compareSimple]
 description = "Test compare of two files with differences"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-compare = true
-expected = '''
+compare.result.code = '''
 --- a.yaml
 +++ b.yaml
 @@ -1,2 +1,2 @@
@@ -5915,12 +6132,13 @@ expected = '''
 -b: 2
 +b: 3
 '''
-[compareSimple.files]
-"a.yaml" = '''
+compare.left.filename = "a.yaml"
+compare.left.code = '''
 a: 1
 b: 2
 '''
-"b.yaml" = '''
+compare.right.filename = "b.yaml"
+compare.right.code = '''
 a: 1
 b: 3
 '''
@@ -5931,10 +6149,7 @@ b: 3
 
 [evaluateMultipleSortPaths]
 description = "Test sorting with multiple sort paths"
-eval = ["a.yaml"]
-format = "yaml"
-sort = ["category", "name"]
-expected = '''
+evaluate.result.code = '''
 category: a
 name: beta
 value: 2
@@ -5951,8 +6166,11 @@ category: b
 name: gamma
 value: 3
 '''
-[evaluateMultipleSortPaths.files]
-"a.yaml" = '''
+evaluate.sort = ["category", "name"]
+
+[[evaluateMultipleSortPaths.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 category: b
 name: gamma
@@ -5973,10 +6191,7 @@ value: 2
 
 [evaluateMultipleSortPathsWithMissing]
 description = "Test sorting with multiple sort paths where some paths are missing"
-eval = ["a.yaml"]
-format = "yaml"
-sort = ["category", "subcategory", "name"]
-expected = '''
+evaluate.result.code = '''
 category: a
 name: beta
 value: 2
@@ -5995,8 +6210,11 @@ name: alpha
 subcategory: "y"
 value: 1
 '''
-[evaluateMultipleSortPathsWithMissing.files]
-"a.yaml" = '''
+evaluate.sort = ["category", "subcategory", "name"]
+
+[[evaluateMultipleSortPathsWithMissing.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 category: b
 name: gamma
@@ -6023,11 +6241,7 @@ value: 2
 
 [diffMultipleSelectors]
 description = "Test diff with multiple selectors"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-selector = ["kind", "metadata.name"]
-expected = '''
+diff.result.code = '''
 $match:
   kind: Service
   metadata:
@@ -6042,8 +6256,9 @@ $match:
     name: web
 $output: false
 '''
-[diffMultipleSelectors.files]
-"a.yaml" = '''
+diff.selector = ["kind", "metadata.name"]
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 ---
 kind: Service
 metadata:
@@ -6057,7 +6272,8 @@ metadata:
   labels:
     version: v1
 '''
-"b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 kind: Service
 metadata:
   name: api
@@ -6067,19 +6283,18 @@ metadata:
 
 [intersectMultipleSelectors]
 description = "Test intersect with multiple selectors"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-intersect = true
-selector = ["kind", "metadata.name"]
-expected = '''
+intersect.result.code = '''
 kind: Service
 metadata:
   labels:
     app: myapp
   name: api
 '''
-[intersectMultipleSelectors.files]
-"a.yaml" = '''
+intersect.selector = ["kind", "metadata.name"]
+
+[[intersectMultipleSelectors.intersect.inputs]]
+filename = "a.yaml"
+code = '''
 ---
 kind: Service
 metadata:
@@ -6094,7 +6309,10 @@ metadata:
   labels:
     app: webapp
 '''
-"b.yaml" = '''
+
+[[intersectMultipleSelectors.intersect.inputs]]
+filename = "b.yaml"
+code = '''
 ---
 kind: Service
 metadata:
@@ -6112,11 +6330,7 @@ spec:
 
 [diffMultipleSelectorsWithMissing]
 description = "Test diff with multiple selectors where some paths are missing"
-eval = ["a.yaml", "b.yaml"]
-format = "yaml"
-diff = true
-selector = ["kind", "metadata.name", "metadata.namespace"]
-expected = '''
+diff.result.code = '''
 $match:
   kind: Service
   metadata:
@@ -6132,8 +6346,9 @@ $match:
     namespace: prod
 $output: false
 '''
-[diffMultipleSelectorsWithMissing.files]
-"a.yaml" = '''
+diff.selector = ["kind", "metadata.name", "metadata.namespace"]
+diff.base.filename = "a.yaml"
+diff.base.code = '''
 ---
 kind: Service
 metadata:
@@ -6148,7 +6363,8 @@ metadata:
   labels:
     version: v1
 '''
-"b.yaml" = '''
+diff.target.filename = "b.yaml"
+diff.target.code = '''
 kind: Service
 metadata:
   name: api

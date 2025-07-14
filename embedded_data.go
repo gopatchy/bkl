@@ -22,21 +22,13 @@ var k8sData []byte
 var fixitData []byte
 
 type TestCase struct {
-	Description string            `toml:"description" json:"description"`
-	Eval        []string          `toml:"eval" json:"eval"`
-	Format      string            `toml:"format" json:"format"`
-	Expected    string            `toml:"expected,omitempty" json:"expected,omitempty"`
-	Files       map[string]string `toml:"files" json:"files"`
-	Errors      []string          `toml:"errors,omitempty" json:"errors,omitempty"`
-	Root        string            `toml:"root,omitempty" json:"root,omitempty"`
-	Env         map[string]string `toml:"env,omitempty" json:"env,omitempty"`
-	Diff        bool              `toml:"diff,omitempty" json:"diff,omitempty"`
-	Intersect   bool              `toml:"intersect,omitempty" json:"intersect,omitempty"`
-	Required    bool              `toml:"required,omitempty" json:"required,omitempty"`
-	Compare     bool              `toml:"compare,omitempty" json:"compare,omitempty"`
-	Benchmark   bool              `toml:"benchmark,omitempty" json:"benchmark,omitempty"`
-	Selector    []string          `toml:"selector,omitempty" json:"selector,omitempty"`
-	Sort        []string          `toml:"sort,omitempty" json:"sort,omitempty"`
+	Description string        `toml:"description" json:"description"`
+	Evaluate    *DocEvaluate  `toml:"evaluate,omitempty" json:"evaluate,omitempty"`
+	Diff        *DocDiff      `toml:"diff,omitempty" json:"diff,omitempty"`
+	Intersect   *DocIntersect `toml:"intersect,omitempty" json:"intersect,omitempty"`
+	Required    *DocEvaluate  `toml:"required,omitempty" json:"required,omitempty"` // Required uses same structure as Evaluate
+	Compare     *DocCompare   `toml:"compare,omitempty" json:"compare,omitempty"`
+	Benchmark   bool          `toml:"benchmark,omitempty" json:"benchmark,omitempty"`
 }
 
 type DocSection struct {
@@ -68,19 +60,27 @@ type DocExample struct {
 }
 
 type DocEvaluate struct {
-	Inputs []DocLayer `yaml:"inputs" json:"inputs"`
-	Result DocLayer   `yaml:"result" json:"result"`
+	Inputs []*DocLayer       `yaml:"inputs" json:"inputs" toml:"inputs"`
+	Result DocLayer          `yaml:"result" json:"result" toml:"result"`
+	Env    map[string]string `yaml:"env,omitempty" json:"env,omitempty" toml:"env,omitempty"`
+	Errors []string          `yaml:"errors,omitempty" json:"errors,omitempty" toml:"errors,omitempty"`
+	Root   string            `yaml:"root,omitempty" json:"root,omitempty" toml:"root,omitempty"`
+	Sort   []string          `yaml:"sort,omitempty" json:"sort,omitempty" toml:"sort,omitempty"`
 }
 
 type DocDiff struct {
-	Base   DocLayer `yaml:"base" json:"base"`
-	Target DocLayer `yaml:"target" json:"target"`
-	Result DocLayer `yaml:"result" json:"result"`
+	Base     DocLayer `yaml:"base" json:"base" toml:"base"`
+	Target   DocLayer `yaml:"target" json:"target" toml:"target"`
+	Result   DocLayer `yaml:"result" json:"result" toml:"result"`
+	Selector []string `yaml:"selector,omitempty" json:"selector,omitempty" toml:"selector,omitempty"`
+	Errors   []string `yaml:"errors,omitempty" json:"errors,omitempty" toml:"errors,omitempty"`
 }
 
 type DocIntersect struct {
-	Inputs []DocLayer `yaml:"inputs" json:"inputs"`
-	Result DocLayer   `yaml:"result" json:"result"`
+	Inputs   []*DocLayer `yaml:"inputs" json:"inputs" toml:"inputs"`
+	Result   DocLayer    `yaml:"result" json:"result" toml:"result"`
+	Selector []string    `yaml:"selector,omitempty" json:"selector,omitempty" toml:"selector,omitempty"`
+	Errors   []string    `yaml:"errors,omitempty" json:"errors,omitempty" toml:"errors,omitempty"`
 }
 
 type DocConvert struct {
@@ -95,18 +95,22 @@ type DocFixit struct {
 }
 
 type DocCompare struct {
-	Left   DocLayer `yaml:"left" json:"left"`
-	Right  DocLayer `yaml:"right" json:"right"`
-	Result DocLayer `yaml:"result" json:"result"`
+	Left   DocLayer          `yaml:"left" json:"left" toml:"left"`
+	Right  DocLayer          `yaml:"right" json:"right" toml:"right"`
+	Result DocLayer          `yaml:"result" json:"result" toml:"result"`
+	Env    map[string]string `yaml:"env,omitempty" json:"env,omitempty" toml:"env,omitempty"`
+	Sort   []string          `yaml:"sort,omitempty" json:"sort,omitempty" toml:"sort,omitempty"`
 }
 
 type DocLayer struct {
-	Label      string   `yaml:"label,omitempty" json:"label,omitempty"`
-	Code       string   `yaml:"code" json:"code"`
-	Highlights []string `yaml:"highlights,omitempty" json:"highlights,omitempty"`
-	Languages  [][]any  `yaml:"languages,omitempty" json:"languages,omitempty"`
-	Expandable bool     `yaml:"expandable,omitempty" json:"expandable,omitempty"`
-	Collapsed  bool     `yaml:"collapsed,omitempty" json:"collapsed,omitempty"`
+	Label      string   `yaml:"label,omitempty" json:"label,omitempty" toml:"label,omitempty"`
+	Filename   string   `yaml:"filename,omitempty" json:"filename,omitempty" toml:"filename,omitempty"`
+	Code       string   `yaml:"code" json:"code" toml:"code"`
+	Content    string   `yaml:"content,omitempty" json:"content,omitempty" toml:"content,omitempty"` // Alias for Code in TOML
+	Highlights []string `yaml:"highlights,omitempty" json:"highlights,omitempty" toml:"highlights,omitempty"`
+	Languages  [][]any  `yaml:"languages,omitempty" json:"languages,omitempty" toml:"languages,omitempty"`
+	Expandable bool     `yaml:"expandable,omitempty" json:"expandable,omitempty" toml:"expandable,omitempty"`
+	Collapsed  bool     `yaml:"collapsed,omitempty" json:"collapsed,omitempty" toml:"collapsed,omitempty"`
 }
 
 func GetTests() (map[string]*TestCase, error) {
@@ -114,8 +118,16 @@ func GetTests() (map[string]*TestCase, error) {
 	decoder := toml.NewDecoder(bytes.NewReader(testsData))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&tests); err != nil {
-		return nil, err
+		if derr, ok := err.(*toml.DecodeError); ok {
+			row, col := derr.Position()
+			return nil, fmt.Errorf("TOML decode error at row %d, column %d: %w", row, col, err)
+		}
+		if smerr, ok := err.(*toml.StrictMissingError); ok {
+			return nil, fmt.Errorf("TOML strict mode error: %s", smerr.String())
+		}
+		return nil, fmt.Errorf("TOML decode error (type %T): %w", err, err)
 	}
+
 	return tests, nil
 }
 
