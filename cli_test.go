@@ -105,7 +105,7 @@ func executeCLICommand(t *testing.T, cmdPath string, args []string, env map[stri
 func TestCLI(t *testing.T) {
 	t.Parallel()
 
-	tests, err := bkl.GetTests()
+	tests, err := bkl.GetAllTests()
 	if err != nil {
 		t.Fatalf("Failed to get tests: %v", err)
 	}
