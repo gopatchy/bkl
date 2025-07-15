@@ -1,7 +1,6 @@
 package bkl_test
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -103,27 +102,6 @@ func executeCLICommand(t *testing.T, cmdPath string, args []string, env map[stri
 	return output
 }
 
-func checkCLIOutput(t *testing.T, output []byte, expected string, removeInitialLines int) {
-	expectedBytes := bytes.TrimSpace([]byte(expected))
-	outputBytes := bytes.TrimSpace(output)
-
-	if removeInitialLines > 0 {
-		outputLines := bytes.Split(outputBytes, []byte("\n"))
-		expectedLines := bytes.Split(expectedBytes, []byte("\n"))
-
-		if len(outputLines) > removeInitialLines {
-			outputBytes = bytes.Join(outputLines[removeInitialLines:], []byte("\n"))
-		}
-		if len(expectedLines) > removeInitialLines {
-			expectedBytes = bytes.Join(expectedLines[removeInitialLines:], []byte("\n"))
-		}
-	}
-
-	if !bytes.Equal(outputBytes, expectedBytes) {
-		t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedBytes, outputBytes)
-	}
-}
-
 func TestCLI(t *testing.T) {
 	t.Parallel()
 
@@ -176,7 +154,7 @@ func runTestCLIEvaluate(t *testing.T, testCase *bkl.DocExample) {
 
 	output := executeCLICommand(t, "./cmd/bkl", args, testCase.Evaluate.Env, testCase.Evaluate.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Evaluate.Result.Code, 0)
+		validateOutput(t, output, testCase.Evaluate.Result.Code, 0)
 	}
 }
 
@@ -201,7 +179,7 @@ func runTestCLIRequired(t *testing.T, testCase *bkl.DocExample) {
 
 	output := executeCLICommand(t, "./cmd/bklr", args, testCase.Required.Env, testCase.Required.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Required.Result.Code, 0)
+		validateOutput(t, output, testCase.Required.Result.Code, 0)
 	}
 }
 
@@ -228,7 +206,7 @@ func runTestCLIIntersect(t *testing.T, testCase *bkl.DocExample) {
 
 	output := executeCLICommand(t, "./cmd/bkli", args, nil, testCase.Intersect.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Intersect.Result.Code, 0)
+		validateOutput(t, output, testCase.Intersect.Result.Code, 0)
 	}
 }
 
@@ -250,7 +228,7 @@ func runTestCLIDiff(t *testing.T, testCase *bkl.DocExample) {
 
 	output := executeCLICommand(t, "./cmd/bkld", args, nil, testCase.Diff.Errors)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Diff.Result.Code, 0)
+		validateOutput(t, output, testCase.Diff.Result.Code, 0)
 	}
 }
 
@@ -272,6 +250,6 @@ func runTestCLICompare(t *testing.T, testCase *bkl.DocExample) {
 
 	output := executeCLICommand(t, "./cmd/bklc", args, testCase.Compare.Env, nil)
 	if output != nil {
-		checkCLIOutput(t, output, testCase.Compare.Result.Code, 2)
+		validateOutput(t, output, testCase.Compare.Result.Code, 2)
 	}
 }

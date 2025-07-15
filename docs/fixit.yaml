@@ -4,11 +4,13 @@
     - example:
         fixit:
           original:
+            filename: original.yaml
             code: |
               ports:
                 - containerPort: 8080
             languages: [[0, "yaml"]]
           bad:
+            filename: bad.yaml
             code: |
               ports:
                 api:
@@ -16,6 +18,7 @@
                 $encode: values:containerPort
             languages: [[0, "yaml"]]
           good:
+            filename: good.yaml
             code: |
               ports:
                 api: 8080
@@ -28,6 +31,7 @@
     - example:
         fixit:
           original:
+            filename: original.yaml
             code: |
               env:
                 - name: DB_HOST
@@ -36,6 +40,7 @@
                   value: "5432"
             languages: [[0, "yaml"]]
           bad:
+            filename: bad.yaml
             code: |
               env:
                 DB_HOST: postgres
@@ -43,6 +48,7 @@
                 $encode: values:name
             languages: [[0, "yaml"]]
           good:
+            filename: good.yaml
             code: |
               env:
                 DB_HOST: postgres
@@ -56,17 +62,20 @@
     - example:
         fixit:
           original:
+            filename: original.yaml
             code: |
               imagePullSecrets:
                 - name: regcred
             languages: [[0, "yaml"]]
           bad:
+            filename: bad.yaml
             code: |
               imagePullSecrets:
                 regcred:
                   $encode: values:name
             languages: [[0, "yaml"]]
           good:
+            filename: good.yaml
             code: |
               imagePullSecrets:
                 regcred: {}

@@ -203,12 +203,14 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 ---
                 b: 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 c: 3
               languages: [[0, "yaml"]]
           result:
@@ -223,12 +225,14 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 ---
                 b: 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 $match:
                   b: 2
                 c: 3
@@ -247,14 +251,16 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 ---
                 b: 2
                 ---
                 a: 1
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 $match:
                   a: 1
                 c: 3
@@ -276,12 +282,14 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 ---
                 b: 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 $match:
                   a: 1
                   $invert: true
@@ -301,10 +309,12 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 $match: null
                 b: 2
               highlights: ["$match: null"]
@@ -325,10 +335,12 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 b: 2
               languages: [[0, "yaml"]]
           result:
@@ -339,10 +351,12 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 b: 2
                 $replace: true
               highlights: ["$replace: true"]
@@ -354,11 +368,13 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 c: 3
                 b: $delete
               highlights: ["b: $delete"]
@@ -379,10 +395,12 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 - 1
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 - 2
               languages: [[0, "yaml"]]
           result:
@@ -393,10 +411,12 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 - 1
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 - 2
                 - $replace: true
               highlights: ["$replace: true"]
@@ -408,11 +428,13 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 - x: 1
                 - x: 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 - x: 3
                 - $delete:
                     x: 2
@@ -430,11 +452,13 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 - a: 1
                 - b: 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 - $match:
                     b: 2
                   b: 10
@@ -448,11 +472,13 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 - 1
                 - 2
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 - $match: 2
                   $value: 10
               highlights: ["$match: 2", "$value: 10"]
@@ -471,7 +497,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   c: foo
@@ -495,7 +522,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 $value: |
                   {"a":1}
                 $decode: json
@@ -515,11 +543,14 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 # export FOO=test
                 "$env:FOO": 1
               highlights: ["\"$env:FOO\""]
               languages: [[0, "yaml"]]
+          env:
+            FOO: test
           result:
             code: |
               test: 1
@@ -528,11 +559,14 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 # export FOO=test
                 a: $env:FOO
               highlights: ["$env:FOO"]
               languages: [[0, "yaml"]]
+          env:
+            FOO: test
           result:
             code: |
               a: test
@@ -549,7 +583,8 @@
     - example:
         evaluate:
           inputs:
-            - label: base64
+            - filename: base64.yaml
+              label: base64
               code: |
                 $value: a
                 $encode: base64
@@ -562,7 +597,8 @@
     - example:
         evaluate:
           inputs:
-            - label: flags
+            - filename: flags.yaml
+              label: flags
               code: |
                 a: 1
                 b: 2
@@ -578,7 +614,8 @@
     - example:
         evaluate:
           inputs:
-            - label: flatten
+            - filename: flatten.yaml
+              label: flatten
               code: |
                 - - a
                   - b
@@ -599,7 +636,8 @@
     - example:
         evaluate:
           inputs:
-            - label: join
+            - filename: join.yaml
+              label: join
               code: |
                 $value: [a, b]
                 $encode: join:/
@@ -612,7 +650,8 @@
     - example:
         evaluate:
           inputs:
-            - label: json
+            - filename: json.yaml
+              label: json
               code: |
                 a: 1
                 b: 2
@@ -627,7 +666,8 @@
     - example:
         evaluate:
           inputs:
-            - label: json (list)
+            - filename: json-list.yaml
+              label: json (list)
               code: |
                 - a: 1
                 - b: 2
@@ -642,7 +682,8 @@
     - example:
         evaluate:
           inputs:
-            - label: prefix
+            - filename: prefix.yaml
+              label: prefix
               code: |
                 - a
                 - 2
@@ -657,7 +698,8 @@
     - example:
         evaluate:
           inputs:
-            - label: sha256
+            - filename: sha256.yaml
+              label: sha256
               code: |
                 $value: hello world
                 $encode: sha256
@@ -670,7 +712,8 @@
     - example:
         evaluate:
           inputs:
-            - label: tolist
+            - filename: tolist.yaml
+              label: tolist
               code: |
                 a: 1
                 b: 2
@@ -685,7 +728,8 @@
     - example:
         evaluate:
           inputs:
-            - label: values
+            - filename: values.yaml
+              label: values
               code: |
                 a: 1
                 b: 2
@@ -702,7 +746,8 @@
     - example:
         evaluate:
           inputs:
-            - label: values:KEY
+            - filename: values-key.yaml
+              label: values:KEY
               code: |
                 a:
                   b: 1
@@ -721,7 +766,8 @@
     - example:
         evaluate:
           inputs:
-            - label: values:KEY:VALUE
+            - filename: values-key-value.yaml
+              label: values:KEY:VALUE
               code: |
                 a: 1
                 b: 2
@@ -738,7 +784,8 @@
     - example:
         evaluate:
           inputs:
-            - label: Stacking
+            - filename: stacking.yaml
+              label: Stacking
               code: |
                 a: 1
                 b: 2
@@ -758,26 +805,31 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: $required
               highlights: ["b: $required"]
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 c: 3
               languages: [[0, "yaml"]]
+          errors: ["required field not set"]
           result:
             code: |
               Error
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: $required
               highlights: ["b: $required"]
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 b: 2
                 c: 3
               highlights: ["b: 2"]
@@ -791,28 +843,33 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   - $required
               highlights: ["b:", "- $required"]
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 c: 3
               languages: [[0, "yaml"]]
+          errors: ["required field not set"]
           result:
             code: |
               Error
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   - $required
               highlights: ["b:", "- $required"]
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: base.layer.yaml
+              code: |
                 b:
                   - 2
                 c: 3
@@ -834,7 +891,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     a: 1
@@ -856,7 +914,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     - a: 1
@@ -878,7 +937,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     a: 1
@@ -902,7 +962,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: 2
                 ---
@@ -925,7 +986,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   c: 3
@@ -952,7 +1014,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: 2
                 ---
@@ -973,7 +1036,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   c: 3
@@ -1001,7 +1065,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     a: 1
@@ -1022,7 +1087,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     - a: 1
@@ -1043,7 +1109,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     a: 1
@@ -1069,7 +1136,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: 2
                 ---
@@ -1091,7 +1159,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   c: 3
@@ -1116,7 +1185,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b: 2
                 ---
@@ -1136,7 +1206,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 b:
                   c: 3
@@ -1163,7 +1234,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     $output: true
@@ -1179,7 +1251,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 foo:
                   bar:
                     - $output: true
@@ -1199,7 +1272,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a:
                   b: 1
                   $output: false
@@ -1215,7 +1289,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a:
                   - b: 1
                   - $output: false
@@ -1231,7 +1306,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: 1
                 $output: false
                 ---
@@ -1253,7 +1329,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: foo
                 b: $repeat
                 $repeat: 2
@@ -1272,7 +1349,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 $repeat:
                   a: 2
                   b: 3
@@ -1298,7 +1376,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 $repeat: [foo, bar, baz]
                 a: $repeat
               highlights: ["$repeat: [foo, bar, baz]", "a: $repeat"]
@@ -1316,7 +1395,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 $repeat:
                   $first: 10
                   $count: 3
@@ -1338,7 +1418,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a:
                   $"b{$repeat}":
                     c: $repeat
@@ -1360,7 +1441,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a:
                   - b: $repeat
                     $repeat: [foo, bar, baz]
@@ -1384,12 +1466,14 @@
     - example:
         evaluate:
           inputs:
-            - label: a.yaml
+            - filename: a.yaml
+              label: a.yaml
               code: |
                 $repeat: 2
                 a: $repeat
               languages: [[0, "yaml"]]
-            - label: a.b.yaml
+            - filename: a.b.yaml
+              label: a.b.yaml
               code: |
                 $repeat: 3
                 ---
@@ -1418,7 +1502,8 @@
     - example:
         evaluate:
           inputs:
-            - code: |
+            - filename: base.yaml
+              code: |
                 a: $$env:foo
               highlights: ["$$env:foo"]
               languages: [[0, "yaml"]]
@@ -1493,12 +1578,14 @@
     - example:
         diff:
           base:
+            filename: base.yaml
             code: |
               a: 1
               b: $required
               c: 3
             languages: [[0, "yaml"]]
           target:
+            filename: target.yaml
             code: |
               a: 1
               b: 2
@@ -1514,11 +1601,13 @@
     - example:
         diff:
           base:
+            filename: base.yaml
             code: |
               - a: 1
               - b: 2
             languages: [[0, "yaml"]]
           target:
+            filename: target.yaml
             code: |
               - a: 1
               - c: 3
@@ -1533,11 +1622,13 @@
     - example:
         diff:
           base:
+            filename: base.yaml
             code: |
               - 1
               - 2
             languages: [[0, "yaml"]]
           target:
+            filename: target.yaml
             code: |
               - 1
               - 3
@@ -1566,12 +1657,14 @@
     - example:
         intersect:
           inputs:
-            - code: |
+            - filename: file1.yaml
+              code: |
                 a: 1
                 b: 2
                 c: 3
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: file2.yaml
+              code: |
                 a: 1
                 b: 10
                 d: 4
@@ -1583,12 +1676,14 @@
     - example:
         intersect:
           inputs:
-            - code: |
+            - filename: file1.yaml
+              code: |
                 - a: 1
                 - b: 2
                 - c: 3
               languages: [[0, "yaml"]]
-            - code: |
+            - filename: file2.yaml
+              code: |
                 - a: 1
                 - b: 10
                 - d: 4
@@ -1620,12 +1715,14 @@
     - example:
         compare:
           left:
+            filename: left.yaml
             code: |
               a: 1
               b: 2
               c: 3
             languages: [[0, "yaml"]]
           right:
+            filename: right.yaml
             code: |
               a: 1
               b: 4
@@ -1642,7 +1739,7 @@
               +b: 4
                c: 3
               +d: 5
-            languages: [[0, "diff"]]
+            languages: [[0, "yaml"]]
 
 - id: kubectl-bkl
   title: kubectl bkl

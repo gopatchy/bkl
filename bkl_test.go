@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"regexp"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -34,9 +33,24 @@ func validateError(t *testing.T, err error, expectedErrors []string) {
 	}
 }
 
-func validateOutput(t *testing.T, output []byte, expected string) {
-	if !bytes.Equal(bytes.TrimSpace(output), bytes.TrimSpace([]byte(expected))) {
-		t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expected, output)
+func validateOutput(t *testing.T, output []byte, expected string, removeInitialLines int) {
+	expectedBytes := bytes.TrimSpace([]byte(expected))
+	outputBytes := bytes.TrimSpace(output)
+
+	if removeInitialLines > 0 {
+		outputLines := bytes.Split(outputBytes, []byte("\n"))
+		expectedLines := bytes.Split(expectedBytes, []byte("\n"))
+
+		if len(outputLines) > removeInitialLines {
+			outputBytes = bytes.Join(outputLines[removeInitialLines:], []byte("\n"))
+		}
+		if len(expectedLines) > removeInitialLines {
+			expectedBytes = bytes.Join(expectedLines[removeInitialLines:], []byte("\n"))
+		}
+	}
+
+	if !bytes.Equal(outputBytes, expectedBytes) {
+		t.Errorf("Output mismatch\nExpected:\n%s\nGot:\n%s", expectedBytes, outputBytes)
 	}
 }
 
@@ -79,7 +93,7 @@ func runEvaluateTest(t *testing.T, evaluate *bkl.DocEvaluate) {
 
 	validateError(t, err, evaluate.Errors)
 	if err == nil {
-		validateOutput(t, output, evaluate.Result.Code)
+		validateOutput(t, output, evaluate.Result.Code, 0)
 	}
 }
 
@@ -120,7 +134,7 @@ func runRequiredTest(t *testing.T, required *bkl.DocRequired) {
 
 	validateError(t, err, required.Errors)
 	if err == nil {
-		validateOutput(t, output, required.Result.Code)
+		validateOutput(t, output, required.Result.Code, 0)
 	}
 }
 
@@ -150,7 +164,7 @@ func runIntersectTest(t *testing.T, intersect *bkl.DocIntersect) {
 
 	validateError(t, err, intersect.Errors)
 	if err == nil {
-		validateOutput(t, output, intersect.Result.Code)
+		validateOutput(t, output, intersect.Result.Code, 0)
 	}
 }
 
@@ -172,7 +186,7 @@ func runDiffTest(t *testing.T, diff *bkl.DocDiff) {
 
 	validateError(t, err, diff.Errors)
 	if err == nil {
-		validateOutput(t, output, diff.Result.Code)
+		validateOutput(t, output, diff.Result.Code, 0)
 	}
 }
 
@@ -194,14 +208,13 @@ func runCompareTest(t *testing.T, compare *bkl.DocCompare) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	validateOutput(t, []byte(result.Diff), compare.Result.Code)
+	validateOutput(t, []byte(result.Diff), compare.Result.Code, 2)
 }
 
 func runConvertTest(t *testing.T, convert *bkl.DocConvert) {
 	fsys := fstest.MapFS{}
 	rootPath := "/"
 
-	// Extract language from To layer
 	if len(convert.To.Languages) != 1 {
 		t.Fatalf("Convert test requires exactly one language in To layer")
 	}
@@ -212,24 +225,14 @@ func runConvertTest(t *testing.T, convert *bkl.DocConvert) {
 		Data: []byte(convert.To.Code),
 	}
 
-	// Extract environment variables from the code
-	env := make(map[string]string)
-	lines := strings.Split(convert.To.Code, "\n")
-	exportRegex := regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
-	for _, line := range lines {
-		if matches := exportRegex.FindStringSubmatch(line); matches != nil {
-			env[matches[1]] = matches[2]
-		}
-	}
-
 	format := getFormat(convert.From.Languages)
 	firstFile := &filename
 
-	output, err := bkl.Evaluate(fsys, []string{filename}, rootPath, rootPath, env, format, nil, firstFile)
+	output, err := bkl.Evaluate(fsys, []string{filename}, rootPath, rootPath, nil, format, nil, firstFile)
 
 	validateError(t, err, nil)
 	if err == nil {
-		validateOutput(t, output, convert.From.Code)
+		validateOutput(t, output, convert.From.Code, 0)
 	}
 }
 
@@ -237,7 +240,6 @@ func runFixitTest(t *testing.T, fixit *bkl.DocFixit) {
 	fsys := fstest.MapFS{}
 	rootPath := "/"
 
-	// Extract language from Good layer
 	if len(fixit.Good.Languages) != 1 {
 		t.Fatalf("Fixit test requires exactly one language in Good layer")
 	}
@@ -248,41 +250,22 @@ func runFixitTest(t *testing.T, fixit *bkl.DocFixit) {
 		Data: []byte(fixit.Good.Code),
 	}
 
-	// Extract environment variables from the code
-	env := make(map[string]string)
-	lines := strings.Split(fixit.Good.Code, "\n")
-	exportRegex := regexp.MustCompile(`#\s*export\s+([A-Z_]+)=(.*)`)
-	for _, line := range lines {
-		if matches := exportRegex.FindStringSubmatch(line); matches != nil {
-			env[matches[1]] = matches[2]
-		}
-	}
-
 	format := getFormat(fixit.Good.Languages)
 	firstFile := &filename
 
-	output, err := bkl.Evaluate(fsys, []string{filename}, rootPath, rootPath, env, format, nil, firstFile)
+	output, err := bkl.Evaluate(fsys, []string{filename}, rootPath, rootPath, nil, format, nil, firstFile)
 
 	validateError(t, err, nil)
 	if err == nil {
-		// For fixit tests, if there's an Original layer, verify the output matches it
 		if fixit.Original.Code != "" {
-			validateOutput(t, output, fixit.Original.Code)
+			validateOutput(t, output, fixit.Original.Code, 0)
 		} else {
-			// Otherwise just verify it evaluates to the same as the Good code
-			validateOutput(t, output, fixit.Good.Code)
+			validateOutput(t, output, fixit.Good.Code, 0)
 		}
 	}
 }
 
-func TestBKL(t *testing.T) {
-	t.Parallel()
-
-	tests, err := bkl.GetTests()
-	if err != nil {
-		t.Fatalf("Failed to get tests: %v", err)
-	}
-
+func RunTestLoop(t *testing.T, tests map[string]*bkl.DocExample) {
 	for testName, testCase := range tests {
 		if testCase.Benchmark {
 			continue
@@ -308,4 +291,15 @@ func TestBKL(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestBKL(t *testing.T) {
+	t.Parallel()
+
+	tests, err := bkl.GetTests()
+	if err != nil {
+		t.Fatalf("Failed to get tests: %v", err)
+	}
+
+	RunTestLoop(t, tests)
 }

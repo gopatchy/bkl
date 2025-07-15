@@ -107,7 +107,7 @@ type DocLayer struct {
 	Label      string   `yaml:"label,omitempty" json:"label,omitempty" toml:"label,omitempty"`
 	Filename   string   `yaml:"filename,omitempty" json:"filename,omitempty" toml:"filename,omitempty"`
 	Code       string   `yaml:"code" json:"code" toml:"code"`
-	Content    string   `yaml:"content,omitempty" json:"content,omitempty" toml:"content,omitempty"` // Alias for Code in TOML
+	Content    string   `yaml:"content,omitempty" json:"content,omitempty" toml:"content,omitempty"`
 	Highlights []string `yaml:"highlights,omitempty" json:"highlights,omitempty" toml:"highlights,omitempty"`
 	Languages  [][]any  `yaml:"languages,omitempty" json:"languages,omitempty" toml:"languages,omitempty"`
 	Expandable bool     `yaml:"expandable,omitempty" json:"expandable,omitempty" toml:"expandable,omitempty"`
