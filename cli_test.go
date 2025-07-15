@@ -172,9 +172,7 @@ func runTestCLIRequired(t *testing.T, testCase *bkl.DocExample) {
 
 	var args []string
 	args = addRootPathArg(args, tmpDir, testCase.Required.Root)
-
 	args = append(args, filepath.Join(tmpDir, testCase.Required.Inputs[0].Filename))
-
 	args = addFormatArg(args, testCase.Required.Result.Languages)
 
 	output := executeCLICommand(t, "./cmd/bklr", args, testCase.Required.Env, testCase.Required.Errors)
