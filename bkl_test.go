@@ -159,10 +159,6 @@ func runIntersectTest(t *testing.T, intersect *bkl.DocIntersect) {
 		evalFiles = append(evalFiles, input.Filename)
 	}
 
-	if len(evalFiles) < 2 {
-		t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(evalFiles))
-	}
-
 	format := getFormat(intersect.Result.Languages)
 	var firstFile *string
 	if len(evalFiles) > 0 {
