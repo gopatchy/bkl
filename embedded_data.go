@@ -156,3 +156,31 @@ func GetDocSections() ([]DocSection, error) {
 
 	return allSections, nil
 }
+
+func GetAllTests() (map[string]*DocExample, error) {
+	tests, err := GetTests()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tests: %w", err)
+	}
+
+	sections, err := GetDocSections()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get doc sections: %w", err)
+	}
+
+	for _, section := range sections {
+		i := 0
+
+		for _, item := range section.Items {
+			if item.Example == nil {
+				continue
+			}
+
+			testName := fmt.Sprintf("%s_example%d", section.ID, i)
+			tests[testName] = item.Example
+			i++
+		}
+	}
+
+	return tests, nil
+}

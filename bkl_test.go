@@ -11,6 +11,15 @@ import (
 	"github.com/gopatchy/bkl"
 )
 
+func getFormat(languages [][]any) *string {
+	if len(languages) > 0 && len(languages[0]) > 1 {
+		if format, ok := languages[0][1].(string); ok {
+			return &format
+		}
+	}
+	return nil
+}
+
 func validateError(t *testing.T, err error, expectedErrors []string) {
 	if len(expectedErrors) > 0 {
 		if err == nil {
@@ -296,9 +305,9 @@ func RunTestLoop(t *testing.T, tests map[string]*bkl.DocExample) {
 func TestBKL(t *testing.T) {
 	t.Parallel()
 
-	tests, err := bkl.GetTests()
+	tests, err := bkl.GetAllTests()
 	if err != nil {
-		t.Fatalf("Failed to get tests: %v", err)
+		t.Fatalf("Failed to get all tests: %v", err)
 	}
 
 	RunTestLoop(t, tests)
