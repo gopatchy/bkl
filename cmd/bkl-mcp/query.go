@@ -56,7 +56,7 @@ func (s *Server) searchDocumentation(keywords []string) []queryResult {
 	results := []queryResult{}
 
 	for _, section := range s.sections {
-		score := s.scoreDocSection(section, keywords)
+		score := section.Score(keywords)
 
 		if score > 0 {
 			results = append(results, queryResult{
@@ -72,116 +72,6 @@ func (s *Server) searchDocumentation(keywords []string) []queryResult {
 	return results
 }
 
-func (s *Server) scoreDocSection(section bkl.DocSection, keywords []string) int {
-	score := 0
-
-	titleLower := strings.ToLower(section.Title)
-	idLower := strings.ToLower(section.ID)
-
-	score += countKeywordMatches(titleLower, keywords) * 20
-	score += countKeywordMatches(idLower, keywords) * 15
-	score += countKeywordMatches(section.Source, keywords) * 30
-
-	for _, item := range section.Items {
-		itemScore := scoreDocItem(item, keywords)
-		score += itemScore
-	}
-
-	return score
-}
-
-func scoreDocItem(item bkl.DocItem, keywords []string) int {
-	score := 0
-
-	if item.Content != "" {
-		contentLower := strings.ToLower(item.Content)
-		contentMatches := countKeywordMatches(contentLower, keywords)
-		if contentMatches > 0 {
-			score += contentMatches * 8
-		}
-	}
-
-	if item.Example != nil {
-		exScore := scoreExample(item.Example, keywords)
-		score += exScore
-	}
-
-	if item.Code != nil {
-		codeMatches := countKeywordMatches(strings.ToLower(item.Code.Code), keywords)
-		if codeMatches > 0 {
-			score += codeMatches * 5
-		}
-	}
-
-	if item.SideBySide != nil {
-		leftMatches := countKeywordMatches(strings.ToLower(item.SideBySide.Left.Code), keywords)
-		rightMatches := countKeywordMatches(strings.ToLower(item.SideBySide.Right.Code), keywords)
-		score += (leftMatches + rightMatches) * 5
-	}
-
-	return score
-}
-
-func scoreExample(example *bkl.DocExample, keywords []string) int {
-	score := 0
-
-	switch {
-	case example.Evaluate != nil:
-		for _, input := range example.Evaluate.Inputs {
-			codeMatches := countKeywordMatches(strings.ToLower(input.Code), keywords)
-			labelMatches := countKeywordMatches(strings.ToLower(input.Label), keywords)
-			if codeMatches > 0 || labelMatches > 0 {
-				score += (codeMatches + labelMatches) * 5
-				break
-			}
-		}
-		resultMatches := countKeywordMatches(strings.ToLower(example.Evaluate.Result.Code), keywords)
-		score += resultMatches * 5
-
-	case example.Diff != nil:
-		baseMatches := countKeywordMatches(strings.ToLower(example.Diff.Base.Code), keywords)
-		targetMatches := countKeywordMatches(strings.ToLower(example.Diff.Target.Code), keywords)
-		score += (baseMatches + targetMatches) * 5
-		resultMatches := countKeywordMatches(strings.ToLower(example.Diff.Result.Code), keywords)
-		score += resultMatches * 5
-
-	case example.Intersect != nil:
-		for _, input := range example.Intersect.Inputs {
-			codeMatches := countKeywordMatches(strings.ToLower(input.Code), keywords)
-			labelMatches := countKeywordMatches(strings.ToLower(input.Label), keywords)
-			if codeMatches > 0 || labelMatches > 0 {
-				score += (codeMatches + labelMatches) * 5
-				break
-			}
-		}
-		resultMatches := countKeywordMatches(strings.ToLower(example.Intersect.Result.Code), keywords)
-		score += resultMatches * 5
-
-	case example.Convert != nil:
-		fromMatches := countKeywordMatches(strings.ToLower(example.Convert.From.Code), keywords)
-		toMatches := countKeywordMatches(strings.ToLower(example.Convert.To.Code), keywords)
-		score += (fromMatches + toMatches) * 5
-
-	case example.Fixit != nil:
-		if example.Fixit.Original.Code != "" {
-			origMatches := countKeywordMatches(strings.ToLower(example.Fixit.Original.Code), keywords)
-			score += origMatches * 5
-		}
-		badMatches := countKeywordMatches(strings.ToLower(example.Fixit.Bad.Code), keywords)
-		goodMatches := countKeywordMatches(strings.ToLower(example.Fixit.Good.Code), keywords)
-		score += (badMatches + goodMatches) * 5
-
-	case example.Compare != nil:
-		leftMatches := countKeywordMatches(strings.ToLower(example.Compare.Left.Code), keywords)
-		rightMatches := countKeywordMatches(strings.ToLower(example.Compare.Right.Code), keywords)
-		score += (leftMatches + rightMatches) * 5
-		resultMatches := countKeywordMatches(strings.ToLower(example.Compare.Result.Code), keywords)
-		score += resultMatches * 5
-	}
-
-	return score
-}
-
 func (s *Server) searchTests(keywords []string) []queryResult {
 	results := []queryResult{}
 
@@ -190,7 +80,8 @@ func (s *Server) searchTests(keywords []string) []queryResult {
 			continue
 		}
 
-		score := s.scoreTest(name, test, keywords)
+		score := bkl.CountKeywordMatches(name, keywords) * 25
+		score += test.Score(keywords)
 
 		if score > 0 {
 			results = append(results, queryResult{
@@ -205,69 +96,8 @@ func (s *Server) searchTests(keywords []string) []queryResult {
 	return results
 }
 
-func (s *Server) scoreTest(name string, test *bkl.DocExample, keywords []string) int {
-	score := 0
-
-	nameLower := strings.ToLower(name)
-	descLower := strings.ToLower(test.Description)
-
-	score += countKeywordMatches(nameLower, keywords) * 25
-	score += countKeywordMatches(descLower, keywords) * 15
-
-	bestFileScore := 0
-
-	// Search through all code content based on operation type
-	var contents []string
-	switch {
-	case test.Evaluate != nil:
-		for _, input := range test.Evaluate.Inputs {
-			contents = append(contents, input.Code)
-		}
-		contents = append(contents, test.Evaluate.Result.Code)
-
-	case test.Required != nil:
-		for _, input := range test.Required.Inputs {
-			contents = append(contents, input.Code)
-		}
-		contents = append(contents, test.Required.Result.Code)
-
-	case test.Diff != nil:
-		contents = append(contents, test.Diff.Base.Code, test.Diff.Target.Code, test.Diff.Result.Code)
-
-	case test.Intersect != nil:
-		for _, input := range test.Intersect.Inputs {
-			contents = append(contents, input.Code)
-		}
-		contents = append(contents, test.Intersect.Result.Code)
-
-	case test.Compare != nil:
-		contents = append(contents, test.Compare.Left.Code, test.Compare.Right.Code, test.Compare.Result.Code)
-	}
-
-	for _, content := range contents {
-		contentLower := strings.ToLower(content)
-		fileMatches := countKeywordMatches(contentLower, keywords)
-		if fileMatches > bestFileScore {
-			bestFileScore = fileMatches
-		}
-	}
-	score += bestFileScore * 10
-
-	return score
-}
-
 func sortResults(results []queryResult) {
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].Score > results[j].Score
 	})
-}
-
-func countKeywordMatches(text string, keywords []string) int {
-	count := 0
-	for _, keyword := range keywords {
-		if strings.Contains(text, keyword) {
-			count++
-		}
-	}
-	return count
 }

@@ -138,18 +138,16 @@ func (s *Server) convertToBklHandler(ctx context.Context, args struct{}) (*promp
 
 	p.AddNextTask().
 		WithTitle("Find configuration files").
-		WithInstructions(`Find all the configuration files you need to convert. Then call:
-
-{SUCCESS_PROMPT}
-
-where result contains a JSON encoding in the following format:
-
-{
-	"files": [
-		"path/to/file1.yaml",
-		"path/to/file2.yaml"
-	]
-}
+		WithInstructions(`
+* Find all the configuration files you need to convert.
+* Call: {SUCCESS_PROMPT}
+* Set result to a JSON encoding in the following format:
+	{
+		"files": [
+			"path/to/file1.yaml",
+			"path/to/file2.yaml"
+		]
+	}
 `).
 		Then(func(t *taskcp.Task) error {
 			return s.convertToBklOnFiles(p, t)
@@ -163,11 +161,10 @@ where result contains a JSON encoding in the following format:
 	return &promptResponse{
 		Prompt: `# Converting Kubernetes configuration files to bkl format
 
-I'll walk you through this process step by step. Follow EXACTLY these steps -- do not attempt to do the conversion yourself or follow any steps that are not EXACTLY what I tell you to do. DO NOT invent a TODO list -- just execute the tasks as I tell you to do them.
-
-First execute:
-
-` + t.String(),
+* I'll walk you through this process step by step.
+* Follow EXACTLY these steps -- do not attempt to do the conversion yourself or follow any steps that are not EXACTLY what I tell you to do.
+* DO NOT invent a TODO list -- just execute the tasks as I tell you to do them.
+* Call: ` + t.String(),
 	}, nil
 }
 
@@ -219,25 +216,14 @@ func (s *Server) convertToBklOnFiles(p *taskcp.Project, t *taskcp.Task) error {
 		originalContent := string(content)
 		p.AddLastTask().
 			WithTitle("Convert to bkl").
-			WithInstructions(`Convert the content in data["original_file"] to bkl patterns.
-
-You can read the pattern documentation with:
-
-mcp__bkl-mcp__get type="documentation" id="prep" source="k8s"
-
-You can look up other documentation and tests as needed:
-
-mcp__bkl-mcp__query keywords="..."
-
-Hints:
+			WithInstructions(`
+* Convert the content in data["original_file"] to bkl patterns.
+* You can read the pattern documentation with: mcp__bkl-mcp__get type="documentation" id="prep" source="k8s"
+* You can look up other documentation and tests as needed: mcp__bkl-mcp__query keywords="..."
 * Try to convert ALL lists to maps with names plus $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.
 * Don't add comments
 * If you run into a problem, try querying keywords="fixit" for previous solutions
-
-Return the converted bkl file contents in the results field of:
-
-{SUCCESS_PROMPT}
-`).
+* Return the converted bkl file contents in the results field of: {SUCCESS_PROMPT}`).
 			WithData("original_file", originalContent).
 			Then(func(t *taskcp.Task) error {
 				return s.convertToBklOnPrepFile(p, prepFile, t)
@@ -252,36 +238,22 @@ Return the converted bkl file contents in the results field of:
 
 	p.AddLastTask().
 		WithTitle("Determine bkl file structure").
-		WithInstructions(`Read the documentation for file structure:
-
-mcp__bkl-mcp__get type="documentation" id="plan" source="k8s"
-
-The list of converted files is in data["prep_files"].
-
-Use the following command instead of bkli to examine file intersection:
-
-mcp__bkl-mcp__intersect selector="kind" files="prep/file1.yaml,prep/file2.yaml"
-
-Once you've determined the file structure, call:
-
-{SUCCESS_PROMPT}
-
-where the result is a JSON encoding in the following format:
-
-{
-	"files":
-		"prep/file1.yaml": "bkl/base.file1.yaml",
-		"prep/file2.yaml": "bkl/base.file1.file2.yaml",
-		"prep/file3.yaml": "bkl/base.file3.yaml"
-	]
-}
-
-I'll figure out which files are in the base layer and which are in the derived layers.
-
-DO NOT create directories or files -- just use the tools to determine the file structure and tell me.
-
-Hints:
-* selector="kind" is critical to tell intersect how to match documents
+		WithInstructions(`
+* Read the documentation for file structure: mcp__bkl-mcp__get type="documentation" id="plan" source="k8s"
+* The list of converted files is in data["prep_files"].
+* Use the following command instead of bkli to examine file intersection: mcp__bkl-mcp__intersect selector="kind,metadata.name" files="prep/file1.yaml,prep/file2.yaml"
+* Once you've determined the file structure, call: {SUCCESS_PROMPT}
+* The result is a JSON encoding in the following format:
+	{
+		"files": {
+			"prep/file1.yaml": "bkl/base.file1.yaml",
+			"prep/file2.yaml": "bkl/base.file1.file2.yaml",
+			"prep/file3.yaml": "bkl/base.file3.yaml"
+		}
+	}
+* I'll figure out which files are in the base layer and which are in the derived layers.
+* DO NOT create directories or files -- just use the tools to determine the file structure and tell me.
+* selector="kind,metadata.name" is critical to tell intersect how to match documents
 `).
 		WithData("prep_files", prepFiles).
 		Then(func(t *taskcp.Task) error {
@@ -316,15 +288,12 @@ func (s *Server) convertToBklOnPrepFile(p *taskcp.Project, targetPath string, t 
 	if err != nil {
 		p.AddNextTask().
 			WithTitle("Fix the prepped file").
-			WithInstructions(`The comparison failed. Please fix the prepped file.
-
-The original file content is in data["original_file"].
-The prepped file content that failed is in data["prepped_file"].
-The error is in data["error"].
-
-Return the corrected bkl file contents in the result field of:
-
-{SUCCESS_PROMPT}`).
+			WithInstructions(`
+* The comparison failed. Please fix the prepped file.
+* The original file content is in data["original_file"].
+* The prepped file content that failed is in data["prepped_file"].
+* The error is in data["error"].
+* Return the corrected bkl file contents in the result field of: {SUCCESS_PROMPT}`).
 			WithData("original_file", originalContent).
 			WithData("prepped_file", preppedContent).
 			WithData("error", err.Error()).
@@ -338,18 +307,14 @@ Return the corrected bkl file contents in the result field of:
 	if compareResult.Diff != "" && t.Result != "" {
 		p.AddNextTask().
 			WithTitle("Verify the conversion").
-			WithInstructions(`The conversion resulted in different output. Please verify the changes are correct.
-
-The original file content is in data["original_file"].
-The prepped file content is in data["prepped_file"].
-The diff is in data["diff"].
-
-If the changes are correct, respond with an empty string in the result field of:
-{SUCCESS_PROMPT}
-
-If you need to modify the conversion, provide the corrected bkl file contents in the result field.
-
-Hints:
+			WithInstructions(`
+* The conversion resulted in different output.
+* Verify the changes are correct.
+* The original file content is in data["original_file"].
+* The prepped file content is in data["prepped_file"].
+* The diff is in data["diff"].
+* If the changes are correct, respond with an empty string in the result field of: {SUCCESS_PROMPT}
+* If you need to modify the conversion, provide the corrected bkl file contents in the result field.
 * Changes in values after $encode conversion are usually bugs (other than list ordering). Don't convert back to a list -- figure out how to use $encode: values, $encode: values:NAME or $encode: values:NAME:VALUE.`).
 			WithData("original_file", originalContent).
 			WithData("prepped_file", preppedContent).
@@ -436,15 +401,11 @@ func (s *Server) verifyConversion(p *taskcp.Project, t *taskcp.Task, originalFil
 
 		p.AddNextTask().
 			WithTitle(fmt.Sprintf("Re-verify %s", filepath.Base(targetFile))).
-			WithInstructions(`The bkl file still produces different output. 
-
-The diff is in data["diff"].
-
-Review and provide the updated bkl file content for %s in the result field of:
-
-{SUCCESS_PROMPT}
-
-or respond with an empty string if this is acceptable.`).
+			WithInstructions(`
+* The bkl file still produces different output. 
+* The diff is in data["diff"].
+* Review and provide the updated bkl file content for %s in the result field of: {SUCCESS_PROMPT}
+* Respond with an empty string if this is acceptable.`).
 			WithData("original_content", string(originalContent)).
 			WithData("target_content", t.Result).
 			WithData("diff", compareResult.Diff).
@@ -647,15 +608,11 @@ func (s *Server) createVerificationTasks(p *taskcp.Project, fileMap map[string]s
 
 		p.AddLastTask().
 			WithTitle("Verify bkl converion").
-			WithInstructions(`Review the bkl conversion for %s.
-
-The diff between evaluating the original file and the bkl layered files is in data["diff"].
-
-If satisfied with the conversion, respond with an empty string in the result field of:
-
-{SUCCESS_PROMPT}
-
-If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`).
+			WithInstructions(`
+* Review the bkl conversion for %s.
+* The diff between evaluating the original file and the bkl layered files is in data["diff"].
+* If satisfied with the conversion, respond with an empty string in the result field of: {SUCCESS_PROMPT}
+* If you want to modify the conversion, provide the updated bkl file content for %s in the result field.`).
 			WithData("original_content", string(originalContent)).
 			WithData("target_content", string(targetContent)).
 			WithData("diff", compareResult.Diff).
@@ -672,15 +629,12 @@ If you want to modify the conversion, provide the updated bkl file content for %
 func (s *Server) createSummaryTask(p *taskcp.Project) {
 	p.AddLastTask().
 		WithTitle("Summarize conversion results").
-		WithInstructions(`All file conversions have been completed. Please provide a summary for the user.
-
-The task summary is in data["summary"].
-
-Call:
-
-{SUCCESS_PROMPT}
-
-with your summary in the result field.`).
+		WithInstructions(`
+* All file conversions have been completed.
+* Provide a summary for the user.
+* The task summary is in data["summary"].
+* Call: {SUCCESS_PROMPT}
+* Set the result field to your summary.`).
 		WithData("summary", p.Summary().String()).
 		Then(func(t *taskcp.Task) error {
 			return nil
@@ -696,22 +650,13 @@ func (s *Server) createPolishTasks(p *taskcp.Project, fileMap map[string]string,
 
 		p.AddLastTask().
 			WithTitle(fmt.Sprintf("Polish %s", filepath.Base(targetFile))).
-			WithInstructions(`Apply polish steps to improve the bkl file %s.
-
-Read the polish documentation:
-
-mcp__bkl-mcp__get type="documentation" id="polish" source="k8s"
-
-The current file content is in data["file_content"].
-
-If no polish is needed, respond with an empty string in the result field of:
-{SUCCESS_PROMPT}
-
-Otherwise, provide the polished bkl file content in the result field.
-
-Hints:
-* Don't add comments
-`).
+			WithInstructions(`
+* Apply polish steps to improve the bkl file %s.
+* Read the polish documentation: mcp__bkl-mcp__get type="documentation" id="polish" source="k8s"
+* The current file content is in data["file_content"].
+* If no polish is needed, respond with an empty string in the result field of: {SUCCESS_PROMPT}
+* Otherwise, provide the polished bkl file content in the result field.
+* Don't add comments`).
 			WithData("file_content", string(content)).
 			Then(func(t *taskcp.Task) error {
 				return s.polishBklFile(p, t, targetFile, fileMap, originalFileMap)
@@ -764,11 +709,9 @@ func (s *Server) createSecondVerificationTask(p *taskcp.Project, targetFile stri
 
 		p.AddNextTask().
 			WithTitle("Fix comparison error").
-			WithInstructions(`The comparison between the original file and bkl conversion failed.
-
-Provide the updated bkl file content in the result field of:
-
-{SUCCESS_PROMPT}`).
+			WithInstructions(`
+* The comparison between the original file and bkl conversion failed.
+* Provide the updated bkl file content in the result field of: {SUCCESS_PROMPT}`).
 			WithData("error", compareErr.Error()).
 			WithData("target_content", string(targetContent)).
 			WithData("original_content", string(originalContent)).
@@ -794,15 +737,11 @@ Provide the updated bkl file content in the result field of:
 
 	p.AddNextTask().
 		WithTitle("Re-verify after polish").
-		WithInstructions(`Review the bkl conversion after polish has been applied.
-
-The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
-
-If satisfied with the polish changes, respond with an empty string in the result field of:
-
-{SUCCESS_PROMPT}
-
-If you want to modify the polish changes, provide the updated bkl file content for %s in the result field.`).
+		WithInstructions(`
+* Review the bkl conversion after polish has been applied.
+* The diff between evaluating the original file and the polished bkl layered files is in data["diff"].
+* If satisfied with the polish changes, respond with an empty string in the result field of: {SUCCESS_PROMPT}
+* If you want to modify the polish changes, provide the updated bkl file content for %s in the result field.`).
 		WithData("original_content", string(originalContent)).
 		WithData("target_content", string(targetContent)).
 		WithData("diff", compareResult.Diff).

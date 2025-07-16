@@ -435,3 +435,214 @@ func (ds *DocSection) ConvertCodeBlocks(targetFormat string) bool {
 
 	return converted
 }
+
+func CountKeywordMatches(text string, keywords []string) int {
+	count := 0
+	textLower := strings.ToLower(text)
+	for _, keyword := range keywords {
+		if strings.Contains(textLower, keyword) {
+			count++
+		}
+	}
+	return count
+}
+
+func (dl *DocLayer) Score(keywords []string) int {
+	if dl == nil {
+		return 0
+	}
+
+	score := 0
+	score += CountKeywordMatches(dl.Code, keywords) * 5
+	score += CountKeywordMatches(dl.Label, keywords) * 5
+
+	return score
+}
+
+func (de *DocEvaluate) Score(keywords []string) int {
+	if de == nil {
+		return 0
+	}
+
+	score := 0
+	for _, input := range de.Inputs {
+		inputScore := input.Score(keywords)
+		if inputScore > 0 {
+			score += inputScore
+			break
+		}
+	}
+	score += de.Result.Score(keywords)
+
+	return score
+}
+
+func (dd *DocDiff) Score(keywords []string) int {
+	if dd == nil {
+		return 0
+	}
+
+	score := 0
+	score += dd.Base.Score(keywords)
+	score += dd.Target.Score(keywords)
+	score += dd.Result.Score(keywords)
+
+	return score
+}
+
+func (di *DocIntersect) Score(keywords []string) int {
+	if di == nil {
+		return 0
+	}
+
+	score := 0
+	for _, input := range di.Inputs {
+		inputScore := input.Score(keywords)
+		if inputScore > 0 {
+			score += inputScore
+			break
+		}
+	}
+	score += di.Result.Score(keywords)
+
+	return score
+}
+
+func (dr *DocRequired) Score(keywords []string) int {
+	if dr == nil {
+		return 0
+	}
+
+	score := 0
+	for _, input := range dr.Inputs {
+		score += input.Score(keywords)
+	}
+	score += dr.Result.Score(keywords)
+
+	return score
+}
+
+func (dc *DocConvert) Score(keywords []string) int {
+	if dc == nil {
+		return 0
+	}
+
+	score := 0
+	score += dc.From.Score(keywords)
+	score += dc.To.Score(keywords)
+
+	return score
+}
+
+func (df *DocFixit) Score(keywords []string) int {
+	if df == nil {
+		return 0
+	}
+
+	score := 0
+	if df.Original.Code != "" {
+		score += df.Original.Score(keywords)
+	}
+	score += df.Bad.Score(keywords)
+	score += df.Good.Score(keywords)
+
+	return score
+}
+
+func (dc *DocCompare) Score(keywords []string) int {
+	if dc == nil {
+		return 0
+	}
+
+	score := 0
+	score += dc.Left.Score(keywords)
+	score += dc.Right.Score(keywords)
+	score += dc.Result.Score(keywords)
+
+	return score
+}
+
+func (de *DocExample) Score(keywords []string) int {
+	if de == nil {
+		return 0
+	}
+
+	score := 0
+	score += CountKeywordMatches(de.Description, keywords) * 15
+
+	if de.Evaluate != nil {
+		score += de.Evaluate.Score(keywords)
+	}
+	if de.Diff != nil {
+		score += de.Diff.Score(keywords)
+	}
+	if de.Intersect != nil {
+		score += de.Intersect.Score(keywords)
+	}
+	if de.Required != nil {
+		score += de.Required.Score(keywords)
+	}
+	if de.Convert != nil {
+		score += de.Convert.Score(keywords)
+	}
+	if de.Fixit != nil {
+		score += de.Fixit.Score(keywords)
+	}
+	if de.Compare != nil {
+		score += de.Compare.Score(keywords)
+	}
+
+	return score
+}
+
+func (di *DocItem) Score(keywords []string) int {
+	score := 0
+
+	if di.Content != "" {
+		score += CountKeywordMatches(di.Content, keywords) * 8
+	}
+
+	if di.Example != nil {
+		score += di.Example.Score(keywords)
+	}
+
+	if di.Code != nil {
+		score += di.Code.Score(keywords)
+	}
+
+	if di.SideBySide != nil {
+		score += di.SideBySide.Score(keywords)
+	}
+
+	return score
+}
+
+func (ds *DocSection) Score(keywords []string) int {
+	if ds == nil {
+		return 0
+	}
+
+	score := 0
+
+	score += CountKeywordMatches(ds.Title, keywords) * 20
+	score += CountKeywordMatches(ds.ID, keywords) * 15
+	score += CountKeywordMatches(ds.Source, keywords) * 30
+
+	for i := range ds.Items {
+		score += ds.Items[i].Score(keywords)
+	}
+
+	return score
+}
+
+func (ds *DocSideBySide) Score(keywords []string) int {
+	if ds == nil {
+		return 0
+	}
+
+	score := 0
+	score += ds.Left.Score(keywords)
+	score += ds.Right.Score(keywords)
+
+	return score
+}
