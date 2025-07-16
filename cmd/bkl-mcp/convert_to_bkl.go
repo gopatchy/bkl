@@ -50,7 +50,21 @@ func (s *Server) convertHelmToPlain(files []string) ([]string, error) {
 		valuesFiles = append(valuesFiles, "")
 	}
 
+	hasEnvSpecificFiles := false
 	for _, valuesFile := range valuesFiles {
+		base := filepath.Base(valuesFile)
+		if base != "values.yaml" && base != "values.yml" {
+			hasEnvSpecificFiles = true
+			break
+		}
+	}
+
+	for _, valuesFile := range valuesFiles {
+		base := filepath.Base(valuesFile)
+		if hasEnvSpecificFiles && (base == "values.yaml" || base == "values.yml") {
+			continue
+		}
+
 		env := s.getEnvFromValuesFile(valuesFile)
 		files, err := s.runHelmTemplate(chartDir, valuesFile, env)
 		if err != nil {
