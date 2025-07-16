@@ -14,183 +14,45 @@ import (
 	"github.com/metoro-io/mcp-golang/transport/stdio"
 )
 
-func runEvaluateTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, evaluate *bkl.DocEvaluate) {
+func buildFileSystem(inputs []*bkl.DocLayer) map[string]any {
 	fileSystem := make(map[string]any)
-	var evalFiles []string
-
-	for _, input := range evaluate.Inputs {
+	for _, input := range inputs {
 		fileSystem[input.Filename] = input.Code
 	}
-	if len(evaluate.Inputs) > 0 {
-		lastInput := evaluate.Inputs[len(evaluate.Inputs)-1]
-		evalFiles = append(evalFiles, lastInput.Filename)
-	}
+	return fileSystem
+}
 
+func getFilenames(inputs []*bkl.DocLayer) []string {
+	var files []string
+	for _, input := range inputs {
+		files = append(files, input.Filename)
+	}
+	return files
+}
+
+func buildBaseArgs(fileSystem map[string]any, format *string) map[string]any {
 	args := map[string]any{
-		"files":      strings.Join(evalFiles, ","),
 		"fileSystem": fileSystem,
 	}
-
-	format := getFormat(evaluate.Result.Languages)
 	if format != nil {
 		args["format"] = *format
 	}
+	return args
+}
 
-	if len(evaluate.Env) > 0 {
-		args["environment"] = evaluate.Env
-	}
-
-	if len(evaluate.Sort) > 0 {
-		args["sort"] = strings.Join(evaluate.Sort, ",")
-	}
-
-	result, err := client.CallTool(ctx, "evaluate", args)
+func callToolAndValidate(ctx context.Context, client *mcp.Client, t *testing.T, tool string, args map[string]any, expectedErrors []string, expectedOutput string, removeLines int) {
+	result, err := client.CallTool(ctx, tool, args)
 	if err != nil {
-		validateError(t, err, evaluate.Errors)
+		validateError(t, err, expectedErrors)
 		return
 	}
 
 	output, err := extractOutput(result)
-	validateError(t, err, evaluate.Errors)
-	if err == nil {
-		validateOutput(t, output, evaluate.Result.Code, 0)
-	}
+	validateResult(t, err, output, expectedErrors, expectedOutput, removeLines)
 }
 
-func runRequiredTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, required *bkl.DocRequired) {
-	fileSystem := make(map[string]any)
-	var evalFiles []string
-
-	for _, input := range required.Inputs {
-		fileSystem[input.Filename] = input.Code
-		evalFiles = append(evalFiles, input.Filename)
-	}
-
-	if len(evalFiles) != 1 {
-		t.Fatalf("Required tests require exactly 1 eval file, got %d", len(evalFiles))
-	}
-
-	args := map[string]any{
-		"file":       evalFiles[0],
-		"fileSystem": fileSystem,
-	}
-
-	format := getFormat(required.Result.Languages)
-	if format != nil {
-		args["format"] = *format
-	}
-
-	result, err := client.CallTool(ctx, "required", args)
-	if err != nil {
-		validateError(t, err, required.Errors)
-		return
-	}
-
-	output, err := extractOutput(result)
-	validateError(t, err, required.Errors)
-	if err == nil {
-		validateOutput(t, output, required.Result.Code, 0)
-	}
-}
-
-func runIntersectTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, intersect *bkl.DocIntersect) {
-	fileSystem := make(map[string]any)
-	var evalFiles []string
-
-	for _, input := range intersect.Inputs {
-		fileSystem[input.Filename] = input.Code
-		evalFiles = append(evalFiles, input.Filename)
-	}
-
-	if len(evalFiles) < 2 {
-		t.Fatalf("Intersect tests require at least 2 eval files, got %d", len(evalFiles))
-	}
-
-	args := map[string]any{
-		"files":      strings.Join(evalFiles, ","),
-		"fileSystem": fileSystem,
-	}
-
-	format := getFormat(intersect.Result.Languages)
-	if format != nil {
-		args["format"] = *format
-	}
-
-	if len(intersect.Selector) > 0 {
-		args["selectors"] = strings.Join(intersect.Selector, ",")
-	}
-
-	result, err := client.CallTool(ctx, "intersect", args)
-	if err != nil {
-		validateError(t, err, intersect.Errors)
-		return
-	}
-
-	output, err := extractOutput(result)
-	validateError(t, err, intersect.Errors)
-	if err == nil {
-		validateOutput(t, output, intersect.Result.Code, 0)
-	}
-}
-
-func runDiffTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, diff *bkl.DocDiff) {
-	fileSystem := make(map[string]any)
-	fileSystem[diff.Base.Filename] = diff.Base.Code
-	fileSystem[diff.Target.Filename] = diff.Target.Code
-
-	args := map[string]any{
-		"baseFile":   diff.Base.Filename,
-		"targetFile": diff.Target.Filename,
-		"fileSystem": fileSystem,
-	}
-
-	format := getFormat(diff.Result.Languages)
-	if format != nil {
-		args["format"] = *format
-	}
-
-	if len(diff.Selector) > 0 {
-		args["selectors"] = strings.Join(diff.Selector, ",")
-	}
-
-	result, err := client.CallTool(ctx, "diff", args)
-	if err != nil {
-		validateError(t, err, diff.Errors)
-		return
-	}
-
-	output, err := extractOutput(result)
-	validateError(t, err, diff.Errors)
-	if err == nil {
-		validateOutput(t, output, diff.Result.Code, 0)
-	}
-}
-
-func runCompareTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, compare *bkl.DocCompare) {
-	fileSystem := make(map[string]any)
-	fileSystem[compare.Left.Filename] = compare.Left.Code
-	fileSystem[compare.Right.Filename] = compare.Right.Code
-
-	args := map[string]any{
-		"file1":      compare.Left.Filename,
-		"file2":      compare.Right.Filename,
-		"fileSystem": fileSystem,
-	}
-
-	format := getFormat(compare.Result.Languages)
-	if format != nil {
-		args["format"] = *format
-	}
-
-	if len(compare.Env) > 0 {
-		args["environment"] = compare.Env
-	}
-
-	if len(compare.Sort) > 0 {
-		args["sort"] = strings.Join(compare.Sort, ",")
-	}
-
-	result, err := client.CallTool(ctx, "compare", args)
+func callToolAndValidateDiff(ctx context.Context, client *mcp.Client, t *testing.T, tool string, args map[string]any, expectedOutput string) {
+	result, err := client.CallTool(ctx, tool, args)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -200,67 +62,131 @@ func runCompareTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, co
 		t.Fatalf("Failed to extract diff: %v", err)
 	}
 
-	validateOutput(t, output, compare.Result.Code, 2)
+	validateOutput(t, output, expectedOutput, 2)
+}
+
+func runEvaluateTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, evaluate *bkl.DocEvaluate) {
+	fileSystem := buildFileSystem(evaluate.Inputs)
+
+	var evalFiles []string
+	if len(evaluate.Inputs) > 0 {
+		lastInput := evaluate.Inputs[len(evaluate.Inputs)-1]
+		evalFiles = append(evalFiles, lastInput.Filename)
+	}
+
+	format := getFormat(evaluate.Result.Languages)
+	args := buildBaseArgs(fileSystem, format)
+	args["files"] = strings.Join(evalFiles, ",")
+
+	if len(evaluate.Env) > 0 {
+		args["environment"] = evaluate.Env
+	}
+
+	if len(evaluate.Sort) > 0 {
+		args["sort"] = strings.Join(evaluate.Sort, ",")
+	}
+
+	callToolAndValidate(ctx, client, t, "evaluate", args, evaluate.Errors, evaluate.Result.Code, 0)
+}
+
+func runRequiredTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, required *bkl.DocRequired) {
+	fileSystem := buildFileSystem(required.Inputs)
+	evalFiles := getFilenames(required.Inputs)
+
+	format := getFormat(required.Result.Languages)
+	args := buildBaseArgs(fileSystem, format)
+	args["file"] = evalFiles[0]
+
+	callToolAndValidate(ctx, client, t, "required", args, required.Errors, required.Result.Code, 0)
+}
+
+func runIntersectTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, intersect *bkl.DocIntersect) {
+	fileSystem := buildFileSystem(intersect.Inputs)
+	evalFiles := getFilenames(intersect.Inputs)
+
+	format := getFormat(intersect.Result.Languages)
+	args := buildBaseArgs(fileSystem, format)
+	args["files"] = strings.Join(evalFiles, ",")
+
+	if len(intersect.Selector) > 0 {
+		args["selectors"] = strings.Join(intersect.Selector, ",")
+	}
+
+	callToolAndValidate(ctx, client, t, "intersect", args, intersect.Errors, intersect.Result.Code, 0)
+}
+
+func runDiffTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, diff *bkl.DocDiff) {
+	fileSystem := make(map[string]any)
+	fileSystem[diff.Base.Filename] = diff.Base.Code
+	fileSystem[diff.Target.Filename] = diff.Target.Code
+
+	format := getFormat(diff.Result.Languages)
+	args := buildBaseArgs(fileSystem, format)
+	args["baseFile"] = diff.Base.Filename
+	args["targetFile"] = diff.Target.Filename
+
+	if len(diff.Selector) > 0 {
+		args["selectors"] = strings.Join(diff.Selector, ",")
+	}
+
+	callToolAndValidate(ctx, client, t, "diff", args, diff.Errors, diff.Result.Code, 0)
+}
+
+func runCompareTestMCP(ctx context.Context, client *mcp.Client, t *testing.T, compare *bkl.DocCompare) {
+	fileSystem := make(map[string]any)
+	fileSystem[compare.Left.Filename] = compare.Left.Code
+	fileSystem[compare.Right.Filename] = compare.Right.Code
+
+	format := getFormat(compare.Result.Languages)
+	args := buildBaseArgs(fileSystem, format)
+	args["file1"] = compare.Left.Filename
+	args["file2"] = compare.Right.Filename
+
+	if len(compare.Env) > 0 {
+		args["environment"] = compare.Env
+	}
+
+	if len(compare.Sort) > 0 {
+		args["sort"] = strings.Join(compare.Sort, ",")
+	}
+
+	callToolAndValidateDiff(ctx, client, t, "compare", args, compare.Result.Code)
+}
+
+func extractField(result *mcp.ToolResponse, fieldName string) ([]byte, error) {
+	for _, content := range result.Content {
+		if content.Type == "text" && content.TextContent != nil {
+			text := content.TextContent.Text
+
+			var response map[string]any
+			if err := json.Unmarshal([]byte(text), &response); err != nil {
+				return nil, fmt.Errorf("failed to parse JSON response: %v", err)
+			}
+
+			if errMsg, ok := response["error"].(string); ok {
+				return nil, fmt.Errorf("%s", errMsg)
+			}
+
+			if value, ok := response[fieldName].(string); ok {
+				return []byte(value), nil
+			}
+
+			return nil, fmt.Errorf("no %s field in response", fieldName)
+		}
+	}
+
+	return nil, fmt.Errorf("no text content in tool response")
 }
 
 func extractOutput(result *mcp.ToolResponse) ([]byte, error) {
-	for _, content := range result.Content {
-		if content.Type == "text" && content.TextContent != nil {
-			text := content.TextContent.Text
-
-			var response map[string]any
-			if err := json.Unmarshal([]byte(text), &response); err != nil {
-				return nil, fmt.Errorf("failed to parse JSON response: %v", err)
-			}
-
-			if errMsg, ok := response["error"].(string); ok {
-				return nil, fmt.Errorf("%s", errMsg)
-			}
-
-			if output, ok := response["output"].(string); ok {
-				return []byte(output), nil
-			}
-
-			return nil, fmt.Errorf("no output field in response")
-		}
-	}
-
-	return nil, fmt.Errorf("no text content in tool response")
+	return extractField(result, "output")
 }
 
 func extractDiff(result *mcp.ToolResponse) ([]byte, error) {
-	for _, content := range result.Content {
-		if content.Type == "text" && content.TextContent != nil {
-			text := content.TextContent.Text
-
-			var response map[string]any
-			if err := json.Unmarshal([]byte(text), &response); err != nil {
-				return nil, fmt.Errorf("failed to parse JSON response: %v", err)
-			}
-
-			if errMsg, ok := response["error"].(string); ok {
-				return nil, fmt.Errorf("%s", errMsg)
-			}
-
-			if diff, ok := response["diff"].(string); ok {
-				return []byte(diff), nil
-			}
-
-			return nil, fmt.Errorf("no diff field in response")
-		}
-	}
-
-	return nil, fmt.Errorf("no text content in tool response")
+	return extractField(result, "diff")
 }
 
-func TestMCP(t *testing.T) {
-	t.Parallel()
-
-	tests, err := bkl.GetAllTests()
-	if err != nil {
-		t.Fatalf("Failed to get all tests: %v", err)
-	}
-
+func setupMCPServer(t *testing.T) (*exec.Cmd, *mcp.Client, context.Context, context.CancelFunc) {
 	cmd := exec.Command("go", "run", "./cmd/bkl-mcp/")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -278,7 +204,6 @@ func TestMCP(t *testing.T) {
 	if err := cmd.Start(); err != nil {
 		t.Fatalf("Failed to start server: %v", err)
 	}
-	defer cmd.Process.Kill()
 
 	go func() {
 		buf := make([]byte, 1024)
@@ -297,10 +222,24 @@ func TestMCP(t *testing.T) {
 	client := mcp.NewClient(transport)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
 	if _, err := client.Initialize(ctx); err != nil {
 		t.Fatalf("Failed to initialize MCP client: %v", err)
 	}
+
+	return cmd, client, ctx, cancel
+}
+
+func TestMCP(t *testing.T) {
+	t.Parallel()
+
+	tests, err := bkl.GetAllTests()
+	if err != nil {
+		t.Fatalf("Failed to get all tests: %v", err)
+	}
+
+	cmd, client, ctx, cancel := setupMCPServer(t)
+	defer cmd.Process.Kill()
+	defer cancel()
 
 	for testName, testCase := range tests {
 		if testCase.Benchmark {
