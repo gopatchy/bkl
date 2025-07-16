@@ -47,47 +47,87 @@ func (s *Server) convertHelmToPlain(files []string) ([]string, error) {
 	var plainFiles []string
 
 	if len(valuesFiles) == 0 {
-		cmd := exec.Command("helm", "template", "release", chartDir)
-		output, err := cmd.Output()
+		valuesFiles = append(valuesFiles, "")
+	}
+
+	for _, valuesFile := range valuesFiles {
+		env := s.getEnvFromValuesFile(valuesFile)
+		files, err := s.runHelmTemplate(chartDir, valuesFile, env)
 		if err != nil {
-			return nil, fmt.Errorf("helm template failed: %w", err)
+			return nil, err
 		}
-		outputFile := filepath.Join("plain", "base.yaml")
-		if err := os.WriteFile(outputFile, output, 0o644); err != nil {
-			return nil, fmt.Errorf("failed to write output file: %w", err)
-		}
-		plainFiles = append(plainFiles, outputFile)
-	} else {
-		for _, valuesFile := range valuesFiles {
-			base := filepath.Base(valuesFile)
-			env := "base"
-
-			if base != "values.yaml" && base != "values.yml" {
-				nameWithoutExt := strings.TrimSuffix(strings.TrimSuffix(base, ".yaml"), ".yml")
-				if e, found := strings.CutPrefix(nameWithoutExt, "values."); found {
-					env = e
-				} else if e, found := strings.CutPrefix(nameWithoutExt, "values-"); found {
-					env = e
-				}
-				if env == "" {
-					env = "base"
-				}
-			}
-
-			cmd := exec.Command("helm", "template", "release", chartDir, "-f", valuesFile)
-			output, err := cmd.Output()
-			if err != nil {
-				return nil, fmt.Errorf("helm template failed for %s: %w", valuesFile, err)
-			}
-			outputFile := filepath.Join("plain", env+".yaml")
-			if err := os.WriteFile(outputFile, output, 0o644); err != nil {
-				return nil, fmt.Errorf("failed to write output file: %w", err)
-			}
-			plainFiles = append(plainFiles, outputFile)
-		}
+		plainFiles = append(plainFiles, files...)
 	}
 
 	return plainFiles, nil
+}
+
+func (s *Server) getEnvFromValuesFile(valuesFile string) string {
+	if valuesFile == "" {
+		return "base"
+	}
+
+	base := filepath.Base(valuesFile)
+	if base == "values.yaml" || base == "values.yml" {
+		return "base"
+	}
+
+	nameWithoutExt := strings.TrimSuffix(strings.TrimSuffix(base, ".yaml"), ".yml")
+	if e, found := strings.CutPrefix(nameWithoutExt, "values."); found && e != "" {
+		return e
+	}
+	if e, found := strings.CutPrefix(nameWithoutExt, "values-"); found && e != "" {
+		return e
+	}
+
+	return "base"
+}
+
+func (s *Server) runHelmTemplate(chartDir, valuesFile, env string) ([]string, error) {
+	outputDir := filepath.Join("plain", env)
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		return nil, fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	args := []string{"template", "release", chartDir, "--output-dir", outputDir}
+	if valuesFile != "" {
+		args = append(args, "-f", valuesFile)
+	}
+
+	cmd := exec.Command("helm", args...)
+	if err := cmd.Run(); err != nil {
+		if valuesFile != "" {
+			return nil, fmt.Errorf("helm template failed for %s: %w", valuesFile, err)
+		}
+		return nil, fmt.Errorf("helm template failed: %w", err)
+	}
+
+	files, err := s.findGeneratedFiles(outputDir)
+	if err != nil {
+		if valuesFile != "" {
+			return nil, fmt.Errorf("failed to find generated files for %s: %w", valuesFile, err)
+		}
+		return nil, fmt.Errorf("failed to find generated files: %w", err)
+	}
+
+	return files, nil
+}
+
+func (s *Server) findGeneratedFiles(dir string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && (strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".yml")) {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to walk directory %s: %w", dir, err)
+	}
+	return files, nil
 }
 
 func (s *Server) convertKustomizeToPlain(files []string) ([]string, error) {
