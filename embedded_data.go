@@ -4,7 +4,9 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"strings"
 
+	"github.com/gopatchy/bkl/internal/format"
 	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
@@ -183,4 +185,253 @@ func GetAllTests() (map[string]*DocExample, error) {
 	}
 
 	return tests, nil
+}
+
+func (dl *DocLayer) ConvertCodeBlocks(targetFormat string) bool {
+	if dl == nil || dl.Code == "" {
+		return false
+	}
+
+	var sourceFormat string
+	if dl.Filename != "" {
+		if idx := strings.LastIndex(dl.Filename, "."); idx != -1 {
+			sourceFormat = dl.Filename[idx+1:]
+		}
+	} else if len(dl.Languages) > 0 {
+		if len(dl.Languages[0]) > 0 {
+			if lang, ok := dl.Languages[0][0].(string); ok {
+				sourceFormat = lang
+			}
+		}
+		if sourceFormat == "" && len(dl.Languages[0]) > 1 {
+			if lang, ok := dl.Languages[0][1].(string); ok {
+				sourceFormat = lang
+			}
+		}
+	}
+
+	if sourceFormat == "" || sourceFormat == targetFormat {
+		return false
+	}
+
+	sourceHandler, err := format.Get(sourceFormat)
+	if err != nil {
+		return false
+	}
+
+	docs, err := sourceHandler.UnmarshalStream([]byte(dl.Code))
+	if err != nil {
+		return false
+	}
+
+	targetHandler, err := format.Get(targetFormat)
+	if err != nil {
+		return false
+	}
+
+	targetBytes, err := targetHandler.MarshalStream(docs)
+	if err != nil {
+		return false
+	}
+
+	dl.Code = string(targetBytes)
+	dl.Content = string(targetBytes)
+
+	if len(dl.Languages) > 0 {
+		if len(dl.Languages[0]) > 0 {
+			dl.Languages[0][0] = targetFormat
+		}
+		if len(dl.Languages[0]) > 1 {
+			dl.Languages[0][1] = targetFormat
+		}
+	}
+
+	return true
+}
+
+func (de *DocEvaluate) ConvertCodeBlocks(targetFormat string) bool {
+	if de == nil {
+		return false
+	}
+
+	converted := false
+	for _, input := range de.Inputs {
+		if input.ConvertCodeBlocks(targetFormat) {
+			converted = true
+		}
+	}
+	if de.Result.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (dd *DocDiff) ConvertCodeBlocks(targetFormat string) bool {
+	if dd == nil {
+		return false
+	}
+
+	converted := false
+	if dd.Base.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if dd.Target.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if dd.Result.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (di *DocIntersect) ConvertCodeBlocks(targetFormat string) bool {
+	if di == nil {
+		return false
+	}
+
+	converted := false
+	for _, input := range di.Inputs {
+		if input.ConvertCodeBlocks(targetFormat) {
+			converted = true
+		}
+	}
+	if di.Result.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (dr *DocRequired) ConvertCodeBlocks(targetFormat string) bool {
+	if dr == nil {
+		return false
+	}
+
+	converted := false
+	for _, input := range dr.Inputs {
+		if input.ConvertCodeBlocks(targetFormat) {
+			converted = true
+		}
+	}
+	if dr.Result.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (dc *DocConvert) ConvertCodeBlocks(targetFormat string) bool {
+	if dc == nil {
+		return false
+	}
+
+	converted := false
+	if dc.From.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if dc.To.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (df *DocFixit) ConvertCodeBlocks(targetFormat string) bool {
+	if df == nil {
+		return false
+	}
+
+	converted := false
+	if df.Original.Code != "" && df.Original.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if df.Bad.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if df.Good.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (dc *DocCompare) ConvertCodeBlocks(targetFormat string) bool {
+	if dc == nil {
+		return false
+	}
+
+	converted := false
+	if dc.Left.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if dc.Right.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	if dc.Result.ConvertCodeBlocks(targetFormat) {
+		converted = true
+	}
+	return converted
+}
+
+func (de *DocExample) ConvertCodeBlocks(targetFormat string) bool {
+	if de == nil {
+		return false
+	}
+
+	converted := false
+
+	if de.Evaluate != nil {
+		converted = de.Evaluate.ConvertCodeBlocks(targetFormat) || converted
+	}
+	if de.Diff != nil {
+		converted = de.Diff.ConvertCodeBlocks(targetFormat) || converted
+	}
+	if de.Intersect != nil {
+		converted = de.Intersect.ConvertCodeBlocks(targetFormat) || converted
+	}
+	if de.Required != nil {
+		converted = de.Required.ConvertCodeBlocks(targetFormat) || converted
+	}
+	if de.Convert != nil {
+		converted = de.Convert.ConvertCodeBlocks(targetFormat) || converted
+	}
+	if de.Fixit != nil {
+		converted = de.Fixit.ConvertCodeBlocks(targetFormat) || converted
+	}
+	if de.Compare != nil {
+		converted = de.Compare.ConvertCodeBlocks(targetFormat) || converted
+	}
+
+	return converted
+}
+
+func (ds *DocSection) ConvertCodeBlocks(targetFormat string) bool {
+	if ds == nil {
+		return false
+	}
+
+	converted := false
+
+	for i := range ds.Items {
+		item := &ds.Items[i]
+
+		if item.Example != nil {
+			if item.Example.ConvertCodeBlocks(targetFormat) {
+				converted = true
+			}
+		}
+
+		if item.Code != nil {
+			if item.Code.ConvertCodeBlocks(targetFormat) {
+				converted = true
+			}
+		}
+
+		if item.SideBySide != nil {
+			if item.SideBySide.Left.ConvertCodeBlocks(targetFormat) {
+				converted = true
+			}
+			if item.SideBySide.Right.ConvertCodeBlocks(targetFormat) {
+				converted = true
+			}
+		}
+	}
+
+	return converted
 }
