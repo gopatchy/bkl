@@ -3,7 +3,6 @@ module github.com/gopatchy/bkl
 go 1.24.4
 
 require (
-	github.com/gopatchy/taskcp v0.0.0-20250706063713-3cde954b6f15
 	github.com/hexops/gotextdiff v1.0.3
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/magiconair/properties v1.8.10
@@ -23,6 +22,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect

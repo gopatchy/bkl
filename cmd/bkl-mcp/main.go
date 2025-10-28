@@ -7,16 +7,14 @@ import (
 	"log"
 
 	"github.com/gopatchy/bkl"
-	"github.com/gopatchy/taskcp"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
 type Server struct {
-	tests       map[string]*bkl.DocExample
-	sections    []bkl.DocSection
-	taskService *taskcp.Service
+	tests    map[string]*bkl.DocExample
+	sections []bkl.DocSection
 }
 
 func NewServer() (*Server, error) {
@@ -31,9 +29,8 @@ func NewServer() (*Server, error) {
 	}
 
 	return &Server{
-		tests:       tests,
-		sections:    sections,
-		taskService: taskcp.New("bkl-mcp"),
+		tests:    tests,
+		sections: sections,
 	}, nil
 }
 
@@ -197,11 +194,6 @@ func main() {
 	)
 	mcpServer.AddTool(issuePromptTool, wrapHandler(srv.issuePromptHandler))
 
-	convertToBklTool := mcp.NewTool("convert_to_bkl",
-		mcp.WithDescription("Get guidance for converting YAML files to bkl format with layering"),
-	)
-	mcpServer.AddTool(convertToBklTool, wrapHandler(srv.convertToBklHandler))
-
 	compareTool := mcp.NewTool("compare",
 		mcp.WithDescription("Evaluate two bkl files and show text differences between their outputs"),
 		mcp.WithString("file1",
@@ -222,10 +214,6 @@ func main() {
 		),
 	)
 	mcpServer.AddTool(compareTool, wrapHandler(srv.compareHandler))
-
-	if err := srv.taskService.RegisterMCPTools(mcpServer); err != nil {
-		log.Fatalf("Failed to register taskcp tools: %v", err)
-	}
 
 	if err := server.ServeStdio(mcpServer); err != nil {
 		log.Fatalf("Server error: %v", err)
