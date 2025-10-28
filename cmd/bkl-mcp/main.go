@@ -81,6 +81,8 @@ func main() {
 
 	queryTool := mcp.NewTool("query",
 		mcp.WithDescription("Query bkl documentation and test examples by keywords"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("keywords",
 			mcp.Required(),
 			mcp.Description("Keywords to search for (comma-separated) in documentation sections and test examples"),
@@ -90,6 +92,8 @@ func main() {
 
 	getTool := mcp.NewTool("get",
 		mcp.WithDescription("Get full content of a documentation section or test"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("type",
 			mcp.Required(),
 			mcp.Description("Type of content: 'documentation' or 'test'"),
@@ -106,6 +110,8 @@ func main() {
 
 	evaluateTool := mcp.NewTool("evaluate",
 		mcp.WithDescription("Evaluate bkl files with given environment and return results"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("files",
 			mcp.Description("Comma-separated list of files to evaluate (relative paths). Leave empty when using directory parameter."),
 		),
@@ -134,6 +140,8 @@ func main() {
 
 	diffTool := mcp.NewTool("diff",
 		mcp.WithDescription("Generate the minimal intermediate layer needed to create the target output from the base layer"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("baseFile",
 			mcp.Required(),
 			mcp.Description("Base file path"),
@@ -155,6 +163,8 @@ func main() {
 
 	intersectTool := mcp.NewTool("intersect",
 		mcp.WithDescription("Generate the maximal base layer that the specified targets have in common"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("files",
 			mcp.Required(),
 			mcp.Description("Comma-separated list of files to intersect (requires at least 2 files)"),
@@ -172,6 +182,8 @@ func main() {
 
 	requiredTool := mcp.NewTool("required",
 		mcp.WithDescription("Generate a document containing just the required fields and their ancestors from the lower layer"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("file",
 			mcp.Required(),
 			mcp.Description("File path to extract required fields from"),
@@ -186,16 +198,22 @@ func main() {
 
 	versionTool := mcp.NewTool("version",
 		mcp.WithDescription("Get version and build information for bkl"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	)
 	mcpServer.AddTool(versionTool, wrapHandler(srv.versionHandler))
 
 	issuePromptTool := mcp.NewTool("issue_prompt",
 		mcp.WithDescription("Get guidance for filing an issue with minimal reproduction case"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 	)
 	mcpServer.AddTool(issuePromptTool, wrapHandler(srv.issuePromptHandler))
 
 	compareTool := mcp.NewTool("compare",
 		mcp.WithDescription("Evaluate two bkl files and show text differences between their outputs"),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithIdempotentHintAnnotation(true),
 		mcp.WithString("file1",
 			mcp.Required(),
 			mcp.Description("First file path to evaluate"),
