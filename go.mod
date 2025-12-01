@@ -1,6 +1,6 @@
 module github.com/gopatchy/bkl
 
-go 1.24.4
+go 1.25.4
 
 require (
 	github.com/hexops/gotextdiff v1.0.3
@@ -9,7 +9,7 @@ require (
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/metoro-io/mcp-golang v0.13.0
 	github.com/pelletier/go-toml/v2 v2.2.4
-	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
+	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
 	gopkg.in/yaml.v3 v3.0.1
 )
 
