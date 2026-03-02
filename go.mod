@@ -9,7 +9,7 @@ require (
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/metoro-io/mcp-golang v0.13.0
 	github.com/pelletier/go-toml/v2 v2.2.4
-	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
+	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
 	gopkg.in/yaml.v3 v3.0.1
 )
 
