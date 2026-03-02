@@ -1,6 +1,6 @@
 module github.com/gopatchy/bkl
 
-go 1.25.4
+go 1.26.0
 
 require (
 	github.com/hexops/gotextdiff v1.0.3
