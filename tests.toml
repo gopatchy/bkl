@@ -6254,3 +6254,319 @@ metadata:
   labels:
     version: v2
 '''
+
+###############################################################################
+# List-of-Maps Repeat (table dimension)
+###############################################################################
+
+[repeatListOfMapsBasicList]
+description = "Test list-of-maps repeat inside a list"
+evaluate.result.code = '''
+- name: a
+  port: 80
+- name: b
+  port: 443
+'''
+
+[[repeatListOfMapsBasicList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+- $repeat:
+    srv:
+      - {name: a, port: 80}
+      - {name: b, port: 443}
+  name: $repeat:srv:name
+  port: $repeat:srv:port
+'''
+
+[repeatListOfMapsInsideMap]
+description = "Test list-of-maps repeat with dynamic key generation in maps"
+evaluate.result.code = '''
+servers:
+  server-a:
+    port: 80
+  server-b:
+    port: 443
+'''
+
+[[repeatListOfMapsInsideMap.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+servers:
+  $"server-{$repeat:srv:name}":
+    $repeat:
+      srv:
+        - {name: a, port: 80}
+        - {name: b, port: 443}
+    port: $repeat:srv:port
+'''
+
+[repeatListOfMapsDocLevel]
+description = "Test list-of-maps repeat at document level"
+evaluate.result.code = '''
+name: a
+port: 80
+---
+name: b
+port: 443
+'''
+
+[[repeatListOfMapsDocLevel.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+$repeat:
+  srv:
+    - {name: a, port: 80}
+    - {name: b, port: 443}
+name: $repeat:srv:name
+port: $repeat:srv:port
+'''
+
+[repeatListOfMapsIndex]
+description = "Test list-of-maps repeat index variable ($repeat:dim is row index)"
+evaluate.result.code = '''
+index: 0
+name: a
+---
+index: 1
+name: b
+'''
+
+[[repeatListOfMapsIndex.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+$repeat:
+  srv:
+    - {name: a}
+    - {name: b}
+index: $repeat:srv
+name: $repeat:srv:name
+'''
+
+[repeatListOfMapsWithCartesian]
+description = "Test list-of-maps combined with cartesian int dimension"
+evaluate.result.code = '''
+servers:
+  server-a-shard0:
+    port: 80
+  server-a-shard1:
+    port: 80
+  server-b-shard0:
+    port: 443
+  server-b-shard1:
+    port: 443
+'''
+
+[[repeatListOfMapsWithCartesian.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+servers:
+  $"server-{$repeat:srv:name}-shard{$repeat:shard}":
+    $repeat:
+      shard: 2
+      srv:
+        - {name: a, port: 80}
+        - {name: b, port: 443}
+    port: $repeat:srv:port
+'''
+
+[repeatListOfMapsWithCartesianList]
+description = "Test list-of-maps combined with cartesian list dimension"
+evaluate.result.code = '''
+servers:
+  dev-db:
+    port: 5432
+  dev-web:
+    port: 80
+  prod-db:
+    port: 5432
+  prod-web:
+    port: 80
+'''
+
+[[repeatListOfMapsWithCartesianList.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+servers:
+  $"{$repeat:env}-{$repeat:srv:name}":
+    $repeat:
+      env: [dev, prod]
+      srv:
+        - {name: web, port: 80}
+        - {name: db, port: 5432}
+    port: $repeat:srv:port
+'''
+
+[repeatListOfMapsWithCartesianRange]
+description = "Test list-of-maps combined with cartesian range dimension"
+evaluate.result.code = '''
+servers:
+  db-shard10:
+    port: 5432
+  db-shard12:
+    port: 5432
+  web-shard10:
+    port: 80
+  web-shard12:
+    port: 80
+'''
+
+[[repeatListOfMapsWithCartesianRange.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+servers:
+  $"{$repeat:srv:name}-shard{$repeat:id}":
+    $repeat:
+      id:
+        $first: 10
+        $step: 2
+        $count: 2
+      srv:
+        - {name: web, port: 80}
+        - {name: db, port: 5432}
+    port: $repeat:srv:port
+'''
+
+[repeatListOfMapsSingleRow]
+description = "Test list-of-maps repeat with single row"
+evaluate.result.code = '''
+name: only
+port: 80
+'''
+
+[[repeatListOfMapsSingleRow.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+$repeat:
+  srv:
+    - {name: only, port: 80}
+name: $repeat:srv:name
+port: $repeat:srv:port
+'''
+
+[repeatListOfMapsHeterogeneousKeys]
+description = "Test list-of-maps repeat where rows have different keys (unreferenced keys ignored)"
+evaluate.result.code = '''
+items:
+  item-a:
+    name: a
+  item-b:
+    name: b
+'''
+
+[[repeatListOfMapsHeterogeneousKeys.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+items:
+  $"item-{$repeat:srv:name}":
+    $repeat:
+      srv:
+        - {name: a}
+        - {name: b, extra: "yes"}
+    name: $repeat:srv:name
+'''
+
+[repeatListOfMapsInterp]
+description = "Test list-of-maps repeat with string interpolation"
+evaluate.result.code = '''
+ns: sdp
+url: https://example.com/us-west-1
+---
+ns: sd
+url: https://example.com/us-east-2
+'''
+
+[[repeatListOfMapsInterp.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+$repeat:
+  loc:
+    - {region: us-west-1, namespace: sdp}
+    - {region: us-east-2, namespace: sd}
+url: $"https://example.com/{$repeat:loc:region}"
+ns: $repeat:loc:namespace
+'''
+
+[repeatListOfMapsTableOnly]
+description = "Test list-of-maps as only dimension (no cartesian)"
+evaluate.result.code = '''
+items:
+  item-a:
+    value: 1
+  item-b:
+    value: 2
+  item-c:
+    value: 3
+'''
+
+[[repeatListOfMapsTableOnly.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+items:
+  $"item-{$repeat:row:name}":
+    $repeat:
+      row:
+        - {name: a, value: 1}
+        - {name: b, value: 2}
+        - {name: c, value: 3}
+    value: $repeat:row:value
+'''
+
+[repeatListOfMapsScalarListNotAffected]
+description = "Test that a list of scalars still works as before (not treated as table)"
+evaluate.result.code = '''
+fruit: apple
+---
+fruit: banana
+---
+fruit: cherry
+'''
+
+[[repeatListOfMapsScalarListNotAffected.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+$repeat:
+  item: [apple, banana, cherry]
+fruit: $repeat:item
+'''
+
+[repeatListOfMapsMixedListNotAffected]
+description = "Test that a mixed list (some maps, some scalars) is treated as plain values"
+evaluate.result.code = '''
+- value: hello
+- value:
+    name: world
+'''
+
+[[repeatListOfMapsMixedListNotAffected.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+- $repeat:
+    x: [hello, {name: world}]
+  value: $repeat:x
+'''
+
+[repeatListOfMapsRangeKeysAreData]
+description = "Test that range param keys ($first, $count) inside table rows are treated as data, not range specs"
+evaluate.result.code = '''
+items:
+  item-0:
+    count: 3
+    first: 1
+  item-1:
+    count: 5
+    first: 10
+'''
+
+[[repeatListOfMapsRangeKeysAreData.evaluate.inputs]]
+filename = "a.yaml"
+code = '''
+items:
+  $"item-{$repeat:cfg}":
+    $repeat:
+      cfg:
+        - {$first: 1, $count: 3}
+        - {$first: 10, $count: 5}
+    first: $repeat:cfg:$first
+    count: $repeat:cfg:$count
+'''

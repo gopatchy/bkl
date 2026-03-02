@@ -59,6 +59,21 @@ func PopListMapValue(l []any, k string) (any, []any, error) {
 	return ret, l, nil
 }
 
+func IsListOfMaps(v []any) bool {
+	if len(v) == 0 {
+		return false
+	}
+
+	for _, item := range v {
+		_, ok := item.(map[string]any)
+		if !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
 func PopListMapBoolValue(l []any, k string, v bool) (bool, []any, error) {
 	if !HasListMapBoolValue(l, k, v) {
 		return false, l, nil

@@ -179,6 +179,25 @@ func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalC
 			}
 
 		case []any:
+			if utils.IsListOfMaps(v) {
+				// List-of-maps: iterate rows, each row's keys become $repeat:name:key
+				for _, ctx := range contexts {
+					for i, item := range v {
+						rowMap := item.(map[string]any)
+						newCtx := ctx.clone()
+						newCtx.Vars[fmt.Sprintf("$repeat:%s", name)] = i
+						for k, val := range rowMap {
+							newCtx.Vars[fmt.Sprintf("$repeat:%s:%s", name, k)] = val
+						}
+						newContexts = append(newContexts, newCtx)
+					}
+				}
+
+				contexts = newContexts
+
+				continue
+			}
+
 			values = v
 
 		case map[string]any:
