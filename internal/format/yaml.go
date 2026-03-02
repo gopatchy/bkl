@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"maps"
 	"strconv"
 
 	"gopkg.in/yaml.v3"
@@ -162,16 +163,12 @@ func yamlTranslateNode(node *yaml.Node) (any, error) {
 func yamlMerge(dst map[string]any, src any, node *yaml.Node) error {
 	switch src2 := src.(type) {
 	case map[string]any:
-		for k, v := range src2 {
-			dst[k] = v
-		}
+		maps.Copy(dst, src2)
 	case []any:
 		for i := len(src2) - 1; i >= 0; i-- {
 			switch inner := src2[i].(type) {
 			case map[string]any:
-				for k, v := range inner {
-					dst[k] = v
-				}
+				maps.Copy(dst, inner)
 			default:
 				return fmt.Errorf("unknown type for merge target: %d (%w)", node.Kind, errors.ErrInvalidType)
 			}

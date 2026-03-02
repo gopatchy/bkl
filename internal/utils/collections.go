@@ -91,9 +91,7 @@ func FilterMap(m map[string]any, filter func(string, any) (map[string]any, error
 			return nil, err
 		}
 
-		for k2, v2 := range m2 {
-			ret[k2] = v2
-		}
+		maps.Copy(ret, m2)
 	}
 
 	return ret, nil

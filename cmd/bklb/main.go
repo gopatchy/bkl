@@ -14,8 +14,8 @@ func main() {
 	debug.SetGCPercent(-1)
 	cmd := filepath.Base(os.Args[0])
 
-	if strings.HasSuffix(cmd, "b") {
-		cmd = strings.TrimSuffix(cmd, "b")
+	if before, ok := strings.CutSuffix(cmd, "b"); ok {
+		cmd = before
 	} else {
 		fatal(fmt.Errorf(`Usage:
   ln -s $(which bklb) toolb  # bklb will run 'tool'

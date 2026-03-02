@@ -29,7 +29,7 @@ type queryResponse struct {
 
 func (s *Server) queryHandler(ctx context.Context, args queryArgs) (*queryResponse, error) {
 	keywords := []string{}
-	for _, kw := range strings.Split(args.Keywords, ",") {
+	for kw := range strings.SplitSeq(args.Keywords, ",") {
 		trimmed := strings.TrimSpace(kw)
 		if trimmed != "" {
 			keywords = append(keywords, strings.ToLower(trimmed))

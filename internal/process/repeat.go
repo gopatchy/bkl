@@ -120,7 +120,7 @@ func repeatGenerateContexts(ec *evalContext, r any) ([]*evalContext, error) {
 	switch r2 := r.(type) {
 	case int:
 		contexts := make([]*evalContext, r2)
-		for i := 0; i < r2; i++ {
+		for i := range r2 {
 			ctx := ec.clone()
 			ctx.Vars["$repeat"] = i
 			contexts[i] = ctx
@@ -174,7 +174,7 @@ func repeatGenerateContextsFromMap(ec *evalContext, rs map[string]any) ([]*evalC
 		switch v := value.(type) {
 		case int:
 			values = make([]any, v)
-			for i := 0; i < v; i++ {
+			for i := range v {
 				values[i] = i
 			}
 

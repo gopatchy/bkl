@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"maps"
 	"sync"
 )
 
 // mapPool reuses maps to reduce allocations
 var mapPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return make(map[string]any, 16)
 	},
 }
@@ -48,9 +49,7 @@ func deepCloneMap(m map[string]any) map[string]any {
 
 	// Create a new map to return (so we can reuse the pooled one)
 	finalResult := make(map[string]any, len(result))
-	for k, v := range result {
-		finalResult[k] = v
-	}
+	maps.Copy(finalResult, result)
 
 	mapPool.Put(result)
 	return finalResult

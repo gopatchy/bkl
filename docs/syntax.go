@@ -38,7 +38,7 @@ func isNumber(s string) bool {
 	return match
 }
 
-func getLineNumber(v interface{}) int {
+func getLineNumber(v any) int {
 	switch n := v.(type) {
 	case int:
 		return n
@@ -49,7 +49,7 @@ func getLineNumber(v interface{}) int {
 	}
 }
 
-func applySyntaxHighlighting(code string, languages [][]interface{}, highlights []string) string {
+func applySyntaxHighlighting(code string, languages [][]any, highlights []string) string {
 	var insertions []insertion
 
 	// First add highlight insertions with special priority

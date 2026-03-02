@@ -92,7 +92,7 @@ type DocConvert struct {
 }
 
 type DocFixit struct {
-	Original DocLayer `yaml:"original,omitempty" json:"original,omitempty"`
+	Original DocLayer `yaml:"original,omitempty" json:"original"`
 	Bad      DocLayer `yaml:"bad" json:"bad"`
 	Good     DocLayer `yaml:"good" json:"good"`
 }

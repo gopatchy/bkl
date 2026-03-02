@@ -207,7 +207,7 @@ func process2EncodeString(obj any, mergeFrom *document.Document, mergeFromDocs [
 		}
 
 		sh := sha256.New()
-		if _, err := sh.Write([]byte(fmt.Sprintf("%v", obj))); err != nil {
+		if _, err := sh.Write(fmt.Appendf(nil, "%v", obj)); err != nil {
 			return nil, err
 		}
 		return hex.EncodeToString(sh.Sum(nil)), nil
