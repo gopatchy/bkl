@@ -1,3 +1,4 @@
+// Deprecated: use git.bkl.sh/bkl/bkl instead.
 module github.com/gopatchy/bkl
 
 go 1.26.0
